@@ -8,21 +8,27 @@
 # above copyright notice is included.
 #
 
-# TODO compile option that just outputs a compiled .rb file
-
 ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
 
 require 'rubygems'
 require 'bundler/setup'
+require File.join(File.dirname(__FILE__), '../lib/dog.rb')
 
-script_file = ARGV.pop
-
-if script_file.nil? then
+if ARGV.empty? then
   puts "error: no input file provided"
   exit
 end
 
-script_file = File.expand_path(script_file)
-$0 = script_file
+# Read the dog code from the file
+dog_code = ARGF.read
 
-# Evaluate the script!
+# Parse the dog code into an AST (called a bark)
+dog_bark = Dog::Parser.parse(dog_code).to_bark
+
+# Compute the AST into a state machine (called a collar)
+dog_collar = Dog::Compiler.compile(dog_barks)
+
+# Execute the state machine. This may save state 
+# as an execution graph (called a leash)
+Dog::Runtime.run(dog_collar)
+
