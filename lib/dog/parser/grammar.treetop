@@ -7,6 +7,8 @@
 # above copyright notice is included.
 #
 
+# TODO - '+=' / '-='  / '*=' / '/=' / '%=' / '**=' / '&&=' / '||='
+
 module Dog
 
 grammar Dog
@@ -16,35 +18,35 @@ grammar Dog
   # ================
 
   rule program
-    program_statements
+    program_statements <Program>
   end
 
   rule program_statements
-    (top_level_statements / statements)
+    (top_level_statements / statements) <ProgramStatements>
   end
 
   rule top_level_statements
-    (top_level_statement t)+
+    (top_level_statement t)+ <TopLevelStatements>
   end
 
   rule top_level_statement
-    listen / load / config
+    (listen / load / config) <TopLevelStatement>
   end
 
   rule statements
-    (statement t)+
+    ((statement t)+) <Statements>
   end
 
   rule statement 
-    s? (command / expression / '' ) s?
+    (s? (command / expression / '' ) s?) <Statement>
   end
 
   rule expression
-    assignment / primary
+    (assignment / primary) <Expression>
   end
 
   rule command
-     on / ask / notify / compute / people / control_structure / print / inspect
+     (on / ask / notify / compute / people / control_structure / print / inspect) <Command>
   end
 
   # ===============
@@ -52,15 +54,15 @@ grammar Dog
   # ===============
 
   rule assignment
-    (lhs s '=' s (ask / compute / people)) / (lhs s assignment_operator s primary)
+    (lhs s '=' s (ask / compute / people)) / (lhs s assignment_operator s primary) <::Dog::Assignment>
   end
 
   rule primary
-    access / operation / literal / variable / ('(' s? primary s? ')')
+    access / operation / literal / identifier / ('(' s? primary s? ')')
   end
 
   rule operation_first
-    (literal / variable / ('(' s? primary s? ')') / access)
+    (literal / identifier / ('(' s? primary s? ')') / access)
   end
 
   rule operation
@@ -68,7 +70,7 @@ grammar Dog
   end
 
   rule access_first
-    (literal / variable / ('(' s primary s ')') / ('(' s operation s ')'))
+    (literal / identifier / ('(' s primary s ')') / ('(' s operation s ')'))
   end
 
   rule access
@@ -76,49 +78,128 @@ grammar Dog
   end
 
   rule lhs
-    variable / access
+    (identifier / access)
   end
-
-  rule variable
-    identifier
-  end
-
+  
   rule identifier
-    (lower (lower / digit / '_')*)
+    lower (lower / digit / '_')* <::Dog::Identifier>
   end
 
   rule binary_operator
-    ('+' / '-'  / '*' / '/' / '%' / '**' / '&&' / '||' / 'AND' / 'OR' / '<=' / '>=' / '<' / '>' / '==' / '=' / '!=' / '<<' / '>>' )
+    (arithmetic_operator / comparative_operator / and_operator / or_operator)
   end
-
+  
   rule unary_operator
-    ('!' / 'NOT')
+    (not_operator)
   end
-
+  
   rule assignment_operator
-    '+=' / '-='  / '*=' / '/=' / '%=' / '**=' / '&&=' / '||='
+    '=' <AssignmentOperator>
   end
-
-
-
+  
+  rule arithmetic_operator
+    (addition_operator / subtraction_operator / multiplication_operator / division_operator)
+  end
+  
+  rule comparative_operator
+    (equality_operator / inequality_operator / greater_than_operator / less_than_operator / greater_than_equal_operator / less_than_equal_operator)
+  end
+  
+  rule logical_operator
+    (and_operator / or_operator / not_operator)
+  end
+  
+  rule addition_operator
+    '+' <AdditionOperator>
+  end
+  
+  rule subtraction_operator
+    '-' <SubtractionOperator>
+  end
+  
+  rule multiplication_operator
+    '*' <MultiplicationOperator>
+  end
+  
+  rule division_operator
+    '/' <DivisionOperator>
+  end
+  
+  rule equality_operator
+    '==' <EqualityOperator>
+  end
+  
+  rule inequality_operator
+    '!=' <InequalityOperator>
+  end
+  
+  rule greater_than_operator
+    '>' <GreaterThanOperator>
+  end
+  
+  rule less_than_operator
+    '<' <LessThanOperator>
+  end
+  
+  rule greater_than_equal_operator
+    '>=' <GreaterThanEqualOperator>
+  end
+  
+  rule less_than_equal_operator
+    '<=' <LessThanEqualOperator>
+  end
+  
+  rule and_operator
+    'AND' <AndOperator>
+  end
+  
+  rule or_operator
+    'OR' <OrOperator>
+  end
+  
+  rule not_operator
+    'NOT' <NotOperator>
+  end
+  
+  rule union_operator
+    'UNION' <UnionOperator>
+  end
+  
+  rule append_operator
+    'INTERSECT' <IntersectOperator>
+  end
+  
+  rule append_operator
+    ('DIFFERENCE' / 'DIFF') <DifferenceOperator>
+  end
+  
+  rule append_operator
+    'APPEND' <AppendOperator>
+  end
+  
+  rule append_operator
+    'PREPEND' <PrependOperator>
+  end
+  
+  
   # ==================
   # = Listen Command = 
   # ==================
 
   rule listen
-    'LISTEN' listen_to_clause listen_for_clause listen_at_clause
+    ('LISTEN' listen_to_clause listen_for_clause listen_at_clause) <Listen>
   end
 
   rule listen_to_clause
-    (s 'TO' s (people / variable))
+    (s 'TO' s (people / identifier)) <ListenToClause>
   end
 
   rule listen_for_clause
-    (s 'FOR' s identifier)
+    (s 'FOR' s identifier) <ListenForClause>
   end
 
   rule listen_at_clause
-    (s 'AT' s string)
+    (s 'AT' s string) <ListenAtClause>
   end
 
 
@@ -128,7 +209,7 @@ grammar Dog
   # ===============
 
   rule ask
-    ('ASK' sn (integer sn)? (people / variable) via_clause? sn 'TO' sn ask_function on_clause? (using_clause)? )
+    ('ASK' sn (integer sn)? (people / identifier) via_clause? sn 'TO' sn ask_function on_clause? (using_clause)? ) <Ask>
   end
 
   rule ask_function
@@ -142,11 +223,11 @@ grammar Dog
   # ==========
 
   rule notify
-    'NOTIFY' s (variable / people) via_clause? notify_of_clause using_clause?
+    ('NOTIFY' s (identifier / people) via_clause? notify_of_clause using_clause?) <Notify>
   end
 
   rule notify_of_clause
-    (s 'OF' s (variable / string))
+    (s 'OF' s (identifier / string)) <NotifyOfClause>
   end
 
 
@@ -156,7 +237,7 @@ grammar Dog
   # ===================
 
   rule compute
-    ('COMPUTE' s identifier on_clause? using_clause? )
+    ('COMPUTE' s identifier on_clause? using_clause? ) <Compute>
   end
 
 
@@ -166,19 +247,19 @@ grammar Dog
   # ==================
 
   rule using_clause
-    (s 'USING' s (parameters / assignment_list / variable))
+    (s 'USING' s (parameters / assignment_list / identifier)) <UsingClause>
   end
 
   rule on_clause 
-    (s ('ON' s)? primary)
+    (s ('ON' s)? primary) <OnClause>
   end
 
   rule via_clause 
-    (s 'VIA' s ('email' / 'im' / 'sms'))
+    (s 'VIA' s ('email' / 'im' / 'sms')) <ViaClause>
   end
 
   rule in_clause
-    (s ((variable s 'IN' s primary) / variable) s)
+    (s ((identifier s 'IN' s primary) / identifier) s) <InClause>
   end
 
 
@@ -187,28 +268,28 @@ grammar Dog
   # = People Command =
   # ==================
 
-  rule people
-    (me / public / users)
+  rule users
+    (me / public / people) <User>
   end
 
   rule me
-    ('ME')
+    ('ME') <Me>
   end
 
   rule public
-    ('PUBLIC')
+    ('PUBLIC') <Public>
   end
 
-  rule users
-    (('PEOPLE' / 'PERSON') people_from_clause (people_where_clause)? )
+  rule people
+    (('PEOPLE' / 'PERSON') people_from_clause (people_where_clause)? ) <People>
   end
 
   rule people_from_clause
-    (sn 'FROM' sn (community_list / primary))
+    (sn 'FROM' sn (community_list / primary)) <PeopleFromClause>
   end
 
   rule people_where_clause
-    (sn 'WHERE' sn predicate)
+    (sn 'WHERE' sn predicate) <PeopleWhereClause>
   end
 
 
@@ -218,7 +299,7 @@ grammar Dog
   # ==============
 
   rule on
-    ('ON' in_clause 'DO' sn statements sn? 'END')
+    ('ON' in_clause 'DO' sn statements sn? 'END') <OnBlock>
   end
 
 
@@ -228,35 +309,35 @@ grammar Dog
   # ====================
 
   rule config
-    ('CONFIG' s identifier s '=' s literal)
+    ('CONFIG' s identifier s '=' s literal) <Config>
   end
 
   rule load
-    require / import / template
+    (require / import / template) <Load>
   end
 
   rule require 
-    ('REQUIRE' space string string 'AS' identifier)
+    ('REQUIRE' space string string 'AS' identifier) <Require>
   end
 
   rule template
-    ('TEMPLATE' space string space 'AS' space identifier)
+    ('TEMPLATE' space string space 'AS' space identifier) <Template>
   end
 
   rule import
-    ('IMPORT' space string space 'AS' space identifier)
+    ('IMPORT' space string space 'AS' space identifier) <Import>
   end
 
   rule parameters
-    ('PARAMETERS' space_newline ('WITH' space_newline assignment_list)? )
+    ('PARAMETERS' space_newline ('WITH' space_newline assignment_list)? ) <Parameters>
   end
 
   rule print
-    ('PRINT' space primary)
+    ('PRINT' space primary) <Print>
   end
 
   rule inspect
-    ('INSPECT' space primary)
+    ('INSPECT' space primary) <Inspect>
   end
 
 
@@ -288,11 +369,11 @@ grammar Dog
   end
 
   rule if
-    ('IF' s primary (s 'THEN')? sn statements sn 'END')
+    ('IF' s primary (s 'THEN')? sn statements sn 'END') <If>
   end
 
   rule for
-    ('FOR' s 'EACH' in_clause 'DO' sn statements sn? ('END' / ('UNTIL' s primary)))
+    ('FOR' s 'EACH' in_clause 'DO' sn statements sn? ('END' / ('UNTIL' s primary))) <For>
   end
 
 
@@ -302,31 +383,35 @@ grammar Dog
   # ================
 
   rule literal
-    number / string / bool / collection
+    (number / string / bool / collection)
   end
 
   rule collection
-    array / hash
+    (array / hash)
   end
 
-  rule array
-    ('[' items* ']')
+  rule array 
+    '[' items? ']' <::Dog::ArrayLiteral>
   end
 
   rule items
-    (sn? primary sn? ( sn? ',' sn? primary)*) 
+    item+ <::Dog::ArrayItems>
   end
-
+  
+  rule item
+    sn? primary sn? ','? <::Dog::ArrayItem>
+  end
+  
   rule hash 
-    ('{' associations* '}')
+    '{' associations? '}' <::Dog::HashLiteral>
   end
 
   rule associations
-    association (',' association)*
+    association+ <::Dog::HashAssociations>
   end
 
-  rule association
-     space_newline string space ':' primary space_newline
+  rule association 
+    sn? key:string s? ':' s? value:primary sn? ','? <::Dog::HashAssociation>
   end
 
   rule bool
@@ -334,27 +419,47 @@ grammar Dog
   end
 
   rule true
-    ('TRUE' / 'true' / 'YES' / 'yes')
+    (
+      'TRUE' <::Dog::TrueLiteral>
+      / 
+      'true' <::Dog::TrueLiteral>
+      /
+      'YES' <::Dog::TrueLiteral>
+      /
+      'yes' <::Dog::TrueLiteral>
+    ) 
   end
 
   rule false
-    ('FALSE' / 'false' / 'NO' / 'no')
+    (
+      'FALSE' <::Dog::FalseLiteral>
+      / 
+      'false' <::Dog::FalseLiteral>
+      / 
+      'NO' <::Dog::FalseLiteral>
+      / 
+      'no' <::Dog::FalseLiteral>
+    ) 
   end
 
   rule number
-    (float / integer)
+    float / integer
   end
 
   rule integer 
-    (('-' s?)? digit+)
+    ('-' s?)? digit+ <::Dog::IntegerLiteral>
   end
 
   rule float
-    (('-' s?)? digit+ '.' digit+)
+    ('-' s?)? digit+ '.' digit* <::Dog::FloatLiteral>
   end
 
   rule string
-    '"' (!'"' . / '\"')* '"'
+    (
+    '"' ('\"' / !'"' .)* '"' <::Dog::StringLiteral>
+    /
+    '\'' ('\\\'' / !'\'' .)* '\'' <::Dog::StringLiteral>
+    )
   end
 
   rule digit

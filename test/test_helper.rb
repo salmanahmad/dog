@@ -9,6 +9,7 @@
 
 require 'rubygems'
 require 'test/unit'
+require 'pp'
 
 ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
 

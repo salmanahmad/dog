@@ -18,8 +18,12 @@ module Dog
       parser.parse(program)
     end
     
+    attr_accessor :parser
+    attr_accessor :should_clean_tree
+    
     def initialize
       @parser = DogParser.new
+      @should_clean_tree = true
     end
     
     def parse(program)
@@ -30,14 +34,14 @@ module Dog
       end
       
       # clean up the tree by removing all nodes of default type 'SyntaxNode'
-      self.clean_tree(tree)
+      clean_tree(tree) if should_clean_tree
       
       return tree
     end
     
     private
     
-      def self.clean_tree(root_node)
+      def clean_tree(root_node)
         return if(root_node.elements.nil?)
         
         root_node.elements.delete_if do |node| 
@@ -45,7 +49,7 @@ module Dog
         end
         
         root_node.elements.each do |node| 
-          self.clean_tree(node) 
+          clean_tree(node) 
         end
       end
       

@@ -33,6 +33,45 @@ module Dog
   class BarkNode < Treetop::Runtime::SyntaxNode 
   end
   
+  class Identifier < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class AssignmentOperator < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class TrueLiteral < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class FalseLiteral < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class IntegerLiteral < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class FloatLiteral < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class StringLiteral < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class ArrayLiteral < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class ArrayItems < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class ArrayItem < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class HashLiteral < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class HashAssociations < Treetop::Runtime::SyntaxNode 
+  end
+  
+  class HashAssociation < Treetop::Runtime::SyntaxNode 
+  end
+  
   
   
 end
