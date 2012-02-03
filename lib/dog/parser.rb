@@ -6,3 +6,9 @@
 # and distribution of modified versions of this work as long as the
 # above copyright notice is included.
 #
+
+require "treetop"
+require File.join(File.dirname(__FILE__), 'parser/parser.rb')
+require File.join(File.dirname(__FILE__), 'parser/bark_nodes.rb')
+
+module Dog end

@@ -15,14 +15,12 @@ spec = Gem::Specification.new do |s|
   s.require_paths = %w[lib]
   s.bindir = 'bin'
   
+  s.executables = ['dog']
+  s.default_executable = 'dog'
+  
   s.has_rdoc = false
-  s.add_dependency 'httpclient'
-  s.add_dependency 'mime-types'
-  s.add_dependency 'citrus'
-  s.add_dependency 'oauth2'
-  s.add_dependency 'json'
+  s.add_dependency 'treetop'
   
   #s.extra_rdoc_files = %w[README.rdoc]
   
-
 end

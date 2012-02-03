@@ -1,0 +1,19 @@
+PATH
+  remote: .
+  specs:
+    dog (0.0.1)
+      treetop
+
+GEM
+  remote: http://www.rubygems.org/
+  specs:
+    polyglot (0.3.3)
+    treetop (1.4.10)
+      polyglot
+      polyglot (>= 0.3.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  dog!
