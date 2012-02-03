@@ -7,222 +7,400 @@
 # above copyright notice is included.
 #
 
+module Dog
 
-grammar Dog::Dog
+grammar Dog
 
-  ##################
-  # Program structure
+  # ================
+  # = Core Program =
+  # ================
 
-  rule block
-    (comment / statement)+ <Block>
-  end
-
-  rule statement
-    space? ( hash_assignment / assignment / if / unless / function_call ) ';'? space? <Statement>
-  end
-  
-  ##################
-  # Literals
-  
-  rule nil
-    "nil" <NilLiteral>
-  end
-  
-  rule true
-    "true" <TrueLiteral>
-  end
-  
-  rule false
-    "false" <FalseLiteral>
+  rule program
+    program_statements
   end
 
-  rule integer
-    ('+' / '-')? [0-9]+ <IntegerLiteral>
-  end
-  
-  rule float
-    ('+' / '-')? [0-9]+ '.' [0-9]+ <FloatLiteral>
-  end
-  
-  rule string
-    '"' ([^"\\] / "\\" . )* '"' <StringLiteral>
-  end
-  
-  rule identifier
-    '$'? [a-zA-Z] [a-zA-Z0-9_]* ('?' / '!')? <Identifier>
-  end
-  
-  ##################
-  # Hash literals
-  
-  rule hash
-    '{' key_value_list? '}' <HashLiteral>
-  end
-  
-  rule key_value_list
-    key_value+ <KeyValueList>
-  end
-  
-  rule key_value
-    space? expression space? '=>' space? expression space? ','? <KeyValue>
-  end
-  
-  ##################
-  # Assignment
-  
-  rule hash_assignment
-    identifier hash_accessor_list space? assignment_operator space? ( hash / function_definition / expression ) <HashAssignment>
-  end
-  
-  rule assignment
-    identifier space? assignment_operator space? ( hash / function_definition / expression ) <Assignment>
-  end
-  
-  ##################
-  # Flow control
-  
-  rule if
-    'if(' space? expression space? ')' space
-      block
-    space? 'end' space? <If>
-  end
-  
-  rule unless
-    'unless(' space? expression space? ')' space
-      block
-    space? 'end' space? <Unless>
-  end
-  
-  ##################
-  # Functions
-  
-  rule function_call
-    identifier space? '(' space? expression? space? ','? expression? space? ')' <FunctionCall>
-  end
-  
-  rule function_definition
-    'function(' space? identifier space? ')' 
-      block
-    space? 'end' <FunctionDefinition>
-  end  
-
-  ##################
-  # Hash component access
-  
-  rule hash_access
-    identifier hash_accessor_list <HashAccess>
-  end
-  
-  rule hash_accessor_list
-    hash_accessor+ <HashAccessorList>
-  end
-  
-  rule hash_accessor
-    '[' expression ']' <HashAccessor>
+  rule program_statements
+    (top_level_statements / statements)
   end
 
-  ##################
-  # Expressions
-  
+  rule top_level_statements
+    (top_level_statement t)+
+  end
+
+  rule top_level_statement
+    listen / load / config
+  end
+
+  rule statements
+    (statement t)+
+  end
+
+  rule statement 
+    s? (command / expression / '' ) s?
+  end
+
   rule expression
-    space? (hash_access / comparative / additive) <Expression>
-  end
-  
-  rule comparative
-    additive space? comparative_operator space? additive <ComparativeExpression>
-  end
-  
-  rule additive
-    multitive space? additive_operator space? additive <AdditiveExpression>
-    /
-    multitive 
+    assignment / primary
   end
 
-  rule multitive
-    primary space? multitive_operator space? multitive <MultitiveExpression>
-    /
-    primary 
+  rule command
+     on / ask / notify / compute / people / control_structure / print / inspect
   end
-  
+
+  # ===============
+  # = Expressions =
+  # ===============
+
+  rule assignment
+    (lhs s '=' s (ask / compute / people)) / (lhs s assignment_operator s primary)
+  end
+
   rule primary
-    function_call / nil / false / true / identifier / float / integer / string 
-    /
-    '(' space? expression space? ')' <Expression>
-  end
-  
-  ##################
-  # Operator sets
-  
-  rule comparative_operator
-    equality_operator / inequality_operator / greater_than_operator / less_than_operator
-  end
-  
-  rule additive_operator
-    addition_operator / subtraction_operator 
-  end
-  
-  rule multitive_operator
-    multiplication_operator / division_operator  
+    access / operation / literal / variable / ('(' s? primary s? ')')
   end
 
-  ##################
-  # Operators
+  rule operation_first
+    (literal / variable / ('(' s? primary s? ')') / access)
+  end
+
+  rule operation
+    ((operation_first s binary_operator s (operation / operation_first)) / (unary_operator s primary))
+  end
+
+  rule access_first
+    (literal / variable / ('(' s primary s ')') / ('(' s operation s ')'))
+  end
+
+  rule access
+    (access_first ('.' identifier)+) / (access_first '[ ' primary ']') / (access_first (('\'' / '\'s') s identifier)+)
+  end
+
+  rule lhs
+    variable / access
+  end
+
+  rule variable
+    identifier
+  end
+
+  rule identifier
+    (lower (lower / digit / '_')*)
+  end
+
+  rule binary_operator
+    ('+' / '-'  / '*' / '/' / '%' / '**' / '&&' / '||' / 'AND' / 'OR' / '<=' / '>=' / '<' / '>' / '==' / '=' / '!=' / '<<' / '>>' )
+  end
+
+  rule unary_operator
+    ('!' / 'NOT')
+  end
 
   rule assignment_operator
-    '=' <AssignmentOperator>
+    '+=' / '-='  / '*=' / '/=' / '%=' / '**=' / '&&=' / '||='
   end
-  
-  rule addition_operator
-    '+' <AdditionOperator>
+
+
+
+  # ==================
+  # = Listen Command = 
+  # ==================
+
+  rule listen
+    'LISTEN' listen_to_clause listen_for_clause listen_at_clause
   end
-  
-  rule subtraction_operator
-    '-' <SubtractionOperator>
+
+  rule listen_to_clause
+    (s 'TO' s (people / variable))
   end
-  
-  rule multiplication_operator
-    '*' <MultiplicationOperator>
+
+  rule listen_for_clause
+    (s 'FOR' s identifier)
   end
-  
-  rule division_operator
-    '/' <DivisionOperator>
+
+  rule listen_at_clause
+    (s 'AT' s string)
   end
-  
-  rule equality_operator
-    '==' <EqualityOperator>
+
+
+
+  # ===============
+  # = Ask Command =
+  # ===============
+
+  rule ask
+    ('ASK' sn (integer sn)? (people / variable) via_clause? sn 'TO' sn ask_function on_clause? (using_clause)? )
   end
-  
-  rule inequality_operator
-    '!=' <InequalityOperator>
+
+  rule ask_function
+    (identifier / string)
   end
-  
-  rule greater_than_operator
-    '>' <GreaterThanOperator>
+
+
+
+  # ==========
+  # = Notify =
+  # ==========
+
+  rule notify
+    'NOTIFY' s (variable / people) via_clause? notify_of_clause using_clause?
   end
-  
-  rule less_than_operator
-    '<' <LessThanOperator>
+
+  rule notify_of_clause
+    (s 'OF' s (variable / string))
   end
-  
-  ##################
-  # Comments
-  
-  rule comment
-    '#' [^"\n"]* ( "\n" / end_of_file )
+
+
+
+  # ===================
+  # = Compute Command =
+  # ===================
+
+  rule compute
+    ('COMPUTE' s identifier on_clause? using_clause? )
   end
-  
-  ##################
-  # Whitespace
-  
+
+
+
+  # ==================
+  # = Shared Clauses =
+  # ==================
+
+  rule using_clause
+    (s 'USING' s (parameters / assignment_list / variable))
+  end
+
+  rule on_clause 
+    (s ('ON' s)? primary)
+  end
+
+  rule via_clause 
+    (s 'VIA' s ('email' / 'im' / 'sms'))
+  end
+
+  rule in_clause
+    (s ((variable s 'IN' s primary) / variable) s)
+  end
+
+
+
+  # ==================
+  # = People Command =
+  # ==================
+
+  rule people
+    (me / public / users)
+  end
+
+  rule me
+    ('ME')
+  end
+
+  rule public
+    ('PUBLIC')
+  end
+
+  rule users
+    (('PEOPLE' / 'PERSON') people_from_clause (people_where_clause)? )
+  end
+
+  rule people_from_clause
+    (sn 'FROM' sn (community_list / primary))
+  end
+
+  rule people_where_clause
+    (sn 'WHERE' sn predicate)
+  end
+
+
+
+  # ==============
+  # = On Command =
+  # ==============
+
+  rule on
+    ('ON' in_clause 'DO' sn statements sn? 'END')
+  end
+
+
+
+  # ====================
+  # = Other Commands =
+  # ====================
+
+  rule config
+    ('CONFIG' s identifier s '=' s literal)
+  end
+
+  rule load
+    require / import / template
+  end
+
+  rule require 
+    ('REQUIRE' space string string 'AS' identifier)
+  end
+
+  rule template
+    ('TEMPLATE' space string space 'AS' space identifier)
+  end
+
+  rule import
+    ('IMPORT' space string space 'AS' space identifier)
+  end
+
+  rule parameters
+    ('PARAMETERS' space_newline ('WITH' space_newline assignment_list)? )
+  end
+
+  rule print
+    ('PRINT' space primary)
+  end
+
+  rule inspect
+    ('INSPECT' space primary)
+  end
+
+
+
+  # =========
+  # = Lists =
+  # =========
+
+  rule community_list
+    (string (sn 'AND' sn string)*)
+  end
+
+  rule assignment_list
+    (assignment_list_assignment sn ((',' / 'AND') sn assignment_list_assignment)*)
+  end
+
+  rule assignment_list_assignment
+    (identifier s '=' s primary)
+  end
+
+
+
+  # ======================
+  # = Control Structures =
+  # ======================
+
+  rule control_structure
+    (if / for)
+  end
+
+  rule if
+    ('IF' s primary (s 'THEN')? sn statements sn 'END')
+  end
+
+  rule for
+    ('FOR' s 'EACH' in_clause 'DO' sn statements sn? ('END' / ('UNTIL' s primary)))
+  end
+
+
+
+  # ================
+  # = Dog literals =
+  # ================
+
+  rule literal
+    number / string / bool / collection
+  end
+
+  rule collection
+    array / hash
+  end
+
+  rule array
+    ('[' items* ']')
+  end
+
+  rule items
+    (sn? primary sn? ( sn? ',' sn? primary)*) 
+  end
+
+  rule hash 
+    ('{' associations* '}')
+  end
+
+  rule associations
+    association (',' association)*
+  end
+
+  rule association
+     space_newline string space ':' primary space_newline
+  end
+
+  rule bool
+    (true / false)
+  end
+
+  rule true
+    ('TRUE' / 'true' / 'YES' / 'yes')
+  end
+
+  rule false
+    ('FALSE' / 'false' / 'NO' / 'no')
+  end
+
+  rule number
+    (float / integer)
+  end
+
+  rule integer 
+    (('-' s?)? digit+)
+  end
+
+  rule float
+    (('-' s?)? digit+ '.' digit+)
+  end
+
+  rule string
+    '"' (!'"' . / '\"')* '"'
+  end
+
+  rule digit
+    [0-9]
+  end
+
+  rule character
+    lower / upper / '_'
+  end
+
+  rule lower
+    [a-z]
+  end
+
+  rule upper
+    [A-Z]
+  end
+
+  rule t
+    terminal
+  end
+
+  rule terminal
+    (";" / "\n" / end_of_file)
+  end
+
+  rule sn
+    space_newline
+  end
+
+  rule space_newline
+    [ \t\n\r]+
+  end
+
+  rule s
+    space
+  end
+
   rule space
-    [\s]+
+    [ \t]+
   end
-  
-  ##################
-  # End of file
   
   rule end_of_file
     !.
   end
+
+end
 
 end
