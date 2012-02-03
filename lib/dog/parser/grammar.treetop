@@ -86,7 +86,7 @@ grammar Dog
   end
 
   rule binary_operator
-    (arithmetic_operator / comparative_operator / and_operator / or_operator)
+    (arithmetic_operator / collection_operator / comparative_operator / and_operator / or_operator)
   end
   
   rule unary_operator
@@ -107,6 +107,10 @@ grammar Dog
   
   rule logical_operator
     (and_operator / or_operator / not_operator)
+  end
+  
+  rule collection_operator
+    union_operator / append_operator / append_operator / append_operator / prepend_operator
   end
   
   rule addition_operator
@@ -177,7 +181,7 @@ grammar Dog
     'APPEND' <AppendOperator>
   end
   
-  rule append_operator
+  rule prepend_operator
     'PREPEND' <PrependOperator>
   end
   
