@@ -13,11 +13,40 @@ class PredicateTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :predicate
+    @parser.parser.root = :predicate_binary
   end
   
-  def test_chains
+  def test_simple_comparison
+    @parser.parse("i == 5")
+    @parser.parse("i.i.i == 5")
+    @parser.parse("i.i.i == 'string'")
+    @parser.parse("i.i.i == true")
+    @parser.parse("i.i.i == [1, true, 'string']")
+  end
+  
+  def test_conditionals
+    @parser.parse("a == 1 AND b < 2 OR c > 3")
+    @parser.parse("a == 1 AND (b < 2 OR c > 3)")
+    @parser.parse("(a == 1 AND b < 2) OR c > 3")
+    @parser.parse("(a == 1 AND (b < 2)) OR c > 3")
+  end
+  
+  def test_primaries_in_conditionals
+    @parser.parse("a == salman.friends")
+    @parser.parse("a == salman.friends.foo.bar")
+  end
+  
+  def test_multiple_parenthesis
+    @parser.parse("i == 5")
+    @parser.parse("(i == 5)")
+    @parser.parse("(((i == 5)))")
+    @parser.parse("((NOT(i == 5)))")
+    @parser.parse("a == 1 AND (b < 2) OR c > 4")
+  end
+  
+  def test_multiple_logical_operators
     @parser.parse("i == 5 AND i == 5 AND i == 5")
+    @parser.parse("i CONTAINS 5 AND i != 5 AND i ASSOCIATES 5")
   end
   
 end
