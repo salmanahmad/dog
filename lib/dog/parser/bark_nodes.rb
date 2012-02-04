@@ -96,6 +96,64 @@ module Dog
   class HashAssociation < BarkNode 
   end
   
+  class AdditionOperator < BarkNode
+  end
   
+  class SubtractionOperator < BarkNode
+  end
   
+  class MultiplicationOperator < BarkNode
+  end
+  
+  class DivisionOperator < BarkNode
+  end
+  
+  class EqualityOperator < BarkNode
+  end
+  
+  class InequalityOperator < BarkNode
+  end
+  
+  class GreaterThanOperator < BarkNode
+  end
+  
+  class LessThanOperator < BarkNode
+  end
+  
+  class GreaterThanEqualOperator < BarkNode
+  end
+  
+  class LessThanEqualOperator < BarkNode
+  end
+  
+  class AndOperator < BarkNode
+  end
+  
+  class OrOperator < BarkNode
+  end
+  
+  class NotOperator < BarkNode
+  end
+  
+  class UnionOperator < BarkNode
+  end
+  
+  class IntersectOperator < BarkNode
+  end
+  
+  class DifferenceOperator < BarkNode
+  end
+  
+  class AppendOperator < BarkNode
+  end
+  
+  class PrependOperator < BarkNode
+  end
+  
+  class AssociatesOperator < BarkNode
+  end
+  
+  class ContainsOperator < BarkNode
+  end
+
 end

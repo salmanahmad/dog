@@ -7,7 +7,10 @@
 # above copyright notice is included.
 #
 
-# TODO - '+=' / '-='  / '*=' / '/=' / '%=' / '**=' / '&&=' / '||='
+# TODO - REPEAT
+# TODO - Task / Message literals
+# TODO - Define functions
+# TODO - Comments
 
 module Dog
 
@@ -102,7 +105,7 @@ grammar Dog
   end
   
   rule comparative_operator
-    (equality_operator / inequality_operator / greater_than_operator / less_than_operator / greater_than_equal_operator / less_than_equal_operator)
+    (equality_operator / inequality_operator / greater_than_operator / less_than_operator / greater_than_equal_operator / less_than_equal_operator / associates_operator / contains_operator)
   end
   
   rule logical_operator
@@ -110,80 +113,89 @@ grammar Dog
   end
   
   rule collection_operator
-    union_operator / append_operator / append_operator / append_operator / prepend_operator
+    union_operator / intersect_operator / difference_operator / append_operator / prepend_operator
   end
   
   rule addition_operator
-    '+' <AdditionOperator>
+    '+' <::Dog::AdditionOperator>
   end
   
   rule subtraction_operator
-    '-' <SubtractionOperator>
+    '-' <::Dog::SubtractionOperator>
   end
   
   rule multiplication_operator
-    '*' <MultiplicationOperator>
+    '*' <::Dog::MultiplicationOperator>
   end
   
   rule division_operator
-    '/' <DivisionOperator>
+    '/' <::Dog::DivisionOperator>
   end
   
   rule equality_operator
-    '==' <EqualityOperator>
+    '==' <::Dog::EqualityOperator>
   end
   
   rule inequality_operator
-    '!=' <InequalityOperator>
+    '!=' <::Dog::InequalityOperator>
   end
   
   rule greater_than_operator
-    '>' <GreaterThanOperator>
+    '>' <::Dog::GreaterThanOperator>
   end
   
   rule less_than_operator
-    '<' <LessThanOperator>
+    '<' <::Dog::LessThanOperator>
   end
   
   rule greater_than_equal_operator
-    '>=' <GreaterThanEqualOperator>
+    '>=' <::Dog::GreaterThanEqualOperator>
   end
   
   rule less_than_equal_operator
-    '<=' <LessThanEqualOperator>
+    '<=' <::Dog::LessThanEqualOperator>
   end
   
   rule and_operator
-    'AND' <AndOperator>
+    'AND' <::Dog::AndOperator>
   end
   
   rule or_operator
-    'OR' <OrOperator>
+    'OR' <::Dog::OrOperator>
   end
   
   rule not_operator
-    'NOT' <NotOperator>
+    'NOT' <::Dog::NotOperator>
   end
   
   rule union_operator
-    'UNION' <UnionOperator>
+    'UNION' <::Dog::UnionOperator>
+  end
+  
+  rule intersect_operator
+    'INTERSECT' <::Dog::IntersectOperator>
+  end
+  
+  rule difference_operator
+    ('DIFFERENCE' / 'DIFF' / 'MINUS') <::Dog::DifferenceOperator>
   end
   
   rule append_operator
-    'INTERSECT' <IntersectOperator>
-  end
-  
-  rule append_operator
-    ('DIFFERENCE' / 'DIFF') <DifferenceOperator>
-  end
-  
-  rule append_operator
-    'APPEND' <AppendOperator>
+    'APPEND' <::Dog::AppendOperator>
   end
   
   rule prepend_operator
-    'PREPEND' <PrependOperator>
+    'PREPEND' <::Dog::PrependOperator>
   end
+  
+  rule associates_operator
+    "ASSOCIATES" <::Dog::AssociatesOperator>
+  end
+  
+  rule contains_operator
+    "CONTAINS" <::Dog::ContainsOperator>
+  end
+  
   
   
   # ==================
@@ -297,10 +309,10 @@ grammar Dog
   end
   
   rule predicate
-    (predicate_boolean / predicate_primary)
+    (predicate_logic / predicate_primary)
   end 
   
-  rule predicate_boolean 
+  rule predicate_logic 
     (predicate_and / predicate_or / predicate_not)
   end 
   
@@ -317,19 +329,16 @@ grammar Dog
   end
   
   rule predicate_primary 
-    conditional / parenthesis_predicate
+    predicate_conditional / predicate_parenthesis
   end 
   
-  rule parenthesis_predicate 
-    ('(' space predicate space ')')
+  rule predicate_parenthesis 
+    ('(' s predicate s ')')
   end
   
-  rule conditional
-    (key_path s conditional_operator s primary)
-  end
-  
-  rule conditional_operator
-    (">" / "<" / "<=" / ">=" / "==" / "!=" / "ASSOCIATES" / "CONTAINS" / "STARTSWITH" / "ENDSWITH")
+  # TODO - Support for primaries in predicate conditionals
+  rule predicate_conditional
+    (key_path s comparative_operator s literal)
   end
   
   rule key_path
@@ -352,6 +361,7 @@ grammar Dog
   # = Others Commands =
   # ===================
   
+  # TODO - Support for primaries instead of literals
   rule config
     'CONFIG' s identifier s '=' s literal <::Dog::Config>
   end
