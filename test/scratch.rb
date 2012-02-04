@@ -20,12 +20,11 @@ class ScratchTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :predicate
+    @parser.parser.root = :scratch
   end
   
   def test_assignment
-    @parser.parse("i == 5")
-
+    @parser.parse("")
   end
   
 end

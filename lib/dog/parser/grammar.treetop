@@ -72,16 +72,16 @@ grammar Dog
     (literal / identifier / ('(' s? primary s? ')') / access)
   end
 
-  rule access_first
-    (identifier / literal / ('(' s primary s ')') / ('(' s operation s ')'))
+  rule access
+    (access_first ('.' identifier)+) / (access_first ('[' s? primary s? ']')+) / (access_first (('\'s' / '\'') s identifier)+)
   end
 
-  rule access
-    (access_first ('.' identifier)+) / (access_first '[ ' primary ']') / (access_first (('\'' / '\'s') s identifier)+)
+  rule access_first
+    (literal / identifier / ('(' s? primary s? ')') / ('(' s operation s ')'))
   end
 
   rule lhs
-    (identifier / access)
+    (access / identifier)
   end
   
   rule identifier

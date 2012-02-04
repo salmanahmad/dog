@@ -28,6 +28,38 @@ class ExpressionTest < Test::Unit::TestCase
     @parser.parse('i = "Foo bar"')
     @parser.parse("i = 'Foo bar'")
     @parser.parse("i = {'key':'value'}")
+    
+    @parser.parse("i[i] = {'key':'value'}")
+    @parser.parse("i[0] = {'key':'value'}")
+    @parser.parse("i['string'] = {'key':'value'}")
+    @parser.parse("i[j[k]][l] = {'key':'value'}")
+    
+    @parser.parse("i.j.k.l = {'key':'value'}")
+    
+    @parser.parse("i's j's k = {'key':'value'}")
+  end
+  
+  def test_operation
+    @parser.parse("5 + 5")
+    @parser.parse("5 + 5 + 5 + 5")
+    @parser.parse("(5) + (5 + 5) + 5")
+    @parser.parse("(5) UNION (5 - 5) / 5")
+    @parser.parse("foo = (5) UNION (5 - 5) / 5")
+  end
+  
+  def test_access
+    @parser.parse("foo")
+    @parser.parse("foo.bar")
+    @parser.parse("foo.bar.baz")
+    @parser.parse("foo.bar.baz.poo")
+    
+    @parser.parse("foo[bar]")
+    @parser.parse("foo[bar[bar]]")
+    @parser.parse("(foo[bar])[baz]")
+    @parser.parse("foo[bar][baz[foo][bar]][poo]")
+    
+    @parser.parse("foo's bar's baz")
+    @parser.parse("foo's bars' baz")
   end
   
 end
