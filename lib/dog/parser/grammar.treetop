@@ -45,7 +45,7 @@ grammar Dog
   end
 
   rule expression
-    (assignment / primary) <Expression>
+    (assignment / primary)
   end
 
   rule command
@@ -57,19 +57,19 @@ grammar Dog
   # ===============
 
   rule assignment
-    (lhs s '=' s (ask / compute / people)) / (lhs s assignment_operator s primary) <::Dog::Assignment>
+    (lhs s? assignment_operator s? (ask / compute / people)) / (lhs s? assignment_operator s? primary)
   end
 
   rule primary
     access / operation / literal / identifier / ('(' s? primary s? ')')
   end
-
-  rule operation_first
-    (literal / identifier / ('(' s? primary s? ')') / access)
-  end
-
+  
   rule operation
     ((operation_first s binary_operator s (operation / operation_first)) / (unary_operator s primary))
+  end
+  
+  rule operation_first
+    (literal / identifier / ('(' s? primary s? ')') / access)
   end
 
   rule access_first
@@ -309,7 +309,7 @@ grammar Dog
   end
   
   rule predicate
-    predicate_unary / predicate_binary
+    predicate_unary / predicate_binary / predicate_primary
   end 
   
   rule predicate_unary
@@ -317,7 +317,7 @@ grammar Dog
   end
   
   rule predicate_binary
-    predicate_primary (s (and_operator / or_operator) s predicate)?
+    predicate_primary (s (and_operator / or_operator) s predicate)
   end
   
   rule predicate_primary 
@@ -328,9 +328,8 @@ grammar Dog
     ('(' s? predicate s? ')')
   end
   
-  # TODO - Support for primaries in predicate conditionals
   rule predicate_conditional
-    (key_path s comparative_operator s primary)
+    (key_path s? comparative_operator s? primary)
   end
   
   rule key_path

@@ -13,10 +13,10 @@ class ExpressionTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
+    @parser.parser.root = :expression
   end
   
   def test_assignment
-    @parser.parser.root = :assignment
     @parser.parse("i = 0")
     @parser.parse("i = 1")
     @parser.parse("i = -1")

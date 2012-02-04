@@ -13,7 +13,7 @@ class PredicateTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :predicate_binary
+    @parser.parser.root = :predicate
   end
   
   def test_simple_comparison
@@ -34,6 +34,11 @@ class PredicateTest < Test::Unit::TestCase
   def test_primaries_in_conditionals
     @parser.parse("a == salman.friends")
     @parser.parse("a == salman.friends.foo.bar")
+  end
+  
+  def test_not
+    @parser.parse("NOT ( i == 7)")
+    @parser.parse("NOT(i==7)")
   end
   
   def test_multiple_parenthesis
