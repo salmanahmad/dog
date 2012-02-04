@@ -30,7 +30,7 @@ grammar Dog
   end
 
   rule top_level_statement
-    (listen / load / config) <TopLevelStatement>
+    (listen / import / config) <TopLevelStatement>
   end
 
   rule statements
@@ -295,6 +295,46 @@ grammar Dog
   rule people_where_clause
     (sn 'WHERE' sn predicate) <PeopleWhereClause>
   end
+  
+  rule predicate
+    (predicate_boolean / predicate_primary)
+  end 
+  
+  rule predicate_boolean 
+    (predicate_and / predicate_or / predicate_not)
+  end 
+  
+  rule predicate_or 
+    (predicate_primary s "OR" s predicate)
+  end 
+
+  rule predicate_and
+    (predicate_primary s "AND" s predicate)
+  end 
+  
+  rule predicate_not
+    ('NOT' s predicate)
+  end
+  
+  rule predicate_primary 
+    conditional / parenthesis_predicate
+  end 
+  
+  rule parenthesis_predicate 
+    ('(' space predicate space ')')
+  end
+  
+  rule conditional
+    (key_path s conditional_operator s primary)
+  end
+  
+  rule conditional_operator
+    (">" / "<" / "<=" / ">=" / "==" / "!=" / "ASSOCIATES" / "CONTAINS" / "STARTSWITH" / "ENDSWITH")
+  end
+  
+  rule key_path
+    identifier ('.' identifier)*
+  end
 
 
 
@@ -308,38 +348,50 @@ grammar Dog
 
 
 
-  # ====================
-  # = Other Commands =
-  # ====================
-
+  # ===================
+  # = Others Commands =
+  # ===================
+  
   rule config
-    ('CONFIG' s identifier s '=' s literal) <Config>
+    'CONFIG' s identifier s '=' s literal <::Dog::Config>
   end
-
-  rule load
-    (require / import / template) <Load>
+  
+  rule import 
+    'IMPORT' s type:(import_function / import_data / import_community / import_task / import_message / import_config) s string (s 'AS' s identifier)? <::Dog::Import>
   end
-
-  rule require 
-    ('REQUIRE' space string string 'AS' identifier) <Require>
+  
+  rule import_function
+    'FUNCTION' <::Dog::ImportFunction>
   end
-
-  rule template
-    ('TEMPLATE' space string space 'AS' space identifier) <Template>
+  
+  rule import_data
+    'DATA' <::Dog::ImportData>
   end
-
-  rule import
-    ('IMPORT' space string space 'AS' space identifier) <Import>
+  
+  rule import_community
+    'COMMUNITY' <::Dog::ImportCommunity>
   end
-
+  
+  rule import_task
+    'TASK' <::Dog::ImportTask>
+  end
+  
+  rule import_message
+    'MESSAGE' <::Dog::ImportMessage>
+  end
+  
+  rule import_config
+    'CONFIG' <::Dog::ImportConfig>
+  end
+  
   rule parameters
     ('PARAMETERS' space_newline ('WITH' space_newline assignment_list)? ) <Parameters>
   end
-
+  
   rule print
     ('PRINT' space primary) <Print>
   end
-
+  
   rule inspect
     ('INSPECT' space primary) <Inspect>
   end

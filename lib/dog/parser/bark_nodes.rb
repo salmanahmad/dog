@@ -11,7 +11,7 @@ module Dog
   
   class Treetop::Runtime::SyntaxNode
     
-    def to_bark
+    def to_tag
       to_hash
     end
     
@@ -30,46 +30,70 @@ module Dog
     
   end
   
-  class BarkNode < Treetop::Runtime::SyntaxNode 
+  class BarkNode < Treetop::Runtime::SyntaxNode
   end
   
-  class Identifier < Treetop::Runtime::SyntaxNode 
+  class Config < BarkNode 
   end
   
-  class AssignmentOperator < Treetop::Runtime::SyntaxNode 
+  class Import < BarkNode 
   end
   
-  class TrueLiteral < Treetop::Runtime::SyntaxNode 
+  class ImportFunction < BarkNode 
   end
   
-  class FalseLiteral < Treetop::Runtime::SyntaxNode 
+  class ImportData < BarkNode 
   end
   
-  class IntegerLiteral < Treetop::Runtime::SyntaxNode 
+  class ImportCommunity < BarkNode 
   end
   
-  class FloatLiteral < Treetop::Runtime::SyntaxNode 
+  class ImportTask < BarkNode 
   end
   
-  class StringLiteral < Treetop::Runtime::SyntaxNode 
+  class ImportMessage < BarkNode 
   end
   
-  class ArrayLiteral < Treetop::Runtime::SyntaxNode 
+  class ImportConfig < BarkNode 
   end
   
-  class ArrayItems < Treetop::Runtime::SyntaxNode 
+  class Identifier < BarkNode 
   end
   
-  class ArrayItem < Treetop::Runtime::SyntaxNode 
+  class AssignmentOperator < BarkNode 
   end
   
-  class HashLiteral < Treetop::Runtime::SyntaxNode 
+  class TrueLiteral < BarkNode 
   end
   
-  class HashAssociations < Treetop::Runtime::SyntaxNode 
+  class FalseLiteral < BarkNode 
   end
   
-  class HashAssociation < Treetop::Runtime::SyntaxNode 
+  class IntegerLiteral < BarkNode 
+  end
+  
+  class FloatLiteral < BarkNode 
+  end
+  
+  class StringLiteral < BarkNode 
+  end
+  
+  class ArrayLiteral < BarkNode 
+  end
+  
+  class ArrayItems < BarkNode 
+  end
+  
+  class ArrayItem < BarkNode 
+  end
+  
+  class HashLiteral < BarkNode 
+  end
+  
+  class HashAssociations < BarkNode 
+  end
+  
+  class HashAssociation < BarkNode 
   end
   
   
