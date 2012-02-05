@@ -30,7 +30,7 @@ module Dog
       tree = @parser.parse(program)
       
       if(tree.nil?)
-        raise "Parse error at offset: #{@parser.index}"
+        raise "Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason}"
       end
       
       # clean up the tree by removing all nodes of default type 'SyntaxNode'

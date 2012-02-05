@@ -20,41 +20,33 @@ grammar Dog
   # ================
   
   rule program
-    program_statements
+    program_statements / ''
   end
   
   rule program_statements
-    (top_level_statements / statements)
-  end
-  
-  rule top_level_statements
-    (top_level_statement t)+ 
+    (((top_level_statement / statement / s) t) / ("\n" / comment))+
   end
   
   rule top_level_statement
     (listen / import / config)
   end
   
-  rule statements
-    ((statement t)+)
-  end
-
   rule statement 
-    (s? (command / expression / '' ) s?)
+    (s? (command / expression) s?)
   end
-
+  
   rule expression
     (assignment / primary)
   end
-
+  
   rule command
      (on / ask / notify / compute / people / control_structure / print / inspect)
   end
-
+  
   # ===============
   # = Expressions =
   # ===============
-
+  
   rule assignment
     (lhs s? assignment_operator s? (ask / compute / people)) / (lhs s? assignment_operator s? primary)
   end
@@ -64,7 +56,7 @@ grammar Dog
   end
   
   rule operation
-    ((operation_first s binary_operator s (operation / operation_first)) / (unary_operator s primary))
+    ((operation_first s? binary_operator s? (operation / operation_first)) / (unary_operator s primary))
   end
   
   rule operation_first
@@ -539,19 +531,20 @@ grammar Dog
   end
 
   rule terminal
-    (";" / "\n" / end_of_file / comment)
+    (";" / comment / "\n" / end_of_file)
   end
   
   rule comment
-    '#' .* '\n'
+    '#' [^"\n"]* ("\n" / end_of_file)
   end
   
   rule sn
     space_newline
   end
-
+  
+  # TODO - Consider allowing comment here as well... thoughts?
   rule space_newline
-    [ \t\n\r]+
+    (" " / "\t" / "\n" / "\r")+
   end
 
   rule s
@@ -559,7 +552,7 @@ grammar Dog
   end
 
   rule space
-    [ \t]+
+    (" " / "\t")+
   end
   
   rule end_of_file
