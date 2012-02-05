@@ -8,9 +8,8 @@
 #
 
 # TODO - REPEAT
-# TODO - Task / Message literals
 # TODO - Define functions
-# TODO - Comments
+# CHECK - Comments
 
 module Dog
 
@@ -19,29 +18,29 @@ grammar Dog
   # ================
   # = Core Program =
   # ================
-
+  
   rule program
-    program_statements <Program>
+    program_statements
   end
-
+  
   rule program_statements
-    (top_level_statements / statements) <ProgramStatements>
+    (top_level_statements / statements)
   end
-
+  
   rule top_level_statements
-    (top_level_statement t)+ <TopLevelStatements>
+    (top_level_statement t)+ 
   end
-
+  
   rule top_level_statement
-    (listen / import / config) <TopLevelStatement>
+    (listen / import / config)
   end
-
+  
   rule statements
-    ((statement t)+) <Statements>
+    ((statement t)+)
   end
 
   rule statement 
-    (s? (command / expression / '' ) s?) <Statement>
+    (s? (command / expression / '' ) s?)
   end
 
   rule expression
@@ -49,7 +48,7 @@ grammar Dog
   end
 
   rule command
-     (on / ask / notify / compute / people / control_structure / print / inspect) <Command>
+     (on / ask / notify / compute / people / control_structure / print / inspect)
   end
 
   # ===============
@@ -97,7 +96,7 @@ grammar Dog
   end
   
   rule assignment_operator
-    '=' <AssignmentOperator>
+    '=' <::Dog::AssignmentOperator>
   end
   
   rule arithmetic_operator
@@ -225,7 +224,7 @@ grammar Dog
   # ===============
 
   rule ask
-    ('ASK' sn (integer sn)? (people / identifier) via_clause? sn 'TO' sn ask_function on_clause? (using_clause)? ) <Ask>
+    ('ASK' sn (integer sn)? (users / identifier) via_clause? sn 'TO' sn ask_function on_clause? (using_clause)? )
   end
 
   rule ask_function
@@ -285,15 +284,15 @@ grammar Dog
   # ==================
 
   rule users
-    (me / public / people) <User>
+    (me / public / people)
   end
 
   rule me
-    ('ME') <Me>
+    ('ME')
   end
 
   rule public
-    ('PUBLIC') <Public>
+    ('PUBLIC')
   end
 
   rule people
@@ -460,7 +459,7 @@ grammar Dog
   end
   
   rule hash 
-    '{' associations? '}' <::Dog::HashLiteral>
+    (identifier s?)? '{' associations? '}' <::Dog::HashLiteral>
   end
 
   rule associations
@@ -540,9 +539,13 @@ grammar Dog
   end
 
   rule terminal
-    (";" / "\n" / end_of_file)
+    (";" / "\n" / end_of_file / comment)
   end
-
+  
+  rule comment
+    '#' .* '\n'
+  end
+  
   rule sn
     space_newline
   end

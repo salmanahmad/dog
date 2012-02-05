@@ -17,6 +17,8 @@ class ExpressionTest < Test::Unit::TestCase
   end
   
   def test_assignment
+    @parser.parse("i = ASK ME TO 'rank'")
+    
     @parser.parse("i = 0")
     @parser.parse("i = 1")
     @parser.parse("i = -1")
@@ -37,6 +39,12 @@ class ExpressionTest < Test::Unit::TestCase
     @parser.parse("i.j.k.l = {'key':'value'}")
     
     @parser.parse("i's j's k = {'key':'value'}")
+  end
+  
+  def test_literals
+    @parser.parse("i = task")
+    @parser.parse("i = task {}")
+    @parser.parse("i = task {'key':'value'}")
   end
   
   def test_operation
