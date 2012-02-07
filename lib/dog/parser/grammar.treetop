@@ -254,11 +254,16 @@ grammar Dog
   # ==================
 
   rule using_clause
-    s? 'USING' s assignment_list
+    s 'USING' s assignment_list
   end
 
+  # TODO - Consolidate this logic with the array items rule. See that TODO as well.
   rule on_clause 
-    s ('ON' s)? items
+    s ('ON' s)? on_clause_items
+  end
+
+  rule on_clause_items 
+    sn? primary (sn? ',' sn? primary)*
   end
 
   rule via_clause 
