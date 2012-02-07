@@ -7,7 +7,6 @@
 # above copyright notice is included.
 #
 
-# TODO - Define functions
 # TODO - Multiline support for expressions with comments - comments can go anywhere there is a newline ???
 
 module Dog
@@ -31,7 +30,7 @@ grammar Dog
   end
   
   rule top_level_statement
-    (listen / import / config)
+    (listen / import / config / function)
   end
   
   rule statement 
@@ -335,13 +334,13 @@ grammar Dog
   # ==============
   # = On Command =
   # ==============
-
+  
   rule on
     ('ON' in_clause 'DO' sn statements sn? 'END') <OnBlock>
   end
-
-
-
+  
+  
+  
   # ===================
   # = Others Commands =
   # ===================
@@ -349,6 +348,26 @@ grammar Dog
   # TODO - Support for primaries instead of literals
   rule config
     'CONFIG' s identifier s '=' s literal <::Dog::Config>
+  end
+  
+  rule function
+    'DEFINE' s identifier (s 'ON' s function_parameters)? (s 'USING' s function_optional_parameters)? s? 'DO' sn statements? 'END'
+  end
+  
+  rule function_parameters
+    function_parameter (',' function_parameter)*
+  end
+  
+  rule function_parameter
+    sn? identifier sn?
+  end
+  
+  rule function_optional_parameters
+    function_optional_parameter (',' function_optional_parameter)*
+  end
+  
+  rule function_optional_parameter
+    sn? identifier (s? '=' s? literal) sn?
   end
   
   rule import 
@@ -420,7 +439,7 @@ grammar Dog
   end
 
   rule repeat
-    'REPEAT' s integer s 'DO' sn statements 'END'
+    'REPEAT' s integer s 'DO' sn statements? 'END'
   end
 
   rule if
@@ -453,6 +472,7 @@ grammar Dog
     item+ <::Dog::ArrayItems>
   end
   
+  # TODO - Remove the comma
   rule item
     sn? primary sn? ','? <::Dog::ArrayItem>
   end
@@ -465,6 +485,7 @@ grammar Dog
     association+ <::Dog::HashAssociations>
   end
 
+  # TODO - Remove the comma
   rule association 
     sn? key:string s? ':' s? value:primary sn? ','? <::Dog::HashAssociation>
   end

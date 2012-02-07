@@ -9,39 +9,37 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class RepeatTest < Test::Unit::TestCase
+class FunctionTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :repeat
+    @parser.parser.root = :function
   end
   
   def test_simple
     program = <<-EOD
-
-REPEAT 5 DO
-  i = 5 + 5
+DEFINE function DO 
+  i
 END
-
 EOD
     
     program.strip!
-    
     @parser.parse(program)
     
-    
-    program = <<-EOD
-
-REPEAT 5 DO
+  end
   
+  def test_on_and_using
+    program = <<-EOD
+DEFINE function ON input DO 
+
+
+
+
 END
-
 EOD
-
-    program.strip!
-
-    @parser.parse(program)
     
+    program.strip!
+    @parser.parse(program)
     
   end
   
