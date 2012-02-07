@@ -10,7 +10,9 @@
 module Dog
   
   class ParseError < RuntimeError
-    
+    attr_accessor :line
+    attr_accessor :column
+    attr_accessor :failure_reason
   end
   
   class Parser
@@ -18,7 +20,7 @@ module Dog
     Treetop.load(File.expand_path(File.join(File.dirname(__FILE__), 'grammar.treetop')))
     
     def self.parse(program)
-      parser = self.class.new
+      parser = self.new
       parser.parse(program)
     end
     
@@ -34,7 +36,13 @@ module Dog
       tree = @parser.parse(program)
       
       if(tree.nil?)
-        raise ParseError.new("Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason}")
+        error = ParseError.new("Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason}")
+        
+        error.line = @parser.failure_line
+        error.column = @parser.failure_column
+        error.failure_reason = @parser.failure_reason
+        
+        raise error
       end
       
       clean_tree(tree) if should_clean_tree

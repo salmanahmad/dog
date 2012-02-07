@@ -22,6 +22,19 @@ end
 # Read the dog code from the file
 dog_code = ARGF.read
 
+begin
+  Dog::Parser.parse(dog_code)
+  puts "Valid Dog Program"
+rescue Dog::ParseError => e
+  puts "Invalid Dog Program"
+  puts
+  puts "Parse error at line: #{e.line}, column: #{e.column}."
+  puts
+  puts e.failure_reason
+end
+
+__END__
+
 # Parse the dog code into an AST (called a bark)
 dog_bark = Dog::Parser.parse(dog_code).to_bark
 
