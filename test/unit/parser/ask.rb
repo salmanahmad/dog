@@ -49,6 +49,12 @@ class AskTest < Test::Unit::TestCase
   def test_using
     @parser.parse("ASK users VIA email TO validate ON data USING force : true")
     
+    @parser.parse("ASK users VIA email TO validate ON data USING force:true , optional : false")
+    
+    @parser.parse("ASK users VIA email TO validate ON data USING force:true, optional : false")
+    
+    @parser.parse("ASK users VIA email TO validate ON data USING force:true,optional:false")
+    
     assert_raises Dog::ParseError do
       @parser.parse("ASK users VIA email TO validate ON dataUSING force : true")
     end

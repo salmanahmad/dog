@@ -425,11 +425,11 @@ grammar Dog
   end
 
   rule assignment_list
-    assignment_list_assignment ( sn (',' / 'AND') sn assignment_list_assignment)*
+    assignment_list_assignment ( sn? (',' / 'AND') sn? assignment_list_assignment)*
   end
 
   rule assignment_list_assignment
-    (identifier s ':' s primary)
+    (identifier s? ':' s? primary)
   end
 
 
