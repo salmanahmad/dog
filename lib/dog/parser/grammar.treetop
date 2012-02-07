@@ -230,11 +230,11 @@ grammar Dog
   # ==========
 
   rule notify
-    ('NOTIFY' s (user / identifier) via_clause notify_of_clause using_clause?) <Notify>
+    'NOTIFY' s (user / identifier) via_clause notify_of_clause using_clause?
   end
 
   rule notify_of_clause
-    (s 'OF' s (identifier / string)) <NotifyOfClause>
+    s 'OF' s (identifier / string)
   end
 
 
@@ -244,7 +244,7 @@ grammar Dog
   # ===================
 
   rule compute
-    ('COMPUTE' s identifier on_clause? using_clause? ) <Compute>
+    'COMPUTE' s identifier on_clause? using_clause?
   end
 
 
