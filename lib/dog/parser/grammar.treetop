@@ -7,9 +7,8 @@
 # above copyright notice is included.
 #
 
-# TODO - REPEAT
 # TODO - Define functions
-# CHECK - Comments
+# TODO - Multiline support for expressions with comments - comments can go anywhere there is a newline ???
 
 module Dog
 
@@ -25,6 +24,10 @@ grammar Dog
   
   rule program_statements
     (((top_level_statement / statement / s) t) / ("\n" / comment))+
+  end
+  
+  rule statements
+    (((statement / s) t) / ("\n" / comment))+
   end
   
   rule top_level_statement
@@ -413,7 +416,11 @@ grammar Dog
   # ======================
 
   rule control_structure
-    (if / for)
+    (if / for / repeat)
+  end
+
+  rule repeat
+    'REPEAT' s integer s 'DO' sn statements 'END'
   end
 
   rule if
