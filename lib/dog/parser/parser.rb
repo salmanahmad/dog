@@ -37,7 +37,6 @@ module Dog
         raise ParseError.new("Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason}")
       end
       
-      # clean up the tree by removing all nodes of default type 'SyntaxNode'
       clean_tree(tree) if should_clean_tree
       
       return tree

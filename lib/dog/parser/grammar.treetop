@@ -216,11 +216,11 @@ grammar Dog
   # ===============
 
   rule ask
-    ('ASK' sn (integer sn)? (user / identifier) via_clause? sn 'TO' sn ask_function on_clause? (using_clause)? )
+    'ASK' sn (integer sn)? (user / identifier) via_clause sn 'TO' sn ask_function on_clause? using_clause?
   end
 
   rule ask_function
-    (identifier / string)
+    identifier
   end
 
 
@@ -254,11 +254,11 @@ grammar Dog
   # ==================
 
   rule using_clause
-    (s 'USING' s (parameters / assignment_list / identifier))
+    s? 'USING' s assignment_list
   end
 
   rule on_clause 
-    (s ('ON' s)? primary)
+    s ('ON' s)? items
   end
 
   rule via_clause 
@@ -396,6 +396,7 @@ grammar Dog
     'CONFIG' <::Dog::ImportConfig>
   end
   
+  # TODO - Remove me
   rule parameters
     ('PARAMETERS' space_newline ('WITH' space_newline assignment_list)? ) <Parameters>
   end
@@ -419,11 +420,11 @@ grammar Dog
   end
 
   rule assignment_list
-    (assignment_list_assignment sn ((',' / 'AND') sn assignment_list_assignment)*)
+    assignment_list_assignment ( sn (',' / 'AND') sn assignment_list_assignment)*
   end
 
   rule assignment_list_assignment
-    (identifier s '=' s primary)
+    (identifier s ':' s primary)
   end
 
 

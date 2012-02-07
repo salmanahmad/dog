@@ -17,7 +17,7 @@ class ExpressionTest < Test::Unit::TestCase
   end
   
   def test_assignment
-    @parser.parse("i = ASK ME TO 'rank'")
+    @parser.parse("i = ASK ME VIA email TO rank")
     
     @parser.parse("i = 0")
     @parser.parse("i = 1")
