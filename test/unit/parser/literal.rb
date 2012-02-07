@@ -111,7 +111,7 @@ class LiteralTest < Test::Unit::TestCase
   end
   
   def test_hash_key_must_be_string
-    assert_raises RuntimeError do
+    assert_raises Dog::ParseError do
       @parser.parse("{1:'value'}")
     end
   end

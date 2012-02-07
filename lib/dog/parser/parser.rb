@@ -9,6 +9,10 @@
 
 module Dog
   
+  class ParseError < RuntimeError
+    
+  end
+  
   class Parser
     
     Treetop.load(File.expand_path(File.join(File.dirname(__FILE__), 'grammar.treetop')))
@@ -30,7 +34,7 @@ module Dog
       tree = @parser.parse(program)
       
       if(tree.nil?)
-        raise "Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason}"
+        raise ParseError.new("Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason}")
       end
       
       # clean up the tree by removing all nodes of default type 'SyntaxNode'

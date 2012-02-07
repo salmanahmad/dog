@@ -9,22 +9,17 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-# TODO - Ensure that these parsed expression return the correct Tag
-
-class ConfigTest < Test::Unit::TestCase
+class LotteryTest < Test::Unit::TestCase
+  
+  include IntegrationHelper
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :config
+    @program = program_for(__FILE__)
   end
   
-  def test_config
-    @parser.parse("CONFIG server = 'localhost:3000'")
-    @parser.parse("CONFIG process_count = 5")
-    @parser.parse("CONFIG persist = true")
-    assert_raises Dog::ParseError do
-      @parser.parse("CONFIG process_count = 5 + 7")
-    end
+  def test_program
+    @parser.parse(@program)
   end
   
 end

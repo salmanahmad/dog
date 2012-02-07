@@ -194,19 +194,19 @@ grammar Dog
   # ==================
 
   rule listen
-    ('LISTEN' listen_to_clause listen_for_clause listen_at_clause) <Listen>
+    'LISTEN' listen_to_clause via_clause listen_at_clause? listen_for_clause
   end
 
   rule listen_to_clause
-    (s 'TO' s (people / identifier)) <ListenToClause>
+    s 'TO' s (user / identifier)
   end
 
   rule listen_for_clause
-    (s 'FOR' s identifier) <ListenForClause>
+    s 'FOR' s identifier
   end
 
   rule listen_at_clause
-    (s 'AT' s string) <ListenAtClause>
+    s 'AT' s string
   end
 
 
@@ -216,7 +216,7 @@ grammar Dog
   # ===============
 
   rule ask
-    ('ASK' sn (integer sn)? (users / identifier) via_clause? sn 'TO' sn ask_function on_clause? (using_clause)? )
+    ('ASK' sn (integer sn)? (user / identifier) via_clause? sn 'TO' sn ask_function on_clause? (using_clause)? )
   end
 
   rule ask_function
@@ -254,19 +254,19 @@ grammar Dog
   # ==================
 
   rule using_clause
-    (s 'USING' s (parameters / assignment_list / identifier)) <UsingClause>
+    (s 'USING' s (parameters / assignment_list / identifier))
   end
 
   rule on_clause 
-    (s ('ON' s)? primary) <OnClause>
+    (s ('ON' s)? primary)
   end
 
   rule via_clause 
-    (s 'VIA' s ('email' / 'im' / 'sms')) <ViaClause>
+    (s 'VIA' s identifier)
   end
 
   rule in_clause
-    (s ((identifier s 'IN' s primary) / identifier) s) <InClause>
+    (s ((identifier s 'IN' s primary) / identifier) s)
   end
 
 
@@ -275,7 +275,7 @@ grammar Dog
   # = People Command =
   # ==================
 
-  rule users
+  rule user
     (me / public / people)
   end
 
@@ -470,7 +470,7 @@ grammar Dog
     item+ <::Dog::ArrayItems>
   end
   
-  # TODO - Remove the comma
+  # TODO - Remove the ? from comman
   rule item
     sn? primary sn? ','? <::Dog::ArrayItem>
   end
