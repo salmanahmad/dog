@@ -23,4 +23,30 @@ class CommentTest < Test::Unit::TestCase
     @parser.parse("\n\n\n  1+2 # comments\n\n\n")
   end
   
+  def test_hash
+    program = <<-EOD
+    
+    #comment
+    
+    i = { 
+      'key':'value' #comment
+    }
+    i
+    EOD
+    
+    @parser.parse(program)
+  end
+  
+  def test_function
+    program = <<-EOD
+DEFINE function ON input DO # comments
+  # comments
+END
+    EOD
+    
+    @parser.parse(program)
+    @parser.parse(program.strip)
+    
+  end
+  
 end

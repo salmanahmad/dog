@@ -7,8 +7,6 @@
 # above copyright notice is included.
 #
 
-# TODO - Multiline support for expressions with comments - comments can go anywhere there is a newline ???
-
 module Dog
 
 grammar Dog
@@ -561,18 +559,17 @@ grammar Dog
   rule terminal
     (";" / comment / "\n" / end_of_file)
   end
-  
+
   rule comment
     '#' [^"\n"]* ("\n" / end_of_file)
   end
-  
+
   rule sn
     space_newline
   end
-  
-  # TODO - Consider allowing comment here as well... thoughts?
+
   rule space_newline
-    (" " / "\t" / "\n" / "\r")+
+    (" " / "\t" / "\n" / "\r" / comment)+
   end
 
   rule s
@@ -582,7 +579,7 @@ grammar Dog
   rule space
     (" " / "\t")+
   end
-  
+
   rule end_of_file
     !.
   end
