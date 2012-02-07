@@ -20,7 +20,7 @@ require File.expand_path('../../lib/dog.rb', __FILE__)
 module IntegrationHelper
   
   def program_for(test_path)
-    directory = File.absolute_path(File.dirname(File.basename(test_path)))
+    directory = File.absolute_path(File.dirname(test_path))
     basename = File.basename(test_path, ".rb") + ".dog"
     path = File.join(directory, basename)
     program = File.read(path)

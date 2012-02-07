@@ -23,4 +23,8 @@ class PeopleTest < Test::Unit::TestCase
     @parser.parse("PERSON FROM mit WHERE id == 7 AND age < 25")
   end
   
+  def test_person
+    @parser.parse("PERSON FROM lottery_entry")
+  end
+  
 end

@@ -1,0 +1,31 @@
+#!/usr/bin/env dog
+
+
+IMPORT FUNCTION "random_selection.rb" AS random_selection
+IMPORT COMMUNITY "mit_students"
+
+LISTEN TO PUBLIC VIA http AT "/" FOR home_page_requests
+LISTEN TO PUBLIC VIA http AT "/submission" FOR submission_page_requests
+LISTEN TO mit_students VIA http FOR lottery_entry 
+
+entrants = [  ]
+
+ON home_page_request DO
+  NOTIFY PERSON FROM home_page_request VIA http_response OF "index.erb"
+END
+
+ON submission_page_request DO
+  NOTIFY PERSON FROM submission_page_request VIA http_response OF "submission.erb"
+END
+
+ON EACH lottery_entry DO 
+  entrant = PERSON FROM lottery_entry
+  entrants = entrants UNION entrant
+  NOTIFY entrant VIA email OF "thanks for your submission!  good luck."
+END
+
+ON EACH 1000 lottery_entries DO
+  winning_entry = COMPUTE random_selection ON lottery_entries
+  NOTIFY PERSON FROM winning_entry VIA email OF "you won the lottery!  congrats!"
+  entries = []
+END

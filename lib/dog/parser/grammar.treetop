@@ -28,7 +28,7 @@ grammar Dog
   end
   
   rule top_level_statement
-    (listen / import / config / function)
+    (listen / import / config / function) s?
   end
   
   rule statement 
@@ -271,7 +271,7 @@ grammar Dog
   end
 
   rule in_clause
-    (s ((identifier s 'IN' s primary) / identifier) s)
+    s ((identifier s 'IN' s primary) / identifier) s
   end
 
 
@@ -293,15 +293,15 @@ grammar Dog
   end
 
   rule people
-    (('PEOPLE' / 'PERSON') people_from_clause (people_where_clause)? ) <People>
+    ('PEOPLE' / 'PERSON') people_from_clause (people_where_clause)?
   end
 
   rule people_from_clause
-    (sn 'FROM' sn (community_list / primary)) <PeopleFromClause>
+    sn 'FROM' sn (community_list / primary)
   end
 
   rule people_where_clause
-    (sn 'WHERE' sn predicate) <PeopleWhereClause>
+    sn 'WHERE' sn predicate
   end
   
   rule predicate
@@ -339,7 +339,7 @@ grammar Dog
   # ==============
   
   rule on
-    ('ON' in_clause 'DO' sn statements sn? 'END') <OnBlock>
+    'ON' (s 'EACH' (s integer)?)? in_clause 'DO' sn statements? s? 'END'
   end
   
   
@@ -469,7 +469,7 @@ grammar Dog
   end
 
   rule array 
-    '[' items? ']' <::Dog::ArrayLiteral>
+    '[' s? items? ']' <::Dog::ArrayLiteral>
   end
 
   rule items

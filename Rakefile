@@ -16,7 +16,9 @@ namespace 'test' do
   
   desc "Run integration tests"
   Rake::TestTask.new('integration') { |t|
-    
+    t.pattern = 'test/integration/**/*.rb'
+    t.verbose = false
+    t.warning = false
   }
   
 end
