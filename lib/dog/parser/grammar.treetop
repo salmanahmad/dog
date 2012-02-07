@@ -230,7 +230,7 @@ grammar Dog
   # ==========
 
   rule notify
-    ('NOTIFY' s (identifier / people) via_clause? notify_of_clause using_clause?) <Notify>
+    ('NOTIFY' s (user / identifier) via_clause notify_of_clause using_clause?) <Notify>
   end
 
   rule notify_of_clause
