@@ -15,10 +15,59 @@ class ForTest < Test::Unit::TestCase
     @parser = Dog::Parser.new
     @parser.parser.root = :for
   end
-  
-  def test_simple
-    
+
+  def test_empty_for
+    program = <<-EOD
+    FOR EACH a IN b DO 
+
+    END
+    EOD
+
+    @parser.parse(program.strip)
   end
+
+  def test_statements
+    program = <<-EOD
+FOR EACH a IN b DO
+  a = a + 1
+END
+    EOD
+
+    @parser.parse(program.strip)
+
+  end
+
+  def test_indent
+    program = <<-EOD
+    FOR EACH a IN b DO
+      a = a + 1
+    END
+    EOD
+
+    @parser.parse(program.strip)
+
+  end
+
+  def test_until
+    program = <<-EOD
+    FOR EACH a IN b DO
+      c = a + 1
+    UNTIL c == 7
+    EOD
+
+    @parser.parse(program.strip)
+
+    program = <<-EOD
+    FOR EACH a IN b DO
+      c = a + 1
+    UNTIL c + 7 - 9
+    EOD
+
+    @parser.parse(program.strip)
+
+  end
+
+
   
   
 end

@@ -13,12 +13,62 @@ class IfTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :for
+    @parser.parser.root = :if
   end
   
-  def test_simple
+  def test_empty_if
+    program = <<-EOD
+    IF true THEN 
+      
+    END
+    EOD
+    
+    @parser.parse(program.strip)
+  end
+  
+  def test_statements
+    program = <<-EOD
+IF (i == 9) THEN
+
+  a = 5
+  b = a + 5
+  c = 'Hello, World!'
+
+END
+    EOD
+    
+    @parser.parse(program.strip)
     
   end
   
+  def test_indent
+    program = <<-EOD
+    IF (i == 9) THEN
+
+    a = 5
+    b = a + 5
+    c = 'Hello, World!'
+
+    END
+    EOD
+
+    @parser.parse(program.strip)
+
+  end
+  
+  def test_conditions
+    program = <<-EOD
+    IF (i == 9) AND (d == 7) THEN
+
+    a = 5
+    b = a + 5
+    c = 'Hello, World!'
+
+    END
+    EOD
+
+    @parser.parse(program.strip)
+
+  end
   
 end

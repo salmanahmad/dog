@@ -13,12 +13,14 @@ class PeopleTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :for
+    @parser.parser.root = :people
   end
   
   def test_simple
-    
+    @parser.parse("PEOPLE FROM mit")
+    @parser.parse("PERSON FROM mit")
+    @parser.parse("PERSON FROM mit WHERE id == 7")
+    @parser.parse("PERSON FROM mit WHERE id == 7 AND age < 25")
   end
-  
   
 end

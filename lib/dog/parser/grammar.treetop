@@ -443,15 +443,15 @@ grammar Dog
   end
 
   rule repeat
-    'REPEAT' s integer s 'DO' sn statements? 'END'
+    'REPEAT' s integer s 'DO' sn statements? s? 'END'
   end
 
   rule if
-    ('IF' s primary (s 'THEN')? sn statements sn 'END') <If>
+    'IF' s primary s 'THEN' sn statements? s? 'END'
   end
 
   rule for
-    ('FOR' s 'EACH' in_clause 'DO' sn statements sn? ('END' / ('UNTIL' s primary))) <For>
+    'FOR' s 'EACH' in_clause 'DO' sn statements? s? ('END' / ('UNTIL' s primary)) 
   end
 
 

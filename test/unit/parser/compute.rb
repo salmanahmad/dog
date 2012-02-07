@@ -13,11 +13,16 @@ class ComputeTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :for
+    @parser.parser.root = :compute
   end
   
   def test_simple
-    
+    @parser.parse("COMPUTE average")
+    @parser.parse("COMPUTE average ON data")
+    @parser.parse("COMPUTE average ON a, b")
+    @parser.parse("COMPUTE average ON a,b")
+    @parser.parse("COMPUTE average ON a,b USING c:5")
+    @parser.parse("COMPUTE average ON a,b USING c : 5, d : 'hello, world'")
   end
   
   
