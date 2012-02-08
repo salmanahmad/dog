@@ -54,7 +54,7 @@ grammar Dog
   end
 
   rule primary
-    operation / access / literal / identifier / ('(' s? primary s? ')') <::Dog::Primary>
+    operation / access / literal / identifier / '(' s? primary s? ')' <::Dog::Primary>
   end
   
   rule operation
@@ -67,12 +67,14 @@ grammar Dog
     literal / access / identifier / '(' s? primary s? ')' <::Dog::Primary>
   end
   
+  
+  
   rule access
     access_first access_tail <::Dog::Access>
   end
   
   rule access_first
-    literal / identifier / '(' s? primary s? ')' / ('(' s operation s ')')
+    literal / identifier / '(' s? primary s? ')' / '(' s operation s ')'
   end
   
   rule access_tail
