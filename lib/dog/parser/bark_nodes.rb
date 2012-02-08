@@ -33,13 +33,12 @@ module Dog
   class BarkNode < Treetop::Runtime::SyntaxNode
   end
   
-
   class Program < BarkNode 
   end
   
   class ProgramStatements < BarkNode 
   end
-
+  
   class Statements < BarkNode 
   end
   
@@ -52,7 +51,25 @@ module Dog
   class Primary < BarkNode 
   end
   
-  class Access < BarkNode 
+  class Access < BarkNode
+  end
+  
+  class AccessDot < BarkNode 
+  end
+  
+  class AccessBracket < BarkNode 
+  end
+  
+  class AccessPossessive < BarkNode 
+  end
+  
+  class AccessVariable < BarkNode 
+  end
+  
+  class AccessPath < BarkNode 
+  end
+  
+  class AccessPathItem < BarkNode 
   end
   
   class Assignment < BarkNode 

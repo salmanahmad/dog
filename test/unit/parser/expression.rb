@@ -50,7 +50,6 @@ class ExpressionTest < Test::Unit::TestCase
   def test_operation
     @parser.parse("5 + 5")
     @parser.parse("5 + 5 + 5 + 5")
-    @parser.should_clean_tree = true
     @parser.parse("(5) + (5 + 5) + 5")
     @parser.parse("(5) UNION (5 - 5) / 5")
     @parser.parse("foo = (5) UNION (5 - 5) / 5")
@@ -58,11 +57,14 @@ class ExpressionTest < Test::Unit::TestCase
   
   def test_access
     @parser.parse("foo")
-    @parser.parse("foo.bar")
+    @parser.parse("foo.bar") 
     @parser.parse("foo.bar.baz")
     @parser.parse("foo.bar.baz.poo")
+    @parser.parse("foo.bar['hi']")
     
     @parser.parse("foo[bar]")
+    
+    @parser.parse("foo[bar][baz]")
     @parser.parse("foo[bar[bar]]")
     @parser.parse("(foo[bar])[baz]")
     @parser.parse("foo[bar][baz[foo][bar]][poo]")
