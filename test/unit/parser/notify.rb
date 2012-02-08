@@ -45,5 +45,9 @@ class NotifyTest < Test::Unit::TestCase
     end
   end
   
+  def test_notify_vs_not
+    @parser.parser.root = :program
+    @parser.parse("matched = NOTIFY pair VIA sms OF match")
+  end
   
 end

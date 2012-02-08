@@ -1,0 +1,45 @@
+#!/usr/bin/env dog
+
+IMPORT FUNCTION "vark_ranking.js" AS ranking
+IMPORT TASK "answer.task" AS answer
+IMPORT COMMUNITY "vark" 
+
+vark_users = PEOPLE FROM vark WHERE role != "admin"
+
+LISTEN TO PUBLIC VIA http AT "/" FOR home_page_requests
+LISTEN TO vark_users VIA http AT "/profile" FOR profile_page_requests
+LISTEN TO vark_users VIA email FOR question # aardvark+question@dormou.se
+ 
+ON home_page_request DO
+  NOTIFY PERSON FROM home_page_request VIA http_response OF "index.erb"
+END
+
+ON profile_page_request DO
+  NOTIFY PERSON FROM home_page_request VIA http_response OF "profile.erb"
+END
+
+ON question DO
+  asker = PERSON FROM question
+  
+  classified_question = COMPUTE classify ON question.body
+  
+  ranked_users = COMPUTE ranking ON vark_users, classified_question
+  
+  indicate_willingness = message {
+    'title' : "You’ve got a new question!",
+    'body': "Do you want to accept a question from {{asker}} about {{classified_question.class}}?"
+  }
+  
+  FOR EACH user IN ranked_users DO
+    # TODO - if I add a space before the comment on the next line then things break. It is because of the way that on_clause is structured
+    response = ASK user VIA email TO indicate_willingness# default timeout.
+    potential_answerer = PERSON FROM response
+    IF response == "yes" THEN # checks, response.body == yes
+      question.answer = ASK potential_answerer VIA email TO answer ON question
+      IF question.answer != "pass" THEN
+        answered = NOTIFY asker VIA email OF question.answer
+      END
+    END
+  UNTIL answered
+  
+END

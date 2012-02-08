@@ -1,0 +1,27 @@
+#!/usr/bin/env dog
+
+IMPORT TASK "indicate_willingness.task"
+IMPORT COMMUNITY "media_lab"
+
+LISTEN TO media_lab VIA http FOR learning_requests
+
+ON learning_request DO
+  
+  learner = PERSON FROM learning_request
+  teachers = PEOPLE FROM media_lab WHERE teaching_capabilities CONTAINS learning_request.field
+  
+  FOR EACH teacher DO
+    answer = ASK teacher VIA email TO indicate_willingness ON learner, learning_request.field
+    pair = [learner, teacher]
+    IF answer == "yes" THEN 
+      match = "Hi " + learner +"," + teacher + ".  Good news!"
+      matched = NOTIFY pair VIA sms OF match
+      BREAK
+    END
+  END
+  
+  IF NOT matched THEN
+    NOTIFY learner VIA email OF "We could not find a teacher for you... sorry..."
+  END
+  
+END

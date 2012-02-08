@@ -71,4 +71,21 @@ END
 
   end
   
+  def test_else
+    # TODO - Add a test case for else statements
+  end
+  
+  def test_operator
+    
+    program = <<-EOD
+    IF waiting_users.count > 0 THEN
+      a = 5
+      b = a + 5
+      c = 'Hello, World!'
+    END
+    EOD
+
+    @parser.parse(program.strip)
+  end
+  
 end

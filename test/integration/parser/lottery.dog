@@ -8,7 +8,7 @@ LISTEN TO PUBLIC VIA http AT "/" FOR home_page_requests
 LISTEN TO PUBLIC VIA http AT "/submission" FOR submission_page_requests
 LISTEN TO mit_students VIA http FOR lottery_entry 
 
-entrants = [  ]
+entrants = [ ]
 
 ON home_page_request DO
   NOTIFY PERSON FROM home_page_request VIA http_response OF "index.erb"

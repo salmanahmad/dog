@@ -40,7 +40,7 @@ grammar Dog
   end
   
   rule command
-     (on / ask / notify / compute / people / control_structure / print / inspect)
+     (notify / on / ask / compute / people / control_structure / print / inspect)
   end
   
   # ===============
@@ -48,11 +48,11 @@ grammar Dog
   # ===============
   
   rule assignment
-    (lhs s? assignment_operator s? (ask / compute / people)) / (lhs s? assignment_operator s? primary)
+    (lhs s? assignment_operator s? (ask / notify / compute / people)) / (lhs s? assignment_operator s? primary)
   end
 
   rule primary
-    access / operation / literal / identifier / ('(' s? primary s? ')')
+    operation / access / literal / identifier / ('(' s? primary s? ')')
   end
   
   rule operation
@@ -60,7 +60,7 @@ grammar Dog
   end
   
   rule operation_first
-    (literal / identifier / ('(' s? primary s? ')') / access)
+    (literal / access / identifier / ('(' s? primary s? ')'))
   end
 
   rule access
@@ -234,7 +234,7 @@ grammar Dog
   end
 
   rule notify_of_clause
-    s 'OF' s (identifier / string)
+    s 'OF' s (access / identifier / string)
   end
 
 
@@ -439,7 +439,7 @@ grammar Dog
   # ======================
 
   rule control_structure
-    (if / for / repeat)
+    (if / for / repeat / break)
   end
 
   rule repeat
@@ -447,13 +447,17 @@ grammar Dog
   end
 
   rule if
-    'IF' s primary s 'THEN' sn statements? s? 'END'
+    'IF' s primary s 'THEN' sn statements? (sn 'ELSE' sn statements?)? s? 'END'
   end
 
   rule for
     'FOR' s 'EACH' in_clause 'DO' sn statements? s? ('END' / ('UNTIL' s primary)) 
   end
-
+  
+  rule break
+    'BREAK'
+  end
+  
 
 
   # ================
