@@ -14,6 +14,7 @@ class RepeatTest < Test::Unit::TestCase
   def setup
     @parser = Dog::Parser.new
     @parser.parser.root = :repeat
+    @parser.should_clean_tree = true
   end
   
   def test_simple

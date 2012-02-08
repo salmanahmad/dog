@@ -50,6 +50,7 @@ class ExpressionTest < Test::Unit::TestCase
   def test_operation
     @parser.parse("5 + 5")
     @parser.parse("5 + 5 + 5 + 5")
+    @parser.should_clean_tree = true
     @parser.parse("(5) + (5 + 5) + 5")
     @parser.parse("(5) UNION (5 - 5) / 5")
     @parser.parse("foo = (5) UNION (5 - 5) / 5")

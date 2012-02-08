@@ -33,6 +33,41 @@ module Dog
   class BarkNode < Treetop::Runtime::SyntaxNode
   end
   
+
+  class Program < BarkNode 
+  end
+  
+  class ProgramStatements < BarkNode 
+  end
+
+  class Statements < BarkNode 
+  end
+  
+  class TopLevelStatement < BarkNode 
+  end
+  
+  class Statement < BarkNode 
+  end
+  
+  class Primary < BarkNode 
+  end
+  
+  class Access < BarkNode 
+  end
+  
+  class Assignment < BarkNode 
+  end
+  
+  class Operation < BarkNode 
+  end
+  
+
+  
+
+  
+  
+  
+  
   class Config < BarkNode 
   end
   
@@ -155,5 +190,19 @@ module Dog
   
   class ContainsOperator < BarkNode
   end
+  
+  
+  class Repeat < BarkNode
+  end
+  
+  class If < BarkNode
+  end
+  
+  class For < BarkNode
+  end
+  
+  class Break < BarkNode
+  end
+  
 
 end

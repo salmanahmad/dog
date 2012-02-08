@@ -16,23 +16,23 @@ grammar Dog
   # ================
   
   rule program
-    program_statements / ''
+    program_statements / '' <::Dog::Program>
   end
   
   rule program_statements
-    (((top_level_statement / statement / s) t) / ("\n" / comment))+
+    (((top_level_statement / statement / s) t) / ("\n" / comment))+ <::Dog::ProgramStatements>
   end
   
   rule statements
-    (((statement / s) t) / ("\n" / comment))+
+    ((statement / s t) / ("\n" / comment))+ <::Dog::Statements>
   end
   
   rule top_level_statement
-    (listen / import / config / function) s?
+    (listen / import / config / function) s? <::Dog::TopLevelStatement>
   end
   
   rule statement 
-    (s? (command / expression) s?)
+    s? (command / expression) s? <::Dog::Statement>
   end
   
   rule expression
@@ -48,19 +48,23 @@ grammar Dog
   # ===============
   
   rule assignment
-    (lhs s? assignment_operator s? (ask / notify / compute / people)) / (lhs s? assignment_operator s? primary)
+    lhs s? assignment_operator s? (ask / notify / compute / people) <::Dog::Assignment>
+    / 
+    lhs s? assignment_operator s? primary <::Dog::Assignment>
   end
 
   rule primary
-    operation / access / literal / identifier / ('(' s? primary s? ')')
+    operation / access / literal / identifier / ('(' s? primary s? ')') <::Dog::Primary>
   end
   
   rule operation
-    ((operation_first s? binary_operator s? (operation / operation_first)) / (unary_operator s primary))
+    operation_first s? binary_operator s? (operation / operation_first) <::Dog::Operation>
+    / 
+    unary_operator s primary <::Dog::Operation>
   end
   
   rule operation_first
-    (literal / access / identifier / ('(' s? primary s? ')'))
+    literal / access / identifier / '(' s? primary s? ')' <::Dog::Primary>
   end
 
   rule access
@@ -443,19 +447,19 @@ grammar Dog
   end
 
   rule repeat
-    'REPEAT' s integer s 'DO' sn statements? s? 'END'
+    'REPEAT' s integer s 'DO' sn statements? s? 'END' <::Dog::Repeat>
   end
 
   rule if
-    'IF' s primary s 'THEN' sn statements? (sn 'ELSE' sn statements?)? s? 'END'
+    'IF' s primary s 'THEN' sn statements? (sn 'ELSE' sn statements?)? s? 'END' <::Dog::If>
   end
 
   rule for
-    'FOR' s 'EACH' in_clause 'DO' sn statements? s? ('END' / ('UNTIL' s primary)) 
+    'FOR' s 'EACH' in_clause 'DO' sn statements? s? ('END' / ('UNTIL' s primary)) <::Dog::For>
   end
   
   rule break
-    'BREAK'
+    'BREAK' <::Dog::Break>
   end
   
 
