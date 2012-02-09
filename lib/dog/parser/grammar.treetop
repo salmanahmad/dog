@@ -16,11 +16,15 @@ grammar Dog
   # ================
   
   rule program
-    program_statements / '' <::Dog::Program>
+    program_statements+ <::Dog::Program> 
+    / 
+    '' <::Dog::Program>
   end
   
   rule program_statements
-    (((top_level_statement / statement / s) t) / ("\n" / comment))+ <::Dog::ProgramStatements>
+    (top_level_statement / statement / s) t <::Dog::ProgramStatements>
+    / 
+    "\n" / comment
   end
   
   rule statements
