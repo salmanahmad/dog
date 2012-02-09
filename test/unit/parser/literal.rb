@@ -79,11 +79,17 @@ class LiteralTest < Test::Unit::TestCase
     @parser.parse("[[1],'Foo Bar', true, false, YES]")
     @parser.parse("[[[[[[3.14]]]]]]")
     @parser.parse("[{'key':5}]")
+    
+    assert_raise Dog::ParseError do
+      @parser.parse("[1items,]")
+    end
   end
   
   def test_hash
     @parser.parse("{'key':'value'}")
     @parser.parse("{\"key\":'value'}")
+    
+    @parser.parse("{'key':1,}")
     
     @parser.parse("{'key':1}")
     @parser.parse("{'key':true}")
@@ -93,6 +99,8 @@ class LiteralTest < Test::Unit::TestCase
     
     @parser.parse("{'key':[1,2,3]}")
     @parser.parse("{'key':[[1]]}")
+    @parser.parse("{'key':[[1,2,true]]}")
+    
     @parser.parse("{'key':{'key':'value'}}")
     
     @parser.parse("{  'key' :   1   , 'key2'  :  'value'  }")

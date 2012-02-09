@@ -67,8 +67,6 @@ grammar Dog
     literal / access / identifier / '(' s? primary s? ')' <::Dog::Primary>
   end
   
-  
-  
   rule access
     access_first access_tail <::Dog::Access>
   end
@@ -92,18 +90,6 @@ grammar Dog
   rule access_possessive
     ('\'s' / '\'') s identifier access_tail? <::Dog::AccessPossessive>
   end
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   rule lhs
     (access / identifier)
@@ -507,29 +493,27 @@ grammar Dog
   end
 
   rule array 
-    '[' s? items? ']' <::Dog::ArrayLiteral>
+    '[' sn? items? (sn? ',' sn?)? ']' <::Dog::ArrayLiteral>
   end
 
   rule items
     item+ <::Dog::ArrayItems>
   end
-  
-  # TODO - Remove the ? from comman
+
   rule item
-    sn? primary sn? ','? <::Dog::ArrayItem>
+    sn? primary sn? (',' &item / '' !item) <::Dog::ArrayItem>
   end
-  
+
   rule hash 
-    (identifier s?)? '{' associations? '}' <::Dog::HashLiteral>
+    (identifier s?)? '{' sn? associations? (sn? ',' sn?)? '}' <::Dog::HashLiteral>
   end
 
   rule associations
     association+ <::Dog::HashAssociations>
   end
 
-  # TODO - Remove the comma
   rule association 
-    sn? key:string s? ':' s? value:primary sn? ','? <::Dog::HashAssociation>
+    sn? key:string s? ':' s? value:primary sn? (',' &association / '' !association) <::Dog::HashAssociation>
   end
 
   rule bool
