@@ -236,11 +236,7 @@ grammar Dog
   # ===============
 
   rule ask
-    'ASK' sn (integer sn)? (user / identifier) via_clause sn 'TO' sn ask_function on_clause? using_clause?
-  end
-
-  rule ask_function
-    identifier
+    'ASK' sn (integer sn)? (user / identifier) via_clause sn 'TO' sn identifier on_clause? using_clause? <::Dog::Ask>
   end
 
 
@@ -250,11 +246,11 @@ grammar Dog
   # ==========
 
   rule notify
-    'NOTIFY' s (user / identifier) via_clause notify_of_clause using_clause?
+    'NOTIFY' s (user / identifier) via_clause notify_of_clause using_clause? <::Dog::Notify>
   end
 
   rule notify_of_clause
-    s 'OF' s (access / identifier / string)
+    s 'OF' s (access / identifier / string) <::Dog::NotifyOfClause>
   end
 
 
@@ -264,36 +260,8 @@ grammar Dog
   # ===================
 
   rule compute
-    'COMPUTE' s identifier on_clause? using_clause?
+    'COMPUTE' s identifier on_clause? using_clause? <::Dog::Compute>
   end
-
-
-
-  # ==================
-  # = Shared Clauses =
-  # ==================
-
-  rule using_clause
-    s 'USING' s assignment_list
-  end
-
-  # TODO - Consolidate this logic with the array items rule. See that TODO as well.
-  rule on_clause 
-    s ('ON' s)? on_clause_items
-  end
-
-  rule on_clause_items 
-    sn? primary (sn? ',' sn? primary)*
-  end
-
-  rule via_clause 
-    s 'VIA' s identifier <::Dog::ViaClause>
-  end
-
-  rule in_clause
-    s ((identifier s 'IN' s primary) / identifier) s
-  end
-
 
 
   # ==================
@@ -321,8 +289,10 @@ grammar Dog
   end
   
   # TODO - fix the AST for PERSON FROM variable
+  # TODO - Add back community list. Right now, you can only access people from 
+  # one community at a time...
   rule people_from_clause
-    sn 'FROM' sn (community_list / primary) <::Dog::PeopleFromClause>
+    sn 'FROM' sn (access / identifier) <::Dog::PeopleFromClause>
   end
 
   rule people_where_clause
@@ -405,7 +375,7 @@ grammar Dog
   end
   
   rule import 
-    'IMPORT' s type:(import_function / import_data / import_community / import_task / import_message / import_config) s string (s 'AS' s identifier)? <::Dog::Import>
+    'IMPORT' s (import_function / import_data / import_community / import_task / import_message / import_config) s string (s 'AS' s identifier)? <::Dog::Import>
   end
   
   rule import_function
@@ -432,17 +402,39 @@ grammar Dog
     'CONFIG' <::Dog::ImportConfig>
   end
   
-  # TODO - Remove me
-  rule parameters
-    ('PARAMETERS' space_newline ('WITH' space_newline assignment_list)? ) <Parameters>
-  end
-  
   rule print
-    ('PRINT' space primary) <Print>
+    'PRINT' space primary <::Dog::Print>
   end
   
   rule inspect
-    ('INSPECT' space primary) <Inspect>
+    'INSPECT' space primary <::Dog::Inspect>
+  end
+
+
+  # ==================
+  # = Shared Clauses =
+  # ==================
+
+  rule using_clause
+    s 'USING' s identifier_associations <::Dog::UsingClause>
+  end
+
+
+  # TODO - Consolidate this logic with the array items rule. See that TODO as well.
+  rule on_clause 
+    s ('ON' s)? on_clause_items
+  end
+
+  rule on_clause_items 
+    sn? primary (sn? ',' sn? primary)*
+  end
+
+  rule via_clause 
+    s 'VIA' s identifier <::Dog::ViaClause>
+  end
+
+  rule in_clause
+    s ((identifier s 'IN' s primary) / identifier) s <::Dog::InClause>
   end
 
 
@@ -450,17 +442,13 @@ grammar Dog
   # =========
   # = Lists =
   # =========
-
-  rule community_list
-    (string (sn 'AND' sn string)*)
+  
+  rule identifier_associations
+    identifier_association+ <::Dog::IdentifierAssociations>
   end
 
-  rule assignment_list
-    assignment_list_assignment ( sn? (',' / 'AND') sn? assignment_list_assignment)*
-  end
-
-  rule assignment_list_assignment
-    (identifier s? ':' s? primary)
+  rule identifier_association
+    sn? identifier s? ':' s? primary sn? (',' &identifier_association / '' !identifier_association) <::Dog::IdentifierAssociation>
   end
 
 
@@ -470,7 +458,7 @@ grammar Dog
   # ======================
 
   rule control_structure
-    (if / for / repeat / break)
+    if / for / repeat / break
   end
 
   rule repeat
@@ -504,7 +492,7 @@ grammar Dog
   end
 
   rule array 
-    '[' sn? items? (sn? ',' sn?)? ']' <::Dog::ArrayLiteral>
+    '[' sn? items? sn? (',' sn?)? ']' <::Dog::ArrayLiteral>
   end
 
   rule items
@@ -512,7 +500,7 @@ grammar Dog
   end
 
   rule item
-    sn? primary sn? (',' &item / '' !item) <::Dog::ArrayItem>
+    sn? primary ((sn? ',' &item) / ('' !item)) <::Dog::ArrayItem>
   end
 
   rule hash 
@@ -524,7 +512,7 @@ grammar Dog
   end
 
   rule association 
-    sn? key:string s? ':' s? value:primary sn? (',' &association / '' !association) <::Dog::HashAssociation>
+    sn? string s? ':' s? primary sn? (',' &association / '' !association) <::Dog::HashAssociation>
   end
 
   rule bool

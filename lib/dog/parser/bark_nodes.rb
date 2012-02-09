@@ -227,14 +227,32 @@ module Dog
   class Notify < BarkNode
   end
   
+  class NotifyOfClause < BarkNode
+  end
+  
   class Compute < BarkNode
   end
   
   
   
+  class UsingClause < BarkNode
+  end
+  
+  class OnClause < BarkNode
+  end
+    
   class ViaClause < BarkNode
   end
   
+  class InClause < BarkNode
+  end
+  
+  
+  class IdentifierAssociations < BarkNode
+  end
+  
+  class IdentifierAssociation < BarkNode
+  end
   
   
   

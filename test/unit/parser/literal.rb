@@ -72,6 +72,7 @@ class LiteralTest < Test::Unit::TestCase
     @parser.parse("[1,]")
     @parser.parse("[1,2,3]")
     @parser.parse("[1,2.0,-3]")
+    @parser.parse("[1   ,    2.0, -3]")
     
     @parser.parse("[1,'Foo Bar']")
     @parser.parse("[1,'Foo Bar', true, false, YES]")

@@ -21,6 +21,7 @@ class PeopleTest < Test::Unit::TestCase
     @parser.parse("PERSON FROM mit")
     @parser.parse("PERSON FROM mit WHERE id == 7")
     @parser.parse("PERSON FROM mit WHERE id == 7 AND age < 25")
+    @parser.parse("PEOPLE FROM communities['mit']")
   end
   
   def test_person

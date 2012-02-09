@@ -47,7 +47,7 @@ class AskTest < Test::Unit::TestCase
   end
   
   def test_using
-    @parser.parse("ASK users VIA email TO validate ON data USING force : true")
+   pp  @parser.parse("ASK users VIA email TO validate ON data USING force : true")
     
     @parser.parse("ASK users VIA email TO validate ON data USING force:true , optional : false")
     

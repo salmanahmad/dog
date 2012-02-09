@@ -25,5 +25,8 @@ class ComputeTest < Test::Unit::TestCase
     @parser.parse("COMPUTE average ON a,b USING c : 5, d : 'hello, world'")
   end
   
+  def test_newline
+    
+  end
   
 end

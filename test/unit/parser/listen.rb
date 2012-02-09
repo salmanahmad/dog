@@ -21,6 +21,8 @@ class ListenTest < Test::Unit::TestCase
     @parser.parse("LISTEN TO ME VIA chat FOR event")
     @parser.parse("LISTEN TO students VIA email FOR event")
     @parser.parse("LISTEN TO students VIA sms FOR event")
+    @parser.parse("LISTEN TO PEOPLE FROM mit VIA sms FOR event")
+    @parser.parse("LISTEN TO PEOPLE FROM mit WHERE age > 19 VIA sms FOR event")
   end
   
   def test_listen_at
