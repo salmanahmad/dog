@@ -29,6 +29,9 @@ EOD
   end
   
   def test_on_and_using
+    
+    @parser.should_clean_tree = true
+    
     program = <<-EOD
 DEFINE function ON input DO 
 
@@ -38,6 +41,18 @@ DEFINE function ON input DO
 END
 EOD
     
+    program.strip!
+    @parser.parse(program)
+    
+    program = <<-EOD
+DEFINE function ON input USING config1 = false,config2 = false DO 
+
+
+
+
+END
+EOD
+
     program.strip!
     @parser.parse(program)
     

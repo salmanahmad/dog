@@ -300,10 +300,32 @@ module Dog
   class PredicateConditonal < BarkNode
   end
   
+  class Function < BarkNode
+  end
+  
+  class FunctionParameters < BarkNode
+  end
+  
+  class FunctionParameter < BarkNode
+  end
+  
+  class FunctionOn < BarkNode
+  end
+  
+  class FunctionUsing < BarkNode
+  end
+  
+  class FunctionOptionalParameters < BarkNode
+  end
+  
+  class FunctionOptionalParameter < BarkNode
+  end  
+  
   
 
 
-  
+  class On < BarkNode
+  end
   
   
   class Repeat < BarkNode
@@ -318,5 +340,11 @@ module Dog
   class Break < BarkNode
   end
   
-
+  class Print < BarkNode
+  end
+  
+  class Inspect < BarkNode
+  end
+  
+  
 end

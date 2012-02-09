@@ -340,7 +340,7 @@ grammar Dog
   # ==============
   
   rule on
-    'ON' (s 'EACH' (s integer)?)? in_clause 'DO' sn statements? s? 'END'
+    'ON' (s 'EACH' (s integer)?)? in_clause 'DO' sn statements? s? 'END' <::Dog::On>
   end
   
   
@@ -355,23 +355,31 @@ grammar Dog
   end
   
   rule function
-    'DEFINE' s identifier (s 'ON' s function_parameters)? (s 'USING' s function_optional_parameters)? s? 'DO' sn statements? 'END'
+    'DEFINE' s identifier function_on? function_using? s? 'DO' sn statements? 'END' <::Dog::Function>
+  end
+  
+  rule function_on
+    s 'ON' s function_parameters <::Dog::FunctionOn>
   end
   
   rule function_parameters
-    function_parameter (',' function_parameter)*
+    function_parameter+ <::Dog::FunctionParameters>
   end
   
   rule function_parameter
-    sn? identifier sn?
+    s? identifier ((s? ',' &function_parameter) / ('' !function_parameter)) <::Dog::FunctionParameter>
+  end
+  
+  rule function_using
+    s 'USING' s function_optional_parameters <::Dog::FunctionUsing>
   end
   
   rule function_optional_parameters
-    function_optional_parameter (',' function_optional_parameter)*
+    function_optional_parameter+ <::Dog::FunctionOptionalParameters>
   end
   
   rule function_optional_parameter
-    sn? identifier (s? '=' s? literal) sn?
+    s? identifier s? '=' s? literal s? (',' &function_optional_parameter / '' !function_optional_parameter) <::Dog::FunctionOptionalParameter>
   end
   
   rule import 
@@ -436,7 +444,7 @@ grammar Dog
   # =========
   # = Lists =
   # =========
-  
+
   rule on_clause_items
     on_clause_item+ <::Dog::OnClauseItems>
   end
@@ -486,11 +494,11 @@ grammar Dog
   # ================
 
   rule literal
-    (number / string / bool / collection)
+    number / string / bool / collection
   end
 
   rule collection
-    (array / hash)
+    array / hash
   end
 
   rule array 
