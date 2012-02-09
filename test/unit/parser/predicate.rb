@@ -31,8 +31,9 @@ class PredicateTest < Test::Unit::TestCase
     @parser.parse("(a == 1 AND (b < 2)) OR c > 3")
   end
   
-  def test_primaries_in_conditionals
+  def test_access_in_conditionals
     @parser.parse("a == salman.friends")
+    @parser.parse("a == salman.friends['happy']")
     @parser.parse("a == salman.friends.foo.bar")
   end
   

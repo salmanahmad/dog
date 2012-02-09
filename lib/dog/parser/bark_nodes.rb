@@ -208,6 +208,77 @@ module Dog
   class ContainsOperator < BarkNode
   end
   
+
+  class Listen < BarkNode
+  end 
+  
+  class ListenToClause < BarkNode
+  end
+  
+  class ListenAtClause < BarkNode
+  end
+  
+  class ListenForClause < BarkNode
+  end
+  
+  class Ask < BarkNode
+  end
+  
+  class Notify < BarkNode
+  end
+  
+  class Compute < BarkNode
+  end
+  
+  
+  
+  class ViaClause < BarkNode
+  end
+  
+  
+  
+  
+  class Me < BarkNode
+  end
+  
+  class Public < BarkNode
+  end
+  
+  class Person < BarkNode
+  end
+  
+  class People < BarkNode
+  end
+  
+  class PeopleFromClause < BarkNode
+  end
+  
+  class PeopleWhereClause < BarkNode
+  end
+  
+  class KeyPaths < BarkNode
+  end
+  
+  class KeyPath < BarkNode
+  end
+  
+  class Predicate < BarkNode
+  end
+  
+  class PredicateBinary < BarkNode
+  end
+  
+  class PredicateUnary < BarkNode
+  end
+  
+  class PredicateConditonal < BarkNode
+  end
+  
+  
+
+
+  
+  
   
   class Repeat < BarkNode
   end

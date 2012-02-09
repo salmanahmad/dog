@@ -43,6 +43,12 @@ class ListenTest < Test::Unit::TestCase
     end
   end
   
+  def test_for_requires_identifier
+    assert_raise Dog::ParseError do 
+      @parser.parse("LISTEN TO students VIA sms FOR 'happy'")
+    end
+  end
+  
   def test_via_required
     assert_raise Dog::ParseError do 
       @parser.parse("LISTEN TO PUBLIC FOR event") 

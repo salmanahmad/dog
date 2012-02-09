@@ -13,7 +13,7 @@ class PeopleTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :people
+    @parser.parser.root = :user
   end
   
   def test_simple
