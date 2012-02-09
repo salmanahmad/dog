@@ -418,15 +418,9 @@ grammar Dog
   rule using_clause
     s 'USING' s identifier_associations <::Dog::UsingClause>
   end
-
-
-  # TODO - Consolidate this logic with the array items rule. See that TODO as well.
+  
   rule on_clause 
-    s ('ON' s)? on_clause_items
-  end
-
-  rule on_clause_items 
-    sn? primary (sn? ',' sn? primary)*
+    s ('ON' s)? on_clause_items <::Dog::OnClause>
   end
 
   rule via_clause 
@@ -443,12 +437,20 @@ grammar Dog
   # = Lists =
   # =========
   
+  rule on_clause_items
+    on_clause_item+ <::Dog::OnClauseItems>
+  end
+
+  rule on_clause_item
+    s? primary ((s? ',' &on_clause_item) / ('' !on_clause_item)) <::Dog::OnClauseItem>
+  end
+  
   rule identifier_associations
     identifier_association+ <::Dog::IdentifierAssociations>
   end
 
   rule identifier_association
-    sn? identifier s? ':' s? primary sn? (',' &identifier_association / '' !identifier_association) <::Dog::IdentifierAssociation>
+    s? identifier s? ':' s? primary s? (',' &identifier_association / '' !identifier_association) <::Dog::IdentifierAssociation>
   end
 
 

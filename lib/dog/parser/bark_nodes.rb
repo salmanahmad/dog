@@ -240,6 +240,14 @@ module Dog
   
   class OnClause < BarkNode
   end
+
+  class OnClauseItems < BarkNode
+  end  
+
+  class OnClauseItem < BarkNode
+  end
+    
+    
     
   class ViaClause < BarkNode
   end

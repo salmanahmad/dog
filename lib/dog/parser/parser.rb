@@ -36,11 +36,12 @@ module Dog
       tree = @parser.parse(program)
       
       if(tree.nil?)
-        error = ParseError.new("Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason}")
+        error = ParseError.new("Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason.inspect}")
         
         error.line = @parser.failure_line
         error.column = @parser.failure_column
         error.failure_reason = @parser.failure_reason
+        
         
         raise error
       end
