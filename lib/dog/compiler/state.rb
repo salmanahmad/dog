@@ -9,20 +9,15 @@
 
 module Dog
   
-  class Runtime
+  class State
     
-    def self.run(bark)
-      runtime = self.new
-      runtime.run(bark)
-    end
+    attr_accessor :parent
+    attr_accessor :children
     
-    def initialize
-      
-    end
+    attr_accessor :variable_dependencies
+    attr_accessor :variable_output
     
-    def run(bark)
-      
-    end
+    attr_accessor :operation
     
   end
   

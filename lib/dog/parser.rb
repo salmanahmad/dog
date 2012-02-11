@@ -8,6 +8,7 @@
 #
 
 require "treetop"
+
 require File.join(File.dirname(__FILE__), 'parser/parser.rb')
 require File.join(File.dirname(__FILE__), 'parser/bark_nodes.rb')
 

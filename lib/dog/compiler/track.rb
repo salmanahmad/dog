@@ -9,19 +9,13 @@
 
 module Dog
   
-  class Runtime
+  class Track
     
-    def self.run(bark)
-      runtime = self.new
-      runtime.run(bark)
-    end
+    attr_accessor :parent_state
+    attr_accessor :pending_states
     
-    def initialize
-      
-    end
-    
-    def run(bark)
-      
+    def finished?
+      pending_states.empty?
     end
     
   end

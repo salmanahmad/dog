@@ -9,20 +9,7 @@
 
 module Dog
   
-  class Runtime
-    
-    def self.run(bark)
-      runtime = self.new
-      runtime.run(bark)
-    end
-    
-    def initialize
-      
-    end
-    
-    def run(bark)
-      
-    end
+  class Router
     
   end
   

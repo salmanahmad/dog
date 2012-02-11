@@ -9,20 +9,20 @@
 
 module Dog
   
-  class Runtime
+  class Variable
     
-    def self.run(bark)
-      runtime = self.new
-      runtime.run(bark)
-    end
-    
-    def initialize
+    def self.named(name)
       
     end
     
-    def run(bark)
+    def self.save
       
     end
+    
+    attr_accessor :value
+    attr_accessor :valid
+    attr_accessor :dirty
+    
     
   end
   

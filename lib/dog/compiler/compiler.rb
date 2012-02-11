@@ -6,3 +6,24 @@
 # and distribution of modified versions of this work as long as the
 # above copyright notice is included.
 #
+
+module Dog
+  
+  class Compiler
+    
+    def self.compile(collar)
+      compiler = self.new
+      compiler.compile(collar)
+    end
+    
+    def initialize
+      
+    end
+    
+    def compile(collar)
+      
+    end
+    
+  end
+  
+end

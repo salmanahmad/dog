@@ -7,23 +7,3 @@
 # above copyright notice is included.
 #
 
-module Dog
-  
-  class Runtime
-    
-    def self.run(bark)
-      runtime = self.new
-      runtime.run(bark)
-    end
-    
-    def initialize
-      
-    end
-    
-    def run(bark)
-      
-    end
-    
-  end
-  
-end
