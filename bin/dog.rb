@@ -36,12 +36,12 @@ end
 __END__
 
 # Parse the dog code into an AST (called a bark)
-dog_bark = Dog::Parser.parse(dog_code).to_bark
+dog_collar = Dog::Parser.parse(dog_code).to_collar
 
-# Compute the AST into a state machine (called a collar)
-dog_collar = Dog::Compiler.compile(dog_barks)
+# Compute the AST into a state machine (called a bark)
+dog_bark = Dog::Compiler.compile(dog_barks)
 
 # Execute the state machine. This may save state 
-# as an execution graph (called a leash)
+# as an execution graph (called a track)
 Dog::Runtime.run(dog_collar)
 
