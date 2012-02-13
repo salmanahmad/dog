@@ -17,6 +17,10 @@ require 'rubygems'
 require 'bundler/setup'
 require File.expand_path('../../lib/dog.rb', __FILE__)
 
+module ParserTests end
+module CompilerTests end
+module RuntimeTests end
+
 module IntegrationHelper
   
   def program_for(test_path)

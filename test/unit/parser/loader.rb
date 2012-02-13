@@ -9,7 +9,7 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class LoadTest < Test::Unit::TestCase
+class ParserTests::LoadTest < Test::Unit::TestCase
   
   def test_parser_module
     assert_raise NameError do

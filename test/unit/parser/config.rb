@@ -11,7 +11,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_hel
 
 # TODO - Ensure that these parsed expression return the correct Tag
 
-class ConfigTest < Test::Unit::TestCase
+class ParserTests::ConfigTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new

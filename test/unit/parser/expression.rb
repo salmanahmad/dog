@@ -9,7 +9,7 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class ExpressionTest < Test::Unit::TestCase
+class ParserTests::ExpressionTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
