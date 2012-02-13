@@ -21,7 +21,8 @@ module Dog
     end
     
     def compile(collar)
-      
+      state = collar.compile
+      return state
     end
     
   end

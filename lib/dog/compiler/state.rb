@@ -19,6 +19,26 @@ module Dog
     
     attr_accessor :operation
     
+    def initialize
+      @parent = nil
+      @children = []
+      @variable_dependencies = []
+      @variable_output = nil
+      @operation = nil
+    end
+    
+    def to_bark
+      Marshal.dump(self)
+    end
+    
+    def self.from_bark(bark)
+      state = Marshal.load(bark)
+      raise "Error" if state.class != self
+      return state
+    rescue
+      raise "Could not load state machine from bark."
+    end
+    
   end
   
 end

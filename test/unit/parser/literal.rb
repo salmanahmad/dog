@@ -68,6 +68,7 @@ class LiteralTest < Test::Unit::TestCase
   end
   
   def test_array
+    @parser.parse("[]")
     @parser.parse("[1]")
     @parser.parse("[1,]")
     @parser.parse("[1,2,3]")

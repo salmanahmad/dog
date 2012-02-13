@@ -7,8 +7,11 @@
 # above copyright notice is included.
 #
 
-require File.join(File.dirname(__FILE__), 'dog/parser.rb')
+# TODO - Figure this out. CollarNodes depends on State. I may want to
+# just remove my directory structure to make this a bit more straight
+# forward.
 require File.join(File.dirname(__FILE__), 'dog/compiler.rb')
+require File.join(File.dirname(__FILE__), 'dog/parser.rb')
 require File.join(File.dirname(__FILE__), 'dog/runtime.rb')
 
 module Dog end

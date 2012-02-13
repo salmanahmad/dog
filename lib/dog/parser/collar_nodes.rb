@@ -30,25 +30,58 @@ module Dog
     
   end
   
+  module CompileChild
+    def compile
+      if self.elements.size == 1 then
+        return self.elements.first.compile
+      elsif self.elements.size == 0
+        return nil
+      else
+        raise "#{self.class.name} has more than 1 child."
+      end
+    end
+  end
+  
   class CollarNode < Treetop::Runtime::SyntaxNode
+    def compile
+      raise "Error: Attempting to compile a base Collar node."
+    end
+    
+    def run
+      raise "Error: Attempting to run a base Collar node."
+    end
   end
   
-  class Program < CollarNode 
+  class Program < CollarNode
+    def compile
+      program = State.new
+      self.elements.each do |node|
+        state = node.compile
+        program.children << state unless state.nil?
+      end
+      return program
+    end
   end
   
-  class ProgramStatements < CollarNode 
+  # TODO - At some point I need to return a state, where does that take place???
+  class ProgramStatements < CollarNode
+    include CompileChild
   end
   
   class Statements < CollarNode 
+    include CompileChild
   end
   
   class TopLevelStatement < CollarNode 
+    include CompileChild
   end
   
-  class Statement < CollarNode 
+  class Statement < CollarNode
+    include CompileChild
   end
   
   class Primary < CollarNode 
+    include CompileChild
   end
   
   class Access < CollarNode
@@ -78,74 +111,10 @@ module Dog
   class Operation < CollarNode 
   end
   
-
-  
-
-  
-  
-  
-  
-  class Config < CollarNode 
-  end
-  
-  class Import < CollarNode 
-  end
-  
-  class ImportFunction < CollarNode 
-  end
-  
-  class ImportData < CollarNode 
-  end
-  
-  class ImportCommunity < CollarNode 
-  end
-  
-  class ImportTask < CollarNode 
-  end
-  
-  class ImportMessage < CollarNode 
-  end
-  
-  class ImportConfig < CollarNode 
-  end
-  
   class Identifier < CollarNode 
   end
   
   class AssignmentOperator < CollarNode 
-  end
-  
-  class TrueLiteral < CollarNode 
-  end
-  
-  class FalseLiteral < CollarNode 
-  end
-  
-  class IntegerLiteral < CollarNode 
-  end
-  
-  class FloatLiteral < CollarNode 
-  end
-  
-  class StringLiteral < CollarNode 
-  end
-  
-  class ArrayLiteral < CollarNode 
-  end
-  
-  class ArrayItems < CollarNode 
-  end
-  
-  class ArrayItem < CollarNode 
-  end
-  
-  class HashLiteral < CollarNode 
-  end
-  
-  class HashAssociations < CollarNode 
-  end
-  
-  class HashAssociation < CollarNode 
   end
   
   class AdditionOperator < CollarNode
@@ -208,7 +177,6 @@ module Dog
   class ContainsOperator < CollarNode
   end
   
-
   class Listen < CollarNode
   end 
   
@@ -233,36 +201,29 @@ module Dog
   class Compute < CollarNode
   end
   
-  
-  
   class UsingClause < CollarNode
   end
   
   class OnClause < CollarNode
   end
-
+  
   class OnClauseItems < CollarNode
-  end  
-
+  end
+  
   class OnClauseItem < CollarNode
   end
-    
-    
-    
+  
   class ViaClause < CollarNode
   end
   
   class InClause < CollarNode
   end
   
-  
   class IdentifierAssociations < CollarNode
   end
   
   class IdentifierAssociation < CollarNode
   end
-  
-  
   
   class Me < CollarNode
   end
@@ -300,6 +261,30 @@ module Dog
   class PredicateConditonal < CollarNode
   end
   
+  class Config < CollarNode 
+  end
+  
+  class Import < CollarNode 
+  end
+  
+  class ImportFunction < CollarNode 
+  end
+  
+  class ImportData < CollarNode 
+  end
+  
+  class ImportCommunity < CollarNode 
+  end
+  
+  class ImportTask < CollarNode 
+  end
+  
+  class ImportMessage < CollarNode 
+  end
+  
+  class ImportConfig < CollarNode 
+  end
+  
   class Function < CollarNode
   end
   
@@ -319,22 +304,18 @@ module Dog
   end
   
   class FunctionOptionalParameter < CollarNode
-  end  
-  
-  
-
-
-  class On < CollarNode
   end
   
-  
-  class Repeat < CollarNode
+  class On < CollarNode
   end
   
   class If < CollarNode
   end
   
   class For < CollarNode
+  end
+  
+  class Repeat < CollarNode
   end
   
   class Break < CollarNode
@@ -346,5 +327,97 @@ module Dog
   class Inspect < CollarNode
   end
   
+  class ArrayLiteral < CollarNode 
+    def compile
+      items = self.elements.first
+      if items then
+        return items.compile
+      else
+        return []
+      end
+    end
+  end
+  
+  class ArrayItems < CollarNode
+    def compile
+      items = []
+      for element in self.elements do
+        items << element.compile
+      end
+      return items
+    end
+  end
+  
+  class ArrayItem < CollarNode 
+    include CompileChild
+  end
+  
+  class HashLiteral < CollarNode 
+    def compile
+      associations = self.elements.first
+      if associations then
+        return associations.compile
+      else
+        return {}
+      end
+    end
+  end
+  
+  class HashAssociations < CollarNode 
+    def compile
+      associations = {}
+      for element in self.elements do
+        association = element.compile
+        for key, value in association do
+          associations[key] = value
+        end
+      end
+      return associations
+    end
+  end
+  
+  class HashAssociation < CollarNode 
+    def compile
+      association = {}
+      key = self.elements[0].compile
+      value = self.elements[1].compile
+      association[key] = value
+      return association
+    end
+  end
+  
+  class StringLiteral < CollarNode 
+    def compile
+      string = self.text_value
+      quote = string[0]
+      string = string[1..-2]
+      string.gsub!("\\#{quote}", quote)
+      return string
+    end
+  end
+  
+  class IntegerLiteral < CollarNode 
+    def compile
+      Integer(self.text_value)
+    end
+  end
+  
+  class FloatLiteral < CollarNode 
+    def compile
+      Float(self.text_value)
+    end
+  end
+  
+  class TrueLiteral < CollarNode 
+    def compile
+      return true
+    end
+  end
+  
+  class FalseLiteral < CollarNode 
+    def compile
+      return false
+    end
+  end
   
 end

@@ -9,7 +9,5 @@
 
 require File.join(File.dirname(__FILE__), 'compiler/compiler.rb')
 require File.join(File.dirname(__FILE__), 'compiler/state.rb')
-require File.join(File.dirname(__FILE__), 'compiler/variable.rb')
-require File.join(File.dirname(__FILE__), 'compiler/track.rb')
 
 module Dog end
