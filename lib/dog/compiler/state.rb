@@ -13,10 +13,6 @@ module Dog
     
     attr_accessor :parent
     attr_accessor :children
-    
-    attr_accessor :variable_dependencies
-    attr_accessor :variable_output
-    
     attr_accessor :operation
     
     def initialize
@@ -25,6 +21,10 @@ module Dog
       @variable_dependencies = []
       @variable_output = nil
       @operation = nil
+    end
+    
+    def run
+      # TODO
     end
     
     def to_bark

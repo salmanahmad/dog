@@ -15,17 +15,33 @@ module Dog
       to_hash
     end
     
+    def self.from_collar(collar)
+      self.from_hash(collar)
+    end
+    
     def to_hash
       hash = {}
       hash[:offset] = self.interval.first
       hash[:text_value] = self.text_value
       hash[:name] = self.class.name
       unless self.elements.nil?
-        hash[:elements] = self.elements.map {|element| element.to_hash() }
+        hash[:elements] = self.elements.map do |element|
+          element.to_hash
+        end
       else
         hash[:elements] = nil
       end
       return hash
+    end
+    
+    def self.from_hash(hash)
+      offset = hash[:offset]
+      text_value = hash[:text_value]
+      name = hash[:name]
+      elements = hash[:elements]
+      
+      # TODO - this will be tricky without treetop support
+      # TODO - ensure that treetop nodes can be marshalled
     end
     
   end
@@ -41,10 +57,24 @@ module Dog
       end
     end
   end
+
+  module RunChild
+    def run
+      if self.elements.size == 1 then
+        return self.elements.first.run
+      elsif self.elements.size == 0
+        return nil
+      else
+        raise "#{self.class.name} has more than 1 child."
+      end
+    end
+  end
   
   class CollarNode < Treetop::Runtime::SyntaxNode
     def compile
-      raise "Error: Attempting to compile a base Collar node."
+      state = State.new
+      state.operation = self
+      return state
     end
     
     def run
@@ -55,15 +85,19 @@ module Dog
   class Program < CollarNode
     def compile
       program = State.new
+      
       self.elements.each do |node|
         state = node.compile
-        program.children << state unless state.nil?
+        unless state.nil? then
+          state.parent = program
+          program.children << state 
+        end
       end
+      
       return program
     end
   end
   
-  # TODO - At some point I need to return a state, where does that take place???
   class ProgramStatements < CollarNode
     include CompileChild
   end
@@ -87,28 +121,22 @@ module Dog
   class Access < CollarNode
   end
   
-  class AccessDot < CollarNode 
+  class AccessBracket < CollarNode 
   end
   
-  class AccessBracket < CollarNode 
+  class AccessDot < CollarNode 
   end
   
   class AccessPossessive < CollarNode 
   end
   
-  class AccessVariable < CollarNode 
-  end
-  
-  class AccessPath < CollarNode 
-  end
-  
-  class AccessPathItem < CollarNode 
-  end
-  
-  class Assignment < CollarNode 
+  class Assignment < CollarNode
   end
   
   class Operation < CollarNode 
+    def run
+      elements[1].run(elements[0].run, elements[1].run)
+    end
   end
   
   class Identifier < CollarNode 
@@ -118,63 +146,123 @@ module Dog
   end
   
   class AdditionOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 + arg2
+    end
   end
   
   class SubtractionOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 - arg2
+    end
   end
   
   class MultiplicationOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 * arg2
+    end
   end
   
   class DivisionOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 / arg2
+    end
   end
   
   class EqualityOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 == arg2
+    end
   end
   
   class InequalityOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 != arg2
+    end
   end
   
   class GreaterThanOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 > arg2
+    end
   end
   
   class LessThanOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 < arg2
+    end
   end
   
   class GreaterThanEqualOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 >= arg2
+    end
   end
   
   class LessThanEqualOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 <= arg2
+    end
   end
   
   class AndOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 && arg2
+    end
   end
   
   class OrOperator < CollarNode
+    def run(arg1, arg2)
+      arg1 || arg2
+    end
   end
   
   class NotOperator < CollarNode
+    def run(arg1)
+      !arg1
+    end
   end
   
   class UnionOperator < CollarNode
+    def run(arg1, arg2)
+      # TODO
+    end
   end
   
   class IntersectOperator < CollarNode
+    def run(arg1, arg2)
+      # TODO
+    end
   end
   
   class DifferenceOperator < CollarNode
+    def run(arg1, arg2)
+      # TODO
+    end
   end
   
   class AppendOperator < CollarNode
+    def run(arg1, arg2)
+      # TODO
+    end
   end
   
   class PrependOperator < CollarNode
+    def run(arg1, arg2)
+      # TODO
+    end
   end
   
   class AssociatesOperator < CollarNode
+    def run(arg1, arg2)
+      # TODO
+    end
   end
   
   class ContainsOperator < CollarNode
+    def run(arg1, arg2)
+      arg1.include? arg2
+    end
   end
   
   class Listen < CollarNode
@@ -265,24 +353,45 @@ module Dog
   end
   
   class Import < CollarNode 
+    def run
+      
+    end
   end
   
   class ImportFunction < CollarNode 
+    def run
+      
+    end
   end
   
   class ImportData < CollarNode 
+    def run
+      
+    end
   end
   
   class ImportCommunity < CollarNode 
+    def run
+      
+    end
   end
   
   class ImportTask < CollarNode 
+    def run
+      
+    end
   end
   
   class ImportMessage < CollarNode 
+    def run
+      
+    end
   end
   
   class ImportConfig < CollarNode 
+    def run
+      
+    end
   end
   
   class Function < CollarNode
@@ -307,31 +416,52 @@ module Dog
   end
   
   class On < CollarNode
+    def run
+      # BIG TODO
+    end
   end
   
   class If < CollarNode
+    def run
+      # BIG TODO
+    end
   end
   
   class For < CollarNode
+    def run
+      # BIG TODO
+    end
   end
   
   class Repeat < CollarNode
+    def run
+      # TODO
+    end
   end
   
   class Break < CollarNode
+    def run
+      # TODO
+    end
   end
   
   class Print < CollarNode
+    def run
+      puts elements.first
+    end
   end
   
   class Inspect < CollarNode
+    def run
+      puts elements.first.inspect
+    end
   end
   
   class ArrayLiteral < CollarNode 
-    def compile
+    def run
       items = self.elements.first
       if items then
-        return items.compile
+        return items.run
       else
         return []
       end
@@ -339,24 +469,24 @@ module Dog
   end
   
   class ArrayItems < CollarNode
-    def compile
+    def run
       items = []
       for element in self.elements do
-        items << element.compile
+        items << element.run
       end
       return items
     end
   end
   
   class ArrayItem < CollarNode 
-    include CompileChild
+    include RunChild
   end
   
   class HashLiteral < CollarNode 
-    def compile
+    def run
       associations = self.elements.first
       if associations then
-        return associations.compile
+        return associations.run
       else
         return {}
       end
@@ -364,10 +494,10 @@ module Dog
   end
   
   class HashAssociations < CollarNode 
-    def compile
+    def run
       associations = {}
       for element in self.elements do
-        association = element.compile
+        association = element.run
         for key, value in association do
           associations[key] = value
         end
@@ -377,17 +507,17 @@ module Dog
   end
   
   class HashAssociation < CollarNode 
-    def compile
+    def run
       association = {}
-      key = self.elements[0].compile
-      value = self.elements[1].compile
+      key = self.elements[0].run
+      value = self.elements[1].run
       association[key] = value
       return association
     end
   end
   
   class StringLiteral < CollarNode 
-    def compile
+    def run
       string = self.text_value
       quote = string[0]
       string = string[1..-2]
@@ -397,25 +527,25 @@ module Dog
   end
   
   class IntegerLiteral < CollarNode 
-    def compile
+    def run
       Integer(self.text_value)
     end
   end
   
   class FloatLiteral < CollarNode 
-    def compile
+    def run
       Float(self.text_value)
     end
   end
   
   class TrueLiteral < CollarNode 
-    def compile
+    def run
       return true
     end
   end
   
   class FalseLiteral < CollarNode 
-    def compile
+    def run
       return false
     end
   end

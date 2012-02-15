@@ -21,7 +21,8 @@ class LiteralTest < Test::Unit::TestCase
   
   def compile(string)
     collar = @parser.parse(string)
-    @compiler.compile(collar)
+    bark = @compiler.compile(collar)
+    bark.operation.run
   end
   
   def test_integer
