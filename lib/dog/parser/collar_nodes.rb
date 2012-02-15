@@ -24,6 +24,10 @@ module Dog
       hash[:offset] = self.interval.first
       hash[:text_value] = self.text_value
       hash[:name] = self.class.name
+      
+      hash[:input] = self.input
+      hash[:interval] = self.interval
+      
       unless self.elements.nil?
         hash[:elements] = self.elements.map do |element|
           element.to_hash
@@ -38,10 +42,18 @@ module Dog
       offset = hash[:offset]
       text_value = hash[:text_value]
       name = hash[:name]
-      elements = hash[:elements]
       
-      # TODO - this will be tricky without treetop support
-      # TODO - ensure that treetop nodes can be marshalled
+      input = hash[:input]
+      interval = hash[:interval]
+      
+      elements = hash[:elements]
+      elements.map! do |element|
+        element = self.from_hash(element)
+      end
+      
+      node_type = Object::const_get(name)
+      node = node_type.new(input, interval, elements)
+      return node
     end
     
   end
@@ -115,7 +127,6 @@ module Dog
   end
   
   class Primary < CollarNode 
-    include CompileChild
   end
   
   class Access < CollarNode
