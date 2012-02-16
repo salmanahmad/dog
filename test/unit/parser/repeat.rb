@@ -34,7 +34,8 @@ EOD
     program = <<-EOD
 
 REPEAT 5 DO
-  
+  PRINT 'hello'
+  PRINT 'hi'
 END
 
 EOD

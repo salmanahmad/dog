@@ -480,7 +480,11 @@ grammar Dog
   end
 
   rule if
-    'IF' s primary s 'THEN' sn statements? (sn 'ELSE' sn statements?)? s? 'END' <::Dog::If>
+    'IF' s primary s 'THEN' sn statements? else_clause? s? 'END' <::Dog::If>
+  end
+  
+  rule else_clause
+    sn 'ELSE' sn statements? <::Dog::ElseClause>
   end
 
   rule for

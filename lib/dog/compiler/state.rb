@@ -18,6 +18,19 @@ module Dog
       @children = []
     end
     
+    def add_child(child)
+      if !child.kind_of?(Array) then
+        child = [child]
+      end
+      
+      for c in child do
+        unless c.nil? then
+          c.parent = self
+          self.children << c
+        end
+      end
+    end
+    
     def run
       raise "Run on state was called."
     end
@@ -59,6 +72,14 @@ module Dog
   
   class ForState < State
     attr_accessor :enumerable
+    
+    def run
+      
+    end
+  end
+  
+  class RepeatState < State
+    attr_accessor :count
     
     def run
       

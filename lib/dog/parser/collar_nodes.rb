@@ -35,6 +35,7 @@ module Dog
       else
         hash[:elements] = nil
       end
+      
       return hash
     end
     
@@ -53,6 +54,7 @@ module Dog
       
       node_type = Object::const_get(name)
       node = node_type.new(input, interval, elements)
+      
       return node
     end
     
@@ -69,7 +71,15 @@ module Dog
       end
     end
   end
-
+  
+  module CompileOperationState
+    def compile
+      state = OperationState.new
+      state.operation = self
+      return state
+    end
+  end
+  
   module RunChild
     def run
       if self.elements.size == 1 then
@@ -82,28 +92,25 @@ module Dog
     end
   end
   
-  class CollarNode < Treetop::Runtime::SyntaxNode
-    def compile
-      state = State.new
-      state.operation = self
-      return state
-    end
-    
+  module NotRunnable
     def run
-      raise "Error: Attempting to run a base Collar node."
+      raise "Attempting to run an unrunnable node: #{self.class.name}."
     end
+  end
+  
+  class CollarNode< Treetop::Runtime::SyntaxNode
+    include NotRunnable
+    include CompileOperationState
+    # TODO - this default is somewhat problematic. For example, for clauses or predicates
   end
   
   class Program < CollarNode
     def compile
-      program = State.new
+      program = ProgramState.new
       
       self.elements.each do |node|
         state = node.compile
-        unless state.nil? then
-          state.parent = program
-          program.children << state 
-        end
+        state.add_child(state)
       end
       
       return program
@@ -114,11 +121,20 @@ module Dog
     include CompileChild
   end
   
-  class Statements < CollarNode 
-    include CompileChild
+  class Statements < CollarNode
+    def compile
+      states = []
+      
+      self.elements.each do |node|
+        state = node.compile
+        states << state
+      end
+      
+      return states
+    end
   end
   
-  class TopLevelStatement < CollarNode 
+  class TopLevelStatement < CollarNode
     include CompileChild
   end
   
@@ -126,34 +142,34 @@ module Dog
     include CompileChild
   end
   
-  class Primary < CollarNode 
+  class Primary < CollarNode
   end
   
   class Access < CollarNode
   end
   
-  class AccessBracket < CollarNode 
+  class AccessBracket < CollarNode
   end
   
-  class AccessDot < CollarNode 
+  class AccessDot < CollarNode
   end
   
-  class AccessPossessive < CollarNode 
+  class AccessPossessive < CollarNode
   end
   
   class Assignment < CollarNode
   end
   
-  class Operation < CollarNode 
+  class Operation < CollarNode
     def run
       elements[1].run(elements[0].run, elements[1].run)
     end
   end
   
-  class Identifier < CollarNode 
+  class Identifier < CollarNode
   end
   
-  class AssignmentOperator < CollarNode 
+  class AssignmentOperator < CollarNode
   end
   
   class AdditionOperator < CollarNode
@@ -277,133 +293,222 @@ module Dog
   end
   
   class Listen < CollarNode
+    def run
+      
+    end
   end 
   
   class ListenToClause < CollarNode
+    def run
+      
+    end
   end
   
   class ListenAtClause < CollarNode
+    def run
+      
+    end
   end
   
   class ListenForClause < CollarNode
+    def run
+      
+    end
   end
   
   class Ask < CollarNode
+    def run
+      
+    end
   end
   
   class Notify < CollarNode
+    def run
+      
+    end
   end
   
   class NotifyOfClause < CollarNode
+    def run
+      
+    end
   end
   
   class Compute < CollarNode
+    def run
+      
+    end
   end
   
   class UsingClause < CollarNode
+    def run
+      
+    end
   end
   
   class OnClause < CollarNode
+    def run
+      
+    end
   end
   
   class OnClauseItems < CollarNode
+    def run
+      
+    end
   end
   
   class OnClauseItem < CollarNode
+    def run
+      
+    end
   end
   
   class ViaClause < CollarNode
+    def run
+      
+    end
   end
   
   class InClause < CollarNode
+    def run
+      
+    end
   end
   
   class IdentifierAssociations < CollarNode
+    def run
+      
+    end
   end
   
   class IdentifierAssociation < CollarNode
+    def run
+      
+    end
   end
   
   class Me < CollarNode
+    def run
+      
+    end
   end
   
   class Public < CollarNode
+    def run
+      
+    end
   end
   
   class Person < CollarNode
+    def run
+      
+    end
   end
   
   class People < CollarNode
+    def run
+      
+    end
   end
   
   class PeopleFromClause < CollarNode
+    def run
+      
+    end
   end
   
   class PeopleWhereClause < CollarNode
+    def run
+      
+    end
   end
   
   class KeyPaths < CollarNode
+    def run
+      
+    end
   end
   
   class KeyPath < CollarNode
+    def run
+      
+    end
   end
   
   class Predicate < CollarNode
+    def run
+      
+    end
   end
   
   class PredicateBinary < CollarNode
+    def run
+      
+    end
   end
   
   class PredicateUnary < CollarNode
+    def run
+      
+    end
   end
   
   class PredicateConditonal < CollarNode
-  end
-  
-  class Config < CollarNode 
-  end
-  
-  class Import < CollarNode 
     def run
       
     end
   end
   
-  class ImportFunction < CollarNode 
+  class Config < CollarNode
     def run
       
     end
   end
   
-  class ImportData < CollarNode 
+  class Import < CollarNode
     def run
       
     end
   end
   
-  class ImportCommunity < CollarNode 
+  class ImportFunction < CollarNode
     def run
       
     end
   end
   
-  class ImportTask < CollarNode 
+  class ImportData < CollarNode
     def run
       
     end
   end
   
-  class ImportMessage < CollarNode 
+  class ImportCommunity < CollarNode
     def run
       
     end
   end
   
-  class ImportConfig < CollarNode 
+  class ImportTask < CollarNode
     def run
       
     end
   end
+  
+  class ImportMessage < CollarNode
+    def run
+      
+    end
+  end
+  
+  class ImportConfig < CollarNode
+    def run
+      
+    end
+  end
+  
+  ### Function stuff start
   
   class Function < CollarNode
   end
@@ -426,27 +531,84 @@ module Dog
   class FunctionOptionalParameter < CollarNode
   end
   
+  ### Function stuff stop
+  
   class On < CollarNode
-    def run
-      # BIG TODO
+    def compile
+      state = nil
+      
+      if elements[1] then
+        state = OnState.new
+        state.dependency = elements[0]
+        state.add_child(element[1].compile)
+      end
+      
+      return state
     end
   end
   
   class If < CollarNode
-    def run
-      # BIG TODO
+    def compile
+      state = nil
+      
+      if elements[0] then
+        condition = elements[0]
+        
+        if elements[1] then
+          element = elements[1]
+          
+          true_branch = ConditionState.new
+          true_branch.condition = condition
+          true_branch.add_child(element.compile)
+          
+          state = IfState.new
+          state.add_child(true_branch)
+        end
+        
+        if elements[2] then
+          element = elements[2]
+          
+          false_branch = ConditionState.new
+          false_branch.add_child(element.compile)
+          
+          state.add_child(false_branch)
+        end
+        
+      end
+      
+      return state
     end
   end
   
+  class ElseClause < CollarNode
+    include CompileChild
+  end
+  
   class For < CollarNode
-    def run
-      # BIG TODO
+    def compile
+      state = nil
+      
+      if elements[1] then
+        state = ForState.new
+        state.enumerable = elements[0]
+        state.add_child(element[1].compile)
+      end
+      
+      return state
     end
   end
   
   class Repeat < CollarNode
-    def run
-      # TODO
+    def compile
+      state = nil
+      
+      if elements[1] then
+        state = RepeatState.new
+        state.count = elements[0]
+        state.add_child(element[1].compile)
+      end
+      
+      return state
     end
   end
   
@@ -468,7 +630,7 @@ module Dog
     end
   end
   
-  class ArrayLiteral < CollarNode 
+  class ArrayLiteral < CollarNode
     def run
       items = self.elements.first
       if items then
@@ -489,11 +651,11 @@ module Dog
     end
   end
   
-  class ArrayItem < CollarNode 
+  class ArrayItem < CollarNode
     include RunChild
   end
   
-  class HashLiteral < CollarNode 
+  class HashLiteral < CollarNode
     def run
       associations = self.elements.first
       if associations then
@@ -504,7 +666,7 @@ module Dog
     end
   end
   
-  class HashAssociations < CollarNode 
+  class HashAssociations < CollarNode
     def run
       associations = {}
       for element in self.elements do
@@ -517,7 +679,7 @@ module Dog
     end
   end
   
-  class HashAssociation < CollarNode 
+  class HashAssociation < CollarNode
     def run
       association = {}
       key = self.elements[0].run
@@ -527,7 +689,7 @@ module Dog
     end
   end
   
-  class StringLiteral < CollarNode 
+  class StringLiteral < CollarNode
     def run
       string = self.text_value
       quote = string[0]
@@ -537,25 +699,25 @@ module Dog
     end
   end
   
-  class IntegerLiteral < CollarNode 
+  class IntegerLiteral < CollarNode
     def run
       Integer(self.text_value)
     end
   end
   
-  class FloatLiteral < CollarNode 
+  class FloatLiteral < CollarNode
     def run
       Float(self.text_value)
     end
   end
   
-  class TrueLiteral < CollarNode 
+  class TrueLiteral < CollarNode
     def run
       return true
     end
   end
   
-  class FalseLiteral < CollarNode 
+  class FalseLiteral < CollarNode
     def run
       return false
     end
