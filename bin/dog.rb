@@ -19,9 +19,15 @@ if ARGV.empty? then
   exit
 end
 
-# Read the dog code from the file
-dog_code = ARGF.read
+# TODO - Fix this hack for TextMate Ruby module
+if ARGV.first == "-KU" then
+  dog_code = File.open(ARGV.last).read
+else
+  # Read the dog code from the file
+  dog_code = ARGF.read
+end
 
+=begin
 begin
   Dog::Parser.parse(dog_code)
   puts "Valid Dog Program"
@@ -32,16 +38,15 @@ rescue Dog::ParseError => e
   puts
   puts e.failure_reason
 end
-
-__END__
+=end
 
 # Parse the dog code into an AST (called a bark)
-dog_collar = Dog::Parser.parse(dog_code).to_collar
+dog_collar = Dog::Parser.parse(dog_code)
 
 # Compute the AST into a state machine (called a bark)
-dog_bark = Dog::Compiler.compile(dog_barks)
+dog_bark = Dog::Compiler.compile(dog_collar)
 
 # Execute the state machine. This may save state 
 # as an execution graph (called a track)
-Dog::Runtime.run(dog_collar)
+Dog::Runtime.run(dog_bark)
 

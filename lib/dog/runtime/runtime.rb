@@ -21,7 +21,7 @@ module Dog
     end
     
     def run(bark)
-      
+      bark.run
     end
     
   end

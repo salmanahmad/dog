@@ -50,7 +50,9 @@ module Dog
     end
     
     def run
-      
+      for child in children do
+        child.run
+      end
     end
   end
   
@@ -58,7 +60,7 @@ module Dog
     attr_accessor :operation
     
     def run
-      
+      operation.run
     end
   end
   

@@ -110,7 +110,7 @@ module Dog
       
       self.elements.each do |node|
         state = node.compile
-        state.add_child(state)
+        program.add_child(state)
       end
       
       return program
@@ -620,13 +620,13 @@ module Dog
   
   class Print < CollarNode
     def run
-      puts elements.first
+      puts elements.first.run
     end
   end
   
   class Inspect < CollarNode
     def run
-      puts elements.first.inspect
+      puts elements.first.run.inspect
     end
   end
   
