@@ -1,0 +1,7 @@
+#!/usr/bin/env dog
+
+d = 'Hello, World!'
+i = (500 + 500) / 2
+PRINT i
+PRINT d
+INSPECT d

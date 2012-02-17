@@ -143,30 +143,123 @@ module Dog
   end
   
   class Primary < CollarNode
+    include RunChild
   end
   
   class Access < CollarNode
+    def run
+      if elements[1] then
+        keys = elements[1].run
+        keys, last = keys[0..-2], keys.last
+        
+        pointer = elements[0].run
+        
+        if pointer.class != Array && pointer.class != Hash then
+          raise "Attempting to access path of a non-collection."
+        end
+        
+        for key in keys do
+          return nil if pointer.nil?
+          pointer = pointer[key]
+        end
+        
+        return pointer[last]
+      else
+        return elements[0].run
+      end
+    end
   end
   
   class AccessBracket < CollarNode
+    def run
+      path = []
+      path << elements[0].run-
+      
+      if elements[1] then
+        items = elements[1].run
+        for item in items do
+          path << item
+        end
+      end
+      
+      return path
+    end
   end
   
   class AccessDot < CollarNode
+    def run
+      path = []
+      path << elements[0].text_value
+      
+      if elements[1] then
+        items = elements[1].run
+        for item in items do
+          path << item
+        end
+      end
+      
+      return path
+    end
   end
   
   class AccessPossessive < CollarNode
+    def run
+      raise "#{self.class} not implemented."
+    end
   end
   
   class Assignment < CollarNode
+    def run
+      element = elements[0]
+      value = elements[2].run
+      
+      if element.class == Identifier then
+        variable = Variable.named(element.text_value)
+        variable.value = value
+      elsif element.class == Access then
+        variable = Variable.named(element.elements[0].text_value)
+        if element.elements[1] then
+          keys = element.elements[1].run
+          keys, last = keys[0..-2], keys.last
+          
+          if variable.value.nil? then
+            variable.value = {}
+          end
+          
+          pointer = variable.value
+          
+          if pointer.class != Array && pointer.class != Hash then
+            raise "Attempting to access path of a non-collection."
+          end
+          
+          for key in keys do
+            pointer[key] ||= {}
+            pointer = pointer[key]
+          end
+          
+          pointer[last] = value
+        else
+          variable.value = value
+        end
+      end
+      
+    end
   end
   
   class Operation < CollarNode
     def run
-      elements[1].run(elements[0].run, elements[1].run)
+      if elements[0].class == NotOperator then
+        elements[0].run(elements[1].run)
+      else
+        elements[1].run(elements[0].run, elements[2].run)
+      end
     end
   end
   
   class Identifier < CollarNode
+    def run
+      Variable.named(self.text_value).value
+    end
   end
   
   class AssignmentOperator < CollarNode
@@ -627,6 +720,7 @@ module Dog
   class Inspect < CollarNode
     def run
       puts elements.first.run.inspect
+      $stdout.flush
     end
   end
   

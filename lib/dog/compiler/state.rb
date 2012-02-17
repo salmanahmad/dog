@@ -32,7 +32,7 @@ module Dog
     end
     
     def run
-      raise "Run on state was called."
+      raise "Run on the base state was called."
     end
   end
   
@@ -50,9 +50,16 @@ module Dog
     end
     
     def run
-      for child in children do
-        child.run
+      track = Track.new
+      fiber = TrackFiber.new do
+        for child in children do
+          output = child.run
+        end
+        output
       end
+      
+      fiber.track = track
+      fiber.resume
     end
   end
   
@@ -84,13 +91,21 @@ module Dog
     attr_accessor :count
     
     def run
-      
+      count.run.to_i.times do
+        for child in children do
+          child.run
+        end
+      end
     end
   end
   
   class IfState < State
     def run
-      
+      for child in children do
+        if child.run then
+          break
+        end
+      end
     end
   end
   
@@ -98,7 +113,11 @@ module Dog
     attr_accessor :condition
     
     def run
-      
+      if condition.nil? || (condition.run == true) then
+        return true
+      else
+        return false
+      end
     end
   end
   

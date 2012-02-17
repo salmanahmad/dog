@@ -7,3 +7,10 @@
 # above copyright notice is included.
 #
 
+module Dog
+  
+  class TrackFiber < Fiber
+    attr_accessor :track
+  end
+  
+end

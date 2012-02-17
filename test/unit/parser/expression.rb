@@ -31,10 +31,11 @@ class ParserTests::ExpressionTest < Test::Unit::TestCase
     @parser.parse("i = 'Foo bar'")
     @parser.parse("i = {'key':'value'}")
     
+    @parser.parse("i.j = 8") 
     @parser.parse("i[i] = {'key':'value'}")
     @parser.parse("i[0] = {'key':'value'}")
     @parser.parse("i['string'] = {'key':'value'}")
-    @parser.parse("i[j[k]][l] = {'key':'value'}")
+    pp @parser.parse("i[j[k]][l] = {'key':'value'}")
     
     @parser.parse("i.j.k.l = {'key':'value'}")
     
@@ -48,6 +49,7 @@ class ParserTests::ExpressionTest < Test::Unit::TestCase
   end
   
   def test_operation
+    @parser.parse("NOT TRUE")
     @parser.parse("5 + 5")
     @parser.parse("5 + 5 + 5 + 5")
     
@@ -56,6 +58,11 @@ class ParserTests::ExpressionTest < Test::Unit::TestCase
     @parser.parse("5 + 5 + (foo['hi']['world']) + 5")
     @parser.parse("5 + 5 + (((foo['hi']['world']))) + 5")
     
+    # TODO - Fix the order of operations. Division should be stronger than addition.
+    # You should take a look at how Koi does this. They encode that directly in the
+    # grammar...
+    @parser.parse("5 + 5 / 2")
+    @parser.parse("5 / 2 + 5")
     @parser.parse("(5) + (5 + 5) + 5")
     @parser.parse("(5) UNION (5 - 5) / 5")
     @parser.parse("foo = (5) UNION (5 - 5) / 5")
@@ -65,7 +72,7 @@ class ParserTests::ExpressionTest < Test::Unit::TestCase
     @parser.parse("foo")
     @parser.parse("foo.bar") 
     @parser.parse("foo.bar.baz")
-    @parser.parse("foo.bar.baz.poo")
+    pp @parser.parse("foo.bar.baz.poo")
     @parser.parse("foo.bar['hi']")
     
     @parser.parse("foo[bar]")

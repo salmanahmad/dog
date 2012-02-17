@@ -11,11 +11,24 @@ module Dog
   
   class Track
     
-    attr_accessor :parent_state
-    attr_accessor :pending_states
+    attr_accessor :name
+    attr_accessor :parent
+    attr_accessor :children
     
-    def finished?
-      pending_states.empty?
+    attr_accessor :fiber
+    
+    def initialize
+      self.name = UUID.new.generate
+    end
+    
+    def self.current
+      track = Fiber.current.track
+      
+      if track.nil?
+        raise "Attempting to access a track outside of a fiber"
+      end
+      
+      return track
     end
     
   end

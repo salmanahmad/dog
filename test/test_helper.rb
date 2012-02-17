@@ -33,6 +33,22 @@ module IntegrationHelper
   
 end
 
+class RuntimeTestCase < Test::Unit::TestCase
+  
+  def setup
+    @parser = Dog::Parser.new
+    @compiler = Dog::Compiler.new
+    @runtime = Dog::Runtime.new
+  end
+  
+  def run_code(code)
+    bark = @compiler.compile(@parser.parse(code))
+    bark.run
+    Dog::Variable.variables
+  end
+  
+end
+
 module UnitHelper
   
 end

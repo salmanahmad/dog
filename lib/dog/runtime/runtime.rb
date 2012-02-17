@@ -21,7 +21,13 @@ module Dog
     end
     
     def run(bark)
-      bark.run
+      EM.run do
+        bark.run
+        
+        # TODO If there are no listeners that are active then 
+        # (keep in mind, that ASKs may have implicit listeners):
+        EM.stop
+      end
     end
     
   end
