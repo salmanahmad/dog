@@ -122,6 +122,7 @@ module Dog
           end
           
           on_fiber.track = on_track
+          on_fiber.request_context = Fiber.current.request_context
           on_fiber.resume
           
           

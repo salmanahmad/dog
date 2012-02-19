@@ -3,5 +3,5 @@
 LISTEN TO PUBLIC VIA http FOR offers
 
 ON offer DO
-  PRINT 'Got an offer!'
+  NOTIFY PUBLIC VIA http_response OF "this is from dog!"
 END

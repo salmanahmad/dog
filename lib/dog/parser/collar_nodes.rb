@@ -386,6 +386,7 @@ module Dog
   end
   
   class Listen < CollarNode
+    
     def run
       configuration = {}
       for element in elements do
@@ -393,7 +394,7 @@ module Dog
       end
       
       if configuration[ViaClause] then
-        case 
+        case configuration[ViaClause]
         when "http"
           path = configuration[ListenAtClause] || ("/" + configuration[ListenForClause])
           variable_name = configuration[ListenForClause]
@@ -409,8 +410,13 @@ module Dog
           Server.aget path do
             variable.value ||= []
             variable.value << params
-            variable.notify_dependencies
-            body ""
+            
+            context = RequestContext.new
+            variable.notify_dependencies context
+            
+            EM.next_tick do
+              body context.body
+            end
           end
         else
           raise "Unknown via command."
@@ -443,14 +449,26 @@ module Dog
   
   class Notify < CollarNode
     def run
+      configuration = {}
+      for element in elements do
+        configuration[element.class] = element.run
+      end
+      
+      via = configuration[ViaClause]
+      content = configuration[NotifyOfClause]
+      
+      case via
+      when "http_response"
+        Fiber.current.request_context.body = content
+      else
+        raise "Unknown via command."
+      end
       
     end
   end
   
   class NotifyOfClause < CollarNode
-    def run
-      
-    end
+    include RunChild
   end
   
   class Compute < CollarNode

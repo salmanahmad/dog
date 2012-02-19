@@ -19,7 +19,6 @@ module Dog
     def self.listeners=(flag)
       @@listeners = flag
     end
-    
   end
   
 end

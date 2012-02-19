@@ -9,14 +9,8 @@
 
 module Dog
   
-  class TrackFiber < Fiber
-    attr_accessor :track
-    attr_accessor :request_context
-    
-    def track=(t)
-      @track = t
-      t.instance_variable_set(:@fiber, self)
-    end
+  class RequestContext
+    attr_accessor :body
   end
   
 end

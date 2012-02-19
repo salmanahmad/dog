@@ -69,7 +69,7 @@ module Dog
       @value
     end
     
-    def notify_dependencies
+    def notify_dependencies(request_context)
       if self.listen then
         # TODO this okay because we currently only letting on clauses
         # that wait on a variable from a LISTEN or an ASK. We may need to
@@ -78,7 +78,10 @@ module Dog
           v = value.pop
           for track_dependency in track_dependencies do
             # TODO figure out when I should resume with true
-            EM.next_tick { track_dependency.fiber.resume v, false }
+            EM.next_tick do 
+              track_dependency.fiber.request_context = request_context
+              track_dependency.fiber.resume v, false 
+            end
           end
         end
       end
