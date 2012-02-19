@@ -11,6 +11,11 @@ module Dog
   
   class TrackFiber < Fiber
     attr_accessor :track
+    
+    def track=(t)
+      @track = t
+      t.instance_variable_set(:@fiber, self)
+    end
   end
   
 end

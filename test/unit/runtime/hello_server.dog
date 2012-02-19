@@ -1,0 +1,7 @@
+#!/usr/bin/env dog
+
+LISTEN TO PUBLIC VIA http FOR offers
+
+ON offer DO
+  PRINT 'Got an offer!'
+END

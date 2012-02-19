@@ -31,6 +31,11 @@ module Dog
       return track
     end
     
+    def fiber=(f)
+      @fiber = f
+      t.instance_variable_set(:@track, self)
+    end
+    
   end
   
 end

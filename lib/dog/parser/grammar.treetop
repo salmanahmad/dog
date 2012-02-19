@@ -438,10 +438,21 @@ grammar Dog
   rule via_clause 
     s 'VIA' s identifier <::Dog::ViaClause>
   end
-
+  
+  # TODO - Allow IN to process on primaries
   rule in_clause
-    s ((identifier s 'IN' s primary) / identifier) s <::Dog::InClause>
+    s in_clause_identifiers s <::Dog::InClause>
   end
+  
+  rule in_clause_identifiers
+    (
+      identifier s 'IN' s identifier <::Dog::InClauseIdentifiers>
+      /
+      identifier '' <::Dog::InClauseIdentifiers>
+    )
+  end
+  
+
 
 
 

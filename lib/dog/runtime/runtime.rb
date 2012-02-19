@@ -26,7 +26,11 @@ module Dog
         
         # TODO If there are no listeners that are active then 
         # (keep in mind, that ASKs may have implicit listeners):
-        EM.stop
+        if Server.listeners? then
+          Thin::Server.start '0.0.0.0', 3000, Server
+        else
+          EM.stop
+        end
       end
     end
     

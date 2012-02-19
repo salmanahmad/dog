@@ -28,5 +28,17 @@ class ParserTests::OnTest < Test::Unit::TestCase
     @parser.parse(program.strip)
   end
   
+  def test_in
+    program = <<-EOD
+    
+    ON offer IN offers DO
+      PRINT 'hello, world!'
+    END
+    
+    EOD
+    
+    @parser.parse(program.strip)
+  end
+  
   
 end

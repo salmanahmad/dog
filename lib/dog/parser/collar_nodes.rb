@@ -387,25 +387,51 @@ module Dog
   
   class Listen < CollarNode
     def run
+      configuration = {}
+      for element in elements do
+        configuration[element.class] = element.run
+      end
       
+      if configuration[ViaClause] then
+        case 
+        when "http"
+          path = configuration[ListenAtClause] || ("/" + configuration[ListenForClause])
+          variable_name = configuration[ListenForClause]
+          
+          if Variable.exists?(variable_name) then
+            raise "Listening on a variable, #{variable_name}, that already exists."
+          end
+          
+          variable = Variable.named(variable_name, true)
+          variable.value = []
+          
+          Server.listeners = true
+          Server.aget path do
+            variable.value ||= []
+            variable.value << params
+            variable.notify_dependencies
+            body ""
+          end
+        else
+          raise "Unknown via command."
+        end
+      end
     end
   end 
   
   class ListenToClause < CollarNode
-    def run
-      
-    end
+    include RunChild
   end
   
   class ListenAtClause < CollarNode
     def run
-      
+      elements.first.text_value
     end
   end
   
   class ListenForClause < CollarNode
     def run
-      
+      elements.first.text_value
     end
   end
   
@@ -459,15 +485,24 @@ module Dog
   
   class ViaClause < CollarNode
     def run
-      
+      elements.first.text_value
     end
   end
   
   class InClause < CollarNode
-    def run
-      
+    include CompileChild
+  end
+  
+  class InClauseIdentifiers < CollarNode
+    def compile
+      identifiers = []
+      identifiers << elements[0].text_value
+      identifiers << elements[1].text_value if elements[1]
+      return identifiers
     end
   end
+  
+  
   
   class IdentifierAssociations < CollarNode
     def run
@@ -632,8 +667,8 @@ module Dog
       
       if elements[1] then
         state = OnState.new
-        state.dependency = elements[0]
-        state.add_child(element[1].compile)
+        state.dependency = elements[0].compile
+        state.add_child(elements[1].compile)
       end
       
       return state
