@@ -99,11 +99,12 @@ module Dog
         end
       end
       
-      # TODO right now we are not support EACH # offers...
-      # TODO right now we are only supporting listen variables...
-      if !variable.listen then
+      if variable.class != ListenVariable && variable.class != AskVariable then
         raise "Attempting to have an ON block on a variable that is not the result of an ASK or a LISTEN."
       end
+      
+      
+      
       
       track = Track.new
       fiber = TrackFiber.new do
@@ -130,7 +131,12 @@ module Dog
         end
       end
       
-      variable.track_dependencies << track
+      
+      dependency = VariableDependency.new
+      dependency.track = track
+      dependency.trigger_count = 1
+      
+      variable.dependencies << dependency
       fiber.track = track
       fiber.resume
     end

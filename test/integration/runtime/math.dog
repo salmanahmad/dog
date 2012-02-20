@@ -5,3 +5,5 @@ i = (500 + 500) / 2
 PRINT i
 PRINT d
 INSPECT d
+
+PRINT d + " HAI!"

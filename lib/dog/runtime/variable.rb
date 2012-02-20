@@ -13,11 +13,6 @@ module Dog
     
     attr_accessor :name
     attr_accessor :value
-    attr_accessor :valid
-    attr_accessor :dirty
-    
-    attr_accessor :listen
-    attr_accessor :track_dependencies
     
     @@variables = {}
     
@@ -39,7 +34,7 @@ module Dog
       end
     end
     
-    def self.named(name, listen = false, track = nil)
+    def self.named(name, track = nil)
       if track.nil? then
         track = Track.current
       end
@@ -50,11 +45,8 @@ module Dog
       variable = @@variables[track.name][name]
       
       if variable.nil? then
-        variable = Variable.new
+        variable = self.new
         variable.name = name
-        variable.value = nil
-        variable.listen = listen
-        variable.track_dependencies = []
         @@variables[track.name][name] = variable
       end
       
@@ -69,22 +61,124 @@ module Dog
       @value
     end
     
+  end
+  
+  module PendingVariable
+    
+    attr_accessor :pending_count
+    attr_accessor :dependencies
+    
     def notify_dependencies(request_context)
-      if self.listen then
-        # TODO this okay because we currently only letting on clauses
-        # that wait on a variable from a LISTEN or an ASK. We may need to
-        # do something to keep track of what values you have sent along already
-        until value.empty? do
-          v = value.pop
-          for track_dependency in track_dependencies do
-            # TODO figure out when I should resume with true
+    end
+    
+    def push_value(v)
+      @value << v
+    end
+    
+  end
+  
+  class VariableDependency
+    attr_accessor :track
+    attr_accessor :trigger_count
+    attr_accessor :current_count
+    
+    def initialize
+      self.trigger_count = 1
+      self.current_count = 0
+    end
+    
+    def notify?
+      self.current_count += 1
+      if self.current_count == self.trigger_count then
+        self.current_count = 0
+        return true
+      else
+        return false
+      end
+    end
+    
+  end
+  
+  class ListenVariable < Variable
+    include PendingVariable
+    
+    def initialize
+      @pending_count = -1
+      @dependencies = []
+      @value = []
+    end
+    
+    def value
+      raise "You cannot access the value of a ListenVariable directly. Use an ON block instead."
+    end
+    
+    def notify_dependencies(request_context)
+      
+      until @value.empty? do
+        v = @value.pop
+        for dependency in dependencies do
+          if dependency.notify? then
             EM.next_tick do 
-              track_dependency.fiber.request_context = request_context
-              track_dependency.fiber.resume v, false 
+              dependency.track.fiber.request_context = request_context
+              dependency.track.fiber.resume v, false
             end
           end
         end
       end
+      
+    end
+    
+  end
+  
+  class AskVariable < Variable
+    include PendingVariable
+    
+    attr_accessor :cursor
+    
+    def initialize
+      @pending_count = 1
+      @dependencies = []
+      @value = []
+      
+      @cursor = 0
+    end
+    
+    def value
+      if self.cursor < self.pending_count then
+        dependency = VariableDependency.new
+        dependency.track = Track.current
+        dependency.trigger_count = -1
+        self.dependencies << dependency
+        
+        Fiber.yield
+      end
+      super
+    end
+    
+    
+    def notify_dependencies(request_context)
+      
+      while cursor < value.length do
+        
+        should_break = (cursor == (pending_count - 1))
+        
+        for dependency in dependencies do
+          if dependency.notify? || should_break then
+            start = ((cursor - 1) - (dependency.trigger_count - 2))
+            finish = cursor
+            v = value[start..finish]
+            v = v.first if v.length == 1
+            
+            EM.next_tick do
+              track_dependency.fiber.request_context = request_context
+              track_dependency.fiber.resume v, should_break
+            end
+          end
+        end
+        
+        cursor += 1
+      end
+      
     end
     
   end

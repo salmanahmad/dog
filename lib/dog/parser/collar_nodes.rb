@@ -214,8 +214,27 @@ module Dog
       value = elements[2].run
       
       if element.class == Identifier then
-        variable = Variable.named(element.text_value)
-        variable.value = value
+        
+        # TODO handle the case when you assign an ask into a collection...
+        if elements[2].class == Ask then
+          variable = Variable.named(element.text_value)
+          path = Track.current.name + "/" + variable.name
+          Server.aget path do
+            variable.value ||= []
+            variable.value << params
+            
+            context = RequestContext.new
+            variable.notify_dependencies context
+            
+            EM.next_tick do
+              body context.body
+            end
+          end
+        else
+          variable = Variable.named(element.text_value)
+          variable.value = value
+        end
+        
       elsif element.class == Access then
         variable = Variable.named(element.elements[0].text_value)
         if element.elements[1] then
@@ -242,7 +261,6 @@ module Dog
           variable.value = value
         end
       end
-      
     end
   end
   
@@ -403,14 +421,11 @@ module Dog
             raise "Listening on a variable, #{variable_name}, that already exists."
           end
           
-          variable = Variable.named(variable_name, true)
-          variable.value = []
+          variable = ListenVariable.named(variable_name)
           
           Server.listeners = true
           Server.aget path do
-            variable.value ||= []
-            variable.value << params
-            
+            variable.push_value(params)
             context = RequestContext.new
             variable.notify_dependencies context
             
@@ -443,8 +458,26 @@ module Dog
   
   class Ask < CollarNode
     def run
+      configuration = {}
+      for element in elements do
+        configuration[element.class] = element.run
+      end
+      
+      via = configuration[ViaClause]
+      content = configuration[AskToClause]
+      
+      case via
+      when "http_response"
+        Fiber.current.request_context.body = content
+      else
+        raise "Unknown via command in ask."
+      end
       
     end
+  end
+  
+  class AskToClause < CollarNode
+    include RunChild
   end
   
   class Notify < CollarNode
@@ -461,7 +494,7 @@ module Dog
       when "http_response"
         Fiber.current.request_context.body = content
       else
-        raise "Unknown via command."
+        raise "Unknown via command in notify."
       end
       
     end

@@ -1,0 +1,37 @@
+#!/usr/bin/env dog
+
+CONFIG dormouse_api_key = "d113e9441e0529b91825341ceee60ed5"
+CONFIG task_path = "tasks"
+CONFIG message_path = "messages"
+CONFIG public_path = "public"
+
+IMPORT TASK "indicate_willingness.task"
+IMPORT COMMUNITY "media_lab"
+
+LISTEN TO media_lab VIA http FOR learning_requests
+
+ON learning_request DO
+  
+  learner = PERSON FROM learning_request
+  teachers = PEOPLE FROM media_lab WHERE media_lab.skills CONTAINS learning_request["field"]
+  
+  matched = false
+  
+  FOR EACH teacher DO
+    answer = ASK teacher VIA email TO indicate_willingness ON learner, learning_request.field
+    pair = [learner, teacher]
+    
+    IF answer["value"] == "yes" THEN 
+      match = "Hi " + learner +"," + teacher + ".  Good news!"
+      NOTIFY pair VIA email OF match
+      matched = true
+      BREAK
+    END
+    
+  END
+  
+  IF NOT matched THEN
+    NOTIFY learner VIA email OF "We could not find a teacher for you... sorry..."
+  END
+  
+END

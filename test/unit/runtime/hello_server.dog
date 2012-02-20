@@ -2,6 +2,11 @@
 
 LISTEN TO PUBLIC VIA http FOR offers
 
+i = 1
+
 ON offer DO
-  NOTIFY PUBLIC VIA http_response OF "this is from dog!"
+  
+  message = "your favorite number is: " + "4"
+  
+  NOTIFY PUBLIC VIA http_response OF message
 END

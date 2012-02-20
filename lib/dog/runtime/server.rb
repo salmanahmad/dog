@@ -12,6 +12,10 @@ module Dog
   class Server < Sinatra::Base
     register Sinatra::Async
     
+    enable  :sessions, :logging
+    
+    @@listeners = false
+    
     def self.listeners?
       @@listeners
     end

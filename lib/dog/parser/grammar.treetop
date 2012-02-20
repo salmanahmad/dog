@@ -240,10 +240,12 @@ grammar Dog
   # ===============
 
   rule ask
-    'ASK' sn (integer sn)? (user / identifier) via_clause sn 'TO' sn identifier on_clause? using_clause? <::Dog::Ask>
+    'ASK' sn (integer sn)? (user / identifier) via_clause ask_to_clause on_clause? using_clause? <::Dog::Ask>
   end
 
-
+  rule ask_to_clause
+    sn 'TO' sn identifier <::Dog::AskToClause>
+  end
 
   # ==========
   # = Notify =

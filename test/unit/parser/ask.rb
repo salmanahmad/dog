@@ -20,7 +20,7 @@ class ParserTests::AskTest < Test::Unit::TestCase
     @parser.parse("ASK users VIA email TO validate")
     @parser.parse("ASK ME VIA email TO validate")
     @parser.parse("ASK PUBLIC VIA email TO validate")
-    @parser.parse("ASK PEOPLE FROM facebook VIA email TO validate")
+    pp @parser.parse("ASK PEOPLE FROM facebook VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > 7 VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age AND interests CONTAINS 'cards' VIA email TO validate")
