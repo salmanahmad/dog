@@ -148,10 +148,11 @@ module Dog
   
   class Access < CollarNode
     def run
+      
       if elements[1] then
+        
         keys = elements[1].run
         keys, last = keys[0..-2], keys.last
-        
         pointer = elements[0].run
         
         if pointer.class != Array && pointer.class != Hash then
@@ -172,8 +173,9 @@ module Dog
   
   class AccessBracket < CollarNode
     def run
+      
       path = []
-      path << elements[0].run-
+      path << elements[0].run
       
       if elements[1] then
         items = elements[1].run
@@ -217,19 +219,8 @@ module Dog
         
         # TODO handle the case when you assign an ask into a collection...
         if elements[2].class == Ask then
-          variable = Variable.named(element.text_value)
-          path = Track.current.name + "/" + variable.name
-          Server.aget path do
-            variable.value ||= []
-            variable.value << params
-            
-            context = RequestContext.new
-            variable.notify_dependencies context
-            
-            EM.next_tick do
-              body context.body
-            end
-          end
+          variable = AskVariable.named(element.text_value)
+          Server.register(variable)
         else
           variable = Variable.named(element.text_value)
           variable.value = value

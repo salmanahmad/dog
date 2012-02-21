@@ -244,7 +244,7 @@ grammar Dog
   end
 
   rule ask_to_clause
-    sn 'TO' sn identifier <::Dog::AskToClause>
+    s 'TO' s (access / identifier / string) <::Dog::AskToClause>
   end
 
   # ==========

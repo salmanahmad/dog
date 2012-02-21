@@ -2,11 +2,8 @@
 
 LISTEN TO PUBLIC VIA http FOR offers
 
-i = 1
-
 ON offer DO
+  message = ASK PUBLIC VIA http_response TO "What is your favorite Number?"
   
-  message = "your favorite number is: " + "4"
-  
-  NOTIFY PUBLIC VIA http_response OF message
+  NOTIFY PUBLIC VIA http_response OF message["value"]
 END

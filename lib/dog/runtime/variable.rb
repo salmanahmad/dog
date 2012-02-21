@@ -13,6 +13,7 @@ module Dog
     
     attr_accessor :name
     attr_accessor :value
+    attr_accessor :track
     
     @@variables = {}
     
@@ -47,6 +48,7 @@ module Dog
       if variable.nil? then
         variable = self.new
         variable.name = name
+        variable.track = track
         @@variables[track.name][name] = variable
       end
       
@@ -112,6 +114,10 @@ module Dog
       raise "You cannot access the value of a ListenVariable directly. Use an ON block instead."
     end
     
+    def complete?
+      return false
+    end
+    
     def notify_dependencies(request_context)
       
       until @value.empty? do
@@ -155,28 +161,41 @@ module Dog
       super
     end
     
+    def complete?
+      @value.size == pending_count
+    end
     
     def notify_dependencies(request_context)
       
-      while cursor < value.length do
-        
+      while cursor < @value.length do
         should_break = (cursor == (pending_count - 1))
         
         for dependency in dependencies do
+          
           if dependency.notify? || should_break then
-            start = ((cursor - 1) - (dependency.trigger_count - 2))
-            finish = cursor
-            v = value[start..finish]
+            
+            if dependency.trigger_count == -1 then
+              v = @value
+            else
+              start = ((cursor - 1) - (dependency.trigger_count - 2))
+              finish = cursor
+              v = @value[start..finish]
+            end
+            
             v = v.first if v.length == 1
             
+            if complete? && @value.length == 1 then
+              @value = @value.first
+            end
+            
             EM.next_tick do
-              track_dependency.fiber.request_context = request_context
-              track_dependency.fiber.resume v, should_break
+              dependency.track.fiber.request_context = request_context
+              dependency.track.fiber.resume v, should_break
             end
           end
         end
         
-        cursor += 1
+        @cursor += 1
       end
       
     end

@@ -20,7 +20,7 @@ class ParserTests::AskTest < Test::Unit::TestCase
     @parser.parse("ASK users VIA email TO validate")
     @parser.parse("ASK ME VIA email TO validate")
     @parser.parse("ASK PUBLIC VIA email TO validate")
-    pp @parser.parse("ASK PEOPLE FROM facebook VIA email TO validate")
+    @parser.parse("ASK PEOPLE FROM facebook VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > 7 VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age AND interests CONTAINS 'cards' VIA email TO validate")
@@ -61,6 +61,11 @@ class ParserTests::AskTest < Test::Unit::TestCase
     
   end
   
+  def test_assignment
+    @parser.parser.root = :assignment
+    pp @parser.parse('message = ASK PUBLIC VIA http_response TO "What is your favorite Number?" ')
+    
+  end
   
   def test_function_cannot_be_string
     assert_raises Dog::ParseError do
