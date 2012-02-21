@@ -244,7 +244,7 @@ grammar Dog
   end
 
   rule ask_to_clause
-    s 'TO' s (access / identifier / string) <::Dog::AskToClause>
+    s 'TO' s identifier <::Dog::AskToClause>
   end
 
   # ==========
@@ -389,7 +389,11 @@ grammar Dog
   end
   
   rule import 
-    'IMPORT' s (import_function / import_data / import_community / import_task / import_message / import_config) s string (s 'AS' s identifier)? <::Dog::Import>
+    'IMPORT' s (import_function / import_data / import_community / import_task / import_message / import_config) s string import_as? <::Dog::Import>
+  end
+  
+  rule import_as
+    s 'AS' s identifier <::Dog::ImportAsClause>
   end
   
   rule import_function

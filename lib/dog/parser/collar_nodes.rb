@@ -220,7 +220,7 @@ module Dog
         # TODO handle the case when you assign an ask into a collection...
         if elements[2].class == Ask then
           variable = AskVariable.named(element.text_value)
-          Server.register(variable)
+          Server.register(variable, value)
         else
           variable = Variable.named(element.text_value)
           variable.value = value
@@ -457,13 +457,21 @@ module Dog
       via = configuration[ViaClause]
       content = configuration[AskToClause]
       
+      callback_path = UUID.new.generate
+      
       case via
       when "http_response"
+        
+        if content.class == TaskVariable then
+          content = content.render({}, {'DogAction' => callback_path})
+        end
+        
         Fiber.current.request_context.body = content
       else
         raise "Unknown via command in ask."
       end
       
+      return callback_path
     end
   end
   
@@ -638,42 +646,57 @@ module Dog
   
   class Import < CollarNode
     def run
-      
+      elements[0].run(elements[1].run, elements[2])
+    end
+  end
+  
+  class ImportAsClause < CollarNode
+    def run
+      elements.first.text_value
     end
   end
   
   class ImportFunction < CollarNode
-    def run
+    def run(path, variable = nil)
       
     end
   end
   
   class ImportData < CollarNode
-    def run
+    def run(path, variable = nil)
       
     end
   end
   
   class ImportCommunity < CollarNode
-    def run
+    def run(path, variable = nil)
       
     end
   end
   
   class ImportTask < CollarNode
-    def run
+    def run(path, variable = nil)
       
+      if variable then
+        variable = variable.run
+      else
+        variable = File.basename(path, ".task")
+        variable.gsub!('.', '_')
+      end
+      
+      variable = TaskVariable.named(variable)
+      variable.value = File.absolute_path(path, Environment.program_directory)
     end
   end
   
   class ImportMessage < CollarNode
-    def run
+    def run(path, variable = nil)
       
     end
   end
   
   class ImportConfig < CollarNode
-    def run
+    def run(path, variable = nil)
       
     end
   end

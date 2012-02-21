@@ -35,7 +35,7 @@ class ParserTests::ImportTest < Test::Unit::TestCase
   
   def test_task
     @parser.parse("IMPORT TASK 'task'")
-    @parser.parse("IMPORT TASK 'task' AS task")
+    pp @parser.parse("IMPORT TASK 'task' AS task")
   end
   
   def test_message

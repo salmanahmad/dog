@@ -43,7 +43,20 @@ module Dog
       @@variables ||= {}
       @@variables[track.name] ||= {}
       
-      variable = @@variables[track.name][name]
+      variable = nil
+      track_pointer = track
+      
+      while true do
+        @@variables[track_pointer.name] ||= {}
+        variable = @@variables[track_pointer.name][name]
+        track_pointer = track_pointer.parent
+        
+
+        
+        
+        break unless variable.nil?
+        break if track_pointer.nil?
+      end
       
       if variable.nil? then
         variable = self.new
@@ -201,5 +214,35 @@ module Dog
     end
     
   end
+  
+  
+  class TaskVariable < Variable
+    
+    def value
+      return self
+    end
+    
+    def render(data = {}, context = {})
+      binding = Binding.generate(data, context)
+      template = ERB.new(File.read(@value))
+      template.result(binding)
+    end
+    
+  end
+  
+  class MessageVariable < Variable
+    
+    def value
+      return self
+    end
+    
+    def render(data = {}, context = {})
+      binding = Binding.generate(data, context)
+      template = ERB.new(File.read(@value))
+      template.result(binding)
+    end
+    
+  end
+  
   
 end

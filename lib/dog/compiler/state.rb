@@ -122,6 +122,7 @@ module Dog
             # Remove the track and clean up the parent track...
           end
           
+          on_track.parent = track
           on_fiber.track = on_track
           on_fiber.request_context = Fiber.current.request_context
           on_fiber.resume
@@ -137,6 +138,7 @@ module Dog
       dependency.trigger_count = 1
       
       variable.dependencies << dependency
+      track.parent = Track.current
       fiber.track = track
       fiber.resume
     end

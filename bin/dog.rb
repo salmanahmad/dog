@@ -19,6 +19,8 @@ if ARGV.empty? then
   exit
 end
 
+Dog::Environment.program_path = File.absolute_path(ARGV.last)
+
 # TODO - Fix this hack for TextMate Ruby module
 if ARGV.first == "-KU" then
   dog_code = File.open(ARGV.last).read
@@ -26,6 +28,7 @@ else
   # Read the dog code from the file
   dog_code = ARGF.read
 end
+
 
 =begin
 begin

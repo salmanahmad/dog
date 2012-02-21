@@ -43,8 +43,8 @@ class RuntimeTestCase < Test::Unit::TestCase
   
   def run_code(code)
     bark = @compiler.compile(@parser.parse(code))
+    pp bark
     bark.run
-    Dog::Variable.variables
   end
   
 end

@@ -1,0 +1,3 @@
+#!/usr/bin/env dog
+
+IMPORT TASK 'foo.task' AS foo

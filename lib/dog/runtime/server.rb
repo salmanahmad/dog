@@ -17,10 +17,8 @@ module Dog
     @@listeners = false
     @@variables = {}
     
-    def self.register(variable)
-      path = variable.track.name + "/" + variable.name
-      puts "Registering: #{path}"
-      @@variables[path] = variable
+    def self.register(variable, callback_path)
+      @@variables[callback_path] = variable
     end
     
     def self.listeners?
@@ -31,10 +29,10 @@ module Dog
       @@listeners = flag
     end
     
-    apost '/track' do
+    apost '/action' do
       
-      path = params["path"]
-      params.delete("path")  
+      path = params["DogAction"]
+      params.delete("DogAction")  
       variable = @@variables[path]
       
       # Validate variable
