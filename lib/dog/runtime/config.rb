@@ -9,23 +9,22 @@
 
 module Dog
   
-  class Environment
+  class Config
     
     class << self
-      attr_accessor :program_path
-      
-      def program_path=(path)
-        @program_path = File.absolute_path(path)
-      end
-      
-      def program_directory
-        File.dirname(@program_path)
-      end
       
       def reset
-        Config.reset
-        Variable.reset
-        Server.reset
+        @config = {}
+      end
+      
+      def set(key, value)
+        @config ||= {}
+        @config[key] = value
+      end
+      
+      def get(key)
+        @config ||= {}
+        @config[key]
       end
       
     end

@@ -17,6 +17,10 @@ module Dog
     @@listeners = false
     @@variables = {}
     
+    def self.reset
+      @@variables = {}
+    end
+    
     def self.register(variable, callback_path)
       @@variables[callback_path] = variable
     end

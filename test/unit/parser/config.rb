@@ -19,7 +19,7 @@ class ParserTests::ConfigTest < Test::Unit::TestCase
   end
   
   def test_config
-    @parser.parse("CONFIG server = 'localhost:3000'")
+    pp @parser.parse("CONFIG server = 'localhost:3000'")
     @parser.parse("CONFIG process_count = 5")
     @parser.parse("CONFIG persist = true")
     assert_raises Dog::ParseError do

@@ -11,26 +11,27 @@ module Dog
   
   class Binding
     
-    def self.generate(data, context)
+    def self.generate(context)
       klass = Class.new do
         
         for key, value in context do
           const_set(key.to_s, value)
         end
         
-        def __get_binding__
-          ::Kernel.binding
-        end
+        # TODO - get rid of this cruft
+        #def __get_binding__
+        #  ::Kernel.binding
+        #end
         
-        for key,value in data do
-          define_method key do
-            return value
-          end
-        end
+        #for key,value in data do
+        #  define_method key do
+        #    return value
+        #  end
+        #end
         
       end
       
-      klass.new.__get_binding__
+      klass.new
     end
   end
   

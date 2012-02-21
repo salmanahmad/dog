@@ -491,6 +491,11 @@ module Dog
       
       case via
       when "http_response"
+        
+        if content.class == MessageVariable then
+          content = content.render({})
+        end
+        
         Fiber.current.request_context.body = content
       else
         raise "Unknown via command in notify."
@@ -640,7 +645,7 @@ module Dog
   
   class Config < CollarNode
     def run
-      
+      Config.set(elements[0].text_value, elements[1].run)
     end
   end
   
@@ -676,7 +681,7 @@ module Dog
   
   class ImportTask < CollarNode
     def run(path, variable = nil)
-      
+      # TODO - This code is redundant with ImportMessage
       if variable then
         variable = variable.run
       else
@@ -691,7 +696,16 @@ module Dog
   
   class ImportMessage < CollarNode
     def run(path, variable = nil)
+      # TODO - This code is redundant with ImportTask
+      if variable then
+        variable = variable.run
+      else
+        variable = File.basename(path, ".message")
+        variable.gsub!('.', '_')
+      end
       
+      variable = MessageVariable.named(variable)
+      variable.value = File.absolute_path(path, Environment.program_directory)
     end
   end
   

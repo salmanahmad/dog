@@ -24,6 +24,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency 'thin'
   s.add_dependency 'sinatra'
   s.add_dependency 'async_sinatra'
+  s.add_dependency 'tilt'
   s.add_dependency 'uuid'
   
   #s.extra_rdoc_files = %w[README.rdoc]

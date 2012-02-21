@@ -21,6 +21,10 @@ module Dog
       @@variables
     end
     
+    def self.reset
+      @@variables = {}
+    end
+    
     def self.exists?(name, track = nil)
       if track.nil? then
         track = Track.current
@@ -216,30 +220,51 @@ module Dog
   end
   
   
+  # TODO - Find a better place for this perhaps?
+  Tilt.register Tilt::ERBTemplate, 'task'
+  Tilt.register Tilt::ERBTemplate, 'message'
+  Tilt.register Tilt::ERBTemplate, 'layout'
+  
+  module RenderableVariable
+    def render(data = {}, context = {})
+      locals = {}
+      for key, value in data do
+        locals[key.to_sym] = value
+      end
+      
+      binding = Binding.generate(context)
+      
+      layout = Config.get('layout')
+      
+      if layout then
+        layout = File.absolute_path(layout, Environment.program_directory)
+        layout_template = Tilt::ERBTemplate.new(layout)
+        layout_template.render do
+          content_template = Tilt::ERBTemplate.new(@value)
+          content_template.render(binding, locals)
+        end
+      else
+        content_template = Tilt::ERBTemplate.new(@value)
+        content_template.render(binding, locals)
+      end
+    end
+  end
+  
   class TaskVariable < Variable
+    include RenderableVariable
     
     def value
       return self
     end
     
-    def render(data = {}, context = {})
-      binding = Binding.generate(data, context)
-      template = ERB.new(File.read(@value))
-      template.result(binding)
-    end
     
   end
   
   class MessageVariable < Variable
+    include RenderableVariable
     
     def value
       return self
-    end
-    
-    def render(data = {}, context = {})
-      binding = Binding.generate(data, context)
-      template = ERB.new(File.read(@value))
-      template.result(binding)
     end
     
   end

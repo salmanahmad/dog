@@ -16,6 +16,7 @@ require 'sinatra/async'
 require 'uuid'
 
 require File.join(File.dirname(__FILE__), 'runtime/environment.rb')
+require File.join(File.dirname(__FILE__), 'runtime/config.rb')
 require File.join(File.dirname(__FILE__), 'runtime/runtime.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track_fiber.rb')

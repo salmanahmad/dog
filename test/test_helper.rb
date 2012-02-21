@@ -42,8 +42,10 @@ class RuntimeTestCase < Test::Unit::TestCase
   end
   
   def run_code(code)
+    Dog::Environment.reset
+    
     bark = @compiler.compile(@parser.parse(code))
-    pp bark
+    bark
     bark.run
   end
   
