@@ -41,11 +41,12 @@ class RuntimeTestCase < Test::Unit::TestCase
     @runtime = Dog::Runtime.new
   end
   
-  def run_code(code)
+  def run_code(code, root = :program)
     Dog::Environment.reset
     
-    bark = @compiler.compile(@parser.parse(code))
-    bark
+    @parser.parser.root = root
+    collar = @parser.parse(code)
+    bark = @compiler.compile(collar)
     bark.run
   end
   

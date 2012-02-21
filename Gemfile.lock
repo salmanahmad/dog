@@ -6,6 +6,7 @@ PATH
       eventmachine
       sinatra
       thin
+      tilt
       treetop
       uuid
 

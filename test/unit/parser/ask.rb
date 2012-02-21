@@ -17,7 +17,7 @@ class ParserTests::AskTest < Test::Unit::TestCase
   end
   
   def test_simple
-    pp @parser.parse("ASK users VIA email TO validate")
+    @parser.parse("ASK users VIA email TO validate")
     @parser.parse("ASK ME VIA email TO validate")
     @parser.parse("ASK PUBLIC VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook VIA email TO validate")
@@ -63,7 +63,7 @@ class ParserTests::AskTest < Test::Unit::TestCase
   
   def test_assignment
     @parser.parser.root = :assignment
-    pp @parser.parse('message = ASK PUBLIC VIA http_response TO "What is your favorite Number?"')
+    @parser.parse('message = ASK PUBLIC VIA http_response TO "What is your favorite Number?"')
     
   end
   

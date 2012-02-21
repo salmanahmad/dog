@@ -408,6 +408,7 @@ module Dog
           path = configuration[ListenAtClause] || ("/" + configuration[ListenForClause])
           variable_name = configuration[ListenForClause]
           
+          
           if Variable.exists?(variable_name) then
             raise "Listening on a variable, #{variable_name}, that already exists."
           end
@@ -436,9 +437,7 @@ module Dog
   end
   
   class ListenAtClause < CollarNode
-    def run
-      elements.first.text_value
-    end
+    include RunChild
   end
   
   class ListenForClause < CollarNode
@@ -456,6 +455,8 @@ module Dog
       
       via = configuration[ViaClause]
       content = configuration[AskToClause]
+      using = configuration[UsingClause]
+      using ||= {}
       
       callback_path = UUID.new.generate
       
@@ -463,7 +464,7 @@ module Dog
       when "http_response"
         
         if content.class == TaskVariable then
-          content = content.render({}, {'DogAction' => callback_path})
+          content = content.render(using, {'DogAction' => callback_path})
         end
         
         Fiber.current.request_context.body = content
@@ -488,12 +489,14 @@ module Dog
       
       via = configuration[ViaClause]
       content = configuration[NotifyOfClause]
+      using = configuration[UsingClause]
+      using ||= {}
       
       case via
       when "http_response"
         
         if content.class == MessageVariable then
-          content = content.render({})
+          content = content.render(using)
         end
         
         Fiber.current.request_context.body = content
@@ -515,9 +518,7 @@ module Dog
   end
   
   class UsingClause < CollarNode
-    def run
-      
-    end
+    include RunChild
   end
   
   class OnClause < CollarNode
@@ -561,13 +562,20 @@ module Dog
   
   class IdentifierAssociations < CollarNode
     def run
+      hash = {}
+      for element in elements do
+        hash.merge! element.run
+      end
       
+      return hash
     end
   end
   
   class IdentifierAssociation < CollarNode
     def run
-      
+      hash = {}
+      hash[elements[0].text_value] = elements[1].run
+      return hash
     end
   end
   
