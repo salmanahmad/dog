@@ -395,7 +395,6 @@ module Dog
   end
   
   class Listen < CollarNode
-    
     def run
       configuration = {}
       for element in elements do
@@ -407,7 +406,6 @@ module Dog
         when "http"
           path = configuration[ListenAtClause] || ("/" + configuration[ListenForClause])
           variable_name = configuration[ListenForClause]
-          
           
           if Variable.exists?(variable_name) then
             raise "Listening on a variable, #{variable_name}, that already exists."
@@ -558,8 +556,6 @@ module Dog
     end
   end
   
-  
-  
   class IdentifierAssociations < CollarNode
     def run
       hash = {}
@@ -581,73 +577,83 @@ module Dog
   
   class Me < CollarNode
     def run
-      
+      self
     end
   end
   
   class Public < CollarNode
     def run
-      
+      self
     end
   end
   
   class Person < CollarNode
     def run
-      
+      return {
+        "person" => {
+          "from" => elements[0].run,
+          "where" => elements[1].run
+        }
+      }
     end
   end
   
   class People < CollarNode
     def run
-      
+      return {
+        "people" => {
+          "from" => elements[0].run,
+          "where" => elements[1].run
+        }
+      }
     end
   end
   
   class PeopleFromClause < CollarNode
     def run
-      
+      elements.first.text_value
     end
   end
   
   class PeopleWhereClause < CollarNode
-    def run
-      
-    end
+    include RunChild
   end
   
   class KeyPaths < CollarNode
     def run
-      
+      paths = []
+      for element in elements do
+        paths << element.run
+      end
+      paths
     end
   end
   
   class KeyPath < CollarNode
     def run
-      
+      elements.first.text_value
     end
   end
   
   class Predicate < CollarNode
-    def run
-      
-    end
+    include RunChild
   end
   
   class PredicateBinary < CollarNode
     def run
-      
+      [elements[0].run, elements[1].text_value, elements[2].run]
     end
   end
   
   class PredicateUnary < CollarNode
     def run
-      
+      [elements[0].text_value, elements[1].run]
     end
   end
   
   class PredicateConditonal < CollarNode
     def run
-      
+      [elements[0].run, elements[1].text_value, elements[2].run]
     end
   end
   
