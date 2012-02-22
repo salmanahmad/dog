@@ -501,7 +501,7 @@ grammar Dog
   end
   
   rule else_clause
-    sn 'ELSE' sn statements? <::Dog::ElseClause>
+    sn? 'ELSE' sn statements? <::Dog::ElseClause>
   end
 
   rule for

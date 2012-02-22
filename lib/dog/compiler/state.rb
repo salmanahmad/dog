@@ -179,6 +179,9 @@ module Dog
     
     def run
       if condition.nil? || (condition.run == true) then
+        for child in children do
+          child.run
+        end
         return true
       else
         return false
