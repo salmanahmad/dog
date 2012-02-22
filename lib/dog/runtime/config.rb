@@ -18,12 +18,12 @@ module Dog
       end
       
       def set(key, value)
-        @config ||= {}
+        @config ||= {'port' => 4567}
         @config[key] = value
       end
       
       def get(key)
-        @config ||= {}
+        @config ||= {'port' => 4567}
         @config[key]
       end
       

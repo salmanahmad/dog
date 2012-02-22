@@ -27,7 +27,10 @@ module Dog
         # TODO If there are no listeners that are active then 
         # (keep in mind, that ASKs may have implicit listeners):
         if Server.listeners? then
-          Thin::Server.start '0.0.0.0', 3000, Server
+          port = Config.get('port')|| 4567
+          
+          Server.set :root, Environment.program_directory
+          Thin::Server.start '0.0.0.0', port, Server
         else
           EM.stop
         end

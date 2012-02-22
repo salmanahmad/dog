@@ -22,6 +22,18 @@ module Dog
         File.dirname(@program_path)
       end
       
+      def dormouse_access_token_url(code)
+        "#{Config.get('dormouse_server')}/oauth/access_token?project_id=#{Config.get('dormouse_project')}&api_key=#{Config.get('dormouse_key')}&code=#{code}"
+      end
+      
+      def dormouse_new_session_url
+        URI.escape("#{Config.get('dormouse_server')}/api/v1/plugins/new_session?project_id=#{Config.get('dormouse_project')}&redirect_uri=http://localhost:#{Config.get('port')}/authenticate")
+      end
+      
+      def dormouse_new_account_url
+        URI.escape("#{Config.get('dormouse_server')}/api/v1/plugins/new_account?project_id=#{Config.get('dormouse_project')}&redirect_uri=http://localhost:#{Config.get('port')}/authenticate")
+      end
+      
       def reset
         Config.reset
         Variable.reset

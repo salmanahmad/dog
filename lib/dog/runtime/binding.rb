@@ -14,6 +14,9 @@ module Dog
     def self.generate(context)
       klass = Class.new do
         
+        const_set('DormouseNewAccount', Environment.dormouse_new_account_url)
+        const_set('DormouseNewSession', Environment.dormouse_new_session_url)
+        
         for key, value in context do
           const_set(key.to_s, value)
         end

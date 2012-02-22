@@ -404,8 +404,10 @@ module Dog
       if configuration[ViaClause] then
         case configuration[ViaClause]
         when "http"
+          
           path = configuration[ListenAtClause] || ("/" + configuration[ListenForClause])
           variable_name = configuration[ListenForClause]
+          to = configuration[ListenToClause]
           
           if Variable.exists?(variable_name) then
             raise "Listening on a variable, #{variable_name}, that already exists."
@@ -415,13 +417,22 @@ module Dog
           
           Server.listeners = true
           Server.aget path do
-            variable.push_value(params)
-            context = RequestContext.new
-            variable.notify_dependencies context
             
-            EM.next_tick do
-              body context.body
+            # TODO Handle authentication here...
+            if to.class != Public && !session['dormouse_access_token'] then
+              $authenticate_redirects ||= {}
+              $authenticate_redirects[session[:session_id]] = path
+              redirect Environment.dormouse_new_session_url
+            else
+              variable.push_value(params)
+              context = RequestContext.new
+              variable.notify_dependencies context
+              
+              EM.next_tick do
+                body context.body
+              end
             end
+            
           end
         else
           raise "Unknown via command."
@@ -589,10 +600,13 @@ module Dog
   
   class Person < CollarNode
     def run
+      where = nil
+      where = elements[1].run if elements[1]
+      
       return {
         "person" => {
           "from" => elements[0].run,
-          "where" => elements[1].run
+          "where" => where
         }
       }
     end
@@ -600,10 +614,13 @@ module Dog
   
   class People < CollarNode
     def run
+      where = nil
+      where = elements[1].run if elements[1]
+      
       return {
         "people" => {
           "from" => elements[0].run,
-          "where" => elements[1].run
+          "where" => where
         }
       }
     end

@@ -10,6 +10,7 @@
 require 'fiber'
 
 require 'eventmachine'
+require 'httparty'
 require 'thin'
 require 'sinatra/base'
 require 'sinatra/async'

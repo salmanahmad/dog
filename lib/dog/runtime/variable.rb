@@ -84,6 +84,9 @@ module Dog
   
   module PendingVariable
     
+    # TODO implement this...
+    attr_accessor :permissions
+    
     attr_accessor :pending_count
     attr_accessor :dependencies
     
