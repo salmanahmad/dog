@@ -1,9 +1,0 @@
-#!/usr/bin/env dog
-
-LISTEN TO PUBLIC VIA http FOR offers
-
-ON offer DO
-  message = ASK PUBLIC VIA http_response TO "What is your favorite Number?"
-  
-  NOTIFY PUBLIC VIA http_response OF message["value"]
-END

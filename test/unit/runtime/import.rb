@@ -11,6 +11,8 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_hel
 
 class RuntimeTests::ImportTest < RuntimeTestCase
   
+  
+  
   def test_task
     run_code("IMPORT TASK 'task.task'")
   end

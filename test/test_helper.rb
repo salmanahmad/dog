@@ -9,6 +9,7 @@
 
 require 'rubygems'
 require 'test/unit'
+require 'stringio'
 require 'pp'
 
 ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
@@ -44,10 +45,22 @@ class RuntimeTestCase < Test::Unit::TestCase
   def run_code(code, root = :program)
     Dog::Environment.reset
     
+    sio = StringIO.new
+    old_stdout, $stdout = $stdout, sio
+    
     @parser.parser.root = root
     collar = @parser.parse(code)
     bark = @compiler.compile(collar)
-    bark.run
+    output_value = bark.run
+    
+    $stdout = old_stdout
+    output_stdout = sio.string.strip
+    
+    if root == :program then
+      output_stdout
+    else
+      output_value
+    end
   end
   
 end

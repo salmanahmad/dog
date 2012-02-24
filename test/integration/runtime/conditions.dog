@@ -1,8 +1,0 @@
-
-flag = TRUE
-
-IF flag THEN
-  PRINT 'It is true'
-ELSE
-  PRINT 'It was false'
-END

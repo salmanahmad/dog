@@ -19,8 +19,8 @@ class ParserTests::PeopleTest < Test::Unit::TestCase
   def test_simple
     @parser.parse("PEOPLE FROM mit")
     @parser.parse("PERSON FROM mit")
-    pp @parser.parse("PERSON FROM mit WHERE user.id == 7")
-    pp @parser.parse("PERSON FROM mit WHERE id == 7 AND age < 25")
+    @parser.parse("PERSON FROM mit WHERE user.id == 7")
+    @parser.parse("PERSON FROM mit WHERE id == 7 AND age < 25")
     @parser.parse("PEOPLE FROM communities['mit']")
   end
   

@@ -13,8 +13,23 @@ class RuntimeTests::PeopleTest < RuntimeTestCase
   
   def test_simple
     output = run_code("PEOPLE FROM mit WHERE id == 7", :user)
-    pp output
+    assert_equal(output, {"people" => {"from" => "mit", "where" => 
+      [["id"], "==", 7]
+    }})
   end
   
+  def test_binary_condition
+    output = run_code("PEOPLE FROM mit WHERE id == 7 AND interests CONTAINS 'fencing'", :user)
+    assert_equal(output, {"people" => {"from" => "mit", "where" => 
+      [[["id"], "==", 7], "AND", [["interests"], "CONTAINS", 'fencing']]
+    }})
+  end
+  
+  def test_unary_condition
+    output = run_code("PEOPLE FROM mit WHERE id == 7 AND NOT(interests CONTAINS 'fencing')", :user)
+    assert_equal(output, {"people" => {"from" => "mit", "where" => 
+      [[["id"], "==", 7], "AND", ['NOT', [["interests"], "CONTAINS", 'fencing']]]
+    }})
+  end
   
 end

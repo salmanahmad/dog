@@ -9,17 +9,15 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class HelloDogTest < Test::Unit::TestCase
+class RuntimeTests::PrintTest < RuntimeTestCase
   
-  include IntegrationHelper
-  
-  def setup
-    @parser = Dog::Parser.new
-    @program = program_for(__FILE__)
+  def test_simple
+    output = run_code("PRINT 'Hello? Yes, this is Dog.'")
+    assert_equal(output, "Hello? Yes, this is Dog.")
+    
+    output = run_code("INSPECT 'Hello? Yes, this is Dog.'")
+    assert_equal(output, "\"Hello? Yes, this is Dog.\"")
   end
   
-  def test_program
-    @parser.parse(@program)
-  end
   
 end

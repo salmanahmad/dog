@@ -56,7 +56,7 @@ grammar Dog
     / 
     lhs s? assignment_operator s? primary <::Dog::Assignment>
   end
-
+  
   rule primary
     operation / access / literal / identifier / '(' s? primary s? ')' <::Dog::Primary>
   end

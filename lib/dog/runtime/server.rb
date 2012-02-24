@@ -49,7 +49,10 @@ module Dog
       access_token = HTTParty.get(Environment.dormouse_access_token_url(params[:code]))
       if access_token.success? then
         session['dormouse_access_token'] = access_token.parsed_response
+        session['dormouse_user'] = 
+        
         url = $authenticate_redirects[session[:session_id]]
+        $authenticate_redirects.delete [session[:session_id]]
         redirect url
       else
         "Could not verify your user account."
