@@ -39,6 +39,7 @@ class ParserTests::PredicateTest < Test::Unit::TestCase
   
   def test_not
     @parser.parse("NOT ( i == 7)")
+    @parser.parse("NOT ( i == 7  )")
     @parser.parse("NOT(i==7)")
   end
   

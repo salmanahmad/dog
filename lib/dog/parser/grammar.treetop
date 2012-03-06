@@ -584,7 +584,7 @@ grammar Dog
   end
 
   rule hash 
-    (identifier s?)? '{' sn? associations? (sn? ',' sn?)? '}' <::Dog::HashLiteral>
+    '{' sn? associations? (sn? ',' sn?)? '}' <::Dog::HashLiteral>
   end
 
   rule associations

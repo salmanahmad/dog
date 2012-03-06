@@ -109,17 +109,6 @@ class ParserTests::LiteralTest < Test::Unit::TestCase
     @parser.parse("{\n\t'key':1,\n\t'key2':'value'\n}")
   end
   
-  def test_hash_inheritance
-    @parser.parse("task {'key':'value'}")
-    @parser.parse("task{\"key\":'value'}")
-    
-    @parser.parse("message {'key':1}")
-    @parser.parse("message {'key':true}")
-    @parser.parse("message {'key':-4.5}")
-    
-    @parser.parse("object {'key':1, 'key2':'value'}")
-  end
-  
   def test_hash_key_must_be_string
     assert_raises Dog::ParseError do
       @parser.parse("{1:'value'}")

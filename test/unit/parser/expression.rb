@@ -42,12 +42,6 @@ class ParserTests::ExpressionTest < Test::Unit::TestCase
     @parser.parse("i's j's k = {'key':'value'}")
   end
   
-  def test_literals
-    @parser.parse("i = task")
-    @parser.parse("i = task {}")
-    @parser.parse("i = task {'key':'value'}")
-  end
-  
   def test_operation
     @parser.parse("NOT TRUE")
     @parser.parse("5 + 5")
