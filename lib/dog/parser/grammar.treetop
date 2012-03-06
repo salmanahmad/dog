@@ -32,7 +32,7 @@ grammar Dog
   end
   
   rule top_level_statement
-    (listen / import / config / function / reply_disallow) s? <::Dog::TopLevelStatement>
+    (listen / allow / import / config / function / reply_disallow) s? <::Dog::TopLevelStatement>
   end
   
   rule statement 
@@ -232,9 +232,31 @@ grammar Dog
   rule listen_at_clause
     s 'AT' s string <::Dog::ListenAtClause>
   end
-
-
-
+  
+  
+  
+  # =========
+  # = Allow =
+  # =========
+  
+  rule allow
+    'ALLOW' s (user / identifier) s 'TO' s allow_modifier s (allow_profile / identifier)
+  end
+  
+  rule allow_modifier
+    'JOIN' <::Dog::AllowModifier>
+    / 
+    'READ' <::Dog::AllowModifier>
+    / 
+    'WRITE' <::Dog::AllowModifier>
+    /
+    'ACCESS' <::Dog::AllowModifier>
+  end
+  
+  rule allow_profile
+    'PROFILE' <::Dog::AllowProfile>
+  end
+  
   # ===============
   # = Ask Command =
   # ===============
@@ -303,11 +325,11 @@ grammar Dog
   end
   
   rule person
-    'PERSON' people_from_clause (people_where_clause)? <::Dog::Person>
+    'PERSON' people_from_clause? (people_where_clause)? <::Dog::Person>
   end
   
   rule people
-    'PEOPLE' people_from_clause (people_where_clause)? <::Dog::People>
+    'PEOPLE' people_from_clause? (people_where_clause)? <::Dog::People>
   end
   
   # TODO - fix the AST for PERSON FROM variable

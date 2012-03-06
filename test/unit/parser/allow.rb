@@ -13,10 +13,24 @@ class ParserTests::AllowTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
+    @parser.parser.root = :allow
   end
   
-  def test_simple
-    @parser.parse("")
+  def test_users
+    @parser.parse("ALLOW PEOPLE TO READ data")
+    @parser.parse("ALLOW PEOPLE FROM leaners TO READ data")
+    @parser.parse("ALLOW leaners TO READ data")
+  end
+  
+  def test_modifier
+    @parser.parse("ALLOW PEOPLE TO READ data")
+    @parser.parse("ALLOW PEOPLE TO WRITE data")
+    @parser.parse("ALLOW PEOPLE TO ACCESS data")
+    @parser.parse("ALLOW PEOPLE TO JOIN community")
+  end
+  
+  def test_profile
+    @parser.parse("ALLOW PEOPLE TO READ PROFILE")
   end
   
 end

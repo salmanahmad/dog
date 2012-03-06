@@ -439,6 +439,18 @@ module Dog
     include CompileChildAsText
   end
   
+  class Allow < CollarNode
+    
+  end
+  
+  class AllowModifier < CollarNode
+    
+  end
+  
+  class AllowProfile < CollarNode
+    
+  end
+  
   class Ask < CollarNode
     def compile
       
