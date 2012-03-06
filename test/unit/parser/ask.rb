@@ -47,13 +47,15 @@ class ParserTests::AskTest < Test::Unit::TestCase
   end
   
   def test_using
-    @parser.parse("ASK users VIA email TO validate ON data USING force : true")
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true")
     
-    @parser.parse("ASK users VIA email TO validate ON data USING force:true , optional : false")
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true, optional = false")
     
-    @parser.parse("ASK users VIA email TO validate ON data USING force:true, optional : false")
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true, optional = false")
     
-    @parser.parse("ASK users VIA email TO validate ON data USING force:true,optional:false")
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true, optional = false")
+    
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true, happy, foo, bar = baz, bank = 'hai'")
     
     assert_raises Dog::ParseError do
       @parser.parse("ASK users VIA email TO validate ON dataUSING force : true")
@@ -62,15 +64,9 @@ class ParserTests::AskTest < Test::Unit::TestCase
   end
   
   def test_assignment
-    @parser.parser.root = :assignment
+    @parser.parser.root = :program
     @parser.parse('message = ASK PUBLIC VIA http_response TO "What is your favorite Number?"')
     
-  end
-  
-  def test_function_cannot_be_string
-    assert_raises Dog::ParseError do
-      @parser.parse("ASK 5 users VIA email TO 'validate'")
-    end
   end
   
   

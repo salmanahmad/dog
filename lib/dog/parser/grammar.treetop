@@ -32,7 +32,7 @@ grammar Dog
   end
   
   rule top_level_statement
-    (listen / import / config / function) s? <::Dog::TopLevelStatement>
+    (listen / import / config / function / reply_disallow) s? <::Dog::TopLevelStatement>
   end
   
   rule statement 
@@ -44,7 +44,7 @@ grammar Dog
   end
   
   rule command
-     notify / on / ask / compute / people / control_structure / print / inspect
+     notify / on / ask / compute / people / control_structure / reply / print / inspect
   end
   
   # ===============
@@ -244,7 +244,7 @@ grammar Dog
   end
 
   rule ask_to_clause
-    s 'TO' s identifier <::Dog::AskToClause>
+    s 'TO' s (identifier / string) <::Dog::AskToClause>
   end
 
   # ==========
@@ -259,6 +259,22 @@ grammar Dog
     s 'OF' s (access / identifier / string) <::Dog::NotifyOfClause>
   end
 
+  
+  # =========
+  # = Reply =
+  # =========
+
+  rule reply
+    'REPLY' s 'TO' s (user / identifier) reply_with_clause <::Dog::Reply>
+  end
+  
+  rule reply_with_clause
+    s 'WITH' s identifier_associations <::Dog::ReplyWithClause>
+  end
+  
+  rule reply_disallow
+    reply '' <::Dog::ReplyDisallow>
+  end
 
 
   # ===================
@@ -479,9 +495,16 @@ grammar Dog
   end
 
   rule identifier_association
-    s? identifier s? ':' s? primary s? (',' &identifier_association / '' !identifier_association) <::Dog::IdentifierAssociation>
+    identifier_association_explicit / identifier_association_implicit
   end
 
+  rule identifier_association_explicit
+    s? identifier s? '=' s? primary s? (',' &identifier_association / '' !identifier_association) <::Dog::IdentifierAssociation>
+  end
+  
+  rule identifier_association_implicit
+    s? identifier s? (',' &identifier_association / '' !identifier_association)
+  end
 
 
   # ======================

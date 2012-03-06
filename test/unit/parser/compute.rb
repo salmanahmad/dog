@@ -21,9 +21,10 @@ class ParserTests::ComputeTest < Test::Unit::TestCase
     @parser.parse("COMPUTE average ON data")
     @parser.parse("COMPUTE average ON a, b")
     @parser.parse("COMPUTE average ON a,b")
-    @parser.parse("COMPUTE average ON a,b USING c:5")
-    @parser.parse("COMPUTE average ON data USING c:5")
-    @parser.parse("COMPUTE average ON a,b USING c : 5, d : 'hello, world'")
+    @parser.parse("COMPUTE average ON a,b USING c = 5")
+    @parser.parse("COMPUTE average ON data USING c = 5")
+    @parser.parse("COMPUTE average ON data USING c, k = 7")
+    @parser.parse("COMPUTE average ON a,b USING c = 5, d = 'hello, world'")
   end
   
 end

@@ -508,6 +508,27 @@ module Dog
     include CompileChild
   end
   
+  class Reply < CollarNode
+    def compile
+      
+    end
+  end
+  
+  class ReplyWithClause < CollarNode
+    def compile
+      
+    end
+  end
+  
+  class ReplyDisallow < CollarNode
+    def compile
+      raise "Compilation error: REPLY can only exist inside of an ON block."
+    end
+  end
+  
+  
+  
+  
   class Compute < CollarNode
     def compile
       # TODO

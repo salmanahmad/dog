@@ -35,7 +35,7 @@ class ParserTests::ExpressionTest < Test::Unit::TestCase
     @parser.parse("i[i] = {'key':'value'}")
     @parser.parse("i[0] = {'key':'value'}")
     @parser.parse("i['string'] = {'key':'value'}")
-    pp @parser.parse("i[j[k]][l] = {'key':'value'}")
+    @parser.parse("i[j[k]][l] = {'key':'value'}")
     
     @parser.parse("i.j.k.l = {'key':'value'}")
     
