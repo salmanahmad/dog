@@ -28,4 +28,14 @@ class ParserTests::PeopleTest < Test::Unit::TestCase
     @parser.parse("PERSON FROM lottery_entry")
   end
   
+  def test_person_and_people
+    @parser.parse("PEOPLE")
+    @parser.parse("PERSON")
+  end
+  
+  def test_from_optional
+    @parser.parse("PEOPLE WHERE age > 7")
+    @parser.parse("PERSON WHERE age > 7")
+  end
+  
 end
