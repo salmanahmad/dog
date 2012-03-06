@@ -20,7 +20,7 @@ class ParserTests::ImportTest < Test::Unit::TestCase
   
   def test_function
     @parser.parse("IMPORT FUNCTION 'test'")
-    @parser.parse("IMPORT FUNCTION 'test' AS test")
+    pp @parser.parse("IMPORT FUNCTION 'test' AS test")
   end
   
   def test_data

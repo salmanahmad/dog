@@ -61,9 +61,9 @@ module Dog
   end
   
   module CompileChild
-    def compile
+    def compile(buffer)
       if self.elements.size == 1 then
-        return self.elements.first.compile
+        self.elements.first.compile
       elsif self.elements.size == 0
         return nil
       else
@@ -71,6 +71,21 @@ module Dog
       end
     end
   end
+  
+  module CompileChildAsText
+    def compile(buffer)
+      if self.elements.size == 1 then
+        self.elements.first.text_value
+      elsif self.elements.size == 0
+        return nil
+      else
+        raise "#{self.class.name} has more than 1 child."
+      end
+    end
+  end
+  
+  
+  ####### These are not needed anymore now that I am transpiling
   
   module CompileOperationState
     def compile
@@ -98,22 +113,25 @@ module Dog
     end
   end
   
+  ###################################
+  
+  
   class CollarNode< Treetop::Runtime::SyntaxNode
-    include NotRunnable
-    include CompileOperationState
+    # TODO - Remove these???
+    #include NotRunnable
+    #include CompileOperationState
     # TODO - this default is somewhat problematic. For example, for clauses or predicates
   end
   
   class Program < CollarNode
     def compile
-      program = ProgramState.new
-      
+      program = FormattedString.new
       self.elements.each do |node|
-        state = node.compile
-        program.add_child(state)
+        program << node.compile
       end
       
-      return program
+      # TODO - Implement this...
+      CompilationContext.program_section << program
     end
   end
   
@@ -125,337 +143,307 @@ module Dog
     def compile
       states = []
       
+      code = FormattedString.new
+      
       self.elements.each do |node|
-        state = node.compile
-        states << state
+        code << node.compile
       end
       
-      return states
+      return code.string
     end
   end
   
   class TopLevelStatement < CollarNode
     include CompileChild
+    # TODO - I have to do something here. With newlines, or, something
   end
   
   class Statement < CollarNode
     include CompileChild
+    # TODO - I have to do something here
   end
   
   class Primary < CollarNode
-    include RunChild
+    include CompileChild
+    # TODO - I have to do something here...for parenthesis
   end
   
   class Access < CollarNode
-    def run
-      
+    def compile
       if elements[1] then
-        
-        keys = elements[1].run
-        keys, last = keys[0..-2], keys.last
-        pointer = elements[0].run
-        
-        if pointer.class != Array && pointer.class != Hash then
-          raise "Attempting to access path of a non-collection."
-        end
-        
-        for key in keys do
-          return nil if pointer.nil?
-          pointer = pointer[key]
-        end
-        
-        return pointer[last]
+        # TODO - Error message if the identifier is not an array or a hash
+        return "(#{elements[0].compile})#{elements[1].compile}"
       else
-        return elements[0].run
+        return elements[0].compile
       end
     end
   end
   
   class AccessBracket < CollarNode
-    def run
-      
-      path = []
-      path << elements[0].run
-      
-      if elements[1] then
-        items = elements[1].run
-        for item in items do
-          path << item
-        end
-      end
-      
+    def compile
+      # TODO - I have to create the path if the object does not already have it
+      path = "[#{elements[0].compile}]"
+      path += "#{elements[1].compile}" if elements[1]
       return path
     end
   end
   
   class AccessDot < CollarNode
-    def run
-      path = []
-      path << elements[0].text_value
-      
-      if elements[1] then
-        items = elements[1].run
-        for item in items do
-          path << item
-        end
-      end
-      
+    def compile
+      # TODO - I have to create the path if the object does not already have it
+      path = "[#{elements[0].text_value}]"
+      path += "#{elements[1].compile}" if elements[1]
       return path
     end
   end
   
   class AccessPossessive < CollarNode
-    def run
-      raise "#{self.class} not implemented."
+    def compile
+      %s|raise "#{self.class} not implemented."|
     end
   end
   
   class Assignment < CollarNode
-    def run
-      element = elements[0]
-      value = elements[2].run
+    def compile
+      lhs = elements[0].compile
+      rhs = elements[2].compile
       
-      if element.class == Identifier then
-        
-        # TODO handle the case when you assign an ask into a collection...
-        if elements[2].class == Ask then
-          variable = AskVariable.named(element.text_value)
-          Server.register(variable, value)
-        else
-          variable = Variable.named(element.text_value)
-          variable.value = value
-        end
-        
-      elsif element.class == Access then
-        variable = Variable.named(element.elements[0].text_value)
-        if element.elements[1] then
-          keys = element.elements[1].run
-          keys, last = keys[0..-2], keys.last
-          
-          if variable.value.nil? then
-            variable.value = {}
-          end
-          
-          pointer = variable.value
-          
-          if pointer.class != Array && pointer.class != Hash then
-            raise "Attempting to access path of a non-collection."
-          end
-          
-          for key in keys do
-            pointer[key] ||= {}
-            pointer = pointer[key]
-          end
-          
-          pointer[last] = value
-        else
-          variable.value = value
-        end
+      variable = nil
+      if elements[0].class == Access 
+        variable = elements[0].elements[0].text_value
+      elsif elements[0].class == Identifier
+        variable = elements[0].text_value
       end
+      
+      # TODO - I have to implement how Server.register works...
+      # TODO - I have to implement Variable#has_changed
+      code = ""
+      code += "#{lhs} = #{rhs}\n"
+      code += "Variable.named(#{variable}).has_changed\n"
+      code += "Server.register(#{lhs})\n" if elements[2].class == Ask
+      return code
     end
   end
   
   class Operation < CollarNode
-    def run
+    def compile
       if elements[0].class == NotOperator then
-        elements[0].run(elements[1].run)
+        "(#{elements[0].compile}(#{elements[1].compile}))"
       else
-        elements[1].run(elements[0].run, elements[2].run)
+        "((#{elements[0].compile}) #{elements[1].compile} (#{elements[2].compile}))"
       end
     end
   end
   
   class Identifier < CollarNode
-    def run
-      Variable.named(self.text_value).value
+    def compile
+      "Variable.named(#{self.text_value}).value"
     end
   end
   
   class AssignmentOperator < CollarNode
+    def compile
+      "="
+    end
   end
   
   class AdditionOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 + arg2
+    def compile
+      "+"
     end
   end
   
   class SubtractionOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 - arg2
+    def compile
+      "-"
     end
   end
   
   class MultiplicationOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 * arg2
+    def compile
+      "*"
     end
   end
   
   class DivisionOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 / arg2
+    def compile
+      "/"
     end
   end
   
   class EqualityOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 == arg2
+    def compile
+      "=="
     end
   end
   
   class InequalityOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 != arg2
+    def compile
+      "!="
     end
   end
   
   class GreaterThanOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 > arg2
+    def compile
+      ">"
     end
   end
   
   class LessThanOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 < arg2
+    def compile
+      "<"
     end
   end
   
   class GreaterThanEqualOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 >= arg2
+    def compile
+      ">="
     end
   end
   
   class LessThanEqualOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 <= arg2
+    def compile
+      "<="
     end
   end
   
   class AndOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 && arg2
+    def compile
+      "&&"
     end
   end
   
   class OrOperator < CollarNode
-    def run(arg1, arg2)
-      arg1 || arg2
+    def compile
+      "||"
     end
   end
   
   class NotOperator < CollarNode
-    def run(arg1)
-      !arg1
+    def compile
+      "!"
     end
   end
   
   class UnionOperator < CollarNode
-    def run(arg1, arg2)
+    def compile
       # TODO
     end
   end
   
   class IntersectOperator < CollarNode
-    def run(arg1, arg2)
+    def compile
       # TODO
     end
   end
   
   class DifferenceOperator < CollarNode
-    def run(arg1, arg2)
+    def compile
       # TODO
     end
   end
   
   class AppendOperator < CollarNode
-    def run(arg1, arg2)
+    def compile
       # TODO
     end
   end
   
   class PrependOperator < CollarNode
-    def run(arg1, arg2)
+    def compile
       # TODO
     end
   end
   
   class AssociatesOperator < CollarNode
-    def run(arg1, arg2)
+    def compile
       # TODO
     end
   end
   
   class ContainsOperator < CollarNode
-    def run(arg1, arg2)
-      arg1.include? arg2
+    def compile
+      # TODO
     end
+    
+    #def run(arg1, arg2)
+    #  arg1.include? arg2
+    #end
   end
   
   class Listen < CollarNode
-    def run
+    def compile
+      
       configuration = {}
       for element in elements do
-        configuration[element.class] = element.run
+        configuration[element.class] = element.compile
       end
       
       if configuration[ViaClause] then
+        
         case configuration[ViaClause]
         when "http"
-          
           path = configuration[ListenAtClause] || ("/" + configuration[ListenForClause])
           variable_name = configuration[ListenForClause]
-          to = configuration[ListenToClause]
+          people = configuration[ListenToClause]
           
-          if Variable.exists?(variable_name) then
-            raise "Listening on a variable, #{variable_name}, that already exists."
-          end
-          
-          variable = ListenVariable.named(variable_name)
-          
-          Server.listeners = true
-          Server.aget path do
-            
-            # TODO Handle authentication here...
-            if to.class != Public && !session['dormouse_access_token'] then
-              $authenticate_redirects ||= {}
-              $authenticate_redirects[session[:session_id]] = path
-              redirect Environment.dormouse_new_session_url
-            else
-              variable.push_value(params)
-              context = RequestContext.new
-              variable.notify_dependencies context
-              
-              EM.next_tick do
-                body context.body
-              end
-            end
-            
-          end
+          # TODO - implement this. See comment block below...
+          listen = "listen(:to => #{people}, :at => #{path}, :for => #{variable_name})"
+          CompilationContext.server_section << listen << "\n"
         else
           raise "Unknown via command."
         end
       end
+      
+      # Listen returns nothing in the current context
+      return ""
     end
+    
+    #if Variable.exists?(variable_name) then
+    #  raise "Listening on a variable, #{variable_name}, that already exists."
+    #end
+    
+    #variable = ListenVariable.named(variable_name)
+    
+    #Server.listeners = true
+    #Server.aget path do
+    #  
+    #  # TODO Handle authentication here...
+    #  if to.class != Public && !session['dormouse_access_token'] then
+    #    $authenticate_redirects ||= {}
+    #    $authenticate_redirects[session[:session_id]] = path
+    #    redirect Environment.dormouse_new_session_url
+    #  else
+    #    variable.push_value(params)
+    #    context = RequestContext.new
+    #    variable.notify_dependencies context
+    #    
+    #    EM.next_tick do
+    #      body context.body
+    #    end
+    #  end
+    # 
+    #end
+    
   end 
   
   class ListenToClause < CollarNode
-    include RunChild
+    include CompileChild
   end
   
   class ListenAtClause < CollarNode
-    include RunChild
+    include CompileChild
   end
   
   class ListenForClause < CollarNode
-    def run
-      elements.first.text_value
-    end
+    include CompileChildAsText
   end
   
   class Ask < CollarNode
+    def compile
+      
+    end
+    
     def run
       configuration = {}
       for element in elements do
@@ -517,17 +505,17 @@ module Dog
   end
   
   class NotifyOfClause < CollarNode
-    include RunChild
+    include CompileChild
   end
   
   class Compute < CollarNode
-    def run
-      
+    def compile
+      # TODO
     end
   end
   
   class UsingClause < CollarNode
-    include RunChild
+    include CompileChild
   end
   
   class OnClause < CollarNode
@@ -549,9 +537,7 @@ module Dog
   end
   
   class ViaClause < CollarNode
-    def run
-      elements.first.text_value
-    end
+    include CompileChildAsText
   end
   
   class InClause < CollarNode
@@ -587,130 +573,125 @@ module Dog
   end
   
   class Me < CollarNode
-    def run
-      self
+    def compile
+      "(People.me)"
     end
   end
   
   class Public < CollarNode
-    def run
-      self
+    def compile
+      "(People.public)"
     end
   end
   
   class Person < CollarNode
     def run
-      where = nil
-      where = elements[1].run if elements[1]
+      from = elements[0].compile
       
-      return {
-        "person" => {
-          "from" => elements[0].run,
-          "where" => where
-        }
-      }
+      where = nil
+      where = elements[1].compile if elements[1]
+      
+      return "People.find_one(:from => #{from}, :where => #{where})"
     end
   end
   
   class People < CollarNode
     def run
-      where = nil
-      where = elements[1].run if elements[1]
+      from = elements[0].compile
       
-      return {
-        "people" => {
-          "from" => elements[0].run,
-          "where" => where
-        }
-      }
+      where = nil
+      where = elements[1].compile if elements[1]
+      
+      return "People.find_all(:from => #{from}, :where => #{where})"
     end
   end
   
   class PeopleFromClause < CollarNode
-    def run
-      elements.first.text_value
-    end
+    include CompileChildAsText
   end
   
   class PeopleWhereClause < CollarNode
-    include RunChild
+    include CompileChild
   end
   
   class KeyPaths < CollarNode
-    def run
+    def compile
       paths = []
       for element in elements do
         paths << element.run
       end
       paths
+      
+      return "[#{paths.join(",")}]"
     end
   end
   
   class KeyPath < CollarNode
-    def run
-      elements.first.text_value
-    end
+    include CompileChildAsText
   end
   
   class Predicate < CollarNode
-    include RunChild
+    include CompileChild
   end
   
   class PredicateBinary < CollarNode
-    def run
-      [elements[0].run, elements[1].text_value, elements[2].run]
+    def compile
+      "[#{elements[0].compile}, #{elements[1].text_value}, #{elements[2].compile}]"
     end
   end
   
   class PredicateUnary < CollarNode
     def run
-      [elements[0].text_value, elements[1].run]
+      "[#{elements[0].text_value}, #{elements[1].compile}]"
     end
   end
   
   class PredicateConditonal < CollarNode
     def run
-      [elements[0].run, elements[1].text_value, elements[2].run]
+      "[#{elements[0].compile}, #{elements[1].text_value}, #{elements[2].compile}]"
     end
   end
   
   class Config < CollarNode
     def run
-      Config.set(elements[0].text_value, elements[1].run)
+      "Config.set(#{elements[0].text_value}, #{elements[1].compile})"
     end
   end
   
   class Import < CollarNode
-    def run
-      elements[0].run(elements[1].run, elements[2])
+    def compile
+      #elements[0].run(elements[1].run, elements[2])
+      "Import.#{elements[0].compile}(#{elements[1].compile}, #{elements[2].compile})"
     end
   end
   
   class ImportAsClause < CollarNode
-    def run
-      elements.first.text_value
-    end
+    include CompileChildAsText
   end
   
   class ImportFunction < CollarNode
-    def run(path, variable = nil)
-      
+    def compile
+      "function"
     end
   end
   
   class ImportData < CollarNode
-    def run(path, variable = nil)
-      
+    def compile
+      "data"
     end
   end
   
   class ImportCommunity < CollarNode
-    def run(path, variable = nil)
-      
+    def compile
+      "community"
     end
   end
   
   class ImportTask < CollarNode
+    def compile
+      "task"
+    end
+    
     def run(path, variable = nil)
       # TODO - This code is redundant with ImportMessage
       if variable then
@@ -726,6 +707,10 @@ module Dog
   end
   
   class ImportMessage < CollarNode
+    def compile
+      "message"
+    end
+    
     def run(path, variable = nil)
       # TODO - This code is redundant with ImportTask
       if variable then
@@ -741,8 +726,8 @@ module Dog
   end
   
   class ImportConfig < CollarNode
-    def run(path, variable = nil)
-      
+    def compile
+      "config"
     end
   end
   
@@ -851,114 +836,104 @@ module Dog
   end
   
   class Break < CollarNode
-    def run
-      # TODO
+    def compile
+      "break;"
     end
   end
   
   class Print < CollarNode
-    def run
-      puts elements.first.run
+    def compile
+      "puts(#{elements.first.compile})"
     end
   end
   
   class Inspect < CollarNode
-    def run
-      puts elements.first.run.inspect
-      $stdout.flush
+    def compile
+      "puts((#{elements.first.compile}).inspect)"
     end
   end
   
   class ArrayLiteral < CollarNode
-    def run
+    def compile
       items = self.elements.first
       if items then
-        return items.run
+        return items.compile
       else
-        return []
+        return "[]"
       end
     end
   end
   
   class ArrayItems < CollarNode
-    def run
+    def compile
       items = []
       for element in self.elements do
-        items << element.run
+        items << element.compile
       end
-      return items
+      
+      return "[#{items.join(",")}]"
     end
   end
   
   class ArrayItem < CollarNode
-    include RunChild
+    include CompileChild
   end
   
   class HashLiteral < CollarNode
-    def run
+    def compile
       associations = self.elements.first
       if associations then
-        return associations.run
+        return associations.compile
       else
-        return {}
+        return "{}"
       end
     end
   end
   
   class HashAssociations < CollarNode
-    def run
-      associations = {}
+    def compile
+      compiled_associations = []
       for element in self.elements do
-        association = element.run
-        for key, value in association do
-          associations[key] = value
-        end
+        compiled_associations = element.compile
       end
-      return associations
+      
+      return "{#{compiled_associations.join(",")}}"
     end
   end
   
   class HashAssociation < CollarNode
-    def run
-      association = {}
-      key = self.elements[0].run
-      value = self.elements[1].run
-      association[key] = value
-      return association
+    def compile
+      "#{self.elements[0].compile} => #{self.elements[1].compile}"
     end
   end
   
   class StringLiteral < CollarNode
-    def run
-      string = self.text_value
-      quote = string[0]
-      string = string[1..-2]
-      string.gsub!("\\#{quote}", quote)
-      return string
+    def compile
+      self.text_value
     end
   end
   
   class IntegerLiteral < CollarNode
-    def run
-      Integer(self.text_value)
+    def compile(buffer)
+      self.text_value
     end
   end
   
   class FloatLiteral < CollarNode
-    def run
-      Float(self.text_value)
+    def compile
+      self.text_value
     end
   end
   
   class TrueLiteral < CollarNode
-    def run
-      return true
+    def compile
+      "true"
     end
   end
   
   class FalseLiteral < CollarNode
-    def run
-      return false
+    def compile
+      "false"
     end
   end
   
