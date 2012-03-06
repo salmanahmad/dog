@@ -54,5 +54,9 @@ class ParserTests::PredicateTest < Test::Unit::TestCase
     @parser.parse("i == 5 AND i == 5 AND i == 5")
     @parser.parse("i CONTAINS 5 AND i != 5 AND i ASSOCIATES 5")
   end
+
+  def test_keypath
+    @parser.parse("user.i CONTAINS 5 AND user.i != 5 AND user.i ASSOCIATES 5")
+  end
   
 end

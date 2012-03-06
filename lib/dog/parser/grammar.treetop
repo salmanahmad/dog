@@ -375,7 +375,7 @@ grammar Dog
   end
   
   rule key_path
-    sn? identifier sn? ('.' &key_path / '' !key_path) <::Dog::KeyPath>
+    identifier ('.' &key_path / '' !key_path) <::Dog::KeyPath>
   end
   
 
@@ -490,9 +490,9 @@ grammar Dog
   
   rule in_clause_identifiers
     (
-      identifier s 'IN' s identifier <::Dog::InClauseIdentifiers>
+      identifier s 'IN' s key_paths <::Dog::InClauseIdentifiers>
       /
-      identifier '' <::Dog::InClauseIdentifiers>
+      key_paths '' <::Dog::InClauseIdentifiers>
     )
   end
   

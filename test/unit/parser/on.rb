@@ -40,5 +40,27 @@ class ParserTests::OnTest < Test::Unit::TestCase
     @parser.parse(program.strip)
   end
   
+  def test_event
+    program = <<-EOD
+    
+    ON dog.account.create DO
+      PRINT 'hello, world!'
+    END
+    
+    EOD
+    
+    @parser.parse(program.strip)
+    
+    program = <<-EOD
+    
+    ON request IN dog.account.signin DO
+      PRINT 'hello, world!'
+    END
+    
+    EOD
+    
+    @parser.parse(program.strip)
+  end
+  
   
 end
