@@ -32,7 +32,7 @@ grammar Dog
   end
   
   rule top_level_statement
-    (listen / allow / import / config / function / reply_disallow) s? <::Dog::TopLevelStatement>
+    (listen / allow / import / config / function / structure_definition / reply_disallow) s? <::Dog::TopLevelStatement>
   end
   
   rule statement 
@@ -210,6 +210,55 @@ grammar Dog
   rule contains_operator
     "CONTAINS" <::Dog::ContainsOperator>
   end
+  
+  # ==============
+  # = Structures =
+  # ==============
+  
+  rule structure_definition
+    identifier s identifier s '{' sn? structure_properties sn? '}' <::Dog::StructureDefinition>
+  end
+  
+  rule structure_properties
+    (structure_relationship_property / structure_property)+ <::Dog::StructureProperties>
+  end
+  
+  rule structure_relationship_property
+    'relationship' s structure_property_name s? structure_relationship_property_inverse? sn <::Dog::StructurePropertyRelationship>
+  end
+  
+  rule structure_relationship_property_inverse
+    ',' s?  (structure_relationship_property_inverse_identifier_path / identifier) <::Dog::StructurePropertyRelationshipInverse>
+  end
+  
+  rule structure_relationship_property_inverse_identifier_path
+    identifier '.' identifier <::Dog::StructurePropertyRelationshipPath>
+  end
+  
+  rule structure_property
+    s? event_property_direction? structure_property_type? structure_property_name (s? '=' s primary)? sn <::Dog::StructureProperty>
+  end
+  
+  rule structure_property_type
+    identifier s <::Dog::StructurePropertyType>
+  end
+  
+  rule structure_property_name
+    identifier '' <::Dog::StructurePropertyName>
+  end
+  
+  rule event_property_direction
+    (event_property_direction_input / event_property_direction_output) s <::Dog::StructurePropertyDirection>
+  end
+  
+  rule event_property_direction_input
+    'input' <::Dog::StructurePropertyDirectionInput>
+  end
+  
+  rule event_property_direction_output
+    'output' <::Dog::StructurePropertyDirectionOutput>
+  end
+  
   
   
   

@@ -371,6 +371,77 @@ module Dog
     #end
   end
   
+  
+  
+  
+  class StructureDefinition < CollarNode
+    def compile
+      
+    end
+  end
+  
+  class StructureProperties < CollarNode
+  
+  end
+  
+  class StructureProperty < CollarNode
+    def compile
+      
+    end
+  end
+  
+  class StructurePropertyType < CollarNode
+    def compile
+      
+    end
+  end
+  
+  class StructurePropertyName < CollarNode
+    def compile
+      
+    end
+  end
+  
+  class StructurePropertyRelationship < CollarNode
+    
+  end
+  
+  class StructurePropertyRelationshipInverse < CollarNode
+    
+  end
+  
+  class StructurePropertyRelationshipPath < CollarNode
+    
+  end
+  
+  
+  class StructurePropertyDirection < CollarNode
+    def compile
+      
+    end
+  end
+  
+  class StructurePropertyDirectionInput < CollarNode
+    def compile
+      
+    end
+  end
+  
+  class StructurePropertyDirectionOutput < CollarNode
+    def compile
+      
+    end
+  end
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   class Listen < CollarNode
     def compile
       
