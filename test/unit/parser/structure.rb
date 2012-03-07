@@ -59,4 +59,52 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     @parser.parse(struct)
   end
   
+  def test_default
+    struct = <<-EOD
+      record data {
+        input string name = "Hi"
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+
+    struct = <<-EOD
+      record data {
+        string name = "Hi"
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    struct = <<-EOD
+      record data {
+        name = "Foobar"
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+  end
+  
+  def test_instance
+    @parser.parser.root = :structure
+    struct = <<-EOD
+      person {
+        first_name = "Salman"
+        string address = "Unknown"
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    @parser.parser.root = :program
+    struct = <<-EOD
+      salman = person {
+        first_name = "Salman"
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+  end
+  
 end

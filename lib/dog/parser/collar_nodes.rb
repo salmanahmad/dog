@@ -373,6 +373,11 @@ module Dog
   
   
   
+  class Structure < CollarNode
+    def compile
+      
+    end
+  end
   
   class StructureDefinition < CollarNode
     def compile
@@ -413,7 +418,6 @@ module Dog
   class StructurePropertyRelationshipPath < CollarNode
     
   end
-  
   
   class StructurePropertyDirection < CollarNode
     def compile

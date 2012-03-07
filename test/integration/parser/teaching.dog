@@ -11,15 +11,14 @@ record learner {
 }
 
 task provide_three_interests {
-  instructions: "Please provide three things that you are interested in learning and teaching."
-  
+  instructions = "Please provide three things that you are interested in learning and teaching."
   output required string objective
   output required list learnables
   output required list teachables
 }
 
 message match {
-  body : "We found a possible match for you!"
+  body = "We found a possible match for you!"
   input person possible_match
   input list learnables
   input list teachables

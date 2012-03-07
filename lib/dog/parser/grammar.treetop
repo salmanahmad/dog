@@ -216,7 +216,7 @@ grammar Dog
   # ==============
   
   rule structure_definition
-    identifier s identifier s '{' sn? structure_properties sn? '}' <::Dog::StructureDefinition>
+    identifier s identifier s '{' sn? structure_properties? sn? '}' <::Dog::StructureDefinition>
   end
   
   rule structure_properties
@@ -236,11 +236,11 @@ grammar Dog
   end
   
   rule structure_property
-    s? event_property_direction? structure_property_type? structure_property_name (s? '=' s primary)? sn <::Dog::StructureProperty>
+    s? event_property_direction? (structure_property_type / structure_property_name) (s '=' s primary)? sn <::Dog::StructureProperty>
   end
   
   rule structure_property_type
-    identifier s <::Dog::StructurePropertyType>
+    identifier s identifier <::Dog::StructurePropertyType>
   end
   
   rule structure_property_name
@@ -259,6 +259,9 @@ grammar Dog
     'output' <::Dog::StructurePropertyDirectionOutput>
   end
   
+  rule structure 
+    identifier s '{' sn? structure_properties? sn? '}' <::Dog::Structure>
+  end
   
   
   
@@ -617,7 +620,7 @@ grammar Dog
   end
 
   rule collection
-    array / hash
+    array / structure / hash
   end
 
   rule array 
