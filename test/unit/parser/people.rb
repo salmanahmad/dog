@@ -38,4 +38,9 @@ class ParserTests::PeopleTest < Test::Unit::TestCase
     @parser.parse("PERSON WHERE age > 7")
   end
   
+  def test_assignment
+    @parser.parser.root = :program
+    @parser.parse("potential_matches = PEOPLE FROM learners WHERE learnables == interests.teachables OR teachables == interests.learables")
+  end
+  
 end

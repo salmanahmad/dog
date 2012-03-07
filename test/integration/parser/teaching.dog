@@ -116,7 +116,10 @@ ON request IN dormouse.profile.edit DO
     
     NOTIFY user VIA email OF match USING possible_match = match, learnables = match.learnables, teachables = match.teachables
     
-    NOTIFY PERSON FROM potential_match VIA email OF match USING possible_match = user, learnables = user.learnables, teachables = user.teachables
+    NOTIFY PERSON FROM potential_match VIA email OF match USING 
+      possible_match = user, 
+      learnables = user.learnables, 
+      teachables = user.teachables
   END
   
 END

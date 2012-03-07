@@ -573,7 +573,7 @@ grammar Dog
   end
 
   rule identifier_association_explicit
-    s? identifier s? '=' s? primary s? (',' &identifier_association / '' !identifier_association) <::Dog::IdentifierAssociation>
+    sn? identifier s? '=' s? primary s? (',' &identifier_association / '' !identifier_association) <::Dog::IdentifierAssociation>
   end
   
   rule identifier_association_implicit
