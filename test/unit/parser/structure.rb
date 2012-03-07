@@ -41,4 +41,22 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     @parser.parse(struct)
   end
   
+  def test_additional
+    struct = <<-EOD
+      record data {
+        string name
+        input string name
+        
+        
+        relationship friends
+        
+        
+        relationship followers, followees
+        relationship books, book.readers
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+  end
+  
 end
