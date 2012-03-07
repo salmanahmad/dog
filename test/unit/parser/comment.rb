@@ -23,6 +23,11 @@ class ParserTests::CommentTest < Test::Unit::TestCase
     @parser.parse("\n\n\n  1+2 # comments\n\n\n")
   end
   
+  def test_comment_with_string
+    @parser.parse(%Q|# comments "This is a string"\n|)
+    @parser.parse("\n\n\n  1+2 # comments \"This is a string\" \n\n\n")
+  end
+  
   def test_hash
     program = <<-EOD
     

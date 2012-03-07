@@ -48,14 +48,15 @@ event meeting {
   input person requested_person
 }
 
-LISTEN TO PEOPLE FOR meetings
+LISTEN TO PEOPLE VIA http FOR meetings
 
 
 ON meeting DO
   requester = PERSON FROM meeting
   requestee = meeting.requested_person
+  group = [requestee, requester]
   
-  NOTIFY [requestee, requester] VIA email OF "Hey! You guys should get together!"
+  NOTIFY group VIA email OF "Hey! You guys should get together!"
 END
 
 
@@ -78,15 +79,15 @@ ON request IN dormouse.account.create DO
   # We ask users the provide_three_interests tasks. Notice how the output
   # is annotated in the task definitions. This is a nice improvement over
   # protocol buffers.
-  interests = ASK user TO provide_three_interests
+  interests = ASK user VIA stream TO provide_three_interests
   
   # This is a black box container that assigns keys from one hash to another
   # Once again, I note that I do not love our function sytnax...
-  COMPUTE assign ON user.learner USING attributes: intrests
+  COMPUTE assign ON user.learner USING attributes = intrests
   
   # This is a pretty brittle matching algorithm. We likely will want to do something more principled to match
   # people up in the future. I don't know how that would look though...
-  potential_matches = SELECT PEOPLE FROM learners WHERE learnables == interests.teachables OR teachables == interests.learables
+  potential_matches = PEOPLE FROM learners WHERE learnables == interests.teachables OR teachables == interests.learables
   
   # Iterate over each math and notify both parties
   FOR EACH potential_match IN potential_matches DO
@@ -94,15 +95,9 @@ ON request IN dormouse.account.create DO
     COMPUTE append ON user.pairs, potential_match
     COMPUTE append ON potential_matche.pairs, user
     
-    NOTIFY user VIA email OF match USING 
-      possible_match : match,
-      learnables : match.learnables,
-      teachables : match.teachables
+    NOTIFY user VIA email OF match USING possible_match = match, learnables = match.learnables, teachables = match.teachables
     
-    NOTIFY PERSON FROM potential_match VIA email OF match USING
-      possible_match : user,
-      learnables : user.learnables,
-      teachables : user.teachables
+    NOTIFY PERSON FROM potential_match VIA email OF match USING possible_match = user, learnables = user.learnables, teachables = user.teachables
   END
   
 END
@@ -112,22 +107,16 @@ END
 ON request IN dormouse.profile.edit DO
   user = PERSON FROM request
   
-  potential_matches = SELECT PEOPLE FROM learners WHERE learnables == interests.teachables OR teachables == interests.learables
+  potential_matches = PEOPLE FROM learners WHERE learnables == interests.teachables OR teachables == interests.learables
   
   FOR EACH potential_match IN potential_matches DO
     
     COMPUTE append ON user.pairs, potential_match
     COMPUTE append ON potential_matche.pairs, user
     
-    NOTIFY user VIA email OF match USING 
-      possible_match : match,
-      learnables : match.learnables,
-      teachables : match.teachables
+    NOTIFY user VIA email OF match USING possible_match = match, learnables = match.learnables, teachables = match.teachables
     
-    NOTIFY PERSON FROM potential_match VIA email OF match USING
-      possible_match : user,
-      learnables : user.learnables,
-      teachables : user.teachables
+    NOTIFY PERSON FROM potential_match VIA email OF match USING possible_match = user, learnables = user.learnables, teachables = user.teachables
   END
   
 END

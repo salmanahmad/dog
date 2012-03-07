@@ -720,7 +720,7 @@ grammar Dog
   end
 
   rule comment
-    '#' [^"\n"]* ("\n" / end_of_file)
+    '#' (!"\n" .)* ("\n" / end_of_file)
   end
 
   rule sn
