@@ -385,6 +385,12 @@ module Dog
     end
   end
   
+  class StructureNestedDefinition < CollarNode
+    def compile
+      
+    end
+  end
+  
   class StructureProperties < CollarNode
   
   end

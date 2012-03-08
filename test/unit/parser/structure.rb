@@ -108,7 +108,36 @@ class ParserTests::StructureTest < Test::Unit::TestCase
   end
   
   def test_nested
-    flunk
+    struct = <<-EOD
+      event book {
+        event create {
+          input string title
+          number_of_chapters
+          table_of_contents
+        }
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    struct = <<-EOD
+      event book {
+        event create {
+          event foo {
+            event bar {
+              input
+            }
+          }
+          
+          
+          input string title
+          number_of_chapters
+          table_of_contents
+        }
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
   end
   
 end

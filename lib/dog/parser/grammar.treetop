@@ -219,8 +219,14 @@ grammar Dog
     identifier s identifier s '{' sn? structure_properties? sn? '}' <::Dog::StructureDefinition>
   end
   
+  # TODO - It is so stupid that I have to do this. Figure out a better way to get PEGs to work
+  # or figure out a bettery way to "clean_tree" in the parser. This is kind of annoying...
+  rule structure_nested_definition
+    structure_definition sn <::Dog::StructureNestedDefinition>
+  end
+  
   rule structure_properties
-    (structure_relationship_property / structure_property)+ <::Dog::StructureProperties>
+    (structure_nested_definition / structure_relationship_property / structure_property)+ <::Dog::StructureProperties>
   end
   
   rule structure_relationship_property
