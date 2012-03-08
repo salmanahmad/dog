@@ -107,4 +107,8 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     
   end
   
+  def test_nested
+    flunk
+  end
+  
 end
