@@ -13,6 +13,11 @@ module Dog::Application
         # track.checkpoint(1) - For example, "foobar('baz') unless track.reached_checkpoint(4)"
         # track.checkpoint - Automatically increment internal checkpoint timestamp.
         
+        # Instead of Variable.named can't I just do "local_variables"
+        # from the bindings - No. I don't love this idea because it
+        # makes the implementation very ruby specific and make things more 
+        # difficult if we ever have the need to work. Also, the code will look
+        # strange to say the least. Best be verbose but understandable.
         Track.current.checkpoint { Variable.named("requester").value = Person.from_variable(meeting) }
         Track.current.checkpoint { Variable.named("requestee").value = meeting.requested_person }
         Track.current.checkpoint { group = [Variable.named("requestee").value, Variable.named("requester").value] }
@@ -29,6 +34,14 @@ module Dog::Application
     # How do I do a fast restart and skip the crap that is in 
     # the Application scope? - The same way that we do it in the
     # normal handlers
+    
+    # Do I like this? Communities being a variable?
+    # It feels like there is some disconnect between this and
+    # the way we define Records and Events which is somewhat 
+    # concerning - Don't worry about. First of all, no one will
+    # be using the Ruby driver initially anyways, so it is not 
+    # that big of a deal and we can always add syntactic sugar
+    # to make this nicer down the road...
     Track.current.checkpoint do
       Dog::Variable.named("learners").value = Community.new do
       
@@ -78,7 +91,6 @@ module Dog::Application
       property "requested_person", :type => Person, :direction => "input"
     end
     
-    
     # http://ujihisa.blogspot.com/2009/11/accepting-both-get-and-post-method-in.html
     Server.listen(:via => "http", :at => "meetings", :eligibility => People, :event => Meeting, :handler => :meetings_68b329_1)
     
@@ -87,15 +99,7 @@ module Dog::Application
     Server.listen(:event => Dormouse::Account::Create, :handler => :dormouse_account_create_d8ad52_1)
     
     
-    # Issues at this point:
-    # Instead of Variable.named can't I just do "local_variables" from the bindings
-    
-    # TODO - Do I like this? Communities being a variable?
-    # It feels like there is some disconnect between this and
-    # the way we define Records and Events which is somewhat 
-    # concerning 
-    
-    # How do I handle For loop and If statements
+    # How do I handle control structures
     
   end
   
