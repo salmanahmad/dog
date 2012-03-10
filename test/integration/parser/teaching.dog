@@ -65,6 +65,10 @@ END
 # We are now waiting on the dormouse.account.create event (which we normally can ignore).
 # However, in this case we want to customize the account create experience.
 
+ON request IN dormouse_account_create DO
+  # Compare this to the other case...
+END
+
 ON request IN dormouse.account.create DO
   # Get our newly created user
   user = PERSON FROM request
