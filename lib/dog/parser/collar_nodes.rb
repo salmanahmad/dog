@@ -7,7 +7,7 @@
 # above copyright notice is included.
 #
 
-module Dog
+module Dog::Nodes
   
   class Treetop::Runtime::SyntaxNode
     

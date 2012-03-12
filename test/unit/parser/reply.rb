@@ -41,7 +41,7 @@ class ParserTests::ReplyTest < Test::Unit::TestCase
   def test_not_allowed_top_level
     @parser.parser.root = :program
     program = @parser.parse("REPLY TO PEOPLE FROM request WITH data")
-    assert_equal(program.elements.first.elements.first.elements.first.class, Dog::ReplyDisallow)
+    assert_equal(program.elements.first.elements.first.elements.first.class, Dog::Nodes::ReplyDisallow)
   end
   
 end
