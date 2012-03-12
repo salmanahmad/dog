@@ -2,6 +2,55 @@ require File.join(File.dirname(__FILE__), "../lib/dog.rb")
 
 module Dog::Application
   
+  # How do I handle control structures
+  
+  if 5 == 7 then
+    # Something
+  else
+    # Something else
+  end
+  
+  
+  Track.current.checkpoint do
+    # Creating a checkpoint inside of another checkpoint creates an augmented
+    # checkpoint number. For example, [5, 1] instead of [6].
+    
+    # Each condition is saved in the track so we can quickly "catch" 
+    # up where we left off.
+    Track.current.checkpoint { Variable.named("_dog_conditional_1") = (5 == 7) }
+    
+    if Variable.named("_dog_conditional_1") then
+      Track.current.checkpoint { 
+        # Something
+      }
+    else
+      Track.current.checkpoint { 
+        # Something else
+      }
+    end
+  end
+  
+  
+  i = 0
+  while i < 7 do
+    # Something
+  end
+  
+  Track.current.checkpoint { Variable.named("i") = 0 }
+  Track.current.checkpoint do
+    Track.current.checkpoint { Variable.named("_dog_conditional_1") = Variable.named("i") < 7 }
+    while Variable.named("_dog_conditional_1") do
+      Track.current.checkpoint {
+        # Something
+      }
+      
+      # Note this order. It is really important. Okay?
+      Track.current.reset_checkpoint
+      Track.current.checkpoint { Variable.named("_dog_conditional_1") = Variable.named("i") < 7 }
+    end
+  end
+  
+  
   # Where does global statements go? - Inside of an EM block
   EM.run do
     
@@ -97,9 +146,6 @@ module Dog::Application
     # How to name handlers for system events - Convert '.' to '_' - Append a signature to all names - Add increment
     Server.listen(:event => ::Dog::Dormouse::Account::Create, :handler => :dormouse_account_create_68b329_1)
     Server.listen(:event => Dormouse::Account::Create, :handler => :dormouse_account_create_d8ad52_1)
-    
-    
-    # How do I handle control structures
     
   end
   
