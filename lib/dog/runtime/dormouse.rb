@@ -9,10 +9,12 @@
 
 module Dog
   
-  class Record < Structure
-    # TODO
-    
-    def self.relationship(name, options = {})
+  module Dormouse
+    class Account < Event
+      
+      class Create < Event
+        
+      end
       
     end
   end

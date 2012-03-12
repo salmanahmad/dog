@@ -36,6 +36,14 @@ module Dog
       t.instance_variable_set(:@track, self)
     end
     
+    def checkpoint &block
+      # TODO
+    end
+    
+    def reset_checkpoint &block
+      # TODO
+    end
+    
   end
   
 end

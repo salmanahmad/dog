@@ -9,6 +9,18 @@
 
 module Dog
   
+  def self.bark! &block
+    # TODO
+    
+    track = Track.new
+    fiber = TrackFiber.new do
+      yield
+    end
+    
+    fiber.track = track
+    fiber.resume
+  end
+  
   class Runtime
     
     def self.run(bark)

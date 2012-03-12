@@ -8,13 +8,20 @@
 #
 
 module Dog
-  
-  class Record < Structure
+  class Person < Record
+    # TODO
+  end
+
+  class People
     # TODO
     
-    def self.relationship(name, options = {})
+    def self.from
       
     end
+    
+    def self.where
+      
+    end
+    
   end
-  
 end

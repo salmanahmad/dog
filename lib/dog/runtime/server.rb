@@ -13,6 +13,24 @@ module Dog
     use Rack::Session::Cookie
     register Sinatra::Async
     
+    
+    def self.expose_variable(variable, options = {})
+      # TODO
+    end
+    
+    def self.expose_community(community, options = {})
+      # TODO
+    end
+    
+    def self.expose_profile_property(property, options = {})
+      # TODO
+    end
+    
+    def self.listen(options = {})
+      # TODO
+    end
+    
+    
     #enable :sessions
     enable :logging
     

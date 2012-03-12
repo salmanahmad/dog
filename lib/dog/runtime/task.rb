@@ -8,13 +8,7 @@
 #
 
 module Dog
-  
-  class Record < Structure
+  class Task < Event
     # TODO
-    
-    def self.relationship(name, options = {})
-      
-    end
   end
-  
 end

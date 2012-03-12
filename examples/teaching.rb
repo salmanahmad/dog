@@ -1,11 +1,30 @@
 require File.join(File.dirname(__FILE__), "../lib/dog.rb")
 
+
+# I need to figure out a way to forward declare relationship 
+# target types - The way I solve this is to have a forward declaration
+# section that defines all of the types that I am going to be using.
+
+
 # Where does global statements go? - Inside of a Dog.bark! call.
 # this call will set up EventMachine and start up the server as
 # well.
 Dog.bark! do
 
 module Dog::Application
+  
+  # This is just here because I don't want to re-write this example:
+  include Dog
+  
+  
+  # This is just here for the listen at the end of the file:
+  module Dormouse
+    class Account < ::Dog::Event
+      class Create < ::Dog::Event
+      end
+    end
+  end
+  
   
   # How do I handle control structures
   
@@ -21,7 +40,7 @@ module Dog::Application
     
     # Each condition is saved in the track so we can quickly "catch" 
     # up where we left off.
-    Track.current.checkpoint { Variable.named("_dog_conditional_1") = (5 == 7) }
+    Track.current.checkpoint { Variable.named("_dog_conditional_1").value = (5 == 7) }
     
     if Variable.named("_dog_conditional_1") then
       Track.current.checkpoint { 
@@ -37,11 +56,12 @@ module Dog::Application
   i = 0
   while i < 7 do
     # Something
+    break
   end
   
-  Track.current.checkpoint { Variable.named("i") = 0 }
+  Track.current.checkpoint { Variable.named("i").value = 0 }
   Track.current.checkpoint do
-    Track.current.checkpoint { Variable.named("_dog_conditional_1") = Variable.named("i") < 7 }
+    Track.current.checkpoint { Variable.named("_dog_conditional_1").value = Variable.named("i") < 7 }
     while Variable.named("_dog_conditional_1") do
       Track.current.checkpoint {
         # Something
@@ -49,7 +69,7 @@ module Dog::Application
       
       # Note this order. It is really important. Okay?
       Track.current.reset_checkpoint
-      Track.current.checkpoint { Variable.named("_dog_conditional_1") = Variable.named("i") < 7 }
+      Track.current.checkpoint { Variable.named("_dog_conditional_1").value = Variable.named("i") < 7 }
     end
   end
       
@@ -99,14 +119,14 @@ module Dog::Application
   # Where does Config go and where does that fit in? - Inline we will handle 
   # sinatra configurational stuff as it comes up
   Config.set("default_community", "learners")
-
+  
   # Classes can be nested. They just can't go inside of a function.
   class Learner < Record
     property "objective", :type => String
     property "learnables", :type => Array
     property "teachables", :type => Array
-    property "friends", :type => Relationship, :target_type => self, :target_property => "friends"
-    property "pairs", :type => Relationship, :target_type => self, :target_property => "friends"
+    relationship "friends", :target_type => self, :target_property => "friends"
+    relationship "pairs", :target_type => self, :target_property => "pairs"
   end
   
   class ProvideThreeInterests < Task
@@ -118,7 +138,7 @@ module Dog::Application
   
   class Match < Message
     property "body", :value => "We found a possible match for you!"
-    property "possible_match", :type => Person, :direction => "input"
+    property "possible_match", :type => ::Dog::Person, :direction => "input"
     property "learnables", :type => Array, :direction => "input"
     property "teachables", :type => Array, :direction => "input"
   end
@@ -136,7 +156,7 @@ module Dog::Application
   Server.expose_profile_property(:all, :eligibility => People, :access => :readwrite)  
   
   class Meeting < Event 
-    property "requested_person", :type => Person, :direction => "input"
+    property "requested_person", :type => ::Dog::Person, :direction => "input"
   end
   
   # http://ujihisa.blogspot.com/2009/11/accepting-both-get-and-post-method-in.html
