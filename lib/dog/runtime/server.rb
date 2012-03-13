@@ -37,7 +37,7 @@ module Dog
       
       # TODO
     end
-    
+        
     def self.listen(options = {})
       @@listeners = true
       
@@ -64,18 +64,48 @@ module Dog
         self.aget location do
           # TODO - Use EM.next_tick at some point?
           
+          parameters = params
+          
+          if request.media_type == 'application/json' then
+            begin
+              parameters = JSON.parse(request.body)
+            rescue
+              parameters = {}
+            end
+          end
+          
+          begin
+            input = event.create_from_hash(parameters)
+          rescue Exception => e
+            puts e
+          end
+          
+          unless input
+            status 400
+            body "Invalid input"
+            return
+          end
+          
           track = Track.new
           fiber = TrackFiber.new do
-            ::Dog::Application::Handlers.send(handler, params)
+            ::Dog::Application::Handlers.send(handler, input)
+          end
+          
+          reply_fiber = Fiber.new do
+            reply = track.context[:reply]
+            if reply then
+              body track.context[:reply]
+            else
+              # TODO
+              body "Default content"
+            end
           end
 
-          fiber.track = track
-          data = fiber.resume
-          body data
+          track.context[:reply_fiber] = reply_fiber
           
-          EM.add_timer(5) do
-            fiber.resume
-          end
+          fiber.track = track
+          fiber.resume
+          reply_fiber.resume unless fiber.alive?
         end        
       end
     end

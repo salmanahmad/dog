@@ -10,11 +10,12 @@
 module Dog
   
   class Event < Structure
-    # TODO
+    
+    
   end
   
-  class SystemEvent
-    # TODO
+  class SystemEvent < Event
+    
   end
   
 end

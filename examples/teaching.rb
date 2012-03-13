@@ -84,9 +84,7 @@ module Dog::Application
       # track.checkpoint(1) - For example, "foobar('baz') unless track.reached_checkpoint(4)"
       # track.checkpoint - Automatically increment internal checkpoint timestamp.
       
-      # Server.reply
-
-      ::Dog::reply "hai"
+      ::Dog.reply "#{meeting.data.inspect} - #{meeting.data.class}"
       
       # Instead of Variable.named can't I just do "local_variables"
       # from the bindings - No. I don't love this idea because it
@@ -151,7 +149,6 @@ module Dog::Application
   end
   
   
-  
   # LET PEOPLE READ AND WRITE RECORD books
   Server.expose_variable("books", :eligibility => People, :access => :readwrite)
   
@@ -165,7 +162,8 @@ module Dog::Application
   Server.expose_profile_property(:all, :eligibility => People, :access => :readwrite)  
   
   class Meeting < Event 
-    property "requested_person", :type => ::Dog::Person, :direction => "input"
+    #property "requested_person", :type => ::Dog::Person, :direction => "input"
+    property "data", :type => Hash, :direction => "input", :required => true
   end
   
   # http://ujihisa.blogspot.com/2009/11/accepting-both-get-and-post-method-in.html

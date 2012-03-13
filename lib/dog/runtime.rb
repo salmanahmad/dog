@@ -15,6 +15,7 @@ require 'thin'
 require 'sinatra/base'
 require 'sinatra/async'
 require 'uuid'
+require 'json'
 
 require File.join(File.dirname(__FILE__), 'runtime/environment.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')

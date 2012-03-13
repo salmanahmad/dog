@@ -14,11 +14,13 @@ module Dog
     attr_accessor :name
     attr_accessor :parent
     attr_accessor :children
+    attr_accessor :context
     
     attr_accessor :fiber
     
     def initialize
       self.name = UUID.new.generate
+      self.context = {}
     end
     
     def self.current

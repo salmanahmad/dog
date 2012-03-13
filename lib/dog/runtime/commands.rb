@@ -10,9 +10,8 @@
 module Dog
   def self.reply(data)
     # TODO - Potentially transform the data
-    # I also may not be able to just return the data. I may need to 
-    # add data to Fiber.current.context or something incase there is a 
-    Fiber.yield data
+    Track.current.context[:reply] = data
+    Track.current.context[:reply_fiber].resume
   end
   
   def self.ask

@@ -11,7 +11,6 @@ module Dog
   
   class TrackFiber < Fiber
     attr_accessor :track
-    attr_accessor :request_context
     
     def track=(t)
       @track = t
