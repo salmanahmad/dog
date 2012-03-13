@@ -11,6 +11,17 @@ module Dog
   
   class Server < Sinatra::Base
     
+    def self.get_or_post(path, opts={}, &block)
+      get(path, opts, &block)
+      post(path, opts, &block)
+    end
+    
+    def self.aget_or_post(path, opts={}, &block)
+      aget(path, opts, &block)
+      apost(path, opts, &block)
+    end
+    
+    
     # If I remember correctly, I was having problems with
     # sinatra async and the default cookie-based sessions
     # I used this to address some of the concerns.
@@ -61,7 +72,7 @@ module Dog
         end
         
         # TODO - GET or POST
-        self.aget location do
+        self.aget_or_post location do
           # TODO - Use EM.next_tick at some point?
           
           parameters = params

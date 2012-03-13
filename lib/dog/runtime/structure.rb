@@ -62,8 +62,6 @@ module Dog
           object.send("#{name}=".intern, params[name])
           value = object.send(name.intern)
         rescue Exception => e
-          puts e
-          puts e.backtrace
           return nil
         end
       end
