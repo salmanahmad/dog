@@ -8,15 +8,18 @@
 #
 
 module Dog
-  
-  module Dormouse
-    class Account < SystemEvent
-      
-      class Create < SystemEvent
-        
-      end
-      
-    end
+  def self.reply(data)
+    # TODO - Potentially transform the data
+    # I also may not be able to just return the data. I may need to 
+    # add data to Fiber.current.context or something incase there is a 
+    Fiber.yield data
   end
   
+  def self.ask
+    
+  end
+  
+  def self.notify
+    
+  end
 end

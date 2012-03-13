@@ -35,6 +35,7 @@ require File.join(File.dirname(__FILE__), 'runtime/task.rb')
 
 require File.join(File.dirname(__FILE__), 'runtime/dormouse.rb')
 
+require File.join(File.dirname(__FILE__), 'runtime/commands.rb')
 
 
 module Dog end

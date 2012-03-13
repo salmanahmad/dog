@@ -75,11 +75,18 @@ module Dog::Application
       
   module Handlers
     
+    # This is just here because I don't want to re-write this example:
+    include Dog
+    
     def self.meetings_68b329_1(meeting)
       # How do I do a continue inside of a function with a track?
       # track.reached_checkpoint?(1)
       # track.checkpoint(1) - For example, "foobar('baz') unless track.reached_checkpoint(4)"
       # track.checkpoint - Automatically increment internal checkpoint timestamp.
+      
+      # Server.reply
+
+      ::Dog::reply "hai"
       
       # Instead of Variable.named can't I just do "local_variables"
       # from the bindings - No. I don't love this idea because it
@@ -90,7 +97,7 @@ module Dog::Application
       Track.current.checkpoint { Variable.named("requestee").value = meeting.requested_person }
       Track.current.checkpoint { group = [Variable.named("requestee").value, Variable.named("requester").value] }
       
-      track.checkpoint { notify(:via => :email, :recipients => group, :message => "Hey! You guys should get together!") }
+      Track.current.checkpoint { notify(:via => :email, :recipients => group, :message => "Hey! You guys should get together!") }      
     end
   
   end
@@ -143,6 +150,8 @@ module Dog::Application
     property "teachables", :type => Array, :direction => "input"
   end
   
+  
+  
   # LET PEOPLE READ AND WRITE RECORD books
   Server.expose_variable("books", :eligibility => People, :access => :readwrite)
   
@@ -164,7 +173,7 @@ module Dog::Application
   
   # How to name handlers for system events - Convert '.' to '_' - Append a signature to all names - Add increment
   Server.listen(:event => ::Dog::Dormouse::Account::Create, :handler => :dormouse_account_create_68b329_1)
-  Server.listen(:event => Dormouse::Account::Create, :handler => :dormouse_account_create_d8ad52_1)
+  #Server.listen(:event => Dormouse::Account::Create, :handler => :dormouse_account_create_d8ad52_1)
 end
 
 end

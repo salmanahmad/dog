@@ -10,15 +10,24 @@
 module Dog
   
   def self.bark! &block
-    # TODO
-    
-    track = Track.new
-    fiber = TrackFiber.new do
-      yield
+    EM.run do
+      track = Track.new
+      fiber = TrackFiber.new do
+        yield
+      end
+
+      fiber.track = track
+      fiber.resume
+      
+      # TODO If there are no listeners that are active then 
+      # (keep in mind, that ASKs may have implicit listeners):
+      if Server.listeners? then
+        port = Config.get('port') || 4567
+        Thin::Server.start '0.0.0.0', port, Server
+      else
+        EM.stop
+      end
     end
-    
-    fiber.track = track
-    fiber.resume
   end
   
   class Runtime
@@ -28,25 +37,8 @@ module Dog
       runtime.run(bark)
     end
     
-    def initialize
-      
-    end
-    
     def run(bark)
-      EM.run do
-        bark.run
-        
-        # TODO If there are no listeners that are active then 
-        # (keep in mind, that ASKs may have implicit listeners):
-        if Server.listeners? then
-          port = Config.get('port')|| 4567
-          
-          Server.set :root, Environment.program_directory
-          Thin::Server.start '0.0.0.0', port, Server
-        else
-          EM.stop
-        end
-      end
+      eval(bark)
     end
     
   end

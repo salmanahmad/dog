@@ -10,29 +10,78 @@
 module Dog
   
   class Server < Sinatra::Base
-    use Rack::Session::Cookie
-    register Sinatra::Async
     
+    # If I remember correctly, I was having problems with
+    # sinatra async and the default cookie-based sessions
+    # I used this to address some of the concerns.
+    register Sinatra::Async
+    use Rack::Session::Cookie
+    enable :logging  
+    #enable :sessions
+    enable :raise_errors
     
     def self.expose_variable(variable, options = {})
+      @@listeners = true
+      
       # TODO
     end
     
     def self.expose_community(community, options = {})
+      @@listeners = true
+      
       # TODO
     end
     
     def self.expose_profile_property(property, options = {})
+      @@listeners = true
+      
       # TODO
     end
     
     def self.listen(options = {})
-      # TODO
+      @@listeners = true
+      
+      if options[:handler].nil? || options[:event].nil? then
+        raise "You must provide a handler an event to a listener."
+      end
+      
+      eligibility = options[:eligibility]
+      handler = options[:handler]
+      event = options[:event]
+      location = options[:at]
+      
+      if event.ancestors.include? SystemEvent then
+        # System event...
+        
+      elsif
+        # User event...
+        
+        if location[0] != '/' then
+          location = '/' + location   
+        end
+        
+        # TODO - GET or POST
+        self.aget location do
+          # TODO - Use EM.next_tick at some point?
+          
+          track = Track.new
+          fiber = TrackFiber.new do
+            ::Dog::Application::Handlers.send(handler, params)
+          end
+
+          fiber.track = track
+          data = fiber.resume
+          body data
+          
+          EM.add_timer(5) do
+            fiber.resume
+          end
+        end        
+      end
     end
     
     
-    #enable :sessions
-    enable :logging
+
     
     @@listeners = false
     @@variables = {}
@@ -78,7 +127,7 @@ module Dog
     end
     
     
-    apost '/action' do
+    post '/action' do
       
       path = params["DogAction"]
       params.delete("DogAction")  

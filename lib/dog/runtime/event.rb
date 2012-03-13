@@ -8,7 +8,13 @@
 #
 
 module Dog
+  
   class Event < Structure
     # TODO
   end
+  
+  class SystemEvent
+    # TODO
+  end
+  
 end
