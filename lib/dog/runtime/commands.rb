@@ -10,8 +10,8 @@
 module Dog
   def self.reply(data)
     # TODO - Potentially transform the data
-    Track.current.context[:reply] = data
-    Track.current.context[:reply_fiber].resume
+    fiber = Track.current.context[:reply_fiber]
+    fiber.resume(data) if fiber.alive?
   end
   
   def self.ask

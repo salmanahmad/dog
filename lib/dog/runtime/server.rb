@@ -11,6 +11,19 @@ module Dog
   
   class Server < Sinatra::Base
     
+    before do
+      if request.media_type == 'application/json' then
+        parameters = nil
+        begin
+          parameters = JSON.parse(request.body)
+        rescue
+          parameters = {}
+        end
+        
+        params.merge!(parameters)
+      end
+    end
+    
     def self.get_or_post(path, opts={}, &block)
       get(path, opts, &block)
       post(path, opts, &block)
@@ -48,7 +61,9 @@ module Dog
       
       # TODO
     end
-        
+    
+    @@handlers = {}
+    
     def self.listen(options = {})
       @@listeners = true
       
@@ -57,9 +72,10 @@ module Dog
       end
       
       eligibility = options[:eligibility]
-      handler = options[:handler]
+      handler = options[:handler] 
       event = options[:event]
       location = options[:at]
+      
       
       if event.ancestors.include? SystemEvent then
         # System event...
@@ -71,24 +87,15 @@ module Dog
           location = '/' + location   
         end
         
-        # TODO - GET or POST
+        @@handlers[event] ||= [] 
+        @@handlers[event].push(handler)
+         
         self.aget_or_post location do
-          # TODO - Use EM.next_tick at some point?
-          
-          parameters = params
-          
-          if request.media_type == 'application/json' then
-            begin
-              parameters = JSON.parse(request.body)
-            rescue
-              parameters = {}
-            end
-          end
           
           begin
-            input = event.create_from_hash(parameters)
+            input = event.create_from_hash(params)
           rescue Exception => e
-            puts e
+            input = nil
           end
           
           unless input
@@ -97,30 +104,54 @@ module Dog
             return
           end
           
-          track = Track.new
-          fiber = TrackFiber.new do
-            ::Dog::Application::Handlers.send(handler, input)
-          end
-          
           reply_fiber = Fiber.new do
-            reply = track.context[:reply]
+            reply = Fiber.yield
             if reply then
-              body track.context[:reply]
+              body reply
             else
               # TODO
               body "Default content"
             end
           end
-
-          track.context[:reply_fiber] = reply_fiber
           
-          fiber.track = track
-          fiber.resume
-          reply_fiber.resume unless fiber.alive?
+          for handler in @@handlers[event] do
+            EM.next_tick do
+              track = Track.new
+              fiber = TrackFiber.new do
+                ::Dog::Application::Handlers.send(handler, input)
+              end
+              track.context[:reply_fiber] = reply_fiber
+              track.fiber = fiber
+              track.fiber.resume
+            end
+          end
+          
+          reply_fiber.resume
         end        
       end
     end
     
+    
+    
+    def self.boot
+      port = Config.get('port') || 4567
+      prefix = Config.get('dog_prefix') || "/dog"
+      
+      if prefix[0] != '/' then
+        prefix = '/' + prefix
+      end
+      
+      if prefix[-1] != '/' then
+        prefix = prefix + '/'
+      end
+      
+      get_or_post prefix + 'account.create' do
+        
+      end
+      
+      
+      Thin::Server.start '0.0.0.0', port, Server
+    end
     
 
     

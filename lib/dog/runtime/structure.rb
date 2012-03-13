@@ -18,7 +18,7 @@ module Dog
     TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].to_set
     
     BOOLEAN_VALUES = FALSE_VALUES | TRUE_VALUES
-    
+        
     def self.convert(value, type)
       return value if value.kind_of? type
       return nil if value.nil?
@@ -51,6 +51,9 @@ module Dog
       end
     end
     
+    def self.name
+      self.name.downcase.gsub("::", ".")
+    end
     
     def self.create_from_hash(params)
       object = self.new

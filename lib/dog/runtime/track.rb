@@ -35,7 +35,7 @@ module Dog
     
     def fiber=(f)
       @fiber = f
-      t.instance_variable_set(:@track, self)
+      f.instance_variable_set(:@track, self)
     end
     
     def checkpoint &block
