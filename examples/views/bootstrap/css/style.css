@@ -70,3 +70,37 @@ footer #dog-powered {
 #sign-in-form {
   display:none;
 }
+
+.profile-box {
+    /*
+    border-radius:5px;
+    background-color:#eee;
+    */
+    margin-bottom:20px;
+      border-bottom:5px solid #08c;
+}
+
+.profile-box > div > * {
+    margin:25px;
+}
+
+.profile-box .image {
+    padding:20px;
+    border:1px solid #ccc;
+    background-color:white;
+}
+
+.profile-box img {
+    width:100%;
+}
+
+
+.sidebar li {
+    font-size:15px;
+    line-height:200%;
+}
+
+
+
+
+
