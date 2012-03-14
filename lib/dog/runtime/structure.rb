@@ -65,11 +65,41 @@ module Dog
           object.send("#{name}=".intern, params[name])
           value = object.send(name.intern)
         rescue Exception => e
+          @instances.delete object
           return nil
         end
       end
       
       return object
+    end
+    
+    def self.instances(conditions = {})
+      @instances ||= {}
+      resultset = []
+      
+      
+      for id, object in @instances do
+        
+        accept = true
+        
+        for property, value in conditions do
+          accept = object[property] == value rescue false
+          break unless accept
+        end 
+        
+        resultset << object if accept
+      end
+      
+      return resultset
+    end
+    
+    def self.add_instance(object)
+      @instances ||= {}
+      @instances[object] = object
+    end
+    
+    def initialize
+      self.class.add_instance(self)
     end
     
     def save_to_hash()
@@ -79,6 +109,10 @@ module Dog
     
     def self.properties
       @properties ||= {}
+    end
+    
+    def [](property)
+      self.send(property.intern)
     end
     
     def self.property(name, options = {})
