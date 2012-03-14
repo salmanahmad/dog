@@ -1,187 +1,70 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Learning Web</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%= layout "/layout.html" %>
 
-    <link href='http://fonts.googleapis.com/css?family=Sansita+One' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" type="text/css" media="screen" charset="utf-8">
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $("#sign-in-button").click(function() {
+      $("#create-account-form").slideUp(function() {
+        $("#sign-in-form").slideDown();
+      });
+      
+    });
     
-    <!--<link rel="stylesheet" href="bootstrap/css/bootstrap-responsive.min.css" type="text/css" media="screen" title="no title" charset="utf-8">-->
-    
-    <style type="text/css" media="screen">
-      body {
-        margin-top:0px;
-        background-color:#eee;
-      }
+    $("#create-account-button").click(function() {
+      $("#sign-in-form").slideUp(function() {
+        $("#create-account-form").slideDown();  
+      });
       
-      header {
-        padding:15px;
-        margin-bottom:10px;
-        border-bottom:5px solid #08c;
-        
-      }
-      
-      header h1 {
-        font-family: 'Sansita One', cursive;
-        font-weight:normal;
-        
-      }
-      
-      footer {
-        padding:25px 50px;
-        margin:-50px;
-        margin-top:30px;
-        background-color:#eee;
-      }
-      
-      footer ul {
-        margin:0px;
-        padding:0px;
-      }
-      
-      footer ul li {
-        display:inline;
-        margin-right:15px;
-      }
-      
-      footer #dog-powered {
-        float:right;
-      }
-      
-      .hero-unit {
-        border-radius:0;
-        background-color:#fff;
-        border:none;
-        border-bottom:5px solid #08c;
-      }
-      
-      .hero-unit h1 {
-        font-size:40px;
-      }
-      
-      .container {
-        background-color:white;
-        padding:50px;
-        box-shadow:0px 0px 10px #555;
-      }
-      
-      #create-account-form {
-        display:none;
-      }
-      
-      #sign-in-form {
-        display:none;
-      }
-      
-    </style>
-    
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    
-    <script src="bootstrap/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="bootstrap/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>    
-    
-    <script type="text/javascript" charset="utf-8">
-      $(function() {
-        $("#sign-in-button").click(function() {
-          $("#create-account-form").slideUp(function() {
-            $("#sign-in-form").slideDown();
-          });
-          
-        });
-        
-        $("#create-account-button").click(function() {
-          $("#sign-in-form").slideUp(function() {
-            $("#create-account-form").slideDown();  
-          });
-          
-        });
-        
-        
-      })
-    </script>
-  </head>
-  <body>
+    });
     
     
-    
-    <div class="container">
-      
-      <header>
-        <h1>Learning Web</h1>
-      </header>
-      
-
-      
-      
-      <div class="hero-unit">
-        <h1>Learn Together</h1>
-        <br>
-        <p>Achieve your goals while helping others reach theirs! <strong>Learning Web</strong> will pair you up with friends based on what each of you can <strong>teach</strong> and what you want to <strong>learn</strong>. Sign in or create an account to get started!</p>
-
-        <p>
-          <a id="sign-in-button" class="btn btn-primary btn-large">Sign In &raquo;</a>
-          <a id="create-account-button" class="btn btn-large">Create Account &raquo;</a>  
-        </p>
-
-      </div>
-      
-      
-      <form class="well form-inline" id="sign-in-form">
-        <h6>Sign In</h6>
-        <input type="text" class="input-medium" placeholder="Email">
-        <input type="password" class="input-medium" placeholder="Password">
-        <button type="submit" class="btn btn-primary">Sign in</button>
-      </form>
-
-
-      <form class="well form-inline" id="create-account-form">
-        <h6>Create Account</h6>
-        <input type="text" class="input-medium" placeholder="Email">
-        <input type="password" class="input-medium" placeholder="Password">
-        <input type="password" class="input-medium" placeholder="Confirm">
-        <button type="submit" class="btn btn-primary">Create Account</button>
-      </form>
+  })
+</script>
 
 
 
-      
-      <div class="row-fluid">
-        <div class="span4">
-          <h2>Step 1: Create account</h2>
+<div class="hero-unit">
+  <h1>Learn Together</h1>
+  <br>
+  <p>Achieve your goals while helping others reach theirs! <strong>Learning Web</strong> will pair you up with friends based on what each of you can <strong>teach</strong> and what you want to <strong>learn</strong>. Sign in or create an account to get started!</p>
+
+  <p>
+    <a id="sign-in-button" class="btn btn-primary btn-large">Sign In &raquo;</a>
+    <a id="create-account-button" class="btn btn-large">Create Account &raquo;</a>  
+  </p>
+
+</div>
+
+
+<form method="POST" action="/dog/account.signin" class="well form-inline" id="sign-in-form">
+  <h6>Sign In</h6>
+  <input type="text" class="input-medium" placeholder="Email" name="email">
+  <input type="password" class="input-medium" placeholder="Password" name="password">
+  <button type="submit" class="btn btn-primary">Sign in</button>
+</form>
+
+
+<form method="POST" action="/dog/account.create" class="well form-inline" id="create-account-form">
+  <h6>Create Account</h6>
+  <input type="text" class="input-medium" placeholder="Email" name="email">
+  <input type="password" class="input-medium" placeholder="Password" name="password">
+  <input type="password" class="input-medium" placeholder="Confirm" name="confirm">
+  <button type="submit" class="btn btn-primary">Create Account</button>
+</form>
+
+<div class="row-fluid">
+  <div class="span4">
+    <h2>Step 1: Create account</h2>
 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.        </div>
-        
-        <div class="span4">
-          <h2>Step 2: List interests </h2>
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.        </div>
-        
-        <div class="span4">
-          <h2>Step 3: Meet up</h2>
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.        
-        </div>
-        
-      </div>
-      
-       
-     <footer>
-        <div id="dog-powered">
-          Powered by Dog
-        </div>
-        
-       <ul>
-        <li><a>Help</a></li>
-        <li><a>About</a></li>
-        <li><a>Terms</a></li>
-        <li>&copy; 2012 MIT Social Computing Lab.</li>
-       </ul>
   
-     </footer>
-      
-      
-    </div>
-  </body>
-</html>
+  <div class="span4">
+    <h2>Step 2: List interests </h2>
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.        </div>
+  
+  <div class="span4">
+    <h2>Step 3: Meet up</h2>
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.        
+  </div>
+  
+</div>
+
+ 

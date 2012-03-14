@@ -11,6 +11,12 @@ module Dog
   
   class Server < Sinatra::Base
     
+    helpers do
+      def layout(name)
+        # Intentionally blank
+      end
+    end
+    
     before do
       if request.media_type == 'application/json' then
         parameters = nil
@@ -43,6 +49,34 @@ module Dog
     enable :logging  
     #enable :sessions
     enable :raise_errors
+    
+    get '*' do
+      path = params[:splat].first
+      path = "/index.html" if path == "/"
+      path = settings.public_folder + path
+      
+      if File.exists? path then
+        
+        
+        if File.extname(path) == ".html" then
+          line = File.open(path, &:readline)
+          match = line.match /^\s*<%=\s*layout\s+"(.+)"\s*%>\s*$/
+          if match then
+            template = settings.public_folder + match[1]
+            template_content = File.open(template, &:read)
+            path_content = File.open(path, &:read)
+            
+            erb path_content, :layout => template_content, :views => '/'
+          else
+            send_file path
+          end
+        else
+          send_file path
+        end
+      else
+        404
+      end
+    end
     
     def self.expose_variable(variable, options = {})
       @@listeners = true
@@ -144,10 +178,12 @@ module Dog
     
     def notify_handlers(event)
       input = process_event(event)
-      
+      handlers = @@handlers[request.path]
+            
       return unless input
+      return unless handlers
       
-      for handler in @@handlers[request.path] do
+      for handler in handlers do
         EM.next_tick do
           track = Track.new
           fiber = TrackFiber.new do
@@ -163,7 +199,7 @@ module Dog
       port = Config.get('port')
       prefix = Config.get('dog_prefix')
 
-      set :static, true
+      set :static, false
       set :public_folder, Proc.new { File.join(File.dirname($0), "views") }
       
       get_or_post prefix + 'meta' do
