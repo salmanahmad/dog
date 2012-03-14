@@ -163,6 +163,9 @@ module Dog
       port = Config.get('port')
       prefix = Config.get('dog_prefix')
 
+      set :static, true
+      set :public_folder, Proc.new { File.join(File.dirname($0), "views") }
+      
       get_or_post prefix + 'meta' do
         body "Dog Meta Data."
       end      
