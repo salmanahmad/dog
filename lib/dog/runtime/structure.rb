@@ -51,7 +51,7 @@ module Dog
       end
     end
     
-    def self.name
+    def self.identifier
       self.name.downcase.gsub("::", ".")
     end
     

@@ -9,14 +9,32 @@
 
 module Dog
   
-  module Dormouse
-    class Account < SystemEvent
-      
-      class Create < SystemEvent
-        
-      end
+  class Account < SystemEvent
+
+    class SignIn < SystemEvent
       
     end
+    
+    class SignOut < SystemEvent
+      
+    end
+    
+    class Create < SystemEvent
+      property "name", :type => String, :required => true, :direction => "input"
+    end
+    
+  end
+  
+  class Community < SystemEvent
+
+    class Join < SystemEvent
+      
+    end
+    
+    class Leave < SystemEvent
+      
+    end
+    
   end
   
 end

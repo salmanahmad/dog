@@ -78,31 +78,23 @@ module Dog
       
       
       if event.ancestors.include? SystemEvent then
-        # System event...
-        
+        location = Config.get('dog_prefix') + event.identifier
+        @@handlers[location] ||= []
+        @@handlers[location].push(handler)
       elsif
-        # User event...
-        
+        # TODO - Validate that the location is not part of the prefix
         if location[0] != '/' then
           location = '/' + location   
         end
         
-        @@handlers[event] ||= [] 
-        @@handlers[event].push(handler)
+        @@handlers[location] ||= [] 
+        @@handlers[location].push(handler)
          
         self.aget_or_post location do
           
-          begin
-            input = event.create_from_hash(params)
-          rescue Exception => e
-            input = nil
-          end
+          input = process_event(event)
           
-          unless input
-            status 400
-            body "Invalid input"
-            return
-          end
+          return unless input
           
           reply_fiber = Fiber.new do
             reply = Fiber.yield
@@ -114,7 +106,7 @@ module Dog
             end
           end
           
-          for handler in @@handlers[event] do
+          for handler in @@handlers[location] do
             EM.next_tick do
               track = Track.new
               fiber = TrackFiber.new do
@@ -131,24 +123,74 @@ module Dog
       end
     end
     
+    def process_event(event)
+      
+      input = nil
+      
+      begin
+        input = event.create_from_hash(params)
+      rescue Exception => e
+        input = nil
+      end
+      
+      unless input
+        status 400
+        body "Invalid input"
+        return nil
+      else
+        return input
+      end
+    end
     
+    def notify_handlers(event)
+      input = process_event(event)
+      
+      return unless input
+      
+      for handler in @@handlers[request.path] do
+        EM.next_tick do
+          track = Track.new
+          fiber = TrackFiber.new do
+            ::Dog::Application::Handlers.send(handler, input)
+          end
+          track.fiber = fiber
+          track.fiber.resume
+        end
+      end
+    end
     
     def self.boot
-      port = Config.get('port') || 4567
-      prefix = Config.get('dog_prefix') || "/dog"
-      
-      if prefix[0] != '/' then
-        prefix = '/' + prefix
+      port = Config.get('port')
+      prefix = Config.get('dog_prefix')
+
+      get_or_post prefix + 'meta' do
+        body "Dog Meta Data."
+      end      
+
+      get_or_post prefix + 'account.signin' do
+        notify_handlers(Account::SignIn)
+        body
       end
       
-      if prefix[-1] != '/' then
-        prefix = prefix + '/'
+      get_or_post prefix + 'account.signout' do
+        notify_handlers(Account::SignOut)
+        body
       end
-      
+
       get_or_post prefix + 'account.create' do
-        
+        notify_handlers(Account::Create)
+        body
       end
       
+      get_or_post prefix + 'community.join' do
+        notify_handlers(Community::Join)
+        body
+      end
+      
+      get_or_post prefix + 'community.leave' do
+        notify_handlers(Community::Leave)
+        body
+      end
       
       Thin::Server.start '0.0.0.0', port, Server
     end

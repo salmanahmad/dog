@@ -78,6 +78,10 @@ module Dog::Application
     # This is just here because I don't want to re-write this example:
     include Dog
     
+    def self.dormouse_account_create_68b329_1(event)
+      puts "Account Create"
+    end
+    
     def self.meetings_68b329_1(meeting)
       # How do I do a continue inside of a function with a track?
       # track.reached_checkpoint?(1)
@@ -170,7 +174,8 @@ module Dog::Application
   Server.listen(:via => "http", :at => "meetings", :eligibility => People, :event => Meeting, :handler => :meetings_68b329_1)
   
   # How to name handlers for system events - Convert '.' to '_' - Append a signature to all names - Add increment
-  Server.listen(:event => ::Dog::Dormouse::Account::Create, :handler => :dormouse_account_create_68b329_1)
+  
+  Server.listen(:event => ::Dog::Account::Create, :handler => :dormouse_account_create_68b329_1)
   #Server.listen(:event => Dormouse::Account::Create, :handler => :dormouse_account_create_d8ad52_1)
 end
 

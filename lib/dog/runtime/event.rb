@@ -10,12 +10,13 @@
 module Dog
   
   class Event < Structure
-    
-    
+        
   end
   
   class SystemEvent < Event
-    
+    def self.identifier
+      self.name.downcase.split("::")[1..-1].join(".")
+    end
   end
   
 end
