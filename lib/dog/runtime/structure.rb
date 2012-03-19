@@ -18,20 +18,18 @@ module Dog
     TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].to_set
     
     BOOLEAN_VALUES = FALSE_VALUES | TRUE_VALUES
-        
-    def self.convert(value, type)
+
+    def self.identifier
+      self.name.downcase.gsub("::", ".")
+    end
+    
+    def self.convert_value_to_type(value, type)
       return value if value.kind_of? type
       return nil if value.nil?
       
       if type.kind_of? Structure then
-        if value.class != Hash then
-          return nil
-        else
-          type.create_from_hash(value)
-        end
-      end
-      
-      if type.class == String then
+        return type.from_hash(value)
+      elsif type.class == String then
         return value.to_s
       elsif type.class == Boolean then
         if BOOLEAN_VALUES.include?(value) then
@@ -41,31 +39,21 @@ module Dog
         end
       elsif type.class == Numeric then
         return value.to_s.to_f
+      elsif type.class == Object
+        return value
       else
-        json = JSON.parse(value.to_s) rescue nil
-        if json.kind_of? type then
-          return json
-        else
-          return nil
-        end
+        return nil
       end
     end
     
-    def self.identifier
-      self.name.downcase.gsub("::", ".")
-    end
-    
-    def self.create_from_hash(params)
+    def self.from_hash(hash)
       object = self.new
       
       for name, options in self.properties do
-        next if options[:direction] == "output"
-        
-        begin          
-          object.send("#{name}=".intern, params[name])
-          value = object.send(name.intern)
+        begin
+          object[name] = hash[name]
         rescue Exception => e
-          @instances.delete object
+          puts e
           return nil
         end
       end
@@ -73,46 +61,43 @@ module Dog
       return object
     end
     
-    def self.instances(conditions = {})
-      @instances ||= {}
-      resultset = []
+    def to_hash
+      hash = {}      
+      properties = self.class.properties
       
-      
-      for id, object in @instances do
-        
-        accept = true
-        
-        for property, value in conditions do
-          accept = object[property] == value rescue false
-          break unless accept
-        end 
-        
-        resultset << object if accept
+      for name, options in properties do
+        if options.type.kind_of? Structure then
+          hash[property] = self[property].to_hash
+        else
+          hash[property] = self[property]
+        end
       end
       
-      return resultset
-    end
-    
-    def self.add_instance(object)
-      @instances ||= {}
-      @instances[object] = object
-    end
-    
-    def initialize
-      self.class.add_instance(self)
-    end
-    
-    def save_to_hash()
-      # TODO - This should check if all output stuff that is required
-      # is written...
-    end
-    
-    def self.properties
-      @properties ||= {}
+      return hash
     end
     
     def [](property)
       self.send(property.intern)
+    end
+    
+    def []=(property, value)
+      self.send("#{property}=".intern, value)
+    end
+    
+    def required_properties_present?
+      for name, options in self.class.properties do
+        if options[:required] && self[name].nil? then
+          return false
+        end
+      end
+      
+      return true
+    end
+    
+    def self.properties
+      @properties ||= {}
+      inherited_properties = superclass.properties rescue {}
+      inherited_properties.merge @properties
     end
     
     def self.property(name, options = {})
@@ -130,12 +115,7 @@ module Dog
         end
         
         define_method("#{name}=".intern) do |arg|
-          
-          arg = self.class.convert(arg, type)
-          
-          if options[:required] && arg.nil? then
-            raise "Error: Attempting to assign nil to required property #{name}."
-          end
+          arg = self.class.convert_value_to_type(arg, type)
           
           if arg.kind_of?(type) || arg.kind_of?(NilClass)  then
             instance_variable_set("@#{name}", arg)
@@ -144,6 +124,7 @@ module Dog
           end
         end
       end
+      
     end
     
   end

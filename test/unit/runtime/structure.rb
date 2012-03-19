@@ -7,26 +7,13 @@
 # above copyright notice is included.
 #
 
-module Dog
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
+
+class RuntimeTests::StructureTest < RuntimeTestCase
   
-  class Record < Structure
-    # TODO
+  def test_simple
     
-    def save
-      if required_properties_present? then
-        self.to_hash
-      else
-        nil
-      end
-    end
-    
-    def self.relationship(name, options = {})
-      
-    end
   end
   
-  class Person < Record
-    
-  end
   
 end

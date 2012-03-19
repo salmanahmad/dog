@@ -138,10 +138,6 @@ module Dog::Application
     relationship "pairs", :target_type => self, :target_property => "pairs"
   end
   
-
-  
-
-  
   class ProvideThreeInterests < Task
     property "instructions", :value => "Please provide three things that you are interested in learning and teaching."
     property "objective", :type => String, :required => true, :direction => "output"
@@ -156,6 +152,7 @@ module Dog::Application
     property "teachables", :type => Array, :direction => "input"
   end
   
+
   # LET PEOPLE READ AND WRITE RECORD books
   Server.expose_variable("books", :eligibility => People, :access => :readwrite)
   

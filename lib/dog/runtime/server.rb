@@ -126,9 +126,8 @@ module Dog
          
         self.aget_or_post location do
           
-          input = process_event(event)
-          
-          return unless input
+          @event = process_event(event)
+          return unless @event
           
           reply_fiber = Fiber.new do
             reply = Fiber.yield
@@ -144,7 +143,7 @@ module Dog
             EM.next_tick do
               track = Track.new
               fiber = TrackFiber.new do
-                ::Dog::Application::Handlers.send(handler, input)
+                ::Dog::Application::Handlers.send(handler, @event)
               end
               track.context[:reply_fiber] = reply_fiber
               track.fiber = fiber
@@ -176,10 +175,9 @@ module Dog
       end
     end
     
-    def notify_handlers(event)
-      input = process_event(event)
+    def notify_handlers(input)
       handlers = @@handlers[request.path]
-            
+      
       return unless input
       return unless handlers
       
@@ -195,44 +193,100 @@ module Dog
       end
     end
     
-    def self.boot
-      port = Config.get('port')
-      prefix = Config.get('dog_prefix')
+    
+    
+    
+    class << self
+      attr_accessor :global_track
+      
+      def boot
+        port = Config.get('port')
+        prefix = Config.get('dog_prefix')
 
-      set :static, false
-      set :public_folder, Proc.new { File.join(File.dirname($0), "views") }
-      
-      get_or_post prefix + 'meta' do
-        body "Dog Meta Data."
-      end      
+        # TODO - I have to figure this out for production
+        set :static, false
+        set :public_folder, Proc.new { File.join(File.dirname($0), "views") }
 
-      get_or_post prefix + 'account.signin' do
-        notify_handlers(Account::SignIn)
-        body
-      end
-      
-      get_or_post prefix + 'account.signout' do
-        notify_handlers(Account::SignOut)
-        body
-      end
+        get_or_post prefix + 'meta' do
+          body "Dog Meta Data."
+        end      
 
-      get_or_post prefix + 'account.create' do
-        notify_handlers(Account::Create)
-        body
+        get_or_post prefix + 'account.signin' do
+          @event = process_event(Account::SignIn)
+
+          # Logic
+
+          notify_handlers(input)
+          reply
+        end
+
+        get_or_post prefix + 'account.signout' do
+          @event = process_event(Account::SignOut)
+
+          # Logic
+
+
+          notify_handlers(input)
+          reply
+        end
+
+        get_or_post prefix + 'account.create' do
+          @event = process_event(Account::Create)
+
+          # Logic
+          people = Variable.named("dog.meta.people", Server.global_track)
+          people.value ||= {}
+
+          if people.value[event.email] then
+            @event.success = false
+            @event.errors ||= []
+            @event.errors << "User name has already been taken."
+          else
+            
+          end
+
+
+
+          notify_handlers(input)
+          reply 
+        end
+
+        get_or_post prefix + 'community.join' do
+          @event = process_event(Community::Join)
+
+          # Logic
+
+          notify_handlers(input)
+          reply
+        end
+
+        get_or_post prefix + 'community.leave' do
+          @event = process_event(Community::Leave)
+
+          # Logic
+
+          notify_handlers(input)
+          reply
+        end
+
+        Thin::Server.start '0.0.0.0', port, Server
       end
       
-      get_or_post prefix + 'community.join' do
-        notify_handlers(Community::Join)
-        body
-      end
-      
-      get_or_post prefix + 'community.leave' do
-        notify_handlers(Community::Leave)
-        body
-      end
-      
-      Thin::Server.start '0.0.0.0', port, Server
     end
+    
+    
+    def reply
+      if @event then
+        status @event.status
+        body @event.to_json
+      end
+    end
+    
+    
+    
+    
+    
+    
     
 
     

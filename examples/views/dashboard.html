@@ -12,6 +12,11 @@
     $("#provide-interests .save").click(function() {
       $("#provide-interests").modal('hide');
     })
+    
+    $('#provide-interests').on('hide', function () {
+      $(".profile .teachables").val($("#provide-interests .teachables").val())
+      $(".profile .learnables").val($("#provide-interests .learnables").val())
+    });
   });
 </script>
 
@@ -22,13 +27,13 @@
   <div class="modal-body">
     <form>
       <label>What are your goals?</label>
-      <textarea name="goals" style="width:90%" rows="4"></textarea>
+      <textarea name="goals" class="goals" style="width:90%" rows="4"></textarea>
 
       <label>What do you want to learn to do that?</label>
-      <textarea name="goals" style="width:90%" rows="4"></textarea>
+      <textarea name="learnables" class="learnables" style="width:90%" rows="4"></textarea>
       
       <label>What can you teach others?</label>
-      <textarea name="goals" style="width:90%" rows="4"></textarea>
+      <textarea name="teachables" class="teachables" style="width:90%" rows="4"></textarea>
     </form>
   </div>
   <div class="modal-footer">
@@ -44,21 +49,21 @@
     </div>
     <div class="span8">
       
-      <form >
-        <div class="control-group">
-          <h3 class="control-label" for="input01">
-            Teachables
-          </h3>
-          <div class="controls">
-            <textarea class="input-xlarge" rows="4" style="width:100%"></textarea>
-          </div>
-        </div>
+      <form class="profile">
         <div class="control-group">
           <h3 class="control-label" for="input01">
             Learnables
           </h3>
           <div class="controls">
-            <textarea class="input-xlarge" rows="4" style="width:100%"></textarea>
+            <textarea class="input-xlarge learnables" rows="4" style="width:100%"></textarea>
+          </div>
+        </div>
+        <div class="control-group">
+          <h3 class="control-label" for="input01">
+            Teachables
+          </h3>
+          <div class="controls">
+            <textarea class="input-xlarge teachables" rows="4" style="width:100%"></textarea>
           </div>
         </div>
       </form>

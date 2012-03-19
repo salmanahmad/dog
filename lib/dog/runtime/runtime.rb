@@ -22,6 +22,7 @@ module Dog
       # TODO If there are no listeners that are active then 
       # (keep in mind, that ASKs may have implicit listeners):
       if Server.listeners? then
+        Server.global_track = track
         Server.boot
       else
         EM.stop

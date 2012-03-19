@@ -17,6 +17,22 @@
     });
     
     
+    $("#sign-in-form").submit(function() {
+      
+      document.location = "/dashboard.html"
+      return false;
+    });
+    
+    $("#create-account-form").submit(function() {
+      
+      $.post("/dog/account.create", $(this).serialize(), function() {
+        document.location = "/dashboard.html"
+      })
+      
+      
+      return false;
+    });
+    
   })
 </script>
 
@@ -28,8 +44,11 @@
   <p>Achieve your goals while helping others reach theirs! <strong>Learning Web</strong> will pair you up with friends based on what each of you can <strong>teach</strong> and what you want to <strong>learn</strong>. Sign in or create an account to get started!</p>
 
   <p>
-    <a id="sign-in-button" class="btn btn-primary btn-large">Sign In &raquo;</a>
-    <a id="create-account-button" class="btn btn-large">Create Account &raquo;</a>  
+    <a id="sign-in-button" class="btn btn-primary btn-large">Connect to Facebook &raquo;</a>
+
+  </p>
+  <p>
+    Don't have Facebook? Create an account.
   </p>
 
 </div>

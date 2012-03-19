@@ -34,7 +34,6 @@ require File.join(File.dirname(__FILE__), 'runtime/event.rb')
 require File.join(File.dirname(__FILE__), 'runtime/message.rb')
 require File.join(File.dirname(__FILE__), 'runtime/task.rb')
 
-require File.join(File.dirname(__FILE__), 'runtime/dormouse.rb')
 require File.join(File.dirname(__FILE__), 'runtime/commands.rb')
 
 
