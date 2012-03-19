@@ -9,10 +9,17 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
+class StuctBoolean < Dog::Structure
+  property "flag", :type => Dog::Boolean
+end
+
 class RuntimeTests::StructureTest < RuntimeTestCase
   
-  def test_simple
-    
+  
+  def test_boolean
+    s = StuctBoolean.new
+    s.flag = true
+    assert_equal(s.flag, true)
   end
   
   

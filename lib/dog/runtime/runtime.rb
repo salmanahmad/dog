@@ -23,7 +23,7 @@ module Dog
       # (keep in mind, that ASKs may have implicit listeners):
       if Server.listeners? then
         Server.global_track = track
-        Server.boot
+        Server.run
       else
         EM.stop
       end

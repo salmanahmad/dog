@@ -29,17 +29,17 @@ module Dog
       
       if type.kind_of? Structure then
         return type.from_hash(value)
-      elsif type.class == String then
+      elsif type == String then
         return value.to_s
-      elsif type.class == Boolean then
+      elsif type == Boolean then
         if BOOLEAN_VALUES.include?(value) then
           return TRUE_VALUES.include?(value)
         else
           return nil
         end
-      elsif type.class == Numeric then
+      elsif type == Numeric then
         return value.to_s.to_f
-      elsif type.class == Object
+      elsif type == Object
         return value
       else
         return nil
@@ -53,7 +53,6 @@ module Dog
         begin
           object[name] = hash[name]
         rescue Exception => e
-          puts e
           return nil
         end
       end
@@ -66,10 +65,10 @@ module Dog
       properties = self.class.properties
       
       for name, options in properties do
-        if options.type.kind_of? Structure then
-          hash[property] = self[property].to_hash
+        if options[:type].kind_of? Structure then
+          hash[name] = self[name].to_hash
         else
-          hash[property] = self[property]
+          hash[name] = self[name]
         end
       end
       
@@ -117,7 +116,9 @@ module Dog
         define_method("#{name}=".intern) do |arg|
           arg = self.class.convert_value_to_type(arg, type)
           
-          if arg.kind_of?(type) || arg.kind_of?(NilClass)  then
+          if type == Boolean && (arg.kind_of?(TrueClass) || arg.kind_of?(FalseClass) || arg.kind_of?(NilClass)) then
+            instance_variable_set("@#{name}", arg)
+          elsif arg.kind_of?(type) || arg.kind_of?(NilClass)  then
             instance_variable_set("@#{name}", arg)
           else
             raise "Error: Attempting to assign property #{name} with invalid type (#{arg.class})."

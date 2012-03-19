@@ -23,6 +23,7 @@ class RuntimeTests::EventTest < RuntimeTestCase
     b = Balance.import({})
     assert_equal(b, nil)
   end
+
   
   
 end

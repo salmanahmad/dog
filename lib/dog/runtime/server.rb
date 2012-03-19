@@ -13,7 +13,7 @@ module Dog
     
     helpers do
       def layout(name)
-        # Intentionally blank
+        # Intentionally blank. Used by our template system.
       end
     end
     
@@ -49,34 +49,6 @@ module Dog
     enable :logging  
     #enable :sessions
     enable :raise_errors
-    
-    get '*' do
-      path = params[:splat].first
-      path = "/index.html" if path == "/"
-      path = settings.public_folder + path
-      
-      if File.exists? path then
-        
-        
-        if File.extname(path) == ".html" then
-          line = File.open(path, &:readline)
-          match = line.match /^\s*<%=\s*layout\s+"(.+)"\s*%>\s*$/
-          if match then
-            template = settings.public_folder + match[1]
-            template_content = File.open(template, &:read)
-            path_content = File.open(path, &:read)
-            
-            erb path_content, :layout => template_content, :views => '/'
-          else
-            send_file path
-          end
-        else
-          send_file path
-        end
-      else
-        404
-      end
-    end
     
     def self.expose_variable(variable, options = {})
       @@listeners = true
@@ -126,8 +98,7 @@ module Dog
          
         self.aget_or_post location do
           
-          @event = process_event(event)
-          return unless @event
+          @event = process_incoming_event(event) rescue return
           
           reply_fiber = Fiber.new do
             reply = Fiber.yield
@@ -156,36 +127,41 @@ module Dog
       end
     end
     
-    def process_event(event)
-      
+    def process_incoming_event(event)
       input = nil
+      input = event.import(params) rescue nil
       
-      begin
-        input = event.create_from_hash(params)
-      rescue Exception => e
-        input = nil
-      end
-      
-      unless input
+      if input.nil?
+        # TODO - Better error reporting...
         status 400
-        body "Invalid input"
-        return nil
-      else
-        return input
+        body "Invalid event"
+        raise
       end
+      
+      return input
     end
     
-    def notify_handlers(input)
+    def process_outgoing_event
+      if @event.success
+        status 200
+      else
+        status 403
+      end
+      
+      body @event.export.to_json
+    end
+    
+    def notify_handlers
       handlers = @@handlers[request.path]
       
-      return unless input
+      return unless @event
       return unless handlers
       
       for handler in handlers do
         EM.next_tick do
           track = Track.new
           fiber = TrackFiber.new do
-            ::Dog::Application::Handlers.send(handler, input)
+            ::Dog::Application::Handlers.send(handler, @event)
           end
           track.fiber = fiber
           track.fiber.resume
@@ -193,96 +169,116 @@ module Dog
       end
     end
     
-    
-    
-    
     class << self
       attr_accessor :global_track
       
       def boot
-        port = Config.get('port')
         prefix = Config.get('dog_prefix')
 
         # TODO - I have to figure this out for production
         set :static, false
         set :public_folder, Proc.new { File.join(File.dirname($0), "views") }
-
+        
         get_or_post prefix + 'meta' do
           body "Dog Meta Data."
         end      
 
         get_or_post prefix + 'account.signin' do
-          @event = process_event(Account::SignIn)
+          @event = process_incoming_event(Account::SignIn) rescue return
 
           # Logic
 
-          notify_handlers(input)
-          reply
+          notify_handlers
+          process_outgoing_event
         end
 
         get_or_post prefix + 'account.signout' do
-          @event = process_event(Account::SignOut)
+          @event = process_incoming_event(Account::SignOut) rescue return
 
           # Logic
 
 
-          notify_handlers(input)
-          reply
+          notify_handlers
+          process_outgoing_event
         end
 
         get_or_post prefix + 'account.create' do
-          @event = process_event(Account::Create)
-
+          @event = process_incoming_event(Account::Create) rescue return
+          
           # Logic
           people = Variable.named("dog.meta.people", Server.global_track)
           people.value ||= {}
 
-          if people.value[event.email] then
+          if people.value[@event.email] then
             @event.success = false
             @event.errors ||= []
             @event.errors << "User name has already been taken."
           else
-            
+            @event.success = true
+            #session[:current_user] = @event.email
           end
-
-
-
-          notify_handlers(input)
-          reply 
+          
+          
+          notify_handlers
+          process_outgoing_event 
         end
 
         get_or_post prefix + 'community.join' do
-          @event = process_event(Community::Join)
+          @event = process_incoming_event(Community::Join) rescue return
 
           # Logic
 
-          notify_handlers(input)
-          reply
+          notify_handlers
+          process_outgoing_event
         end
 
         get_or_post prefix + 'community.leave' do
-          @event = process_event(Community::Leave)
+          @event = process_incoming_event(Community::Leave) rescue return
 
           # Logic
 
-          notify_handlers(input)
-          reply
+          notify_handlers
+          process_outgoing_event
         end
+        
+        
+        get '*' do
+          path = params[:splat].first
+          path = "/index.html" if path == "/"
+          path = settings.public_folder + path
 
-        Thin::Server.start '0.0.0.0', port, Server
+          if File.exists? path then
+            if File.extname(path) == ".html" then
+              line = File.open(path, &:readline)
+              match = line.match /^\s*<%=\s*layout\s+"(.+)"\s*%>\s*$/
+              if match then
+                template = settings.public_folder + match[1]
+                template_content = File.open(template, &:read)
+                path_content = File.open(path, &:read)
+
+                erb path_content, :layout => template_content, :views => '/'
+              else
+                send_file path
+              end
+            else
+              send_file path
+            end
+          else
+            404
+          end
+        end
+        
+        return self
+      end
+      
+      def run
+        boot
+        Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
       
     end
     
-    
-    def reply
-      if @event then
-        status @event.status
-        body @event.to_json
-      end
-    end
-    
-    
+
     
     
     
@@ -362,7 +358,7 @@ module Dog
       end
       
     end
-    
+     
   end
   
 end

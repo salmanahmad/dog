@@ -24,14 +24,11 @@ module Dog
     end
     
     def export
-      
-      if object.required_output_present? then
-        return object
+      if self.required_output_present? then
+        return self.to_hash
       else
         return nil
       end
-      
-      return self.to_hash
     end
     
     def required_input_present?
@@ -95,8 +92,6 @@ module Dog
       property "email", :type => String, :required => true, :direction => "input"
       property "password", :type => String, :direction => "input"
       property "confirm", :type => String, :direction => "input"
-      
-      
     end
     
   end

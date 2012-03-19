@@ -9,6 +9,7 @@
 
 require 'rubygems'
 require 'test/unit'
+require 'rack/test'
 require 'stringio'
 require 'pp'
 
