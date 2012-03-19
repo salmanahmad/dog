@@ -27,6 +27,8 @@ class RuntimeTests::ServerTest < RuntimeTestCase
   def test_it_says_hello_world
     get '/dog/account.create', {"email" => "foo@foobar.com"}
     assert last_response.ok?
+    assert_equal last_request.env['rack.session'][:current_user], "foo@foobar.com"
+
   end
   
 end

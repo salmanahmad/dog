@@ -45,6 +45,8 @@ module Dog
     # sinatra async and the default cookie-based sessions
     # I used this to address some of the concerns.
     register Sinatra::Async
+    
+    # TODO - Set the secret here!
     use Rack::Session::Cookie
     enable :logging  
     #enable :sessions
@@ -215,12 +217,11 @@ module Dog
             @event.errors << "User name has already been taken."
           else
             @event.success = true
-            #session[:current_user] = @event.email
+            session[:current_user] = @event.email
           end
           
-          
           notify_handlers
-          process_outgoing_event 
+          process_outgoing_event
         end
 
         get_or_post prefix + 'community.join' do
