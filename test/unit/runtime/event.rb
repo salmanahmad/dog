@@ -23,7 +23,14 @@ class RuntimeTests::EventTest < RuntimeTestCase
     b = Balance.import({})
     assert_equal(b, nil)
   end
-
   
+  def test_inheritance
+    p = Balance.properties
+    
+    assert_equal p.keys.size, 4
+    ["success", "errors", "name", "amount"].each do |value|
+      assert p.keys.include?(value)
+    end
+  end
   
 end

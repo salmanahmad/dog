@@ -184,20 +184,46 @@ module Dog
         get_or_post prefix + 'meta' do
           body "Dog Meta Data."
         end      
-
-        get_or_post prefix + 'account.signin' do
-          @event = process_incoming_event(Account::SignIn) rescue return
-
-          # Logic
-
+        
+        get_or_post prefix + 'account.status' do
+          @event = process_incoming_event(Account::LoginStatus) rescue return
+          
+          if session[:current_user]
+            @event.success = true
+            @event.logged_in = true
+          else
+            @event.success = true
+            @event.logged_in = false
+          end
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'account.login' do
+          @event = process_incoming_event(Account::Login) rescue return
+          
+          people = Variable.named("dog.meta.people", Server.global_track)
+          people.value ||= Collection.new
+          
+          person = people.value.find(:email => @event.email).first
+          
+          if person && person.password == Digest::SHA1.hexdigest(@event.password)
+            @event.success = true
+            session[:current_user] = person.id
+          else
+            @event.success = false
+          end
+          
           notify_handlers
           process_outgoing_event
         end
 
-        get_or_post prefix + 'account.signout' do
-          @event = process_incoming_event(Account::SignOut) rescue return
+        get_or_post prefix + 'account.logout' do
+          @event = process_incoming_event(Account::Logout) rescue return
           
-          # Logic
+          session.clear
+          @event.success = true
 
           notify_handlers
           process_outgoing_event

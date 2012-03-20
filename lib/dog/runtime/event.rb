@@ -80,11 +80,16 @@ module Dog
   
   class Account < SystemEvent
 
-    class SignIn < SystemEvent
-      
+    class LoginStatus < SystemEvent
+      property "logged_in", :type => Boolean, :direction => "output"
     end
     
-    class SignOut < SystemEvent
+    class Login < SystemEvent
+      property "email", :type => String, :direction => "input"
+      property "password", :type => String, :direction => "input"
+    end
+    
+    class Logout < SystemEvent
       
     end
     
