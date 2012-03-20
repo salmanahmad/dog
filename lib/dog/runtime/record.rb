@@ -12,6 +12,13 @@ module Dog
   class Record < Structure
     # TODO
     
+    property "id", :type => String
+    
+    def initialize
+      # TODO - Remove for Mongo?      
+      self.id = UUID.new.generate
+    end
+    
     def save
       if required_properties_present? then
         self.to_hash
@@ -26,7 +33,10 @@ module Dog
   end
   
   class Person < Record
-    
+    property "email", :type => String
+    property "facebook", :type => String
+    property "twitter", :type => String
+    property "password", :type => String
   end
   
 end

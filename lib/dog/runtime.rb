@@ -8,6 +8,7 @@
 #
 
 require 'fiber'
+require 'digest/sha1'
 
 require 'eventmachine'
 require 'httparty'
@@ -28,6 +29,7 @@ require File.join(File.dirname(__FILE__), 'runtime/request_context.rb')
 require File.join(File.dirname(__FILE__), 'runtime/binding.rb')
 
 require File.join(File.dirname(__FILE__), 'runtime/structure.rb')
+require File.join(File.dirname(__FILE__), 'runtime/collection.rb')
 require File.join(File.dirname(__FILE__), 'runtime/record.rb')
 require File.join(File.dirname(__FILE__), 'runtime/person.rb')
 require File.join(File.dirname(__FILE__), 'runtime/event.rb')

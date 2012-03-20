@@ -196,34 +196,41 @@ module Dog
 
         get_or_post prefix + 'account.signout' do
           @event = process_incoming_event(Account::SignOut) rescue return
-
+          
           # Logic
-
 
           notify_handlers
           process_outgoing_event
         end
-
+        
         get_or_post prefix + 'account.create' do
           @event = process_incoming_event(Account::Create) rescue return
           
-          # Logic
           people = Variable.named("dog.meta.people", Server.global_track)
-          people.value ||= {}
+          people.value ||= Collection.new
 
-          if people.value[@event.email] then
+          @event.password ||= ""
+          @event.confirm ||= ""
+          
+          unless people.value.find(:email => @event.email).empty? then
             @event.success = false
             @event.errors ||= []
             @event.errors << "User name has already been taken."
           else
             @event.success = true
-            session[:current_user] = @event.email
+            
+            person = Person.new
+            person.email = @event.email
+            person.password = Digest::SHA1.hexdigest @event.password
+            people.value.add person
+            
+            session[:current_user] = person.id
           end
           
           notify_handlers
           process_outgoing_event
         end
-
+        
         get_or_post prefix + 'community.join' do
           @event = process_incoming_event(Community::Join) rescue return
 

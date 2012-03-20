@@ -15,12 +15,9 @@ end
 
 class RuntimeTests::StructureTest < RuntimeTestCase
   
-  
   def test_boolean
     s = StuctBoolean.new
     s.flag = true
     assert_equal(s.flag, true)
   end
-  
-  
 end

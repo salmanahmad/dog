@@ -25,10 +25,17 @@ class RuntimeTests::ServerTest < RuntimeTestCase
   end
   
   def test_it_says_hello_world
-    get '/dog/account.create', {"email" => "foo@foobar.com"}
+    post '/dog/account.create', {"email" => "foo@foobar.com"}
     assert last_response.ok?
-    assert_equal last_request.env['rack.session'][:current_user], "foo@foobar.com"
+    user_id = last_request.env['rack.session'][:current_user]
+    assert user_id.match(/[\d\w]{8}-[\d\w]{4}-[\d\w]{4}-[\d\w]{4}-[\d\w]{12}/)
+    
 
+    
+    post '/dog/account.create', {"email" => "foo@foobar.com"}
+    assert last_response.client_error?
+    assert_equal last_request.env['rack.session'][:current_user], user_id
+    
   end
   
 end
