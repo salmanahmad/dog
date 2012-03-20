@@ -84,7 +84,6 @@ module Dog
       event = options[:event]
       location = options[:at]
       
-      
       if event.ancestors.include? SystemEvent then
         location = Config.get('dog_prefix') + event.identifier
         @@handlers[location] ||= []
@@ -104,12 +103,16 @@ module Dog
           
           reply_fiber = Fiber.new do
             reply = Fiber.yield
-            if reply then
-              body reply
-            else
-              # TODO
-              body "Default content"
+            begin
+              if reply then
+                @event.assign(reply)
+              end
+            rescue Exception => e
+              # TODO - Reraise error for Dog?
+              @event.status = false
             end
+            
+            process_outgoing_event
           end
           
           for handler in @@handlers[location] do
@@ -144,13 +147,23 @@ module Dog
     end
     
     def process_outgoing_event
+      # TODO - Figure out how to update sucecess if the export fails...
+            
+      output = @event.export
+      if output.nil? then
+        # Raise Error for Dog?
+        @event.success = false
+        output = {}
+      end
+      
       if @event.success
         status 200
       else
         status 403
       end
       
-      body @event.export.to_json
+      body output.to_json
+      
     end
     
     def notify_handlers
@@ -259,18 +272,18 @@ module Dog
         
         get_or_post prefix + 'community.join' do
           @event = process_incoming_event(Community::Join) rescue return
-
+          
           # Logic
-
+          
           notify_handlers
           process_outgoing_event
         end
 
         get_or_post prefix + 'community.leave' do
           @event = process_incoming_event(Community::Leave) rescue return
-
+          
           # Logic
-
+          
           notify_handlers
           process_outgoing_event
         end

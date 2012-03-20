@@ -59,7 +59,7 @@ module Dog
       
       return object
     end
-    
+        
     def to_hash
       hash = {}      
       properties = self.class.properties
@@ -73,6 +73,13 @@ module Dog
       end
       
       return hash
+    end
+    
+    def assign(hash)
+      # TODO - Error reporting
+      for key, value in hash do
+        self[key] = value
+      end
     end
     
     def [](property)
