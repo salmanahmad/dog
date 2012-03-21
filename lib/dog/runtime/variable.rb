@@ -15,14 +15,14 @@ module Dog
     attr_accessor :value
     attr_accessor :track
     
-    @@variables = {}
+    @variables = {}
     
     def self.variables
-      @@variables
+      @variables
     end
     
     def self.reset
-      @@variables = {}
+      @variables = {}
     end
     
     def self.exists?(name, track = nil)
@@ -30,9 +30,9 @@ module Dog
         track = Track.current
       end
       
-      @@variables[track.name] ||= {}
+      @variables[track.name] ||= {}
       
-      if @@variables[track.name].include? name then
+      if @variables[track.name].include? name then
         return true
       else
         return false
@@ -44,15 +44,15 @@ module Dog
         track = Track.current
       end
       
-      @@variables ||= {}
-      @@variables[track.name] ||= {}
+      @variables ||= {}
+      @variables[track.name] ||= {}
       
       variable = nil
       track_pointer = track
       
       while true do
-        @@variables[track_pointer.name] ||= {}
-        variable = @@variables[track_pointer.name][name]
+        @variables[track_pointer.name] ||= {}
+        variable = @variables[track_pointer.name][name]
         track_pointer = track_pointer.parent
         
 
@@ -66,7 +66,7 @@ module Dog
         variable = self.new
         variable.name = name
         variable.track = track
-        @@variables[track.name][name] = variable
+        @variables[track.name][name] = variable
       end
       
       return variable
