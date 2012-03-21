@@ -9,27 +9,33 @@
 
 module Dog
   
-  def self.bark! &block
+  def self.bark!(run = true, &block)
     EM.run do
       track = Track.new
       fiber = TrackFiber.new do
-        yield
+        yield if block
       end
 
       fiber.track = track
       fiber.resume
       
+      # TODO - This is here for testing
+      Server.global_track = track
+      Server.boot
+      
       # TODO If there are no listeners that are active then 
       # (keep in mind, that ASKs may have implicit listeners):
       if Server.listeners? then
-        Server.global_track = track
-        Server.run
+        Server.run if run
       else
         EM.stop
       end
     end
+    
+    # TODO - This is here for testing
+    return Server
   end
-  
+    
   class Runtime
     
     def self.run(bark)

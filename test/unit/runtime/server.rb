@@ -14,9 +14,7 @@ class RuntimeTests::ServerTest < RuntimeTestCase
   include Rack::Test::Methods
   
   def app
-    track = Dog::Track.new
-    ::Dog::Server.global_track = track
-    ::Dog::Server.boot
+    ::Dog.bark! false
   end
   
   def test_create_without_email

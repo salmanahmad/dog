@@ -10,6 +10,7 @@
 require 'rubygems'
 require 'test/unit'
 require 'rack/test'
+require 'httparty'
 require 'stringio'
 require 'pp'
 
@@ -34,6 +35,62 @@ module IntegrationHelper
   end
   
 end
+
+module RuntimeHelper
+  def invalid?(res)
+    res.code < 100 || res.code >= 600;        
+  end
+
+  def informational?(res)
+    res.code >= 100 && res.code < 200
+  end
+  
+  def successful?(res)
+    res.code >= 200 && res.code < 300
+  end
+  
+  def redirection?(res)
+    res.code >= 300 && res.code < 400
+  end
+  
+  def client_error?(res)
+    res.code >= 400 && res.code < 500
+  end
+  
+  def server_error?(res)
+    res.code >= 500 && res.code < 600
+  end
+
+  def ok?(res)
+    res.code == 200
+  end
+  
+  def bad_request?(res)
+    res.code == 400
+  end
+  
+  def forbidden?(res)
+    res.code == 403
+  end
+  
+  def not_found?(res)
+    res.code == 404
+  end
+  
+  def method_not_allowed?  res
+    res.code == 405
+  end
+  
+  def unprocessable?(res)
+    res.code == 422
+  end
+
+  def redirect?(res)
+    [301, 302, 303, 307].include? res.code
+  end
+
+end
+
 
 class RuntimeTestCase < Test::Unit::TestCase
   

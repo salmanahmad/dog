@@ -106,6 +106,7 @@ module Dog
             begin
               if reply then
                 @event.assign(reply)
+                @event.success = true if @event.success.nil?
               end
             rescue Exception => e
               # TODO - Reraise error for Dog?
@@ -148,7 +149,8 @@ module Dog
     
     def process_outgoing_event
       # TODO - Figure out how to update sucecess if the export fails...
-            
+      content_type 'application/json'
+      
       output = @event.export
       if output.nil? then
         # Raise Error for Dog?
@@ -315,11 +317,12 @@ module Dog
           end
         end
         
+        # This is very important. Do not remove this or testing will not work
         return self
       end
       
       def run
-        boot
+        # TODO - You must call boot first. Right now we are not because of testing.
         Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
       

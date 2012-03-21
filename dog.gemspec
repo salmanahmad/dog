@@ -21,13 +21,14 @@ spec = Gem::Specification.new do |s|
   s.has_rdoc = false
   s.add_dependency 'treetop'
   s.add_dependency 'eventmachine'
-  s.add_dependency 'httparty'
   s.add_dependency 'thin'
   s.add_dependency 'sinatra'
   s.add_dependency 'async_sinatra'
   s.add_dependency 'tilt'
   s.add_dependency 'uuid'
   
+  s.add_development_dependency 'httparty'
+    
   #s.extra_rdoc_files = %w[README.rdoc]
   
 end
