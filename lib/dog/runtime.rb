@@ -11,7 +11,7 @@ require 'fiber'
 require 'digest/sha1'
 
 require 'eventmachine'
-require 'httparty'
+require 'sequel'
 require 'thin'
 require 'sinatra/base'
 require 'sinatra/async'

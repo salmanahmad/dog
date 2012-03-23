@@ -9,6 +9,11 @@
 
 module Dog
   
+  at_exit do
+    puts
+    puts "Dog is going to sleep. Bai!"
+  end
+  
   def self.bark!(run = true, &block)
     EM.run do
       track = Track.new
@@ -35,7 +40,7 @@ module Dog
     # TODO - This is here for testing
     return Server
   end
-    
+  
   class Runtime
     
     def self.run(bark)

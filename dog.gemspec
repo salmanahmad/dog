@@ -21,6 +21,7 @@ spec = Gem::Specification.new do |s|
   s.has_rdoc = false
   s.add_dependency 'treetop'
   s.add_dependency 'eventmachine'
+  s.add_dependency 'sequel'
   s.add_dependency 'thin'
   s.add_dependency 'sinatra'
   s.add_dependency 'async_sinatra'

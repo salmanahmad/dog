@@ -92,7 +92,7 @@ ON request IN dormouse.account.create DO
   # This is a pretty brittle matching algorithm. We likely will want to do something more principled to match
   # people up in the future. I don't know how that would look though...
   potential_matches = PEOPLE FROM learners WHERE learnables == interests.teachables OR teachables == interests.learables
-  
+   
   # Iterate over each math and notify both parties
   FOR EACH potential_match IN potential_matches DO
     

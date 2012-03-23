@@ -11,11 +11,7 @@ module Dog
   
   class Server < Sinatra::Base
     
-    helpers do
-      def layout(name)
-        # Intentionally blank. Used by our template system.
-      end
-    end
+    # Automatically parse JSON
     
     before do
       if request.media_type == 'application/json' then
@@ -27,6 +23,31 @@ module Dog
         end
         
         params.merge!(parameters)
+      end
+    end
+    
+    # CORS Supports
+    # TODO - Support JSONP
+    # TODO - Host dog.js from Dog to avoid any XSS
+    
+    after do
+      response['Access-Control-Allow-Origin'] = '*'
+      response['Access-Control-Allow-Methods'] = 'POST, PUT, GET, DELETE, OPTIONS'
+      response['Access-Control-Max-Age'] = "1728000"
+    end
+
+    options '/*' do
+      response['Access-Control-Allow-Origin'] = '*'
+      response['Access-Control-Allow-Methods'] = 'POST, PUT, GET, DELETE, OPTIONS'
+      response['Access-Control-Allow-Headers'] = 'X-Requested-With, X-Prototype-Version'
+      response['Access-Control-Max-Age'] = '1728000'
+      response['Content-Type'] = 'text/plain'
+      return ''
+    end
+    
+    helpers do
+      def layout(name)
+        # Intentionally blank. Used by our template system.
       end
     end
     
@@ -54,19 +75,16 @@ module Dog
     
     def self.expose_variable(variable, options = {})
       @@listeners = true
-      
       # TODO
     end
     
     def self.expose_community(community, options = {})
       @@listeners = true
-      
       # TODO
     end
     
     def self.expose_profile_property(property, options = {})
       @@listeners = true
-      
       # TODO
     end
     
@@ -228,6 +246,8 @@ module Dog
             session[:current_user] = person.id
           else
             @event.success = false
+            @event.errors ||= []
+            @event.errors << "Wrong Username/Email and password combination."
           end
           
           notify_handlers
@@ -258,17 +278,23 @@ module Dog
             @event.errors ||= []
             @event.errors << "User name has already been taken."
           else
-            @event.success = true
-            
-            person = Person.new
-            person.email = @event.email
-            person.password = Digest::SHA1.hexdigest @event.password
-            people.value.add person
-            
-            session[:current_user] = person.id
+            if @event.password != @event.confirm then
+              @event.success = false
+              @event.errors ||= []
+              @event.errors << "Password and Confirmation does not match."
+            else
+              @event.success = true
+              person = Person.new
+              person.email = @event.email
+              person.password = Digest::SHA1.hexdigest @event.password
+              people.value.add person
+
+              session[:current_user] = person.id
+
+              notify_handlers              
+            end
           end
           
-          notify_handlers
           process_outgoing_event
         end
         
@@ -330,11 +356,6 @@ module Dog
     
 
     
-    
-    
-    
-    
-
     
     @@listeners = false
     @@variables = {}
