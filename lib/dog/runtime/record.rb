@@ -32,11 +32,4 @@ module Dog
     end
   end
   
-  class Person < Record
-    property "email", :type => String
-    property "facebook", :type => String
-    property "twitter", :type => String
-    property "password", :type => String
-  end
-  
 end

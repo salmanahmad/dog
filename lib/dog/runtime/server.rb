@@ -267,9 +267,6 @@ module Dog
         get_or_post prefix + 'account.create' do
           @event = process_incoming_event(Account::Create) rescue return
           
-          people = Variable.named("dog.meta.people", Server.global_track)
-          people.value ||= Collection.new
-
           @event.password ||= ""
           @event.confirm ||= ""
           
@@ -284,14 +281,15 @@ module Dog
               @event.errors << "Password and Confirmation does not match."
             else
               @event.success = true
-              person = Person.new
-              person.email = @event.email
-              person.password = Digest::SHA1.hexdigest @event.password
-              people.value.add person
-
-              session[:current_user] = person.id
-
-              notify_handlers              
+              Dog::database.transaction do
+                person = Person.new
+                person.email = @event.email
+                person.password = Digest::SHA1.hexdigest @event.password
+                person.save
+                
+                session[:current_user] = person.id
+                notify_handlers
+              end
             end
           end
           
