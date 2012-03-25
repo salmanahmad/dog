@@ -8,18 +8,8 @@
 #
 
 module Dog
-  class Person
+  class Person < Sequel::Model(:people)
     # TODO
-    
-    def self.new
-      # TODO - This is the hack of all hacks but kinda cool.
-      # Decide if you want to keep it or you want to change
-      # to something else...
-      @class ||= Class.new(Sequel::Model(:users)) do
-        
-      end
-      @class.new
-    end
     
   end
 

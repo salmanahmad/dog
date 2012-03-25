@@ -9,41 +9,49 @@
 
 module Dog
   
-  class Track
-    
-    attr_accessor :name
-    attr_accessor :parent
-    attr_accessor :children
+  class Track < Sequel::Model(:tracks)
+            
     attr_accessor :context
-    
     attr_accessor :fiber
     
     def initialize
-      self.name = UUID.new.generate
       self.context = {}
     end
     
-    def self.current
-      track = Fiber.current.track
-      
-      if track.nil?
-        raise "Attempting to access a track outside of a fiber"
-      end
-      
-      return track
+    def parent
+      self.class.filter(:id => self.parent_id).first
     end
     
+    def children
+      self.class.filter(:parent_id => self.id).all
+    end
+   
     def fiber=(f)
       @fiber = f
-      f.instance_variable_set(:@track, self)
+      f.instance_variable_set(:@track, self.id)
     end
     
     def checkpoint &block
       # TODO
     end
-    
+
     def reset_checkpoint &block
       # TODO
+    end
+    
+    def self.root
+      return @root if @root
+      @root = Track.find_or_create(:root => true)
+    end
+
+    def self.current
+      track = Fiber.current.track
+
+      if track.nil?
+        raise "Attempting to access a track outside of a fiber"
+      end
+
+      return track
     end
     
   end

@@ -14,6 +14,9 @@ module Dog
   end
   
   module Database
+    
+    include Dog
+    
     class << self
       
       def initialize
@@ -23,22 +26,35 @@ module Dog
         connection = Config.get "database"
 
         if connection then
-          self.database = Sequel.connect(connection)  
+          ::Dog.database = Sequel.connect(connection)  
         else
           # TODO - the name of the file. I can't use $0 here though, right?
-          self.database = Sequel.connect("sqlite://dog.db")  
+          ::Dog.database = Sequel.connect("sqlite://dog.db")  
+          #::Dog.database = Sequel.sqlite
         end
-
-        self.database.create_table? :tracks do
+        
+        ::Dog.database.create_table? :tracks do
           primary_key :id
           foreign_key :parent_id, :tracks
-          integer :checkpoint
-
-          index :id
+          boolean :root, :default => false
+          integer :checkpoint, :default => 0
+          integer :depth, :default => 0
+          
           index :parent_id
+          index :root
+        end
+        
+        ::Dog.database.create_table? :workflows do
+          primary_key :id
+          foreign_key :track_id, :tracks
+          foreign_key :person_id, :people
+          string :name
+          
+          index :track_id
+          index :person_id
         end
 
-        self.database.create_table? :track_parents do
+        ::Dog.database.create_table? :track_parents do
           foreign_key :track_id, :tracks
           foreign_key :parent_id, :tracks
 
@@ -46,7 +62,7 @@ module Dog
           index :parent_id
         end
 
-        self.database.create_table? :variables do
+        ::Dog.database.create_table? :variables do
           primary_key :id
           foreign_key :track_id, :tracks
           foreign_key :person_id, :people
@@ -60,7 +76,7 @@ module Dog
           index [:name, :track_id], :unique => true
         end
 
-        self.database.create_table? :communities do
+        ::Dog.database.create_table? :communities do
           primary_key :id
           string :name
           text :properties
@@ -68,7 +84,7 @@ module Dog
           index :name
         end
 
-        self.database.create_table? :community_memberships do
+        ::Dog.database.create_table? :community_memberships do
           foreign_key :person_id, :people
           foreign_key :community_id, :communities
 
@@ -77,7 +93,7 @@ module Dog
           index [:person_id, :community_id], :unique => true
         end
 
-        self.database.create_table? :people do
+        ::Dog.database.create_table? :people do
           primary_key :id
           string :handle
           string :email
@@ -92,7 +108,7 @@ module Dog
           index :google, :unique => true
         end
 
-        self.database.create_table? :person_properties do
+        ::Dog.database.create_table? :person_properties do
           primary_key :id
           foreign_key :community_id, :communities
           foreign_key :person_id, :people
@@ -105,7 +121,7 @@ module Dog
           index [:name, :community_id, :person_id], :unqiue => true
         end
 
-        self.database.create_table? :person_relationships do
+        ::Dog.database.create_table? :person_relationships do
           primary_key :id
           foreign_key :community_id, :communities
           foreign_key :person_id, :people
@@ -118,7 +134,7 @@ module Dog
           index [:name, :community_id, :person_id]
         end
 
-        self.database.create_table? :events do
+        ::Dog.database.create_table? :events do
           primary_key :id
           foreign_key :person_id, :people
           text :properties

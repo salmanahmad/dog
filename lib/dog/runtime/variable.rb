@@ -9,34 +9,21 @@
 
 module Dog
   
-  class Variable
+  class Variable < Sequel::Model(:variables)
     
-    attr_accessor :name
-    attr_accessor :value
-    attr_accessor :track
+    plugin :serialization, :json
+    serialize_attributes :json, :value
     
-    @variables = {}
-    
-    def self.variables
-      @variables
-    end
-    
-    def self.reset
-      @variables = {}
-    end
+    # Raw SQL for performance here. This query is properly indexed and very fast.
+    @find_variable_query = "SELECT 'variables.*' FROM 'tracks' INNER JOIN 'variables' ON ('variables'.'track_id' = 'tracks'.'id') WHERE 'tracks'.'id' IN (SELECT 'parent_id' FROM 'track_parents' WHERE 'track_id' = ?) ORDER BY tracks.depth LIMIT 1"
     
     def self.exists?(name, track = nil)
       if track.nil? then
         track = Track.current
       end
       
-      @variables[track.name] ||= {}
-      
-      if @variables[track.name].include? name then
-        return true
-      else
-        return false
-      end
+      rows = Dog::database[@find_variable_query, track.id]
+      return rows.first
     end
     
     def self.named(name, track = nil)
@@ -44,40 +31,18 @@ module Dog
         track = Track.current
       end
       
-      @variables ||= {}
-      @variables[track.name] ||= {}
+      rows = Dog::database[@find_variable_query, track.id]
       
-      variable = nil
-      track_pointer = track
-      
-      while true do
-        @variables[track_pointer.name] ||= {}
-        variable = @variables[track_pointer.name][name]
-        track_pointer = track_pointer.parent
-        
-
-        
-        
-        break unless variable.nil?
-        break if track_pointer.nil?
-      end
-      
-      if variable.nil? then
-        variable = self.new
+      if rows.first then
+        variable = Variable.load(rows.first)
+      else
+        variable = Variable.new
         variable.name = name
-        variable.track = track
-        @variables[track.name][name] = variable
+        variable.track_id = track.id
+        variable.save
       end
       
       return variable
-    end
-    
-    def value=(v)
-      @value = v
-    end
-    
-    def value
-      @value
     end
     
   end

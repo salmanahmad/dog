@@ -18,25 +18,71 @@ require 'sinatra/async'
 require 'uuid'
 require 'json'
 
+# TODO - It is kind of weird that I do load config, but nothing else. 
+# Is that okay?
 require File.join(File.dirname(__FILE__), 'runtime/environment.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
-require File.join(File.dirname(__FILE__), 'runtime/runtime.rb')
-require File.join(File.dirname(__FILE__), 'runtime/track.rb')
-require File.join(File.dirname(__FILE__), 'runtime/track_fiber.rb')
-require File.join(File.dirname(__FILE__), 'runtime/variable.rb')
-require File.join(File.dirname(__FILE__), 'runtime/server.rb')
-require File.join(File.dirname(__FILE__), 'runtime/request_context.rb')
-require File.join(File.dirname(__FILE__), 'runtime/binding.rb')
+require File.join(File.dirname(__FILE__), 'runtime/database.rb')
 
-require File.join(File.dirname(__FILE__), 'runtime/structure.rb')
-require File.join(File.dirname(__FILE__), 'runtime/collection.rb')
-require File.join(File.dirname(__FILE__), 'runtime/record.rb')
-require File.join(File.dirname(__FILE__), 'runtime/person.rb')
-require File.join(File.dirname(__FILE__), 'runtime/event.rb')
-require File.join(File.dirname(__FILE__), 'runtime/message.rb')
-require File.join(File.dirname(__FILE__), 'runtime/task.rb')
+module Dog
+  
+  def self.bark!(run = true, &block)
+    
+    # I need to handle the fast startup logic here
+    Database.initialize
+    
+    require File.join(File.dirname(__FILE__), 'runtime/track.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/track_fiber.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/variable.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/server.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/request_context.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/binding.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/structure.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/collection.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/record.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/person.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/event.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/message.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/task.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/commands.rb')
 
-require File.join(File.dirname(__FILE__), 'runtime/commands.rb')
+    EM.run do
+      track = Track.root
+      fiber = TrackFiber.new do
+        yield if block
+      end
 
+      fiber.track = track
+      fiber.resume
 
-module Dog end
+      # TODO - This is here for testing
+      Server.global_track = track
+      Server.boot
+
+      # TODO If there are no listeners that are active then 
+      # (keep in mind, that ASKs may have implicit listeners):
+      if Server.listeners? then
+        Server.run if run
+      else
+        EM.stop
+      end
+    end
+
+    # TODO - This is here for testing
+    return Server
+  end
+
+  class Runtime
+
+    def self.run(bark)
+      runtime = self.new
+      runtime.run(bark)
+    end
+
+    def run(bark)
+      eval(bark)
+    end
+
+  end
+
+end

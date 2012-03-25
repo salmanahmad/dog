@@ -9,8 +9,21 @@ require File.join(File.dirname(__FILE__), "../lib/dog.rb")
 # Where does global statements go? - Inside of a Dog.bark! call.
 # this call will set up EventMachine and start up the server as
 # well.
+
+
+# All of the config statements get pulled out and placed here.
+# In top level scope before bark!
+Dog::Config.set("default_community", "learners")
+Dog::Config.set("default_community", "learners")
+Dog::Config.set("default_community", "learners")
+Dog::Config.set("default_community", "learners")
+Dog::Config.set("default_community", "learners")
+
+
 Dog.bark! do
 
+# TODO - Do I need Dog::Application? I don't think I do. 
+# I could create this dynamically in bark!, right?
 module Dog::Application
   
   # This is just here because I don't want to re-write this example:

@@ -12,8 +12,17 @@ module Dog
   class TrackFiber < Fiber
     attr_accessor :track
     
+    def track
+      if @track.class != Track then
+        @track = Track.filter(:id => @track.id).first
+        @track.instance_variable_set(:@fiber, self) 
+      end
+      
+      @track
+    end
+    
     def track=(t)
-      @track = t
+      @track = t.id
       t.instance_variable_set(:@fiber, self)
     end
   end
