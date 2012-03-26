@@ -15,14 +15,19 @@ module Dog
     serialize_attributes :json, :value
     
     # Raw SQL for performance here. This query is properly indexed and very fast.
-    @find_variable_query = "SELECT 'variables.*' FROM 'tracks' INNER JOIN 'variables' ON ('variables'.'track_id' = 'tracks'.'id') WHERE 'tracks'.'id' IN (SELECT 'parent_id' FROM 'track_parents' WHERE 'track_id' = ?) ORDER BY tracks.depth LIMIT 1"
+    @find_variable_query = "SELECT 'variables'.* FROM 'tracks' INNER JOIN 'variables' ON ('variables'.'track_id' = 'tracks'.'id') WHERE 'tracks'.'id' IN (SELECT parent_id FROM track_parents WHERE track_id = ?) AND 'variables'.'name' = ? ORDER BY 'tracks'.'depth' DESC LIMIT 1"
+    
+    
+    def person
+      Person.filter(:id => self.person_id).first
+    end
     
     def self.exists?(name, track = nil)
       if track.nil? then
         track = Track.current
       end
       
-      rows = Dog::database[@find_variable_query, track.id]
+      rows = ::Dog::database[@find_variable_query, track.id, name]
       return rows.first
     end
     
@@ -31,7 +36,10 @@ module Dog
         track = Track.current
       end
       
-      rows = Dog::database[@find_variable_query, track.id]
+      puts ::Dog::database.fetch(@find_variable_query, track.id, name).sql
+      rows = ::Dog::database.fetch(@find_variable_query, track.id, name).all
+      
+      puts rows.inspect
       
       if rows.first then
         variable = Variable.load(rows.first)
@@ -39,6 +47,7 @@ module Dog
         variable = Variable.new
         variable.name = name
         variable.track_id = track.id
+        puts "#{name} - #{track.id}"
         variable.save
       end
       

@@ -8,24 +8,7 @@
 #
 
 module Dog
-  class Person < Sequel::Model(:people)
-    
-    def self.from_variable
-      
-    end
-    
-  end
-
-  class People
-    # TODO
-    
-    def self.from
-      
-    end
-    
-    def self.where
-      
-    end
+  class Handler
     
   end
 end

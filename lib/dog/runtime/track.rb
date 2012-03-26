@@ -14,8 +14,30 @@ module Dog
     attr_accessor :context
     attr_accessor :fiber
     
-    def initialize
-      self.context = {}
+    def self.create(values = {}, &block)
+      ::Dog.database.transaction do
+        track = super
+        parent = track.parent
+        if parent then 
+          track.depth = parent.depth + 1
+          track.save
+        end
+        
+        parents = track.parents
+        parents.unshift track
+        
+        puts parents.inspect
+        
+        for parent in parents do
+          ::Dog.database[:track_parents].insert(:track_id => track.id, :parent_id => parent.id)
+        end
+        return track
+      end
+    end
+    
+    def context
+      @context ||= {}
+      @context
     end
     
     def parent
@@ -24,6 +46,18 @@ module Dog
     
     def children
       self.class.filter(:parent_id => self.id).all
+    end
+    
+    def parents
+      parents = []
+      parent = self.parent
+      while(true)
+        break if parent.nil?
+        parents << parent
+        parent = parent.parent
+      end
+      
+      return parents
     end
    
     def fiber=(f)

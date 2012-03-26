@@ -31,6 +31,7 @@ module Dog
     # I need to handle the fast startup logic here
     Database.initialize
     
+
     require File.join(File.dirname(__FILE__), 'runtime/track.rb')
     require File.join(File.dirname(__FILE__), 'runtime/track_fiber.rb')
     require File.join(File.dirname(__FILE__), 'runtime/variable.rb')
@@ -45,6 +46,9 @@ module Dog
     require File.join(File.dirname(__FILE__), 'runtime/message.rb')
     require File.join(File.dirname(__FILE__), 'runtime/task.rb')
     require File.join(File.dirname(__FILE__), 'runtime/commands.rb')
+    
+    require File.join(File.dirname(__FILE__), 'runtime/workflow.rb')
+    require File.join(File.dirname(__FILE__), 'runtime/handler.rb')
 
     EM.run do
       track = Track.root

@@ -14,7 +14,7 @@ module Dog
     
     def track
       if @track.class != Track then
-        @track = Track.filter(:id => @track.id).first
+        @track = Track.filter(:id => @track).first
         @track.instance_variable_set(:@fiber, self) 
       end
       

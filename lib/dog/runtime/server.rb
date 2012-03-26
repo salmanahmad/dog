@@ -98,6 +98,7 @@ module Dog
       end
       
       eligibility = options[:eligibility]
+      variable_name = options[:variable_name]
       handler = options[:handler] 
       event = options[:event]
       location = options[:at]
@@ -136,9 +137,13 @@ module Dog
           
           for handler in @@handlers[location] do
             EM.next_tick do
-              track = Track.new
+              track = Track.create(:parent_id => Track.root.id)
               fiber = TrackFiber.new do
-                ::Dog::Application::Handlers.send(handler, @event)
+                variable = Variable.named(variable_name)
+                variable.value = @event.to_hash
+                variable.save
+                
+                h = handler.new.run
               end
               track.context[:reply_fiber] = reply_fiber
               track.fiber = fiber
@@ -194,7 +199,7 @@ module Dog
       
       for handler in handlers do
         EM.next_tick do
-          track = Track.new
+          track = Track.create(:parent_id => Track.root.id)
           fiber = TrackFiber.new do
             ::Dog::Application::Handlers.send(handler, @event)
           end
@@ -270,7 +275,7 @@ module Dog
           @event.password ||= ""
           @event.confirm ||= ""
           
-          unless people.value.find(:email => @event.email).empty? then
+          if Person.filter(:email => @event.email).count == 0 then
             @event.success = false
             @event.errors ||= []
             @event.errors << "User name has already been taken."
