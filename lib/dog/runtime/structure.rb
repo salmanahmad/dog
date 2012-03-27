@@ -8,7 +8,7 @@
 #
 
 module Dog
-  
+    
   class Boolean; end
   
   class Structure
@@ -73,6 +73,17 @@ module Dog
       end
       
       return hash
+    end
+    
+    def self.json_create(o)
+      self.from_hash(o['data'])
+    end
+    
+    def to_json
+      {
+        'json_class' => self.class.name,
+        'data' => self.to_hash
+      }.to_json
     end
     
     def assign(hash)

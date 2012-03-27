@@ -11,8 +11,7 @@ module Dog
   
   class Variable < Sequel::Model(:variables)
     
-    plugin :serialization, :json
-    serialize_attributes :json, :value
+    plugin :serialization, :dog_json, :value
     
     # Raw SQL for performance here. This query is properly indexed and very fast.
     @find_variable_query = "SELECT 'variables'.* FROM 'tracks' INNER JOIN 'variables' ON ('variables'.'track_id' = 'tracks'.'id') WHERE 'tracks'.'id' IN (SELECT parent_id FROM track_parents WHERE track_id = ?) AND 'variables'.'name' = ? ORDER BY 'tracks'.'depth' DESC LIMIT 1"
@@ -36,10 +35,7 @@ module Dog
         track = Track.current
       end
       
-      puts ::Dog::database.fetch(@find_variable_query, track.id, name).sql
       rows = ::Dog::database.fetch(@find_variable_query, track.id, name).all
-      
-      puts rows.inspect
       
       if rows.first then
         variable = Variable.load(rows.first)
@@ -47,7 +43,6 @@ module Dog
         variable = Variable.new
         variable.name = name
         variable.track_id = track.id
-        puts "#{name} - #{track.id}"
         variable.save
       end
       

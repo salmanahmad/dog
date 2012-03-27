@@ -26,8 +26,6 @@ module Dog
         parents = track.parents
         parents.unshift track
         
-        puts parents.inspect
-        
         for parent in parents do
           ::Dog.database[:track_parents].insert(:track_id => track.id, :parent_id => parent.id)
         end

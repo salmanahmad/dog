@@ -140,10 +140,10 @@ module Dog
               track = Track.create(:parent_id => Track.root.id)
               fiber = TrackFiber.new do
                 variable = Variable.named(variable_name)
-                variable.value = @event.to_hash
+                variable.value = @event
                 variable.save
-                
-                h = handler.new.run
+                h = handler.new
+                h.run
               end
               track.context[:reply_fiber] = reply_fiber
               track.fiber = fiber
