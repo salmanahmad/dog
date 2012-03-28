@@ -22,7 +22,6 @@ require 'json'
 
 # TODO - It is kind of weird that I do load config, but nothing else. 
 # Is that okay?
-require File.join(File.dirname(__FILE__), 'runtime/environment.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
 require File.join(File.dirname(__FILE__), 'runtime/database.rb')
 
@@ -39,9 +38,6 @@ module Dog
     require File.join(File.dirname(__FILE__), 'runtime/track_fiber.rb')
     require File.join(File.dirname(__FILE__), 'runtime/variable.rb')
     require File.join(File.dirname(__FILE__), 'runtime/server.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/request_context.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/binding.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/collection.rb')
     require File.join(File.dirname(__FILE__), 'runtime/record.rb')
     require File.join(File.dirname(__FILE__), 'runtime/person.rb')
     require File.join(File.dirname(__FILE__), 'runtime/event.rb')
