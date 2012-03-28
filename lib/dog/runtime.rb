@@ -20,38 +20,6 @@ require 'sinatra/async'
 require 'uuid'
 require 'json'
 
-Sequel::Plugins::Serialization.register_format(:dog_json,
-  lambda do |v|
-    v.to_json
-  end,
-  lambda do |v|
-
-    if (v.nil?) then
-      return nil
-    end
-
-    if (v == "null") then
-      return nil
-    end
-
-    if (r = Integer(v) rescue false) then
-      return r
-    end
-
-    if (r = Float(v) rescue false) then
-      return r
-    end
-
-    if (r = JSON.parse(v) rescue false) then
-      return r
-    end
-
-    Shellwords::shellwords(v).first
-
-  end
-)
-
-
 # TODO - It is kind of weird that I do load config, but nothing else. 
 # Is that okay?
 require File.join(File.dirname(__FILE__), 'runtime/environment.rb')

@@ -7,11 +7,42 @@
 # above copyright notice is included.
 #
 
+Sequel::Plugins::Serialization.register_format(:variable_json,
+  lambda do |v|
+    v.to_json
+  end,
+  lambda do |v|
+
+    if (v.nil?) then
+      return nil
+    end
+
+    if (v == "null") then
+      return nil
+    end
+
+    if (r = Integer(v) rescue false) then
+      return r
+    end
+
+    if (r = Float(v) rescue false) then
+      return r
+    end
+
+    if (r = JSON.parse(v) rescue false) then
+      return r
+    end
+
+    Shellwords::shellwords(v).first
+
+  end
+)
+
 module Dog
   
   class Variable < Sequel::Model(:variables)
     
-    plugin :serialization, :dog_json, :value
+    plugin :serialization, :variable_json, :value
     
     # Raw SQL for performance here. This query is properly indexed and very fast.
     @find_variable_query = "SELECT 'variables'.* FROM 'tracks' INNER JOIN 'variables' ON ('variables'.'track_id' = 'tracks'.'id') WHERE 'tracks'.'id' IN (SELECT parent_id FROM track_parents WHERE track_id = ?) AND 'variables'.'name' = ? ORDER BY 'tracks'.'depth' DESC LIMIT 1"

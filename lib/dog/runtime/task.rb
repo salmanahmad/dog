@@ -8,7 +8,23 @@
 #
 
 module Dog
-  class Task < Event
-    # TODO
+  class Task < Sequel::Model(:tasks)
+    include Properties
+    
+    plugin :single_table_inheritance, :kind
+    plugin :serialization, :json, :value
+    
+    one_to_many :task_responses
+    
+    # TODO - Setup many-to-many relationships
+    # many_to_many :people, :class => :person, :join_table => :person_tasks, :left_key => :task_id, :right_key => :person_id
+  end
+  
+  class TaskResponse < Sequel::Model(:task_responses)
+    plugin :serialization, :json, :value
+    
+    many_to_one :task
+    many_to_one :responder, :class => :person
   end
 end
+

@@ -8,7 +8,13 @@
 #
 
 module Dog
-  class Message < Event
-    # TODO
+  class Message < Sequel::Model(:messages)
+    include Properties
+    
+    plugin :single_table_inheritance, :kind
+    plugin :serialization, :json, :value
+    
+    # TODO - Setup many-to-many relationships
+    # many_to_many :people, :class => :person, :join_table => :person_messages, :left_key => :messages_id, :right_key => :person_id
   end
 end

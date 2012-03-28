@@ -127,19 +127,57 @@ module Dog
           foreign_key :person_id, :people
           foreign_key :target_id, :people
           string :name
-
+          
           index :name
           index :community_id
           index :person_id
           index [:name, :community_id, :person_id]
         end
-
-        ::Dog.database.create_table? :events do
-          primary_key :id
+        
+        ::Dog.database.create_table? :person_messages do
           foreign_key :person_id, :people
-          text :properties
+          foreign_key :message_id, :messages
+          
+          index :person_id
+          index :message_id
         end
-
+        
+        ::Dog.database.create_table? :person_tasks do
+          foreign_key :person_id, :people
+          foreign_key :task_id, :tasks
+          
+          index :person_id
+          index :task_id
+        end
+        
+        ::Dog.database.create_table? :messages do
+          primary_key :id
+          string :kind
+          text :value
+          
+          index :kind
+        end
+        
+        ::Dog.database.create_table? :tasks do
+          primary_key :id
+          string :kind
+          integer :replication
+          integer :duplication
+          text :value
+          
+          index :kind
+        end
+        
+        ::Dog.database.create_table? :task_responses do
+          primary_key :id
+          foreign_key :task_id, :tasks
+          foreign_key :responder_id, :people
+          text :value
+          
+          index :task_id
+          index :responder_id
+        end
+        
       end 
     end
   end    

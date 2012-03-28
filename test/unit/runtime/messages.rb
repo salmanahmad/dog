@@ -7,22 +7,20 @@
 # above copyright notice is included.
 #
 
-module Dog
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
+
+Dog.bark! do
+  
+  include Dog
+  
+  class Foobar < Task
     
-  class Record < Structure
-    # TODO
-    
-    def save
-      if required_properties_present? then
-        self.to_hash
-      else
-        nil
-      end
-    end
-    
-    def self.relationship(name, options = {})
-      
-    end
   end
   
+  f = Foobar.create
+  pp Task.all
+  
+  
 end
+
+puts "Hai"

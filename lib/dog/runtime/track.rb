@@ -14,6 +14,9 @@ module Dog
     attr_accessor :context
     attr_accessor :fiber
     
+    many_to_one :parent, :class => self, :key => :parent_id
+    one_to_many :children, :class => self, :key => :parent_id
+    
     def self.create(values = {}, &block)
       ::Dog.database.transaction do
         track = super
@@ -29,6 +32,7 @@ module Dog
         for parent in parents do
           ::Dog.database[:track_parents].insert(:track_id => track.id, :parent_id => parent.id)
         end
+        
         return track
       end
     end
@@ -36,14 +40,6 @@ module Dog
     def context
       @context ||= {}
       @context
-    end
-    
-    def parent
-      self.class.filter(:id => self.parent_id).first
-    end
-    
-    def children
-      self.class.filter(:parent_id => self.id).all
     end
     
     def parents
@@ -75,7 +71,7 @@ module Dog
       return @root if @root
       @root = Track.find_or_create(:root => true)
     end
-
+    
     def self.current
       track = Fiber.current.track
 

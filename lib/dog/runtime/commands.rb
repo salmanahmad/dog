@@ -16,11 +16,11 @@ module Dog
     end
   end
   
-  def self.ask
+  def self.ask(users, task, properties)
     
   end
   
-  def self.notify
+  def self.notify(users, message, properties)
     
   end
 end

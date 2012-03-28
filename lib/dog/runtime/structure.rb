@@ -11,54 +11,102 @@ module Dog
     
   class Boolean; end
   
-  class Structure
+  module Properties
     
-    FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
-
-    TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].to_set
-    
-    BOOLEAN_VALUES = FALSE_VALUES | TRUE_VALUES
-
-    def self.identifier
-      self.name.downcase.gsub("::", ".")
+    def self.included(base)
+      base.extend(ClassMethods)
     end
     
-    def self.convert_value_to_type(value, type)
-      return value if value.kind_of? type
-      return nil if value.nil?
+    module ClassMethods
       
-      if type.kind_of? Structure then
-        return type.from_hash(value)
-      elsif type == String then
-        return value.to_s
-      elsif type == Boolean then
-        if BOOLEAN_VALUES.include?(value) then
-          return TRUE_VALUES.include?(value)
+      FALSE_VALUES = [false, 0, '0', 'f', 'F', 'false', 'FALSE'].to_set
+
+      TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].to_set
+
+      BOOLEAN_VALUES = FALSE_VALUES | TRUE_VALUES
+      
+      def identifier
+        self.name.downcase.gsub("::", ".")
+      end
+
+      def convert_value_to_type(value, type)
+        return value if value.kind_of? type
+        return nil if value.nil?
+
+        if type.kind_of? Structure then
+          return type.from_hash(value)
+        elsif type == String then
+          return value.to_s
+        elsif type == Boolean then
+          if BOOLEAN_VALUES.include?(value) then
+            return TRUE_VALUES.include?(value)
+          else
+            return nil
+          end
+        elsif type == Numeric then
+          return value.to_s.to_f
+        elsif type == Object
+          return value
         else
           return nil
         end
-      elsif type == Numeric then
-        return value.to_s.to_f
-      elsif type == Object
-        return value
-      else
-        return nil
       end
+      
+      def from_hash(hash)
+        object = self.new
+
+        for name, options in self.properties do
+          begin
+            object[name] = hash[name]
+          rescue Exception => e
+            return nil
+          end
+        end
+
+        return object
+      end  
+      
+      def json_create(o)
+        self.from_hash(o['data'])
+      end
+      
+      def properties
+        @properties ||= {}
+        inherited_properties = superclass.properties rescue {}
+        inherited_properties.merge @properties
+      end
+
+      def property(name, options = {})
+
+        type = options[:type] || Object
+
+        self.instance_eval do
+          @properties ||= {}
+          @properties[name] = options        
+        end
+
+        self.class_eval do
+          define_method(name.intern) do
+            instance_variable_get("@#{name}")
+          end
+
+          define_method("#{name}=".intern) do |arg|
+            arg = self.class.convert_value_to_type(arg, type)
+
+            if type == Boolean && (arg.kind_of?(TrueClass) || arg.kind_of?(FalseClass) || arg.kind_of?(NilClass)) then
+              instance_variable_set("@#{name}", arg)
+            elsif arg.kind_of?(type) || arg.kind_of?(NilClass)  then
+              instance_variable_set("@#{name}", arg)
+            else
+              raise "Error: Attempting to assign property #{name} with invalid type (#{arg.class})."
+            end
+          end
+        end
+        
+      end
+      
     end
     
-    def self.from_hash(hash)
-      object = self.new
-      
-      for name, options in self.properties do
-        begin
-          object[name] = hash[name]
-        rescue Exception => e
-          return nil
-        end
-      end
-      
-      return object
-    end
         
     def to_hash
       hash = {}      
@@ -73,10 +121,6 @@ module Dog
       end
       
       return hash
-    end
-    
-    def self.json_create(o)
-      self.from_hash(o['data'])
     end
     
     def to_json
@@ -111,41 +155,10 @@ module Dog
       return true
     end
     
-    def self.properties
-      @properties ||= {}
-      inherited_properties = superclass.properties rescue {}
-      inherited_properties.merge @properties
-    end
-    
-    def self.property(name, options = {})
-      
-      type = options[:type] || Object
-      
-      self.instance_eval do
-        @properties ||= {}
-        @properties[name] = options        
-      end
-      
-      self.class_eval do
-        define_method(name.intern) do
-          instance_variable_get("@#{name}")
-        end
-        
-        define_method("#{name}=".intern) do |arg|
-          arg = self.class.convert_value_to_type(arg, type)
-          
-          if type == Boolean && (arg.kind_of?(TrueClass) || arg.kind_of?(FalseClass) || arg.kind_of?(NilClass)) then
-            instance_variable_set("@#{name}", arg)
-          elsif arg.kind_of?(type) || arg.kind_of?(NilClass)  then
-            instance_variable_set("@#{name}", arg)
-          else
-            raise "Error: Attempting to assign property #{name} with invalid type (#{arg.class})."
-          end
-        end
-      end
-      
-    end
-    
+  end
+  
+  class Structure
+    include Properties
   end
   
 end
