@@ -11,65 +11,7 @@ module Dog
   
   class Event < Structure
     property "success", :type => Boolean, :direction => "output"
-    property "errors", :type => Array, :direction => "output"
-    
-    def self.import(params)
-      object = self.from_hash(params)
-      
-      if object.required_input_present? then
-        return object
-      else
-        return nil
-      end
-    end
-    
-    def export
-      if self.required_output_present? then
-        return self.to_hash
-      else
-        return nil
-      end
-    end
-    
-    def required_input_present?
-      
-      for name, options in self.class.properties do
-        next if options[:direction] == "output"
-        
-        if options[:type].kind_of? Event then
-          return nil unless object.required_input_present?
-        elsif options[:type].kind_of? Structure then
-          return nil unless object.required_properties_present?
-        else
-          if options[:required] && options[:direction] == "input" && self[name].nil? then
-            return false
-          end
-        end
-        
-      end
-      
-      return true
-    end
-    
-    def required_output_present?
-      
-      for name, options in self.class.properties do
-        next if options[:direction] == "input"
-        
-        if options[:type].kind_of? Event then
-          return nil unless object.required_output_present?
-        elsif options[:type].kind_of? Structure then
-          return nil unless object.required_properties_present?
-        else
-          if options[:required] && options[:direction] == "output" && self[name].nil? then
-            return false
-          end
-        end
-      end
-      
-      return true
-    end
-    
+    property "errors", :type => Array, :direction => "output"    
   end
   
   class SystemEvent < Event

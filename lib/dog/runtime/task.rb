@@ -8,9 +8,7 @@
 #
 
 module Dog
-  class Task < Sequel::Model(:tasks)
-    include Properties
-    
+  class RoutedTask < Sequel::Model(:tasks)
     plugin :single_table_inheritance, :kind
     plugin :serialization, :json, :value
     
@@ -23,8 +21,12 @@ module Dog
   class TaskResponse < Sequel::Model(:task_responses)
     plugin :serialization, :json, :value
     
-    many_to_one :task
-    many_to_one :responder, :class => :person
+    many_to_one :task, :class => RoutedTask
+    many_to_one :responder, :class => Person
+  end
+  
+  class Task < Structure
+    
   end
 end
 

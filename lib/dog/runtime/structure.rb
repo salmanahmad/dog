@@ -33,7 +33,7 @@ module Dog
         return value if value.kind_of? type
         return nil if value.nil?
 
-        if type.kind_of? Structure then
+        if type.kind_of? Properties then
           return type.from_hash(value)
         elsif type == String then
           return value.to_s
@@ -47,6 +47,16 @@ module Dog
           return value.to_s.to_f
         elsif type == Object
           return value
+        else
+          return nil
+        end
+      end
+      
+      def import(params)
+        object = self.from_hash(params)
+
+        if object.required_input_present? then
+          return object
         else
           return nil
         end
@@ -102,18 +112,27 @@ module Dog
             end
           end
         end
-        
       end
-      
     end
     
-        
+    def initialize(params = {})
+      assign(params)
+    end
+    
+    def export
+      if self.required_output_present? then
+        return self.to_hash
+      else
+        return nil
+      end
+    end
+    
     def to_hash
       hash = {}      
       properties = self.class.properties
       
       for name, options in properties do
-        if options[:type].kind_of? Structure then
+        if options[:type].kind_of? Properties then
           hash[name] = self[name].to_hash
         else
           hash[name] = self[name]
@@ -149,6 +168,47 @@ module Dog
       for name, options in self.class.properties do
         if options[:required] && self[name].nil? then
           return false
+        end
+      end
+      
+      return true
+    end
+    
+    def required_input_present?
+      for name, options in self.class.properties do
+        next if options[:direction] == "output"
+        
+        is_directional_object = options[:type].kind_of?(Event) || options[:type].kind_of?(Task) || options[:type].kind_of?(Message)
+        
+        if is_directional_object then
+          return nil unless object.required_input_present?
+        elsif options[:type].kind_of? Record then
+          return nil unless object.required_properties_present?
+        else
+          if options[:required] && options[:direction] == "input" && self[name].nil? then
+            return false
+          end
+        end
+        
+      end
+      
+      return true
+    end
+    
+    def required_output_present?
+      for name, options in self.class.properties do
+        next if options[:direction] == "input"
+        
+        is_directional_object = options[:type].kind_of?(Event) || options[:type].kind_of?(Task) || options[:type].kind_of?(Message)
+        
+        if is_directional_object then
+          return nil unless object.required_output_present?
+        elsif options[:type].kind_of? Record then
+          return nil unless object.required_properties_present?
+        else
+          if options[:required] && options[:direction] == "output" && self[name].nil? then
+            return false
+          end
         end
       end
       

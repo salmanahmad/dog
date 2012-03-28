@@ -16,11 +16,48 @@ module Dog
     end
   end
   
-  def self.ask(users, task, properties)
-    
+  def self.ask(users, task)
+    if task.kind_of? Task then
+      unless task.required_input_present?
+        raise "Required input parameters are missing."
+        return
+      end
+      
+      ::Dog.database.transaction do
+        task = RoutedTask.new
+        task.replication = 1
+        task.duplication = 1
+        task.value = task
+        task.save
+        
+        users = [users] if users.class != Array
+        
+        for user in users
+          ::Dog.database[:person_tasks].insert(:person_id => user.id, :task_id => task.id)
+        end
+      end
+    end
   end
   
-  def self.notify(users, message, properties)
+  def self.notify(users, message)
+    if task.kind_of? Message then
+      unless task.required_input_present?
+        raise "Required input parameters are missing."
+        return
+      end
+      
+      ::Dog.database.transaction do
+        message = RoutedMessage.new
+        message.value = message
+        message.save
+        
+        users = [users] if users.class != Array
+        
+        for user in users
+          ::Dog.database[:person_messages].insert(:person_id => user.id, :message_id => message.id)
+        end
+      end
+    end
     
   end
 end

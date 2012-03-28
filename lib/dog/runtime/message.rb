@@ -7,14 +7,16 @@
 # above copyright notice is included.
 #
 
-module Dog
-  class Message < Sequel::Model(:messages)
-    include Properties
-    
+module Dog  
+  class RoutedMessage < Sequel::Model(:messages)
     plugin :single_table_inheritance, :kind
     plugin :serialization, :json, :value
     
     # TODO - Setup many-to-many relationships
     # many_to_many :people, :class => :person, :join_table => :person_messages, :left_key => :messages_id, :right_key => :person_id
+  end
+  
+  class Message < Structure
+    
   end
 end

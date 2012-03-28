@@ -35,14 +35,14 @@ Dog.bark! do
   class LearningRequestHandler < Handler
     def run
       user = Dog::Variable.named("learning_request").person
-      objectives = Dog::ask(user, ProvideObjective)
+      objectives = Dog::ask(user, ProvideObjective.new())
       
       if user.public? then
         user = Dog::ask(user, Login)
       end
       
-      teacher = Dog::ask(user, PickTeacher, :choices => ["Foo", "Bar"])
-      Dog::notify(user, MeetingConfirmation)
+      teacher = Dog::ask(user, PickTeacher.new(:choices => ["Foo", "Bar"]))
+      Dog::notify(user, MeetingConfirmation.new)
     end
   end
   
