@@ -8,13 +8,26 @@
 #
 
 module Dog
-  class Workflow < DatabaseObject
-    collection "workflows"
+  class Community < DatabaseObject
+    collection "communities"
     
     attr_accessor :_id
-    attr_accessor :type
-    attr_accessor :track_id
-    attr_accessor :routing
-    attr_accessor :created_at
+    attr_accessor :name
+    attr_accessor :properties
+    
+    def members
+      
+    end
+    
+    def self.from_hash
+      
+    end
+    
+    def to_hash
+      return {
+        name: self.name,
+        properties: self.properties
+      }
+    end
   end
 end

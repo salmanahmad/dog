@@ -11,6 +11,16 @@ module Dog
   class Person < DatabaseObject
     collection "people"
     
+    attr_accessor :_id
+    attr_accessor :handle
+    attr_accessor :email
+    attr_accessor :facebook
+    attr_accessor :twitter
+    attr_accessor :google
+    attr_accessor :password
+    attr_accessor :communities
+    attr_accessor :profile
+    
     def self.from_variable
       
     end
@@ -18,7 +28,6 @@ module Dog
   end
 
   class People
-    # TODO
     
     def self.from
       
