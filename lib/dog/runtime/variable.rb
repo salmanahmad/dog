@@ -36,7 +36,7 @@ module Dog
       end
       
       ancestors = track.scoped_ancestors
-      document = ::Dog::database["variables"].find_one({
+      document = ::Dog::database[self.collection_name].find_one({
         "track_id" => {
           "$in" => ancestors
           }

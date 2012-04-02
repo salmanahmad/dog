@@ -25,7 +25,15 @@ module Dog
     end
     
     def to_hash
-      
+      return {
+        type: self.type,
+        value: self.value,
+        routing: (self.routing || {}),
+        replication: (self.replication || 1),
+        duplication: (self.duplication || 1),
+        responses: (self.responses || []),
+        created_at: (self.created_at || DateTime.now)
+      }
     end
   end
   

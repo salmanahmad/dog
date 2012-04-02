@@ -22,7 +22,12 @@ module Dog
     end
     
     def to_hash
-      
+      return {
+        type: self.type,
+        value: self.value,
+        routing: (self.routing || {}),
+        created_at: (self.created_at || DateTime.now)
+      }
     end
   end
   

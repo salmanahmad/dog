@@ -8,7 +8,8 @@
 #
 
 module Dog
-  class Person < Sequel::Model(:people)
+  class Person < DatabaseObject
+    collection "people"
     
     def self.from_variable
       

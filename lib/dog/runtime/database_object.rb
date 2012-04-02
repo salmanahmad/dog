@@ -18,11 +18,15 @@ module Dog
       self.collection_name = name
     end
     
+    def collection_name
+      self.class.collection_name
+    end
+    
     def save
       if self._id then
-        ::Dog::database[self.class.collection_name].update({"_id" => self._id}, self.to_hash)
+        ::Dog::database[self.collection_name].update({"_id" => self._id}, self.to_hash)
       else
-        id = ::Dog::database[self.class.collection_name].insert(self.to_hash)
+        id = ::Dog::database[self.collection_name].insert(self.to_hash)
         self._id = id
       end
     end
