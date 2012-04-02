@@ -9,32 +9,47 @@
 
 module Dog
   
-  class Track < Sequel::Model(:tracks)
-            
+  class Track
+    
+    attr_accessor :_id
+    attr_accessor :ancestors
+    attr_accessor :checkpoint
+    attr_accessor :depth
+    
     attr_accessor :context
     attr_accessor :fiber
     
-    many_to_one :parent, :class => self, :key => :parent_id
-    one_to_many :children, :class => self, :key => :parent_id
+    def self.from_hash
+      # TODO
+    end
     
-    def self.create(values = {}, &block)
-      ::Dog.database.transaction do
-        track = super
-        parent = track.parent
-        if parent then 
-          track.depth = parent.depth + 1
-          track.save
-        end
-        
-        parents = track.parents
-        parents.unshift track
-        
-        for parent in parents do
-          ::Dog.database[:track_parents].insert(:track_id => track.id, :parent_id => parent.id)
-        end
-        
-        return track
+    def to_hash
+      return {
+        "ancestors" => self.ancestors,
+        "checkpoint" => self.checkpoint,
+        "depth" => self.depth
+      }
+    end
+    
+    def save
+      if self._id then
+        ::Dog::database["tracks"].update({"_id" => self._id}, self.to_hash)
+      else
+        id = ::Dog::database["tracks"].insert(self.to_hash)
+        self._id = id
       end
+    en
+    
+    def self.create
+      parent = Track.current
+      
+      track = Track.new
+      track.ancestors = parent.scoped_ancestors
+      track.depth = parent.depth + 1
+      track.checkpoint = 0
+      track.save
+        
+      return track
     end
     
     def context
@@ -42,21 +57,16 @@ module Dog
       @context
     end
     
-    def parents
-      parents = []
-      parent = self.parent
-      while(true)
-        break if parent.nil?
-        parents << parent
-        parent = parent.parent
-      end
-      
-      return parents
+    def scoped_ancestors
+      ancestors = self.ancestors
+      ancestors ||= []
+      ancestors << self._id
+      return ancestors
     end
-   
+    
     def fiber=(f)
       @fiber = f
-      f.instance_variable_set(:@track, self.id)
+      f.instance_variable_set(:@track, self._id)
     end
     
     def checkpoint &block
@@ -68,8 +78,23 @@ module Dog
     end
     
     def self.root
-      return @root if @root
-      @root = Track.find_or_create(:root => true)
+      root = ::Dog.database["tracks"].find_one({
+        "ancestors" => {
+          "$size" => 0
+        }
+      })
+      
+      if root then
+        return Track.from_hash(root)
+      else
+        root = Track.new
+        root.ancestors = []
+        root.depth = 0
+        root.checkpoint = 0
+        root.save
+        
+        return root
+      end
     end
     
     def self.current

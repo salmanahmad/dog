@@ -10,20 +10,30 @@
 require 'fiber'
 require 'digest/sha1'
 
-require 'eventmachine'
-require 'sequel'
-require 'sequel/plugins/serialization'
-
 require 'thin'
+require 'eventmachine'
 require 'sinatra/base'
 require 'sinatra/async'
 require 'uuid'
 require 'json'
+require 'mongo'
 
-# TODO - It is kind of weird that I do load config, but nothing else. 
-# Is that okay?
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
 require File.join(File.dirname(__FILE__), 'runtime/database.rb')
+require File.join(File.dirname(__FILE__), 'runtime/structure.rb')
+require File.join(File.dirname(__FILE__), 'runtime/track.rb')
+require File.join(File.dirname(__FILE__), 'runtime/track_fiber.rb')
+require File.join(File.dirname(__FILE__), 'runtime/variable.rb')
+require File.join(File.dirname(__FILE__), 'runtime/server.rb')
+require File.join(File.dirname(__FILE__), 'runtime/record.rb')
+require File.join(File.dirname(__FILE__), 'runtime/person.rb')
+require File.join(File.dirname(__FILE__), 'runtime/event.rb')
+require File.join(File.dirname(__FILE__), 'runtime/message.rb')
+require File.join(File.dirname(__FILE__), 'runtime/task.rb')
+require File.join(File.dirname(__FILE__), 'runtime/commands.rb')
+
+require File.join(File.dirname(__FILE__), 'runtime/workflow.rb')
+require File.join(File.dirname(__FILE__), 'runtime/handler.rb')
 
 module Dog
   
@@ -33,20 +43,7 @@ module Dog
     Database.initialize
     
 
-    require File.join(File.dirname(__FILE__), 'runtime/structure.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/track.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/track_fiber.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/variable.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/server.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/record.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/person.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/event.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/message.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/task.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/commands.rb')
-    
-    require File.join(File.dirname(__FILE__), 'runtime/workflow.rb')
-    require File.join(File.dirname(__FILE__), 'runtime/handler.rb')
+
 
     EM.run do
       track = Track.root

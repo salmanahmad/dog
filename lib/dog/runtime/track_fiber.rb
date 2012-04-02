@@ -14,7 +14,8 @@ module Dog
     
     def track
       if @track.class != Track then
-        @track = Track.filter(:id => @track).first
+        # TODO - Do I need this? BSON::ObjectId.from_string. Or will @track be set accordingly? 
+        @track = ::Dog.database["tracks"].find_one({"_id" => @track})
         @track.instance_variable_set(:@fiber, self) 
       end
       
@@ -22,7 +23,7 @@ module Dog
     end
     
     def track=(t)
-      @track = t.id
+      @track = t._id
       t.instance_variable_set(:@fiber, self)
     end
   end

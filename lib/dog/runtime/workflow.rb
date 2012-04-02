@@ -8,7 +8,7 @@
 #
 
 module Dog
-  class Workflow < Structure
+  class Workflow
     
   end
 end

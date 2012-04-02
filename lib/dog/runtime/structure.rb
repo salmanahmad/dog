@@ -123,6 +123,7 @@ module Dog
       if self.required_output_present? then
         return self.to_hash
       else
+        # TODO - Raise Exception Here!
         return nil
       end
     end

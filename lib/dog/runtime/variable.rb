@@ -7,49 +7,26 @@
 # above copyright notice is included.
 #
 
-Sequel::Plugins::Serialization.register_format(:variable_json,
-  lambda do |v|
-    v.to_json
-  end,
-  lambda do |v|
 
-    if (v.nil?) then
-      return nil
-    end
-
-    if (v == "null") then
-      return nil
-    end
-
-    if (r = Integer(v) rescue false) then
-      return r
-    end
-
-    if (r = Float(v) rescue false) then
-      return r
-    end
-
-    if (r = JSON.parse(v) rescue false) then
-      return r
-    end
-
-    Shellwords::shellwords(v).first
-
-  end
-)
 
 module Dog
   
-  class Variable < Sequel::Model(:variables)
+  class Variable
     
-    plugin :serialization, :variable_json, :value
+    attr_accessor :_id
+    attr_accessor :person_id
+    attr_accessor :track_id
+    attr_accessor :name
+    attr_accessor :type
+    attr_accessor :value
     
-    # Raw SQL for performance here. This query is properly indexed and very fast.
-    @find_variable_query = "SELECT 'variables'.* FROM 'tracks' INNER JOIN 'variables' ON ('variables'.'track_id' = 'tracks'.'id') WHERE 'tracks'.'id' IN (SELECT parent_id FROM track_parents WHERE track_id = ?) AND 'variables'.'name' = ? ORDER BY 'tracks'.'depth' DESC LIMIT 1"
-    
+    # Denormalization
+    attr_accessor :track_depth
     
     def person
-      Person.filter(:id => self.person_id).first
+      if self.person_id
+        ::Dog.database["people"].find_one({"_id" => self.person_id})
+      end
     end
     
     def self.exists?(name, track = nil)
@@ -57,8 +34,17 @@ module Dog
         track = Track.current
       end
       
-      rows = ::Dog::database[@find_variable_query, track.id, name]
-      return rows.first
+      ancestors = track.scoped_ancestors
+      document = ::Dog::database["variables"].find_one({
+        "track_id" => {
+          "$in" => ancestors
+          }
+        }
+      ).sort({
+        "track_depth" => -1
+      })
+      
+      return self.from_hash(document)
     end
     
     def self.named(name, track = nil)
@@ -66,18 +52,52 @@ module Dog
         track = Track.current
       end
       
-      rows = ::Dog::database.fetch(@find_variable_query, track.id, name).all
-      
-      if rows.first then
-        variable = Variable.load(rows.first)
-      else
+      variable = self.exists?(name, track)
+      unless variable then
         variable = Variable.new
         variable.name = name
-        variable.track_id = track.id
+        variable.track_id = track._id
+        variable.track_depth = track.depth
         variable.save
       end
       
       return variable
+    end
+    
+    def self.from_hash
+      # TODO
+    end
+    
+    def to_hash
+      type = nil
+      value = nil
+      
+      if self.value.kindof? Structure then
+        value = self.value.export
+        type = self.value.class.name
+      else
+        value = self.value
+      end
+      
+      hash = {
+        "person_id" => self.person_id,
+        "track_id" => self.track_id,
+        "track_depth" => self.track_depth,
+        "name" => self.name,
+        "type" => type,
+        "value" => value
+      }
+      
+      return hash
+    end
+    
+    def save
+      if self._id then
+        ::Dog::database["variables"].update({"_id" => self._id}, self.to_hash)
+      else
+        id = ::Dog::database["variables"].insert(self.to_hash)
+        self._id = id
+      end
     end
     
   end
