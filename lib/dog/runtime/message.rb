@@ -8,12 +8,22 @@
 #
 
 module Dog  
-  class RoutedMessage < Sequel::Model(:messages)
-    plugin :single_table_inheritance, :kind
-    plugin :serialization, :json, :value
+  class RoutedMessage < DatabaseObject
+    collection "messages"
     
-    # TODO - Setup many-to-many relationships
-    # many_to_many :people, :class => :person, :join_table => :person_messages, :left_key => :messages_id, :right_key => :person_id
+    attr_accessor :_id
+    attr_accessor :type
+    attr_accessor :value
+    attr_accessor :routing
+    attr_accessor :created_at
+    
+    def self.from_hash
+      # TODO
+    end
+    
+    def to_hash
+      
+    end
   end
   
   class Message < Structure

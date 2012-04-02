@@ -9,7 +9,8 @@
 
 module Dog
   
-  class Track
+  class Track < DatabaseObject
+    collection "tracks"
     
     attr_accessor :_id
     attr_accessor :ancestors
@@ -30,15 +31,6 @@ module Dog
         "depth" => self.depth
       }
     end
-    
-    def save
-      if self._id then
-        ::Dog::database["tracks"].update({"_id" => self._id}, self.to_hash)
-      else
-        id = ::Dog::database["tracks"].insert(self.to_hash)
-        self._id = id
-      end
-    en
     
     def self.create
       parent = Track.current

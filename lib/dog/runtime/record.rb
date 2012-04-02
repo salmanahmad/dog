@@ -11,15 +11,6 @@ module Dog
     
   class Record < Structure
     # TODO
-    
-    def save
-      if required_properties_present? then
-        self.to_hash
-      else
-        nil
-      end
-    end
-    
     def self.relationship(name, options = {})
       
     end

@@ -8,21 +8,25 @@
 #
 
 module Dog
-  class RoutedTask < Sequel::Model(:tasks)
-    plugin :single_table_inheritance, :kind
-    plugin :serialization, :json, :value
+  class RoutedTask < DatabaseObject
+    collection "tasks"
     
-    one_to_many :task_responses
+    attr_accessor :_id
+    attr_accessor :type
+    attr_accessor :value
+    attr_accessor :routing
+    attr_accessor :replication
+    attr_accessor :duplication
+    attr_accessor :responses
+    attr_accessor :created_at
     
-    # TODO - Setup many-to-many relationships
-    # many_to_many :people, :class => :person, :join_table => :person_tasks, :left_key => :task_id, :right_key => :person_id
-  end
-  
-  class TaskResponse < Sequel::Model(:task_responses)
-    plugin :serialization, :json, :value
+    def self.from_hash
+      # TODO
+    end
     
-    many_to_one :task, :class => RoutedTask
-    many_to_one :responder, :class => Person
+    def to_hash
+      
+    end
   end
   
   class Task < Structure

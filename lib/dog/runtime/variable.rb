@@ -11,7 +11,8 @@
 
 module Dog
   
-  class Variable
+  class Variable < DatabaseObject
+    collection "variables"
     
     attr_accessor :_id
     attr_accessor :person_id
@@ -89,15 +90,6 @@ module Dog
       }
       
       return hash
-    end
-    
-    def save
-      if self._id then
-        ::Dog::database["variables"].update({"_id" => self._id}, self.to_hash)
-      else
-        id = ::Dog::database["variables"].insert(self.to_hash)
-        self._id = id
-      end
     end
     
   end
