@@ -154,18 +154,17 @@ module Dog
     
     def update_conditions(conditions)
       updated_conditions = {}
+      boolean_operators = ["$and", "$or", "$nor"]
       
       for key, value in conditions do
-        if key.include?("$") || key.include?(".")
+        if boolean_operators.include?(key)
+          value = updated_conditions(value)
+        elsif key.include?("$") || key.include?(".")
           # Do nothing
         elsif Person.default_properties.include? key
           # DO nothing
         else
           key = "profile.#{self.community_hint}.#{key}"
-        end
-        
-        if value.class == Hash then
-          value = updated_conditions(value)
         end
         
         updated_conditions[key] = value
