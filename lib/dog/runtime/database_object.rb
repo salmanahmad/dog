@@ -28,6 +28,7 @@ module Dog
     end
     
     def self.find_by_id(id)
+      return nil if id.nil?
       id = BSON::ObjectId.from_string(id) if id.class == String
       return self.find_one({"_id" => id})
     end

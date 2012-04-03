@@ -34,15 +34,7 @@ module Dog
     end
         
     def self.find_by_name(name)
-      community = ::Dog.database[self.collection_name].find_one({
-        "name" => name
-      })
-      
-      if community then
-        return self.from_hash(community)
-      else
-        return nil
-      end
+      return self.find_one({"name" => name})
     end
       
     def to_hash

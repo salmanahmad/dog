@@ -17,6 +17,7 @@ module Dog
     attr_accessor :checkpoint
     attr_accessor :depth
     
+    # Volatile properties
     attr_accessor :context
     attr_accessor :fiber
     
@@ -66,7 +67,7 @@ module Dog
     end
     
     def self.root
-      root = ::Dog.database["tracks"].find_one({
+      root = self.find_one({
         "ancestors" => {
           "$size" => 0
         }

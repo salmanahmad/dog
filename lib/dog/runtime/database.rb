@@ -31,12 +31,32 @@ module Dog
           ::Dog.database = Mongo::Connection.new.db($0)
         end
         
-        # TODO - Ensure Indices
+        ::Dog.database[Community.collection_name].ensure_index("name")
         
-        # Variable - name
-        # Variable - track_id
+        ::Dog.database[Message.collection_name].ensure_index("type")
+        ::Dog.database[Message.collection_name].ensure_index("created_at")
+
+        ::Dog.database[Person.collection_name].ensure_index("handle")
+        ::Dog.database[Person.collection_name].ensure_index("email")
+        ::Dog.database[Person.collection_name].ensure_index("facebook")
+        ::Dog.database[Person.collection_name].ensure_index("twitter")
+        ::Dog.database[Person.collection_name].ensure_index("google")
+        ::Dog.database[Person.collection_name].ensure_index("password")
+        ::Dog.database[Person.collection_name].ensure_index("communities")
         
+        ::Dog.database[Task.collection_name].ensure_index("type")
+        ::Dog.database[Task.collection_name].ensure_index("created_at")
+        ::Dog.database[Task.collection_name].ensure_index("replication")
+        ::Dog.database[Task.collection_name].ensure_index("responses")
         
+        ::Dog.database[Track.collection_name].ensure_index("depth")
+        ::Dog.database[Track.collection_name].ensure_index("ancestors")
+        
+        ::Dog.database[Variable.collection_name].ensure_index("name")
+        ::Dog.database[Variable.collection_name].ensure_index("track_id")
+        ::Dog.database[Variable.collection_name].ensure_index("track_depth")
+        
+        ::Dog.database[Workflow.collection_name].ensure_index("type")        
       end 
     end
   end    

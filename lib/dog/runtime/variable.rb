@@ -7,8 +7,6 @@
 # above copyright notice is included.
 #
 
-
-
 module Dog
   
   class Variable < DatabaseObject
@@ -25,9 +23,7 @@ module Dog
     attr_accessor :track_depth
     
     def person
-      if self.person_id
-        ::Dog.database["people"].find_one({"_id" => self.person_id})
-      end
+      Person.find_by_id(self.person_id)
     end
     
     def self.exists?(name, track = nil)

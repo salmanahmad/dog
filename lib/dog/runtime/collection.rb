@@ -10,7 +10,8 @@
 module Dog
   class Collection
     def self.named(name)
-      ::Dog.database[name.to_s]
+      collection_name = "app." + name.to_s
+      ::Dog.database[collection_name]
     end
   end
 end

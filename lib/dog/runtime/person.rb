@@ -21,6 +21,19 @@ module Dog
     attr_accessor :communities
     attr_accessor :profile
     
+    def to_hash
+      return {
+        handle: self.handle,
+        email: self.email,
+        facebook: self.facebook,
+        twitter: self.twitter,
+        google: self.google,
+        password: self.password,
+        communities: self.communities,
+        profile: self.profile
+      }
+    end
+    
     def self.from_variable
       
     end
