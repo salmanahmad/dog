@@ -65,8 +65,18 @@ module Dog
       return variable
     end
     
-    def self.from_hash
-      # TODO
+    def self.from_hash(hash)
+      object = super
+      
+      type = hash["type"]
+      if type then
+        type = Kernel.const_get(type)
+        if type.kind_of? Structure then
+          object.value = type.new.import(object.value)
+        end        
+      end
+      
+      return object
     end
     
     def to_hash

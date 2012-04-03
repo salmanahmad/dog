@@ -20,15 +20,11 @@ module Dog
     attr_accessor :context
     attr_accessor :fiber
     
-    def self.from_hash
-      # TODO
-    end
-    
     def to_hash
       return {
-        "ancestors" => self.ancestors,
-        "checkpoint" => self.checkpoint,
-        "depth" => self.depth
+        ancestors: self.ancestors,
+        checkpoint: self.checkpoint,
+        depth: self.depth
       }
     end
     

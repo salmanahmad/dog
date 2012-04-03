@@ -23,6 +23,8 @@ spec = Gem::Specification.new do |s|
   s.add_dependency 'eventmachine'
   s.add_dependency 'sequel'
   s.add_dependency 'sqlite3'
+  s.add_dependency 'mongo'
+  s.add_dependency 'bson_ext'
   s.add_dependency 'pg'
   s.add_dependency 'thin'
   s.add_dependency 'sinatra'

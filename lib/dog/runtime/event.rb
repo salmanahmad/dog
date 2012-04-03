@@ -43,7 +43,8 @@ module Dog
     
   end
   
-  class Community < SystemEvent
+  # TODO - Rename this back to community and solve the superclass mismatch problem
+  class CHANGEME_Community < SystemEvent
 
     class Join < SystemEvent
       

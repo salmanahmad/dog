@@ -12,9 +12,19 @@ module Dog
     collection "workflows"
     
     attr_accessor :_id
-    attr_accessor :type
     attr_accessor :track_id
+    attr_accessor :type
     attr_accessor :routing
     attr_accessor :created_at
+    
+    def to_hash
+      return {
+        type: self.type,
+        track_id: self.track_id,
+        routing: (self.routing || {}),
+        created_at: (self.created_at || DateTime.now)
+      }
+    end
+    
   end
 end

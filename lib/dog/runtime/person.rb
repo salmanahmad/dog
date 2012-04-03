@@ -25,17 +25,18 @@ module Dog
       
     end
     
+    def self.find_by_email(email)
+      # TODO
+    end
+    
   end
 
   class People
     
-    def self.from
-      
-    end
-    
-    def self.where
+    def self.find()
       
     end
     
   end
+  
 end

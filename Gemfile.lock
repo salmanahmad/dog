@@ -3,7 +3,9 @@ PATH
   specs:
     dog (0.0.1)
       async_sinatra
+      bson_ext
       eventmachine
+      mongo
       pg
       sequel
       sinatra
@@ -19,6 +21,9 @@ GEM
     async_sinatra (0.5.0)
       rack (>= 1.2.1)
       sinatra (>= 1.0)
+    bson (1.6.1)
+    bson_ext (1.6.1)
+      bson (~> 1.6.1)
     daemons (1.1.8)
     eventmachine (0.12.10)
     httparty (0.8.1)
@@ -26,6 +31,8 @@ GEM
       multi_xml
     macaddr (1.5.0)
       systemu (>= 2.4.0)
+    mongo (1.6.1)
+      bson (~> 1.6.1)
     multi_json (1.0.4)
     multi_xml (0.4.1)
     pg (0.13.2)

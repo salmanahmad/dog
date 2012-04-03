@@ -20,10 +20,6 @@ module Dog
     attr_accessor :responses
     attr_accessor :created_at
     
-    def self.from_hash
-      # TODO
-    end
-    
     def to_hash
       return {
         type: self.type,

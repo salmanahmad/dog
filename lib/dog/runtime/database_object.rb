@@ -14,6 +14,15 @@ module Dog
       attr_accessor :collection_name
     end
     
+    def self.from_hash
+      object = self.new
+      for key, value in hash do
+        object.instance_variable_set("@#{key}".intern, value)
+      end
+      
+      return object
+    end
+    
     def self.collection(name)
       self.collection_name = name
     end
