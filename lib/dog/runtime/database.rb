@@ -31,16 +31,16 @@ module Dog
           ::Dog.database = Mongo::Connection.new.db($0)
         end
         
-        ::Dog.database[Community.collection_name].ensure_index("name")
+        ::Dog.database[Community.collection_name].ensure_index("name", {unique:true})
         
         ::Dog.database[Message.collection_name].ensure_index("type")
         ::Dog.database[Message.collection_name].ensure_index("created_at")
 
-        ::Dog.database[Person.collection_name].ensure_index("handle")
-        ::Dog.database[Person.collection_name].ensure_index("email")
-        ::Dog.database[Person.collection_name].ensure_index("facebook")
-        ::Dog.database[Person.collection_name].ensure_index("twitter")
-        ::Dog.database[Person.collection_name].ensure_index("google")
+        ::Dog.database[Person.collection_name].ensure_index("handle", { unique:true, sparse:true })
+        ::Dog.database[Person.collection_name].ensure_index("email", { unique:true, sparse:true })
+        ::Dog.database[Person.collection_name].ensure_index("facebook", { unique:true, sparse:true })
+        ::Dog.database[Person.collection_name].ensure_index("twitter", { unique:true, sparse:true })
+        ::Dog.database[Person.collection_name].ensure_index("google", { unique:true, sparse:true })
         ::Dog.database[Person.collection_name].ensure_index("password")
         ::Dog.database[Person.collection_name].ensure_index("communities")
         

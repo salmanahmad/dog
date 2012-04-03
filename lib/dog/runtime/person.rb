@@ -34,8 +34,29 @@ module Dog
       }
     end
     
-    def self.from_variable
+    def join_community(community)
+      # Note: This adds the community to the profile but does not
+      # save the actual person object. You have to call #save. This
+      # was done so that we can ensure atomic updates
       
+      return nil if community.nil?
+      self.communities ||= []
+      self.communities = self.communities | [community.name]
+      
+      self.profile ||= {}
+      self.profile[community.name] ||= {}
+      
+      for key, value in community do
+        unless self.profile[community.name].include?(key) then
+          self.profile[community.name][key] = nil
+        end   
+      end
+      
+      return true
+    end
+    
+    def join_community_named(community_name)
+      join_community(Community.find_by_name(community_name))
     end
     
     def self.find_by_email(email)
@@ -45,10 +66,6 @@ module Dog
   end
 
   class People
-    
-    def self.find()
-      
-    end
     
   end
   
