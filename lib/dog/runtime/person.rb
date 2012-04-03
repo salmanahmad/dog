@@ -11,6 +11,19 @@ module Dog
   class Person < DatabaseObject
     collection "people"
     
+    def self.default_properties
+      return [
+        "_id", 
+        "handle", 
+        "email", 
+        "facebook", 
+        "twitter", 
+        "google", 
+        "communities",
+        "profile"
+      ]
+    end
+    
     attr_accessor :_id
     attr_accessor :handle
     attr_accessor :email
@@ -59,7 +72,25 @@ module Dog
       join_community(Community.find_by_name(community_name))
     end
     
+    def leave_community(community)
+      # Note: Just like join, this does not save the object
+      
+      return nil if community.nil?
+      self.communities ||= []
+      self.communities = self.communities - [community.name]
+      
+      self.profile ||= {}
+      self.profile.delete(community.name)
+      
+      return true
+    end
+    
+    def leave_community_named(community_name)
+      leave_community(Community.find_by_name(community_name))
+    end
+    
     def update_profile(properties = {})
+      # TODO - Validate profile information
       old_profile = self.profile
       
       begin
@@ -97,8 +128,51 @@ module Dog
     end
     
   end
-
+  
   class People
+    
+    attr_accessor :community_hint
+    
+    def self.from(community)
+      people = People.new
+      people.from(community)
+    end
+    
+    def self.where(conditions)
+      people = People.new
+      people.where(conditions)
+    end
+    
+    def from(community)
+      self.community_hint = community
+      return self
+    end
+    
+    def where(conditions)
+      update_conditions(conditions)
+    end
+    
+    def update_conditions(conditions)
+      updated_conditions = {}
+      
+      for key, value in conditions do
+        if key.include?("$") || key.include?(".")
+          # Do nothing
+        elsif Person.default_properties.include? key
+          # DO nothing
+        else
+          key = "profile.#{self.community_hint}.#{key}"
+        end
+        
+        if value.class == Hash then
+          value = updated_conditions(value)
+        end
+        
+        updated_conditions[key] = value
+      end
+      
+      return updated_conditions
+    end
     
   end
   

@@ -11,34 +11,10 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_hel
 
 class RuntimeTests::PeopleTest < RuntimeTestCase
   
-  def test_simple
-    # TODO
-    return
-    
-    output = run_code("PEOPLE FROM mit WHERE id == 7", :user)
-    assert_equal(output, {"people" => {"from" => "mit", "where" => 
-      [["id"], "==", 7]
-    }})
-  end
-  
-  def test_binary_condition
-    # TODO
-    return
-    
-    output = run_code("PEOPLE FROM mit WHERE id == 7 AND interests CONTAINS 'fencing'", :user)
-    assert_equal(output, {"people" => {"from" => "mit", "where" => 
-      [[["id"], "==", 7], "AND", [["interests"], "CONTAINS", 'fencing']]
-    }})
-  end
-  
-  def test_unary_condition
-    # TODO
-    return
-    
-    output = run_code("PEOPLE FROM mit WHERE id == 7 AND NOT(interests CONTAINS 'fencing')", :user)
-    assert_equal(output, {"people" => {"from" => "mit", "where" => 
-      [[["id"], "==", 7], "AND", ['NOT', [["interests"], "CONTAINS", 'fencing']]]
-    }})
+  def test_main
+    assert_equal(Dog::People.where("email" => "foo@foobar.com"), {"email" => "foo@foobar.com"})
+    assert_equal(Dog::People.from("stanford").where("age" => 8), {"profile.stanford.age"=>8})
+    assert_equal(Dog::People.from("stanford").where("age" => 8, "email" => "foo"), {"profile.stanford.age" => 8, "email" => "foo"})
   end
   
 end

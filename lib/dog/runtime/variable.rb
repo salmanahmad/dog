@@ -87,12 +87,12 @@ module Dog
       end
       
       hash = {
-        person_id: => self.person_id,
-        track_id: => self.track_id,
-        track_depth: => self.track_depth,
-        name: => self.name,
-        type: => type,
-        value: => value
+        person_id: self.person_id,
+        track_id: self.track_id,
+        track_depth: self.track_depth,
+        name: self.name,
+        type: type,
+        value: value
       }
       
       return hash
