@@ -14,12 +14,11 @@ module Dog
     
     def track
       if @track.class != Track then
-        # TODO - Do I need this? BSON::ObjectId.from_string. Or will @track be set accordingly? 
-        @track = ::Dog.database["tracks"].find_one({"_id" => @track})
+        @track = Track.find_by_id(@track)
         @track.instance_variable_set(:@fiber, self) 
       end
       
-      @track
+      return @track
     end
     
     def track=(t)

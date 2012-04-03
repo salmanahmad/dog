@@ -26,7 +26,7 @@ module Dog
     end
     
     def self.find_by_email(email)
-      # TODO
+      self.find_one({"email" => email})
     end
     
   end

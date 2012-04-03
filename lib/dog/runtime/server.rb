@@ -241,11 +241,7 @@ module Dog
         get_or_post prefix + 'account.login' do
           @event = process_incoming_event(Account::Login) rescue return
           
-          people = Variable.named("dog.meta.people", Server.global_track)
-          people.value ||= Collection.new
-          
-          person = people.value.find(:email => @event.email).first
-          
+          person = Person.find_by_email(@email.email)
           if person && person.password == Digest::SHA1.hexdigest(@event.password)
             @event.success = true
             session[:current_user] = person.id
@@ -275,7 +271,9 @@ module Dog
           @event.password ||= ""
           @event.confirm ||= ""
           
-          if Person.filter(:email => @event.email).count == 0 then
+          person = Person.find_by_email(@event.email)
+          
+          if person then
             @event.success = false
             @event.errors ||= []
             @event.errors << "User name has already been taken."
@@ -286,15 +284,14 @@ module Dog
               @event.errors << "Password and Confirmation does not match."
             else
               @event.success = true
-              Dog::database.transaction do
-                person = Person.new
-                person.email = @event.email
-                person.password = Digest::SHA1.hexdigest @event.password
-                person.save
+              
+              person = Person.new
+              person.email = @event.email
+              person.password = Digest::SHA1.hexdigest @event.password
+              person.save
                 
-                session[:current_user] = person.id
-                notify_handlers
-              end
+              session[:current_user] = person.id
+              notify_handlers
             end
           end
           

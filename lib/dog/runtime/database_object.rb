@@ -27,8 +27,35 @@ module Dog
       self.collection_name = name
     end
     
+    def self.find_by_id(id)
+      id = BSON::ObjectId.from_string(id) if id.class == String
+      return self.find_one({"_id" => id})
+    end
+    
+    def self.find_one(conditions = {})
+      document = ::Dog::database[self.collection_name].find_one(conditions)
+      
+      if document then
+        return self.from_hash(document)
+      else
+        return nil
+      end
+    end
+    
+    def self.find(conditions = {})
+      return ::Dog::database[self.collection_name].find(conditions)
+    end
+    
     def collection_name
       self.class.collection_name
+    end
+    
+    def id
+      self._id
+    end
+    
+    def id=(some_id)
+      self._id = some_id
     end
     
     def save

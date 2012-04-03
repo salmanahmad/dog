@@ -11,9 +11,6 @@ module Dog
     
   class Record < Structure
     # TODO
-    def self.relationship(name, options = {})
-      
-    end
   end
   
 end
