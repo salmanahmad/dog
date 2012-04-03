@@ -59,6 +59,39 @@ module Dog
       join_community(Community.find_by_name(community_name))
     end
     
+    def update_profile(properties = {})
+      old_profile = self.profile
+      
+      begin
+        for key, value in properties do
+          community = Community.find_by_name(key)
+          self.update_profile_for_community(community, value)
+        end
+      rescue => exception
+        self.profile = old_profile
+        raise exception
+      end
+    end
+    
+    def update_profile_for_community(community, properties)
+      self.profile ||= {}
+      self.profile[community.name] ||= {}
+      
+      old_profile = self.profile[community.name]
+      for key, value in properties do
+        next unless community.properties.include? key
+        
+        property = community.properties[key]
+        type = property["type"]
+        
+        if type then
+          self.profile[community.name][key] = Properties.convert_value_to_type(value, type)
+        else
+          self.profile[community.name][key] = value
+        end
+      end
+    end
+    
     def self.find_by_email(email)
       self.find_one({"email" => email})
     end
