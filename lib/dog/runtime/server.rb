@@ -49,6 +49,28 @@ module Dog
       def layout(name)
         # Intentionally blank. Used by our template system.
       end
+      
+      def verify_current_user(message = "You need to be logged in when performing this operation")
+        unless session[:current_user]
+          @event.success = false
+          @event.errors = [message]
+          process_outgoing_event
+          return false
+        end
+        
+        return true        
+      end
+      
+      def verify_not_current_user(message = "You cannot be logged in when performing this operation.")
+        if session[:current_user]
+          @event.success = false
+          @event.errors = [message]
+          process_outgoing_event
+          return false
+        end
+        
+        return true
+      end
     end
     
     def self.get_or_post(path, opts={}, &block)
@@ -268,6 +290,8 @@ module Dog
         get_or_post prefix + 'account.create' do
           @event = process_incoming_event(SystemEvents::Account::Create) rescue return
           
+          return unless verify_not_current_user("You cannot be logged in when creating a new account.")
+          
           @event.password ||= ""
           @event.confirm ||= ""
           
@@ -302,6 +326,8 @@ module Dog
         get_or_post prefix + 'profile.view' do
           @event = process_incoming_event(SystemEvents::Profile::View) rescue return
           
+          return unless verify_current_user("You have to be logged in to view your profile.")
+          
           # TODO
           
           notify_handlers
@@ -310,6 +336,8 @@ module Dog
         
         get_or_post prefix + 'profile.write' do
           @event = process_incoming_event(SystemEvents::Profile::Write) rescue return
+          
+          return unless verify_current_user("You have to be logged in to write to your profile.")
           
           # TODO
           
@@ -320,6 +348,8 @@ module Dog
         get_or_post prefix + 'profile.update' do
           @event = process_incoming_event(SystemEvents::Profile::Update) rescue return
           
+          return unless verify_current_user("You have to be logged in to update your profile.")
+          
           # TODO
           
           notify_handlers
@@ -328,6 +358,8 @@ module Dog
         
         get_or_post prefix + 'profile.push' do
           @event = process_incoming_event(SystemEvents::Profile::Push) rescue return
+          
+          return unless verify_current_user("You have to be logged in to update your profile.")
           
           # TODO
           
@@ -338,6 +370,8 @@ module Dog
         get_or_post prefix + 'profile.pull' do
           @event = process_incoming_event(SystemEvents::Profile::Pull) rescue return
           
+          return unless verify_current_user("You have to be logged in to update your profile.")
+          
           # TODO
           
           notify_handlers
@@ -346,6 +380,8 @@ module Dog
         
         get_or_post prefix + 'community.join' do
           @event = process_incoming_event(SystemEvents::Community::Join) rescue return
+          
+          return unless verify_current_user("You have to be logged in to join a community.")
           
           # TODO
           
@@ -356,6 +392,8 @@ module Dog
         get_or_post prefix + 'community.leave' do
           @event = process_incoming_event(SystemEvents::Community::Leave) rescue return
           
+          return unless verify_current_user("You have to be logged in to leave a community.")
+          
           # TODO
           
           notify_handlers
@@ -364,6 +402,8 @@ module Dog
         
         get_or_post prefix + 'tasks.view' do
           @event = process_incoming_event(SystemEvents::Tasks::View) rescue return
+          
+          return unless verify_current_user("You have to be logged in to view tasks.")
           
           # TODO
           
@@ -374,6 +414,8 @@ module Dog
         get_or_post prefix + 'tasks.list' do
           @event = process_incoming_event(SystemEvents::Tasks::List) rescue return
           
+          return unless verify_current_user("You have to be logged in to view tasks.")
+          
           # TODO
           
           notify_handlers
@@ -382,6 +424,8 @@ module Dog
         
         get_or_post prefix + 'messages.view' do
           @event = process_incoming_event(SystemEvents::Messages::View) rescue return
+          
+          return unless verify_current_user("You have to be logged in to view messages.")
           
           # TODO
           
@@ -392,6 +436,8 @@ module Dog
         get_or_post prefix + 'messages.list' do
           @event = process_incoming_event(SystemEvents::Messages::List) rescue return
           
+          return unless verify_current_user("You have to be logged in to view messages.")
+          
           # TODO
           
           notify_handlers
@@ -400,6 +446,8 @@ module Dog
         
         get_or_post prefix + 'workflows.list' do
           @event = process_incoming_event(SystemEvents::Workflows::List) rescue return
+          
+          return unless verify_current_user("You have to be logged in to view workflows.")
           
           # TODO
           
