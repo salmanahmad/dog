@@ -9,6 +9,7 @@
 
 module Dog  
   class RoutedMessage < DatabaseObject
+    include Routability
     collection "messages"
     
     attr_accessor :_id
@@ -25,6 +26,11 @@ module Dog
         created_at: (self.created_at || Time.now)
       }
     end
+    
+    def to_hash_for_event
+      to_hash
+    end
+    
   end
   
   class Message < Structure

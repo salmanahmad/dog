@@ -157,6 +157,19 @@ module Dog
       self.find_one({"email" => email})
     end
     
+    def accepts_routing?(predicate)
+      # TODO - Optimize this with client side evaluation. For now I suppose this is okay...
+      
+      raise "A person must be saved before matching it against a predicate." unless self._id
+      predicate["_id"] = self._id
+      
+      if self.find_one(predicate) then
+        return true
+      else
+        return false
+      end
+    end
+    
   end
   
   class People

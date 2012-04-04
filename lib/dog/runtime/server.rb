@@ -419,9 +419,19 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to view tasks.")
           
-          # TODO
+          current_user = Person.find_by_id(session[:current_user])
+          task = Task.find_by_id(@event.id)
           
-          notify_handlers
+          if task.route_to_person? current_user then
+            @event.success = true
+            @event.task = task.to_hash_for_event
+            notify_handlers
+          else
+            @event.success = false
+            @event.errors ||= []
+            @event.errors << "You are not eligible for this task."
+          end
+          
           process_outgoing_event
         end
         
@@ -430,7 +440,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to view tasks.")
           
-          # TODO
+          current_user = Person.find_by_id(session[:current_user])
+          @event.tasks = Task.for_person(current_user)
+          @event.success = true
           
           notify_handlers
           process_outgoing_event
@@ -441,9 +453,19 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to view messages.")
           
-          # TODO
+          current_user = Person.find_by_id(session[:current_user])
+          message = Message.find_by_id(@event.id)
           
-          notify_handlers
+          if message.route_to_person? current_user then
+            @event.success = true
+            @event.message = message.to_hash_for_event
+            notify_handlers
+          else
+            @event.success = false
+            @event.errors ||= []
+            @event.errors << "You are not eligible for this message."
+          end
+          
           process_outgoing_event
         end
         
@@ -452,7 +474,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to view messages.")
           
-          # TODO
+          current_user = Person.find_by_id(session[:current_user])
+          @event.messages = Message.for_person(current_user)
+          @event.success = true
           
           notify_handlers
           process_outgoing_event
@@ -463,7 +487,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to view workflows.")
           
-          # TODO
+          current_user = Person.find_by_id(session[:current_user])
+          @event.workflows = Workflow.for_person(current_user)
+          @event.success = true
           
           notify_handlers
           process_outgoing_event

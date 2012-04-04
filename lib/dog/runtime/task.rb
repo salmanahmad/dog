@@ -9,6 +9,7 @@
 
 module Dog
   class RoutedTask < DatabaseObject
+    include Routability
     collection "tasks"
     
     attr_accessor :_id
@@ -31,6 +32,15 @@ module Dog
         created_at: (self.created_at || Time.now)
       }
     end
+    
+    def to_hash_for_event
+      hash = to_hash
+      hash.delete(:replication)
+      hash.delete(:duplication)
+      hash.delete(:responses)
+      return hash
+    end
+    
   end
   
   class Task < Structure
