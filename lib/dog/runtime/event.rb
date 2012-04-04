@@ -43,15 +43,68 @@ module Dog
 
     end
     
+    # TODO - 
+      # Find all of the users 
+      # Read users
+      # Update a users's profile information
+      # Add a user to a relationship profile field
+    
+    # TODO - Adding output fields for all of these events...
+    
     class Community < SystemEvent
 
       class Join < SystemEvent
-
+        property "name", :type => String, :required => true, :direction => "input"
       end
 
       class Leave < SystemEvent
-
+        property "name", :type => String, :required => true, :direction => "input"
       end
     end
+    
+    class Tasks < SystemEvent
+      
+      class View < SystemEvent
+        property "track_id", :type => String, :required => true, :direction => "input"
+      end
+      
+      class List < SystemEvent
+        # TODO - ObjectId as a type
+        # TODO - Default values for properties. This is useful for profile
+        # stuff as well when initializing the user's profile
+        property "type", :type => String, :direction => "input"
+        property "track_id", :type => String, :direction => "input"
+        property "limit", :type => String, :direction => "input"
+        property "offset", :type => String, :direction => "input"
+      end
+      
+    end
+    
+    class Messages < SystemEvent
+      
+      class View < SystemEvent
+        property "message_id", :type => String, :required => true, :direction => "input"
+      end
+      
+      class List < SystemEvent
+        property "type", :type => String, :direction => "input"
+        property "track_id", :type => String, :direction => "input"
+        property "limit", :type => String, :direction => "input"
+        property "offset", :type => String, :direction => "input"
+      end
+      
+    end
+    
+    class Workflows < SystemEvent
+      
+      class List < SystemEvent
+        property "type", :type => String, :direction => "input"
+        property "limit", :type => String, :direction => "input"
+        property "offset", :type => String, :direction => "input"
+      end
+      
+    end
+    
+    
   end  
 end
