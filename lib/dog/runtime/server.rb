@@ -328,7 +328,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to view your profile.")
           
-          # TODO
+          person = Person.find_by_id(session[:current_user])
+          @event.value = person.to_hash_for_event
+          @event.success = true
           
           notify_handlers
           process_outgoing_event
@@ -339,7 +341,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to write to your profile.")
           
-          # TODO
+          person = Person.find_by_id(session[:current_user])
+          success = person.write_profile(@event.value)
+          @event.success = success
           
           notify_handlers
           process_outgoing_event
@@ -350,7 +354,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to update your profile.")
           
-          # TODO
+          person = Person.find_by_id(session[:current_user])
+          success = person.update_profile(@event.value)
+          @event.success = success
           
           notify_handlers
           process_outgoing_event
@@ -361,7 +367,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to update your profile.")
           
-          # TODO
+          person = Person.find_by_id(session[:current_user])
+          success = person.push_profile(@event.value)
+          @event.success = success
           
           notify_handlers
           process_outgoing_event
@@ -372,7 +380,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to update your profile.")
           
-          # TODO
+          person = Person.find_by_id(session[:current_user])
+          success = person.pull_profile(@event.value)
+          @event.success = success
           
           notify_handlers
           process_outgoing_event
@@ -383,7 +393,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to join a community.")
           
-          # TODO
+          person = Person.find_by_id(session[:current_user])
+          success = person.join_community_named(@event.name)
+          @event.success = success
           
           notify_handlers
           process_outgoing_event
@@ -394,7 +406,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to leave a community.")
           
-          # TODO
+          person = Person.find_by_id(session[:current_user])
+          success = person.leave_community_named(@event.name)
+          @event.success = success
           
           notify_handlers
           process_outgoing_event

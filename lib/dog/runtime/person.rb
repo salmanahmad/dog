@@ -37,6 +37,7 @@ module Dog
     # For routing
     attr_accessor :last_task_id
     attr_accessor :last_message_id
+    attr_accessor :last_workflow_id
     
     def to_hash
       return {
@@ -49,8 +50,19 @@ module Dog
         communities: self.communities,
         profile: self.profile,
         last_task_id: self.last_task_id,
-        last_message_id: self.last_message_id
+        last_message_id: self.last_message_id,
+        last_workflow_id: self.last_workflow_id
       }
+    end
+    
+    def to_hash_for_event
+      hash = self.to_hash
+      hash[:_id] = self._id
+      hash.delete(:password)
+      hash.delete(:last_task_id)
+      hash.delete(:last_message_id)
+      hash.delete(:last_workflow_id)
+      return hash
     end
     
     def join_community(community)
@@ -127,6 +139,18 @@ module Dog
           self.profile[community.name][key] = value
         end
       end
+    end
+    
+    def write_profile
+      # TODO...
+    end
+    
+    def push_profile
+      # TODO...
+    end
+    
+    def pull_profile
+      # TODO...
     end
     
     def self.find_by_email(email)
