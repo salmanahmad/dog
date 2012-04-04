@@ -22,7 +22,7 @@ module Dog
         type: self.type,
         value: self.value,
         routing: (self.routing || {}),
-        created_at: (self.created_at || DateTime.now)
+        created_at: (self.created_at || Time.now)
       }
     end
   end

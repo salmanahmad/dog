@@ -28,7 +28,7 @@ module Dog
         replication: (self.replication || 1),
         duplication: (self.duplication || 1),
         responses: (self.responses || []),
-        created_at: (self.created_at || DateTime.now)
+        created_at: (self.created_at || Time.now)
       }
     end
   end
