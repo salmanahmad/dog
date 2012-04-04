@@ -65,6 +65,14 @@ module Dog
       return hash
     end
     
+    def self.search(query)
+      # TODO
+    end
+    
+    def self.find_by_email(email)
+      self.find_one({"email" => email})
+    end
+    
     def join_community(community)
       # Note: This adds the community to the profile but does not
       # save the actual person object. You have to call #save. This
@@ -151,10 +159,6 @@ module Dog
     
     def pull_profile
       # TODO...
-    end
-    
-    def self.find_by_email(email)
-      self.find_one({"email" => email})
     end
     
     def accepts_routing?(predicate)

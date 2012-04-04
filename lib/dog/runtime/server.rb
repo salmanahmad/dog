@@ -323,6 +323,35 @@ module Dog
           process_outgoing_event
         end
         
+        # TODO - Privacy considerations need to go here...
+        
+        get_or_post prefix + 'people.search' do
+          @event = process_incoming_event(SystemEvents::People::Search) rescue return
+          
+          @event.results = Person.search(@event.query)
+          @event.success = true
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'people.view' do
+          @event = process_incoming_event(SystemEvents::People::View) rescue return
+          
+          person = Person.find_by_id(@event.id)
+          if person then
+            @event.person = person.to_hash_for_event
+            @event.success = true
+          else
+            @event.success = false
+            @event.errors ||= []
+            @event.errors << "Could not find the user with that identifier."
+          end
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
         get_or_post prefix + 'profile.view' do
           @event = process_incoming_event(SystemEvents::Profile::View) rescue return
           
