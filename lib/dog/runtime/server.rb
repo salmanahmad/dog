@@ -299,10 +299,55 @@ module Dog
           process_outgoing_event
         end
         
+        get_or_post prefix + 'profile.view' do
+          @event = process_incoming_event(SystemEvents::Profile::View) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'profile.write' do
+          @event = process_incoming_event(SystemEvents::Profile::Write) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'profile.update' do
+          @event = process_incoming_event(SystemEvents::Profile::Update) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'profile.push' do
+          @event = process_incoming_event(SystemEvents::Profile::Push) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'profile.pull' do
+          @event = process_incoming_event(SystemEvents::Profile::Pull) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
         get_or_post prefix + 'community.join' do
           @event = process_incoming_event(SystemEvents::Community::Join) rescue return
           
-          # Logic
+          # TODO
           
           notify_handlers
           process_outgoing_event
@@ -311,12 +356,56 @@ module Dog
         get_or_post prefix + 'community.leave' do
           @event = process_incoming_event(SystemEvents::Community::Leave) rescue return
           
-          # Logic
+          # TODO
           
           notify_handlers
           process_outgoing_event
         end
         
+        get_or_post prefix + 'tasks.view' do
+          @event = process_incoming_event(SystemEvents::Tasks::View) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'tasks.list' do
+          @event = process_incoming_event(SystemEvents::Tasks::List) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'messages.view' do
+          @event = process_incoming_event(SystemEvents::Messages::View) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'messages.list' do
+          @event = process_incoming_event(SystemEvents::Messages::List) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'workflows.list' do
+          @event = process_incoming_event(SystemEvents::Workflows::List) rescue return
+          
+          # TODO
+          
+          notify_handlers
+          process_outgoing_event
+        end
         
         get '*' do
           path = params[:splat].first
