@@ -34,6 +34,10 @@ module Dog
     attr_accessor :communities
     attr_accessor :profile
     
+    # For routing
+    attr_accessor :last_task_id
+    attr_accessor :last_message_id
+    
     def to_hash
       return {
         handle: self.handle,
@@ -43,7 +47,9 @@ module Dog
         google: self.google,
         password: self.password,
         communities: self.communities,
-        profile: self.profile
+        profile: self.profile,
+        last_task_id: self.last_task_id,
+        last_message_id: self.last_message_id
       }
     end
     

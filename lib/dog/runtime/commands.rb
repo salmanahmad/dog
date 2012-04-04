@@ -23,19 +23,11 @@ module Dog
         return
       end
       
-      ::Dog.database.transaction do
-        task = RoutedTask.new
-        task.replication = 1
-        task.duplication = 1
-        task.value = task
-        task.save
-        
-        users = [users] if users.class != Array
-        
-        for user in users
-          ::Dog.database[:person_tasks].insert(:person_id => user.id, :task_id => task.id)
-        end
-      end
+      routed_task = RoutedTask.new
+      routed_task.type = task.class
+      routed_task.value = task.to_hash
+      routed_task.routing = users
+      routed_task.save
     end
   end
   
@@ -46,17 +38,11 @@ module Dog
         return
       end
       
-      ::Dog.database.transaction do
-        message = RoutedMessage.new
-        message.value = message
-        message.save
-        
-        users = [users] if users.class != Array
-        
-        for user in users
-          ::Dog.database[:person_messages].insert(:person_id => user.id, :message_id => message.id)
-        end
-      end
+      routed_message = RoutedMessage.new
+      routed_message.type = message.class
+      routed_message.value = message.to_hash
+      routed_message.routing = users
+      routed_message.save
     end
     
   end
