@@ -13,12 +13,12 @@ module Dog
     
     def self.default_properties
       return [
-        "_id", 
-        "handle", 
-        "email", 
-        "facebook", 
-        "twitter", 
-        "google", 
+        "_id",
+        "handle",
+        "email",
+        "facebook",
+        "twitter",
+        "google",
         "communities",
         "profile"
       ]

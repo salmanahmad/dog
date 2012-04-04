@@ -8,53 +8,50 @@
 #
 
 module Dog
-  
   class Event < Structure
     property "success", :type => Boolean, :direction => "output"
     property "errors", :type => Array, :direction => "output"    
   end
   
-  class SystemEvent < Event
-    def self.identifier
-      self.name.downcase.split("::")[1..-1].join(".")
+  module SystemEvents
+    class SystemEvent < Event
+      def self.identifier
+        self.name.downcase.split("::")[2..-1].join(".")
+      end
     end
-  end
-  
-  class Account < SystemEvent
 
-    class LoginStatus < SystemEvent
-      property "logged_in", :type => Boolean, :direction => "output"
-    end
-    
-    class Login < SystemEvent
-      property "email", :type => String, :direction => "input"
-      property "password", :type => String, :direction => "input"
-    end
-    
-    class Logout < SystemEvent
-      
-    end
-    
-    class Create < SystemEvent
-      property "email", :type => String, :required => true, :direction => "input"
-      property "password", :type => String, :direction => "input"
-      property "confirm", :type => String, :direction => "input"
-    end
-    
-  end
-  
-  # TODO - Rename this back to community and solve the superclass mismatch problem
-  class CHANGEME_Community < SystemEvent
+    class Account < SystemEvent
 
-    class Join < SystemEvent
-      
+      class LoginStatus < SystemEvent
+        property "logged_in", :type => Boolean, :direction => "output"
+      end
+
+      class Login < SystemEvent
+        property "email", :type => String, :direction => "input"
+        property "password", :type => String, :direction => "input"
+      end
+
+      class Logout < SystemEvent
+
+      end
+
+      class Create < SystemEvent
+        property "email", :type => String, :required => true, :direction => "input"
+        property "password", :type => String, :direction => "input"
+        property "confirm", :type => String, :direction => "input"
+      end
+
     end
     
-    class Leave < SystemEvent
-      
+    class Community < SystemEvent
+
+      class Join < SystemEvent
+
+      end
+
+      class Leave < SystemEvent
+
+      end
     end
-    
-  end
-  
-  
+  end  
 end

@@ -224,7 +224,7 @@ module Dog
         end      
         
         get_or_post prefix + 'account.status' do
-          @event = process_incoming_event(Account::LoginStatus) rescue return
+          @event = process_incoming_event(SystemEvents::Account::LoginStatus) rescue return
           
           if session[:current_user]
             @event.success = true
@@ -239,7 +239,7 @@ module Dog
         end
         
         get_or_post prefix + 'account.login' do
-          @event = process_incoming_event(Account::Login) rescue return
+          @event = process_incoming_event(SystemEvents::Account::Login) rescue return
           
           person = Person.find_by_email(@email.email)
           if person && person.password == Digest::SHA1.hexdigest(@event.password)
@@ -256,7 +256,7 @@ module Dog
         end
 
         get_or_post prefix + 'account.logout' do
-          @event = process_incoming_event(Account::Logout) rescue return
+          @event = process_incoming_event(SystemEvents::Account::Logout) rescue return
           
           session.clear
           @event.success = true
@@ -266,7 +266,7 @@ module Dog
         end
         
         get_or_post prefix + 'account.create' do
-          @event = process_incoming_event(Account::Create) rescue return
+          @event = process_incoming_event(SystemEvents::Account::Create) rescue return
           
           @event.password ||= ""
           @event.confirm ||= ""
@@ -300,7 +300,7 @@ module Dog
         end
         
         get_or_post prefix + 'community.join' do
-          @event = process_incoming_event(Community::Join) rescue return
+          @event = process_incoming_event(SystemEvents::Community::Join) rescue return
           
           # Logic
           
@@ -309,7 +309,7 @@ module Dog
         end
 
         get_or_post prefix + 'community.leave' do
-          @event = process_incoming_event(Community::Leave) rescue return
+          @event = process_incoming_event(SystemEvents::Community::Leave) rescue return
           
           # Logic
           
