@@ -7,6 +7,11 @@
 # above copyright notice is included.
 #
 
+# TODO - ObjectId as a type
+# TODO - Default values for properties. This is useful for profile stuff as well when initializing the user's profile
+# TODO - Repeated (boolean) option for repeated content instead of arrays
+# TODO - Rethink Required properties. For example, with errors a required property may not be necessary
+
 module Dog
     
   class Boolean; end

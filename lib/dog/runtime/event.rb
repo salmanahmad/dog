@@ -43,13 +43,43 @@ module Dog
 
     end
     
-    # TODO - 
-      # Find all of the users 
-      # Read users
-      # Update a users's profile information
-      # Add a user to a relationship profile field
+    class People < SystemEvent
+      
+      class Search < SystemEvent
+        property "query", :type => String, :required => true, :direction => "input"
+        property "results", :type => Array, :required => true, :direction => "output"
+      end
+      
+      class View < SystemEvent
+        property "id", :type => String, :required => true, :direction => "input"
+        property "person", :type => Hash, :required => true, :direction => "output"
+      end
+      
+    end
     
-    # TODO - Adding output fields for all of these events...
+    class Profile < SystemEvent
+      
+      class View < SystemEvent
+        property "profile", :type => Hash, :required => true, :direction => "output"
+      end
+      
+      class Write < SystemEvent
+        property "profile", :type => Hash, :required => true, :direction => "input"
+      end
+      
+      class Update < SystemEvent
+        property "profile", :type => Hash, :required => true, :direction => "input"
+      end
+      
+      class Push < SystemEvent
+        property "profile", :type => Hash, :required => true, :direction => "input"
+      end
+      
+      class Pull < SystemEvent
+        property "profile", :type => Hash, :required => true, :direction => "input"
+      end
+      
+    end
     
     class Community < SystemEvent
 
@@ -65,17 +95,16 @@ module Dog
     class Tasks < SystemEvent
       
       class View < SystemEvent
-        property "track_id", :type => String, :required => true, :direction => "input"
+        property "id", :type => String, :required => true, :direction => "input"
+        property "task", :type => Hash, :required => true, :direction => "output"
       end
       
       class List < SystemEvent
-        # TODO - ObjectId as a type
-        # TODO - Default values for properties. This is useful for profile
-        # stuff as well when initializing the user's profile
         property "type", :type => String, :direction => "input"
         property "track_id", :type => String, :direction => "input"
         property "limit", :type => String, :direction => "input"
         property "offset", :type => String, :direction => "input"
+        property "tasks", :type => Array, :required => true, :direction => "output"
       end
       
     end
@@ -83,7 +112,8 @@ module Dog
     class Messages < SystemEvent
       
       class View < SystemEvent
-        property "message_id", :type => String, :required => true, :direction => "input"
+        property "id", :type => String, :required => true, :direction => "input"
+        property "message", :type => Hash, :required => true, :direction => "output"
       end
       
       class List < SystemEvent
@@ -91,6 +121,7 @@ module Dog
         property "track_id", :type => String, :direction => "input"
         property "limit", :type => String, :direction => "input"
         property "offset", :type => String, :direction => "input"
+        property "messages", :type => Array, :required => true, :direction => "output"
       end
       
     end
@@ -101,6 +132,7 @@ module Dog
         property "type", :type => String, :direction => "input"
         property "limit", :type => String, :direction => "input"
         property "offset", :type => String, :direction => "input"
+        property "workflows", :type => Array, :required => true, :direction => "output"
       end
       
     end

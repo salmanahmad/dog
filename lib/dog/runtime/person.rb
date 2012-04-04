@@ -96,7 +96,7 @@ module Dog
     end
     
     def update_profile(properties = {})
-      # TODO - Validate profile information
+      # TODO - Validate profile information with community type definitions
       old_profile = self.profile
       
       begin
