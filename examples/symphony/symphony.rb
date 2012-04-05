@@ -25,8 +25,8 @@ end
 DB.create_table? :journey_one do
   primary_key :id
   foreign_key :user_id
-  text :sound_url
-  text :why
+  text :came_to_toronto
+  text :love_about_neighborhood
   
   index :user_id
 end
@@ -70,6 +70,10 @@ end
 
 class User < Sequel::Model(:users)
   plugin :serialization, :json, :profile
+end
+
+class JourneyOne < Sequel::Model(:journey_one)
+  
 end
 
 class JourneyTwo < Sequel::Model(:journey_two)
@@ -259,6 +263,29 @@ class Symphony < Sinatra::Base
     })
   end
   
+
+  get '/my/journeys/one/save' do
+    verify_current_user
+    user = current_user
+    
+    unless user
+      return jsonp ({
+        success: false,
+        errors: ["You need to be logged in to do this."]
+      })
+    else
+      DB.transaction do
+        journey = JourneyOne.find_or_create(:user_id => user.id)
+        journey.came_to_toronto = params[:came_to_toronto]
+        journey.love_about_neighborhood = params[:love_about_neighborhood]
+        journey.save
+      end
+      
+      return jsonp({
+        success:true
+      })
+    end
+  end
   
   get '/my/journeys/two/save' do
     verify_current_user
@@ -315,6 +342,14 @@ class Symphony < Sinatra::Base
       redirect params['redirect_to']
     end
   end
+
+  get '/my/journeys/one' do
+    return jsonp(not_logged_in) if not_logged_in
+    user = current_user
+    
+    journey = JourneyOne.find_or_create(:user_id => user.id)
+    jsonp({success:true, journey_one:{ came_to_toronto:journey.came_to_toronto, love_about_neighborhood:journey.love_about_neighborhood}})
+  end
   
   get '/my/journeys/two' do
     return jsonp(not_logged_in) if not_logged_in
@@ -344,6 +379,10 @@ class Symphony < Sinatra::Base
         picture: picture
       }
     })
+  end
+
+  get '/journeys/two/all' do
+    return "#{params[:callback]}(#{JourneyOne.to_json})"
   end
   
   get '/journeys/two/all' do
