@@ -381,7 +381,7 @@ class Symphony < Sinatra::Base
     })
   end
 
-  get '/journeys/two/all' do
+  get '/journeys/one/all' do
     return "#{params[:callback]}(#{JourneyOne.to_json})"
   end
   
