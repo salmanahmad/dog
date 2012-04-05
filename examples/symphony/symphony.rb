@@ -22,10 +22,30 @@ DB.create_table? :users do
   index :email, :unique => true
 end
 
+DB.create_table? :journey_one do
+  primary_key :id
+  foreign_key :user_id
+  text :sound_url
+  text :why
+  
+  index :user_id
+end
+
 DB.create_table? :journey_two do
   primary_key :id
   foreign_key :user_id
   text :sound_url
+  text :why
+  
+  index :user_id
+end
+
+DB.create_table? :journey_three do
+  primary_key :id
+  foreign_key :user_id
+  text :story
+  string :audio_filename
+  string :picture_filename
   
   index :user_id
 end
@@ -53,6 +73,10 @@ class User < Sequel::Model(:users)
 end
 
 class JourneyTwo < Sequel::Model(:journey_two)
+  
+end
+
+class JourneyThree < Sequel::Model(:journey_three)
   
 end
 
@@ -145,6 +169,49 @@ class Symphony < Sinatra::Base
     }
   end
   
+  get '/dog/account.unsubscribe' do
+    verify_current_user
+    user = current_user
+    
+    profile = user.profile
+    profile["unsubscribe"] = true
+    user.profile = profile
+    user.save
+    
+    return jsonp {
+      success:true
+    }
+  end
+  
+  get '/dog/admin.subscribed_users' do
+    admins = ["patorpey@media.mit.edu", "saahmad@mit.edu"]
+    
+    verify_current_user
+    user = current_user
+    
+    if admins.include? user.email then
+      results = []
+      
+      users = User.all
+      for user in users do
+        unless user.profile["unsubscribe"] then
+          results << user
+        end
+      end
+      
+      return jsonp {
+        success:true,
+        results: results
+      }
+    else
+      return jsonp {
+        success:false,
+        errors: ["You are not an administrator."]
+      }
+    end
+    
+  end
+  
   get '/dog/account.create' do
     
     if params[:email].strip == "" then
@@ -215,6 +282,39 @@ class Symphony < Sinatra::Base
       })
     end
   end
+
+
+  post '/my/journeys/three/save' do
+    verify_current_user
+    user = current_user
+    
+    unless user
+      return "You have to be logged in to perform this action."
+    else
+      journey = JourneyThree.find_or_create(:user_id => user.id)
+      journey.story = params["story"]
+      journey.audio_filename = params["audio"][:filename]
+      journey.picture_filename = params["picture"][:filename]
+      journey.save
+      
+      directory = File.join(File.dirname(__FILE__), "public", "journeys", "3")
+      audio_name = File.join(directory, "audio", "#{journey.id}_#{journey.audio_filename}")
+      picture_name = File.join(directory, "picture", "#{journey.id}_#{journey.picture_filename}")
+      
+      File.delete(audio_name) if File.exists?(audio_name)
+      File.delete(picture_name) if File.exists?(picture_name)
+      
+      File.open(audio_name, "w") do |f|
+        f.write(params['audio'][:tempfile].read)
+      end
+      
+      File.open(picture_name, "w") do |f|
+        f.write(params['picture'][:tempfile].read)
+      end
+      
+      redirect params['redirect_to']
+    end
+  end
   
   get '/my/journeys/two' do
     return jsonp(not_logged_in) if not_logged_in
@@ -224,8 +324,44 @@ class Symphony < Sinatra::Base
     jsonp({success:true, journey_two:{ sound_url:journey.sound_url, why:journey.why}})
   end
   
+  get '/my/journeys/three' do
+    return jsonp(not_logged_in) if not_logged_in
+    user = current_user
+    
+    journey = JourneyThree.find_or_create(:user_id => user.id)
+    
+    audio = nil
+    picture = nil
+    
+    audio = "http://#{request.host_with_port}/journeys/3/audio/#{journey.id}_#{journey.audio_filename}" if journey.audio_filename
+    picture = "http://#{request.host_with_port}/journeys/3/picture/#{journey.id}_#{journey.picture_filename}" if journey.picture_filename
+    
+    jsonp({
+      success:true, 
+      journey_three:{ 
+        story: journey.story,
+        audio: audio,
+        picture: picture
+      }
+    })
+  end
+  
   get '/journeys/two/all' do
     return "#{params[:callback]}(#{JourneyTwo.to_json})"
+  end
+  
+  get '/journeys/three/all' do
+    output = []
+    journeys = JourneyThree.all
+    for journey in journeys do
+      output << {
+        story: journey.story,
+        audio: "http://#{request.host_with_port}/journeys/3/audio/#{journey.id}_#{journey.audio_filename}",
+        picture: "http://#{request.host_with_port}/journeys/3/picture/#{journey.id}_#{journey.picture_filename}"
+      }
+    end
+    
+    return "#{params[:callback]}(#{output.to_json})"
   end
   
 end
