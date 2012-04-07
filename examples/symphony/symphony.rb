@@ -207,6 +207,13 @@ class Symphony < Sinatra::Base
     verify_current_user
     user = current_user
     
+    unless user
+      return jsonp ({
+        success: false,
+        errors: ["You need to be logged in as an admin to do this."]
+      })
+    end
+    
     if admins.include? user.email then
       results = []
       
