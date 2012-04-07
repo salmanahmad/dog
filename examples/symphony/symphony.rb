@@ -6,6 +6,7 @@ require 'digest/md5'
 require "json"
 require "sinatra/base"
 require "sinatra/jsonp"
+require "pony"
 
 DB = Sequel.connect("sqlite://dog.db")
 
@@ -50,6 +51,15 @@ DB.create_table? :journey_three do
   index :user_id
 end
 
+DB.create_table? :password_recovery_requests do
+  primary_key :id
+  foreign_key :user_id
+  string :code
+  
+  index :user_id
+  index :code
+end
+
 
 class Time 
   def to_json 
@@ -70,6 +80,10 @@ end
 
 class User < Sequel::Model(:users)
   plugin :serialization, :json, :profile
+end
+
+class PasswordRecoveryRequests < Sequel::Model(:password_recovery_requests)
+  
 end
 
 class JourneyOne < Sequel::Model(:journey_one)
@@ -214,6 +228,110 @@ class Symphony < Sinatra::Base
       }
     end
     
+  end
+  
+  get '/dog/account.password.recover' do
+    
+    params[:reset_url] ||= ""
+    if params[:reset_url].strip == "" then
+      return jsonp ({
+        success: false,
+        errors: ["You need to provide a reset password url"]
+      })
+    end
+    
+    params[:email] ||= ""
+    
+    if params[:email].strip == "" then
+      return jsonp ({
+        success: false,
+        errors: ["Email cannot be blank"]
+      })
+    end
+    
+    user = User.find(:email => params[:email])
+    if user.nil? then
+      return jsonp ({
+        success: false,
+        errors: ["Could not find a user with that email (#{params[:email]})."]
+      })
+    end
+    
+    recovery_request = nil
+    
+    DB.transaction do
+      recovery_request = PasswordRecoveryRequests.new
+      recovery_request.user_id = user.id
+      recovery_request.save
+      
+      recovery_request.code = recovery_request.id.to_s + SecureRandom.hex(16)
+      recovery_request.save
+    end
+    
+    reset_url = params[:reset_url] + "?code=#{recovery_request.code}"
+    
+      body = <<-EOD
+Hello! There was a request to change your password. If you did not
+make this request, just ignore this email. Otherwise, please click
+the link below to change your password:
+
+#{reset_url}
+
+Talk soon! 
+
+EOD
+   
+   Pony.mail(
+      :to => user.email, 
+      :from => "Toronto Symphony <dog@toronto.media.mit.edu>",
+      :subject => "Reset your password",
+      :body => body,
+      :via => :smtp, 
+      :via_options => {
+        :address              => 'smtp.gmail.com',
+        :port                 => '587',
+        :enable_starttls_auto => true,
+        :user_name            => 'apps@dormou.se',
+        :password             => 'helloworld123',
+        :authentication       => :plain,
+        :domain               => "localhost.localdomain" # the HELO domain provided by the client to the server
+      }
+    )
+    
+    return jsonp({
+      success: true
+    })
+  end
+  
+  get '/dog/account.password.reset' do
+   
+    params[:code] ||= ""
+    if params[:code].strip == "" then
+      return jsonp ({
+        success: false,
+        errors: ["You need to provide a reset password code"]
+      })
+    end
+
+    if params[:password] != params[:password_confirm] then
+      return jsonp ({
+        success: false,
+        errors: ["Password and Confirmation does not match."]
+      })
+    end
+    
+    DB.transaction do
+      recovery_request = PasswordRecoveryRequests.find(:code => params[:code])
+      user = User.find(:id => recovery_request.user_id)    
+      user.password = Digest::MD5.hexdigest params[:password]
+      user.save
+      
+      recovery_request.destroy
+    end
+    
+    return jsonp ({
+      success: true,
+    })
   end
   
   get '/dog/account.create' do
