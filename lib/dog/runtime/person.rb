@@ -14,6 +14,8 @@ module Dog
     def self.default_properties
       return [
         "_id",
+        "first_name",
+        "last_name",
         "handle",
         "email",
         "facebook",
@@ -25,6 +27,8 @@ module Dog
     end
     
     attr_accessor :_id
+    attr_accessor :first_name
+    attr_accessor :last_name
     attr_accessor :handle
     attr_accessor :email
     attr_accessor :facebook
@@ -41,6 +45,8 @@ module Dog
     
     def to_hash
       return {
+        first_name: self.first_name,
+        last_name: self.last_name,
         handle: self.handle,
         email: self.email,
         facebook: self.facebook,
@@ -66,7 +72,13 @@ module Dog
     end
     
     def self.search(query)
-      # TODO
+      query = Regexp.new(query)
+      self.find({"$or" => [
+        {"first_name" => query},
+        {"last_name" => query},
+        {"handle" => query},
+        {"email" => query}
+      ]}).to_a
     end
     
     def self.find_by_email(email)
@@ -135,6 +147,7 @@ module Dog
       self.profile[community.name] ||= {}
       
       old_profile = self.profile[community.name]
+      
       for key, value in properties do
         next unless community.properties.include? key
         
@@ -149,16 +162,108 @@ module Dog
       end
     end
     
-    def write_profile
-      # TODO...
+    def write_profile(properties = {})
+      # TODO - Validate profile information with community type definitions
+      old_profile = self.profile
+      
+      begin
+        for key, value in properties do
+          community = Community.find_by_name(key)
+          self.write_profile_for_community(community, value)
+        end
+      rescue => exception
+        self.profile = old_profile
+        raise exception
+      end
     end
     
-    def push_profile
-      # TODO...
+    def write_profile_for_community(community, properties = {})
+      self.profile ||= {}
+      self.profile[community.name] ||= {}
+      
+      old_profile = self.profile[community.name]
+      self.profile[community.name] = {}
+      
+      for key, value in properties do
+        next unless community.properties.include? key
+        
+        property = community.properties[key]
+        type = property["type"]
+        
+        if type then
+          self.profile[community.name][key] = Properties.convert_value_to_type(value, type)
+        else
+          self.profile[community.name][key] = value
+        end
+      end
     end
     
-    def pull_profile
-      # TODO...
+    def push_profile(properties = {})
+      # TODO - Validate profile information with community type definitions
+      old_profile = self.profile
+      
+      begin
+        for key, value in properties do
+          community = Community.find_by_name(key)
+          self.push_profile_for_community(community, value)
+        end
+      rescue => exception
+        self.profile = old_profile
+        raise exception
+      end
+    end
+    
+    def push_profile_for_community(community, properties = {})
+      self.profile ||= {}
+      self.profile[community.name] ||= {}
+      
+      old_profile = self.profile[community.name]
+      
+      for key, value in properties do
+        next unless community.properties.include? key
+        
+        property = community.properties[key]
+        type = property["type"]
+        
+        if type == Array && value.class == Array then
+          self.profile[community.name][key] ||= []
+          self.profile[community.name][key] |= value
+        end
+      end
+    end
+    
+    def pull_profile(properties = {})
+      # TODO - Validate profile information with community type definitions
+      old_profile = self.profile
+      
+      begin
+        for key, value in properties do
+          community = Community.find_by_name(key)
+          self.pull_profile_for_community(community, value)
+        end
+      rescue => exception
+        self.profile = old_profile
+        raise exception
+      end
+    end
+    
+    def pull_profile_for_community(community, properties = {})
+      self.profile ||= {}
+      self.profile[community.name] ||= {}
+      
+      old_profile = self.profile[community.name]
+      
+      for key, value in properties do
+        next unless community.properties.include? key
+        
+        property = community.properties[key]
+        type = property["type"]
+        
+        if type == Array && value.class == Array then
+          self.profile[community.name][key] ||= []
+          self.profile[community.name][key] -= value
+        end
+      end
     end
     
     def accepts_routing?(predicate)

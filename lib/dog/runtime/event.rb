@@ -107,6 +107,11 @@ module Dog
         property "tasks", :type => Array, :required => true, :direction => "output"
       end
       
+      class Respond < SystemEvent
+        property "id", :type => String, :required => true, :direction => "input"
+        property "response", :type => Hash, :direction => "input"
+      end
+      
     end
     
     class Messages < SystemEvent

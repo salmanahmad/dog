@@ -36,7 +36,17 @@ module Dog
     def self.find_by_name(name)
       return self.find_one({"name" => name})
     end
+    
+    def self.from_hash(hash)
+      object = super
       
+      for name, property in object.properties do
+        property["type"] = Kernel.const_get(property["type"])
+      end
+      
+      return object
+    end
+    
     def to_hash
       return {
         name: self.name,

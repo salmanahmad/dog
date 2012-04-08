@@ -13,8 +13,10 @@ module Dog
     collection "variables"
     
     attr_accessor :_id
-    attr_accessor :person_id
     attr_accessor :track_id
+    attr_accessor :person_id  # Used with LISTEN
+    attr_accessor :task_id    # Used with ASK 
+    attr_accessor :handlers   # Used with ASK. TODO
     attr_accessor :name
     attr_accessor :type
     attr_accessor :value
@@ -26,6 +28,12 @@ module Dog
       Person.find_by_id(self.person_id)
     end
     
+    def self.notify_handlers_for_task(task)
+      # TODO
+      # This method should also wake up the track if the task
+      # Is completed...
+    end
+    
     def self.exists?(name, track = nil)
       if track.nil? then
         track = Track.current
@@ -35,10 +43,11 @@ module Dog
       document = self.find_one({
         "track_id" => {
           "$in" => ancestors
-          }
         }
-      ).sort({
-        "track_depth" => -1
+      }, {
+        :sort => {
+          "track_depth" => -1
+        }
       })
       
       return self.from_hash(document)
@@ -99,6 +108,52 @@ module Dog
     end
     
   end
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  # TODO - Remove this old stuff. I don't think any of it is necessary at all.
   
   module PendingVariable
     

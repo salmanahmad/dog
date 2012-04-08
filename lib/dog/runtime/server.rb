@@ -449,7 +449,7 @@ module Dog
           return unless verify_current_user("You have to be logged in to view tasks.")
           
           current_user = Person.find_by_id(session[:current_user])
-          task = Task.find_by_id(@event.id)
+          task = RoutedTask.find_by_id(@event.id)
           
           if task.route_to_person? current_user then
             @event.success = true
@@ -483,7 +483,7 @@ module Dog
           return unless verify_current_user("You have to be logged in to view messages.")
           
           current_user = Person.find_by_id(session[:current_user])
-          message = Message.find_by_id(@event.id)
+          message = RoutedMessage.find_by_id(@event.id)
           
           if message.route_to_person? current_user then
             @event.success = true
@@ -508,6 +508,29 @@ module Dog
           @event.success = true
           
           notify_handlers
+          process_outgoing_event
+        end
+        
+        get_or_post prefix + 'tasks.respond' do
+          @event = process_incoming_event(SystemEvents::Tasks::Respond) rescue return
+          
+          return unless verify_current_user("You have to be logged in to respond to tasks.")
+          
+          current_user = Person.find_by_id(session[:current_user])
+          current_task = RoutedTask.find_by_id(@event.id)
+          
+          if current_task.route_to_person?(current_user) then
+            current_task.process_response(@event.response, current_user)
+            current_task.save
+            Variable.notify_handlers_for_task(current_task)
+          else
+            
+            @event.success = false
+            @event.errors ||= []
+            @event.errors << "You are not eligible for this task"
+            return
+          end          
+          
           process_outgoing_event
         end
         
@@ -560,83 +583,7 @@ module Dog
       end
       
     end
-    
-
-    
-    
-    @@listeners = false
-    @@variables = {}
-    
-    def self.reset
-      @@variables = {}
-    end
-    
-    def self.register(variable, callback_path)
-      @@variables[callback_path] = variable
-    end
-    
-    def self.listeners?
-      @@listeners
-    end
-    
-    def self.listeners=(flag)
-      @@listeners = flag
-    end
-    
-    get '/logout' do
-      session['authenticate_redirect'] = nil
-      session['dormouse_access_token'] = nil
-      redirect '/'
-    end
-    
-    get '/authenticate' do
-      @error = nil
-      
-      # TODO - Move away from HTTParty
-      
-      access_token = HTTParty.get(Environment.dormouse_access_token_url(params[:code]))
-      if access_token.success? then
-        session['dormouse_access_token'] = access_token.parsed_response
-        session['dormouse_user'] = 
-        
-        url = $authenticate_redirects[session[:session_id]]
-        $authenticate_redirects.delete [session[:session_id]]
-        redirect url
-      else
-        "Could not verify your user account."
-      end
-    end
-    
-    
-    post '/action' do
-      
-      path = params["DogAction"]
-      params.delete("DogAction")  
-      variable = @@variables[path]
-      
-      # TODO - Handle authentication here...
-      
-      # Validate variable
-      if variable.nil? then
-        response.status = 404
-        body
-      else
-        variable.push_value(params)
-        
-        context = RequestContext.new
-        variable.notify_dependencies context
-        
-        EM.next_tick do
-          body context.body
-          if variable.complete? then
-            @@variables.delete(path)
-          end
-        end
-        
-      end
-      
-    end
-     
+ 
   end
   
 end

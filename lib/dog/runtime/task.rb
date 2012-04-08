@@ -21,6 +21,33 @@ module Dog
     attr_accessor :responses
     attr_accessor :created_at
     
+    def process_response(response, person)
+      response ||= {}
+      self.responses ||= []
+      
+      if self.responses.count >= self.replication then
+        raise "The task has already been answered."
+      end
+      
+      task = Kernel.const_get(self.type).new
+      task.assign(response)
+      task.assign(self.value)
+      
+      if task.required_output_present? then
+        if response.include? "_person_id"
+          # TODO - Enforce this somewhere
+          raise "Error. The _person key was set on response"
+        end
+        
+        response["_person_id"] = person._id
+        self.responses << response
+        return true
+      else
+        # TODO raise exception with the errors for reporting
+        raise "Required task output was not present."
+      end
+    end
+    
     def to_hash
       return {
         type: self.type,
