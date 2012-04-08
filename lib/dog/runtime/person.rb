@@ -97,7 +97,7 @@ module Dog
       self.profile ||= {}
       self.profile[community.name] ||= {}
       
-      for key, value in community do
+      for key, value in community.properties do
         unless self.profile[community.name].include?(key) then
           self.profile[community.name][key] = nil
         end   

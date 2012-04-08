@@ -24,17 +24,16 @@ module Dog
         @initialized = true
         
         database_name = Config.get "database"
-
-        if connection then
-          ::Dog.database = Mongo::Connection.new.db(database_name)
-        else
-          ::Dog.database = Mongo::Connection.new.db($0)
-        end
+        database_name = File.basename($0, File.extname($0)) if database_name.nil?
+        
+        ::Dog.database = Mongo::Connection.new.db(database_name)
+        
+        # TODO - Add compound indices for queries.
         
         ::Dog.database[Community.collection_name].ensure_index("name", {unique:true})
         
-        ::Dog.database[Message.collection_name].ensure_index("type")
-        ::Dog.database[Message.collection_name].ensure_index("created_at")
+        ::Dog.database[RoutedMessage.collection_name].ensure_index("type")
+        ::Dog.database[RoutedMessage.collection_name].ensure_index("created_at")
 
         ::Dog.database[Person.collection_name].ensure_index("handle", { unique:true, sparse:true })
         ::Dog.database[Person.collection_name].ensure_index("email", { unique:true, sparse:true })
@@ -44,10 +43,10 @@ module Dog
         ::Dog.database[Person.collection_name].ensure_index("password")
         ::Dog.database[Person.collection_name].ensure_index("communities")
         
-        ::Dog.database[Task.collection_name].ensure_index("type")
-        ::Dog.database[Task.collection_name].ensure_index("created_at")
-        ::Dog.database[Task.collection_name].ensure_index("replication")
-        ::Dog.database[Task.collection_name].ensure_index("responses")
+        ::Dog.database[RoutedTask.collection_name].ensure_index("type")
+        ::Dog.database[RoutedTask.collection_name].ensure_index("created_at")
+        ::Dog.database[RoutedTask.collection_name].ensure_index("replication")
+        ::Dog.database[RoutedTask.collection_name].ensure_index("responses")
         
         ::Dog.database[Track.collection_name].ensure_index("depth")
         ::Dog.database[Track.collection_name].ensure_index("ancestors")

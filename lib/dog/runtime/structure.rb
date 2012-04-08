@@ -123,6 +123,12 @@ module Dog
     end
     
     def initialize(params = {})
+      for key, options in self.class.properties do
+        if options[:value] then
+          self[key] = options[:value]
+        end
+      end
+      
       assign(params)
     end
     

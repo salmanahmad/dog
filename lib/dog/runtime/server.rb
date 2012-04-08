@@ -125,7 +125,7 @@ module Dog
       event = options[:event]
       location = options[:at]
       
-      if event.ancestors.include? SystemEvent then
+      if event.ancestors.include? ::Dog::SystemEvents::SystemEvent then
         location = Config.get('dog_prefix') + event.identifier
         @@handlers[location] ||= []
         @@handlers[location].push(handler)
@@ -221,7 +221,7 @@ module Dog
       
       for handler in handlers do
         EM.next_tick do
-          track = Track.create(:parent_id => Track.root.id)
+          track = Track.new(:parent_id => Track.root.id)
           fiber = TrackFiber.new do
             ::Dog::Application::Handlers.send(handler, @event)
           end
@@ -246,7 +246,7 @@ module Dog
         end      
         
         get_or_post prefix + 'account.status' do
-          @event = process_incoming_event(SystemEvents::Account::LoginStatus) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Account::LoginStatus) rescue return
           
           if session[:current_user]
             @event.success = true
@@ -261,9 +261,9 @@ module Dog
         end
         
         get_or_post prefix + 'account.login' do
-          @event = process_incoming_event(SystemEvents::Account::Login) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Account::Login) rescue return
           
-          person = Person.find_by_email(@email.email)
+          person = Person.find_by_email(@event.email)
           if person && person.password == Digest::SHA1.hexdigest(@event.password)
             @event.success = true
             session[:current_user] = person.id
@@ -278,7 +278,7 @@ module Dog
         end
 
         get_or_post prefix + 'account.logout' do
-          @event = process_incoming_event(SystemEvents::Account::Logout) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Account::Logout) rescue return
           
           session.clear
           @event.success = true
@@ -288,7 +288,7 @@ module Dog
         end
         
         get_or_post prefix + 'account.create' do
-          @event = process_incoming_event(SystemEvents::Account::Create) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Account::Create) rescue return
           
           return unless verify_not_current_user("You cannot be logged in when creating a new account.")
           
@@ -326,7 +326,7 @@ module Dog
         # TODO - Privacy considerations need to go here...
         
         get_or_post prefix + 'people.search' do
-          @event = process_incoming_event(SystemEvents::People::Search) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::People::Search) rescue return
           
           @event.results = Person.search(@event.query)
           @event.success = true
@@ -336,7 +336,7 @@ module Dog
         end
         
         get_or_post prefix + 'people.view' do
-          @event = process_incoming_event(SystemEvents::People::View) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::People::View) rescue return
           
           person = Person.find_by_id(@event.id)
           if person then
@@ -353,7 +353,7 @@ module Dog
         end
         
         get_or_post prefix + 'profile.view' do
-          @event = process_incoming_event(SystemEvents::Profile::View) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Profile::View) rescue return
           
           return unless verify_current_user("You have to be logged in to view your profile.")
           
@@ -366,7 +366,7 @@ module Dog
         end
         
         get_or_post prefix + 'profile.write' do
-          @event = process_incoming_event(SystemEvents::Profile::Write) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Profile::Write) rescue return
           
           return unless verify_current_user("You have to be logged in to write to your profile.")
           
@@ -379,7 +379,7 @@ module Dog
         end
         
         get_or_post prefix + 'profile.update' do
-          @event = process_incoming_event(SystemEvents::Profile::Update) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Profile::Update) rescue return
           
           return unless verify_current_user("You have to be logged in to update your profile.")
           
@@ -392,7 +392,7 @@ module Dog
         end
         
         get_or_post prefix + 'profile.push' do
-          @event = process_incoming_event(SystemEvents::Profile::Push) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Profile::Push) rescue return
           
           return unless verify_current_user("You have to be logged in to update your profile.")
           
@@ -405,7 +405,7 @@ module Dog
         end
         
         get_or_post prefix + 'profile.pull' do
-          @event = process_incoming_event(SystemEvents::Profile::Pull) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Profile::Pull) rescue return
           
           return unless verify_current_user("You have to be logged in to update your profile.")
           
@@ -418,7 +418,7 @@ module Dog
         end
         
         get_or_post prefix + 'community.join' do
-          @event = process_incoming_event(SystemEvents::Community::Join) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Community::Join) rescue return
           
           return unless verify_current_user("You have to be logged in to join a community.")
           
@@ -431,7 +431,7 @@ module Dog
         end
 
         get_or_post prefix + 'community.leave' do
-          @event = process_incoming_event(SystemEvents::Community::Leave) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Community::Leave) rescue return
           
           return unless verify_current_user("You have to be logged in to leave a community.")
           
@@ -444,7 +444,7 @@ module Dog
         end
         
         get_or_post prefix + 'tasks.view' do
-          @event = process_incoming_event(SystemEvents::Tasks::View) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Tasks::View) rescue return
           
           return unless verify_current_user("You have to be logged in to view tasks.")
           
@@ -465,7 +465,7 @@ module Dog
         end
         
         get_or_post prefix + 'tasks.list' do
-          @event = process_incoming_event(SystemEvents::Tasks::List) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Tasks::List) rescue return
           
           return unless verify_current_user("You have to be logged in to view tasks.")
           
@@ -478,7 +478,7 @@ module Dog
         end
         
         get_or_post prefix + 'messages.view' do
-          @event = process_incoming_event(SystemEvents::Messages::View) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Messages::View) rescue return
           
           return unless verify_current_user("You have to be logged in to view messages.")
           
@@ -499,7 +499,7 @@ module Dog
         end
         
         get_or_post prefix + 'messages.list' do
-          @event = process_incoming_event(SystemEvents::Messages::List) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Messages::List) rescue return
           
           return unless verify_current_user("You have to be logged in to view messages.")
           
@@ -512,7 +512,7 @@ module Dog
         end
         
         get_or_post prefix + 'tasks.respond' do
-          @event = process_incoming_event(SystemEvents::Tasks::Respond) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Tasks::Respond) rescue return
           
           return unless verify_current_user("You have to be logged in to respond to tasks.")
           
@@ -535,7 +535,7 @@ module Dog
         end
         
         get_or_post prefix + 'workflows.list' do
-          @event = process_incoming_event(SystemEvents::Workflows::List) rescue return
+          @event = process_incoming_event(::Dog::SystemEvents::Workflows::List) rescue return
           
           return unless verify_current_user("You have to be logged in to view workflows.")
           

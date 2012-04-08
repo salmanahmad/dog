@@ -24,7 +24,6 @@ module Dog
       end
       
       members = Class.new Structure
-      puts members
       members.instance_eval &block
       
       community.properties = members.properties
@@ -48,9 +47,17 @@ module Dog
     end
     
     def to_hash
+      properties = self.properties.clone
+      
+      for name, property in properties do
+        if property[:type] then
+          property[:type] = property[:type].name
+        end
+      end
+            
       return {
         name: self.name,
-        properties: self.properties
+        properties: properties
       }
     end
   end

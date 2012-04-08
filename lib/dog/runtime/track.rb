@@ -74,7 +74,7 @@ module Dog
       })
       
       if root then
-        return Track.from_hash(root)
+        return root
       else
         root = Track.new
         root.ancestors = []
