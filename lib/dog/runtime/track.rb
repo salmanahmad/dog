@@ -29,8 +29,14 @@ module Dog
       }
     end
     
-    def self.create
-      parent = Track.current
+    def self.create(hash)
+      parent = nil
+      
+      if hash[:parent_id] then
+        parent = Track.find_by_id(hash[:parent_id])
+      else
+        parent = Track.current
+      end
       
       track = Track.new
       track.ancestors = parent.scoped_ancestors

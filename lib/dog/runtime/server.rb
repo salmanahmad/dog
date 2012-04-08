@@ -221,9 +221,10 @@ module Dog
       
       for handler in handlers do
         EM.next_tick do
-          track = Track.new(:parent_id => Track.root.id)
+          track = Track.create(:parent_id => Track.root.id)
           fiber = TrackFiber.new do
-            ::Dog::Application::Handlers.send(handler, @event)
+            # TODO - Assign the @event to the variable
+            handler.new.run(@event)
           end
           track.fiber = fiber
           track.fiber.resume

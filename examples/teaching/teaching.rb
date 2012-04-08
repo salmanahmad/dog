@@ -27,8 +27,8 @@ Dog.bark! do
   end
   
   class CreateAccountHandler < Dog::Handler
-    def run
-      
+    def run(event = nil)
+      puts "Hello, I am here!"
     end    
   end
   
