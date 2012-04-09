@@ -24,7 +24,7 @@ module Dog
         @routability_cache_collection = collection
       end
       
-      def for_person(person)
+      def for_person(person, options = {})
         results = []
         first_record_id = nil
 

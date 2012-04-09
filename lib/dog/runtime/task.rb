@@ -21,6 +21,11 @@ module Dog
     attr_accessor :responses
     attr_accessor :created_at
     
+    def completed?
+      self.responses ||= []
+      return self.responses.length >= self.replication
+    end
+    
     def process_response(response, person)
       response ||= {}
       self.responses ||= []
@@ -52,6 +57,35 @@ module Dog
       object = super
       object.type = Kernel.const_get(object.type)
       return object
+    end
+    
+    def self.for_person(person, options = {})
+      # TODO - Refactor this with routability
+      results = []
+      
+      records = self.find({}, {:sort => ["created_at", Mongo::DESCENDING]})
+      
+      for record in records do
+        record = self.from_hash(record)
+        
+        if options[:after_task_id] && (BSON::ObjectId.from_string(options[:after_task_id]) == record._id) then
+          break
+        end
+        
+        if options[:completed] == true && !record.completed? then
+          next
+        end
+        
+        if options[:completed] == false && record.completed? then
+          next
+        end
+        
+        if person.accepts_routing?(record.routing) then
+          results << record.to_hash_for_event
+        end
+      end
+
+      return results
     end
     
     def to_hash

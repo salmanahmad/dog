@@ -272,7 +272,7 @@ module Dog
       raise "A person must be saved before matching it against a predicate." unless self._id
       predicate["_id"] = self._id
       
-      if self.find_one(predicate) then
+      if self.class.find_one(predicate) then
         return true
       else
         return false

@@ -104,6 +104,8 @@ module Dog
         property "track_id", :type => String, :direction => "input"
         property "limit", :type => String, :direction => "input"
         property "offset", :type => String, :direction => "input"
+        property "completed", :type => Boolean, :direction => "input"
+        property "after_task_id", :type => String, :direction => "input"
         property "tasks", :type => Array, :required => true, :direction => "output"
       end
       

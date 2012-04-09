@@ -93,7 +93,7 @@ module Dog
     use Rack::Session::Cookie
     enable :logging  
     #enable :sessions
-    enable :raise_errors
+    #enable :raise_errors
     
     def self.expose_variable(variable, options = {})
       @@listeners = true
@@ -475,8 +475,9 @@ module Dog
           
           return unless verify_current_user("You have to be logged in to view tasks.")
           
+          # TODO Task options
           current_user = Person.find_by_id(session[:current_user])
-          @event.tasks = Task.for_person(current_user)
+          @event.tasks = RoutedTask.for_person(current_user, {:completed => @event.completed, :after_task_id => @event.after_task_id})
           @event.success = true
           
           notify_handlers
@@ -510,7 +511,7 @@ module Dog
           return unless verify_current_user("You have to be logged in to view messages.")
           
           current_user = Person.find_by_id(session[:current_user])
-          @event.messages = Message.for_person(current_user)
+          @event.messages = RoutedMessage.for_person(current_user)
           @event.success = true
           
           notify_handlers
