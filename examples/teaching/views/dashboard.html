@@ -8,6 +8,8 @@
 
 <script type="text/javascript" charset="utf-8">
 	
+
+	
 	function provideThreeInterests(task) {
 		$("#provide-interests").modal({keyboard:false});
 		$("#provide-interests").data("dog.task", task);
@@ -26,9 +28,12 @@
 			var teachables = $("#provide-interests .teachables").val()
 			
 			var request = $.post("/dog/tasks.respond", {
-				"objective":objective,
-				"learnables":learnables,
-				"teachables":teachables
+				"id": $(this).data("dog.task")._id,
+				"response": {
+					"objective":objective,
+					"learnables":[learnables],
+					"teachables":[teachables]	
+				}
 			});
 			
 			request.done(function(output) {

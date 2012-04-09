@@ -13,6 +13,10 @@ class StuctBoolean < Dog::Structure
   property "flag", :type => Dog::Boolean
 end
 
+class StuctBoolean < Dog::Structure
+  property "flag", :type => Dog::Boolean
+end
+
 class RuntimeTests::StructureTest < RuntimeTestCase
   
   def test_boolean
@@ -20,4 +24,9 @@ class RuntimeTests::StructureTest < RuntimeTestCase
     s.flag = true
     assert_equal(s.flag, true)
   end
+  
+  def test_assign
+    
+  end
+  
 end

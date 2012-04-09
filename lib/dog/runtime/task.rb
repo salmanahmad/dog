@@ -34,9 +34,11 @@ module Dog
         raise "The task has already been answered."
       end
       
-      task = Kernel.const_get(self.type).new
-      task.assign(response)
+      # TODO - This is a mass assignment flaw.
+      # In the future only merge the output properties 
+      task = self.type.new
       task.assign(self.value)
+      task.assign(response)
       
       if task.required_output_present? then
         if response.include? "_person_id"
@@ -102,7 +104,7 @@ module Dog
     
     def to_hash_for_event
       hash = to_hash
-      hash["_id"] = self._id
+      hash["_id"] = self._id.to_s
       hash.delete(:replication)
       hash.delete(:duplication)
       hash.delete(:responses)

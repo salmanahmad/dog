@@ -11,7 +11,7 @@ Dog.bark! do
     property "teachables", :type => Array
     property "learnables", :type => Array
   end
-  
+    
   class ProvideThreeInterests < Dog::Task
     property "instructions", :value => "Please provide three things that you are interested in learning and teaching."
     property "objective", :type => String, :required => true, :direction => "output"

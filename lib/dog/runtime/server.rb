@@ -179,8 +179,13 @@ module Dog
     end
     
     def process_incoming_event(event)
+      
       input = nil
-      input = event.import(params) rescue nil
+      begin
+        input = event.import(params) 
+      rescue => e
+        
+      end
       
       if input.nil?
         # TODO - Better error reporting...
@@ -203,10 +208,11 @@ module Dog
         output = {}
       end
       
-      if @event.success
-        status 200
-      else
+      if @event.success == false
         status 403
+      else
+        status 200
+        
       end
       
       body output.to_json
@@ -530,6 +536,7 @@ module Dog
             current_task.process_response(@event.response, current_user)
             current_task.save
             Variable.notify_handlers_for_task(current_task)
+            @event.success = true
           else
             
             @event.success = false
