@@ -7,27 +7,52 @@
 </style>
 
 <script type="text/javascript" charset="utf-8">
-  $(function() {
-    var request = $.post("/dog/tasks.list", {
-		"completed":false
+	
+	function provideThreeInterests(task) {
+		$("#provide-interests").modal({keyboard:false});
+		$("#provide-interests").data("dog.task", task);
+	}
+	
+  	$(function() {
+		
+	    $("#provide-interests .save").click(function() {
+			$("#provide-interests").modal('hide');
+	    })
+
+	    $('#provide-interests').on('hide', function () {
+			
+			var objective = $("#provide-interests .objective").val()
+			var learnables = $("#provide-interests .teachables").val()
+			var teachables = $("#provide-interests .teachables").val()
+			
+			var request = $.post("/dog/tasks.respond", {
+				"objective":objective,
+				"learnables":learnables,
+				"teachables":teachables
+			});
+			
+			request.done(function(output) {
+				if(output.success) {
+					$(".profile .teachables").val(teachables)
+					$(".profile .learnables").val(learnables)
+				}
+			})
+	    });
+	
+	
+		var request = $.post("/dog/tasks.list", {
+			"completed":false
+		});
+
+		request.done(function(dog) {
+			for(i in dog.tasks) {
+				var task = dog.tasks[i];
+				if (task.type == "ProvideThreeInterests") {
+					provideThreeInterests(task);
+				}
+			}
+		})
 	});
-	
-	request.done(function(data) {
-		console.log(data);
-	})
-	
-	/*
-	$("#provide-interests").modal({keyboard:false});
-    $("#provide-interests .save").click(function() {
-      $("#provide-interests").modal('hide');
-    })
-    
-    $('#provide-interests').on('hide', function () {
-      $(".profile .teachables").val($("#provide-interests .teachables").val())
-      $(".profile .learnables").val($("#provide-interests .learnables").val())
-    });
-	*/
-  });
 </script>
 
 <div class="modal fade" id="provide-interests">
@@ -37,7 +62,7 @@
   <div class="modal-body">
     <form>
       <label>What are your goals?</label>
-      <textarea name="goals" class="goals" style="width:90%" rows="4"></textarea>
+      <textarea name="objective" class="objective" style="width:90%" rows="4"></textarea>
 
       <label>What do you want to learn to do that?</label>
       <textarea name="learnables" class="learnables" style="width:90%" rows="4"></textarea>

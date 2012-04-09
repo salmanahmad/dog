@@ -102,6 +102,7 @@ module Dog
     
     def to_hash_for_event
       hash = to_hash
+      hash["_id"] = self._id
       hash.delete(:replication)
       hash.delete(:duplication)
       hash.delete(:responses)

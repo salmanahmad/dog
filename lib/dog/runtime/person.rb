@@ -44,7 +44,7 @@ module Dog
     attr_accessor :last_workflow_id
     
     def to_hash
-      return {
+      hash = {
         first_name: self.first_name,
         last_name: self.last_name,
         handle: self.handle,
@@ -59,6 +59,14 @@ module Dog
         last_message_id: self.last_message_id,
         last_workflow_id: self.last_workflow_id
       }
+      
+      hash.delete(:handle) unless hash[:handle]
+      hash.delete(:email) unless hash[:email]
+      hash.delete(:facebook) unless hash[:facebook]
+      hash.delete(:twitter) unless hash[:twitter]
+      hash.delete(:google) unless hash[:google]
+      
+      return hash
     end
     
     def to_hash_for_event
@@ -91,6 +99,7 @@ module Dog
       # was done so that we can ensure atomic updates
       
       return nil if community.nil?
+      
       self.communities ||= []
       self.communities = self.communities | [community.name]
       

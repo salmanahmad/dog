@@ -69,9 +69,9 @@ module Dog
       if self._id then
         # TODO - Consider using Collection#find_and_modify for atomic semantics.
         # http://api.mongodb.org/ruby/current/Mongo/Collection.html#find_and_modify-instance_method
-        ::Dog::database[self.collection_name].update({"_id" => self._id}, self.to_hash)
+        ::Dog::database[self.collection_name].update({"_id" => self._id}, self.to_hash, {:safe => true})
       else
-        id = ::Dog::database[self.collection_name].insert(self.to_hash)
+        id = ::Dog::database[self.collection_name].insert(self.to_hash, {:safe => true})
         self._id = id
       end
     end
