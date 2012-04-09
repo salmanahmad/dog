@@ -39,7 +39,7 @@ module Dog
       return self.find_one({"_id" => id})
     end
     
-    def self.find_one(conditions = {})
+    def self.find_one(conditions = {}, opts = {})
       document = ::Dog::database[self.collection_name].find_one(conditions)
       
       if document then
@@ -49,7 +49,7 @@ module Dog
       end
     end
     
-    def self.find(conditions = {})
+    def self.find(conditions = {}, opts = {})
       return ::Dog::database[self.collection_name].find(conditions)
     end
     

@@ -222,10 +222,15 @@ module Dog
       for handler in handlers do
         EM.next_tick do
           track = Track.create(:parent_id => Track.root.id)
+          
           fiber = TrackFiber.new do
-            # TODO - Assign the @event to the variable
-            handler.new.run(@event)
+            handler.run
           end
+          
+          variable = Variable.create(handler.variable_name, track)
+          variable.person_id = session[:current_user]
+          variable.save
+          
           track.fiber = fiber
           track.fiber.resume
         end

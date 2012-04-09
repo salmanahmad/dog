@@ -18,9 +18,15 @@ module Dog
     attr_accessor :routing
     attr_accessor :created_at
     
+    def from_hash(hash)
+      object = super
+      object.type = Kernel.const_get(object.type)
+      return object
+    end
+    
     def to_hash
       return {
-        type: self.type,
+        type: self.type.name,
         value: self.value,
         routing: (self.routing || {}),
         created_at: (self.created_at || Time.now)

@@ -50,7 +50,24 @@ module Dog
         }
       })
       
-      return self.from_hash(document)
+      return document
+    end
+    
+    def self.create(name, track = nil)
+      if track.nil? then
+        track = Track.current
+      end
+      
+      variable = self.exists?(name, track)
+      if variable.nil? || (variable.track_id != track.id) then
+        variable = Variable.new
+        variable.name = name
+        variable.track_id = track._id
+        variable.track_depth = track.depth
+        variable.save
+      end
+      
+      return variable
     end
     
     def self.named(name, track = nil)
@@ -88,7 +105,7 @@ module Dog
       type = nil
       value = nil
       
-      if self.value.kindof? Structure then
+      if self.value.kind_of? Structure then
         value = self.value.export
         type = self.value.class.name
       else

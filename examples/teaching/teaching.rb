@@ -27,12 +27,13 @@ Dog.bark! do
   end
   
   class CreateAccountHandler < Dog::Handler
-    def run(event = nil)
-      puts "Hello, I am here!"
+    def run
+      variable = Dog::Variable.named("account_create")
+      Dog::ask(Dog::People.where("_id" => variable.person_id), ProvideThreeInterests.new)
     end    
   end
   
-  Dog::Server.listen(:event => Dog::SystemEvents::Account::Create, :handler => CreateAccountHandler, :variable => "account_create")
+  Dog::Server.listen(:event => Dog::SystemEvents::Account::Create, :handler => CreateAccountHandler.new("account_create"))
   
 end
 

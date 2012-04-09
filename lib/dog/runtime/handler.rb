@@ -10,5 +10,24 @@
 module Dog
   class Handler
     
+    attr_accessor :variable_name
+    
+    def initialize(variable)
+      self.variable_name = variable
+    end
+    
+    def to_hash
+      return {
+        type: self.class.name,
+        variable_name: self.variable_name
+      }
+    end
+    
+    def self.from_hash(hash)
+      type = Kernel.const_get(hash["type"])
+      object = type.new(hash["variable_name"])
+      return object
+    end
+    
   end
 end
