@@ -93,6 +93,24 @@ module Dog
       self.find_one({"email" => email})
     end
     
+    # TODO - Update the API so this will return multiple
+    # people and accept and array not only an id
+    def self.from(data)
+      person_id = nil
+      
+      if data.kind_of?(Hash) then
+        person_id = data["_person_id"]
+      else
+        person_id = data.person_id rescue nil
+      end
+      
+      if person_id then
+        return Person.find_by_id(person_id)
+      else
+        return nil
+      end
+    end
+    
     def join_community(community)
       # Note: This adds the community to the profile but does not
       # save the actual person object. You have to call #save. This
@@ -164,7 +182,7 @@ module Dog
         type = property["type"]
         
         if type then
-          self.profile[community.name][key] = Properties.convert_value_to_type(value, type)
+          self.profile[community.name][key] = Structure.convert_value_to_type(value, type)
         else
           self.profile[community.name][key] = value
         end

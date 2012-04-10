@@ -34,8 +34,16 @@ Dog.bark! do
       interests.value = Dog::ask(Dog::People.where("_id" => variable.person_id), ProvideThreeInterests.new)
       interests.save
       
+      output = Dog::Variable.named("interests").value.first
       
-      output = Dog::Variable.named("interests").value
+      person = Dog::Person.from(output)
+      puts person
+      
+      person.update_profile({
+        "learners" => output
+      })
+      person.save
+      
       puts "Here I am ! #{output}"
     end    
   end
