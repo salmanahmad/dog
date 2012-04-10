@@ -10,7 +10,19 @@
 module Dog
   
   class TrackFiber < Fiber
+    
+    class << self
+      attr_accessor :fibers
+    end
+    
     attr_accessor :track
+    
+    def initialize
+      super
+      self.class.fibers ||= []
+      self.class.fibers << self
+      return self
+    end
     
     def track
       if @track.class != Track then

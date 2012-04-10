@@ -24,14 +24,53 @@ module Dog
     # Denormalization
     attr_accessor :track_depth
     
+    def to_hash
+      type = nil
+      value = nil
+      
+      if @value.kind_of? Structure then
+        value = @value.export
+        type = @value.class.name
+      else
+        value = @value
+      end
+      
+      hash = {
+        track_id: self.track_id,
+        person_id: self.person_id,
+        task_id: self.task_id,
+        handlers: self.handlers,
+        track_depth: self.track_depth,
+        name: self.name,
+        type: type,
+        value: value
+      }
+      
+      return hash
+    end
+    
+    
     def person
       Person.find_by_id(self.person_id)
     end
     
     def self.notify_handlers_for_task(task)
       # TODO
-      # This method should also wake up the track if the task
-      # Is completed...
+      
+      variable = Variable.find_one({"task_id" => task._id})
+      variable.value = task.responses
+      variable.save
+      
+      if variable then
+        for fiber in TrackFiber.fibers do
+          if fiber.track._id == variable.track_id then
+            fiber.resume
+            return
+          end
+        end
+      end
+      
+      # If the fiber is not there, what do I do? Start a new one? I need to have my start up logic to do that...
     end
     
     def self.exists?(name, track = nil)
@@ -41,6 +80,7 @@ module Dog
       
       ancestors = track.scoped_ancestors
       document = self.find_one({
+        "name" => name,
         "track_id" => {
           "$in" => ancestors
         }
@@ -51,6 +91,30 @@ module Dog
       })
       
       return document
+    end
+    
+    def value=(value)
+      if value.class == RoutedTask then
+        self.task_id = value._id
+        @value = nil
+      else
+        @value = value
+      end
+    end
+    
+    def value
+      if self.task_id then
+        task = RoutedTask.find_by_id(self.task_id)
+        if task.completed? then
+          return @value
+        else
+          Fiber.yield
+          self.reload
+          return @value
+        end
+      else
+        return @value
+      end
     end
     
     def self.create(name, track = nil)
@@ -100,30 +164,7 @@ module Dog
       
       return object
     end
-    
-    def to_hash
-      type = nil
-      value = nil
-      
-      if self.value.kind_of? Structure then
-        value = self.value.export
-        type = self.value.class.name
-      else
-        value = self.value
-      end
-      
-      hash = {
-        person_id: self.person_id,
-        track_id: self.track_id,
-        track_depth: self.track_depth,
-        name: self.name,
-        type: type,
-        value: value
-      }
-      
-      return hash
-    end
-    
+        
   end
   
   

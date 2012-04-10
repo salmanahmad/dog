@@ -28,6 +28,7 @@ module Dog
       routed_task.value = task.to_hash
       routed_task.routing = users
       routed_task.save
+      return routed_task
     end
   end
   
@@ -43,6 +44,7 @@ module Dog
       routed_message.value = message.to_hash
       routed_message.routing = users
       routed_message.save
+      return routed_message
     end
     
   end

@@ -20,12 +20,18 @@ module Dog
       return object
     end
     
+    # TODO - migrate all of the custom self.from_hash
+    # over to just from_hash
+    
+    def from_hash(hash)
+      for key, value in hash do
+        self.instance_variable_set("@#{key}".intern, value)
+      end      
+    end
+    
     def self.from_hash(hash)
       object = self.new
-      for key, value in hash do
-        object.instance_variable_set("@#{key}".intern, value)
-      end
-      
+      object.from_hash(hash)
       return object
     end
     
@@ -63,6 +69,13 @@ module Dog
     
     def id=(some_id)
       self._id = some_id
+    end
+    
+    def reload
+      if self._id then
+        document = ::Dog::database[self.collection_name].find_one({"_id" => self._id})
+        self.from_hash(document)
+      end
     end
     
     def save
