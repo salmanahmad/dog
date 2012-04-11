@@ -32,7 +32,7 @@ chat = task {
   output string message
 }
 
-DEFINE FUNCTION conversation FOR people DO
+DEFINE FUNCTION converse FOR people DO
   messages = ASK people TO chat REPEAT INDEFINITELY
   
   ON message IN messages DO
@@ -42,8 +42,32 @@ DEFINE FUNCTION conversation FOR people DO
   WAIT FOREVER
 END
 
+LISTEN TO learners VIA http FOR find_teacher
+LISTEN TO learners VIA http FOR matched_teachers
+LISTEN TO learners VIA http AT '/meet' FOR meeting_conversation
+
+ON request IN find_teacher DO
+  user = PERSON FROM request
+  REPLY WITH request.teachers = PEOPLE FROM learners WHERE teachables IN request.learnable
+END
+
+ON request IN matched_teachers DO
+  user = PERSON FROM request
+  REPLY WITH request.teachers = PEOPLE FROM learners WHERE teachables IN user.learners.learnables
+END
+
+ON request IN meeting_conversation DO
+  requester = PERSON FROM request
+  requestee = request.person
+  ASK [requester, requestee] TO converse
+END
+
 ON request IN dog.account.create DO
-  interests = ASK PERSON FROM request TO provide_three_interests
+  new_user = PERSON FROM request
+  interests = ASK new_user TO provide_three_interests
   
+  new_user.learners.objective = interests.objective
+  new_user.learners.learnables = interests.learnables
+  new_user.learners.teachables = interests.teachables
 END
 
