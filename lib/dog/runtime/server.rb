@@ -120,7 +120,6 @@ module Dog
       end
       
       eligibility = options[:eligibility]
-      variable_name = options[:variable_name]
       handler = options[:handler] 
       event = options[:event]
       location = options[:at]
@@ -139,7 +138,6 @@ module Dog
         @@handlers[location].push(handler)
          
         self.aget_or_post location do
-          
           @event = process_incoming_event(event) rescue return
           
           reply_fiber = Fiber.new do
@@ -157,17 +155,21 @@ module Dog
             process_outgoing_event
           end
           
+          # TODO - Consolidate this logic with notify_handlers below for API events
+          
           for handler in @@handlers[location] do
             EM.next_tick do
               track = Track.create(:parent_id => Track.root.id)
               fiber = TrackFiber.new do
-                variable = Variable.named(variable_name)
-                variable.value = @event
-                variable.save
-                h = handler.new
-                h.run
+                handler.run
               end
-              track.context[:reply_fiber] = reply_fiber
+              
+              variable = Variable.named(handler.variable_name, track)
+              variable.person_id = session[:current_user]
+              variable.value = @event
+              variable.save
+              
+              fiber.context[:reply_fiber] = reply_fiber
               track.fiber = fiber
               track.fiber.resume
             end
@@ -212,11 +214,9 @@ module Dog
         status 403
       else
         status 200
-        
       end
       
       body output.to_json
-      
     end
     
     def notify_handlers
@@ -235,6 +235,7 @@ module Dog
           
           variable = Variable.create(handler.variable_name, track)
           variable.person_id = session[:current_user]
+          variable.value = @event
           variable.save
           
           track.fiber = fiber

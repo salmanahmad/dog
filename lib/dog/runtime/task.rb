@@ -35,7 +35,10 @@ module Dog
       end
       
       # TODO - This is a mass assignment flaw.
-      # In the future only merge the output properties 
+      # In the future only merge the output properties.
+      
+      # TODO - This is also a problem with process_outgoing_event
+      # to makesure that REPLY and stuff also works
       task = self.type.new
       task.assign(self.value)
       task.assign(response)

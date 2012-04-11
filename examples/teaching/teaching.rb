@@ -28,7 +28,14 @@ Dog.bark! do
   
   class FindTeacher < Dog::Event
     property "teachable", :type => String, :direction => "input"
-    property "teachers", :direction => "output"
+    property "teachers", :type => Array, :direction => "output"
+  end
+  
+  class FindTeacherHandler < Dog::Handler
+    def run
+      request = Dog::Variable.named("request")
+      Dog::reply("teachers" => [request.value.teachable])
+    end
   end
   
   class CreateAccountHandler < Dog::Handler
@@ -53,7 +60,10 @@ Dog.bark! do
     end    
   end
   
+  
   Dog::Server.listen(:event => Dog::SystemEvents::Account::Create, :handler => CreateAccountHandler.new("account_create"))
+  Dog::Server.listen(:event => FindTeacher, :at => "find_teacher", :eligibility => Dog::People, :handler => FindTeacherHandler.new("request"))
+  
 end
 
 

@@ -18,7 +18,6 @@ module Dog
     attr_accessor :depth
     
     # Volatile properties
-    attr_accessor :context
     attr_accessor :fiber
     
     def to_hash
@@ -45,11 +44,6 @@ module Dog
       track.save
         
       return track
-    end
-    
-    def context
-      @context ||= {}
-      @context
     end
     
     def scoped_ancestors

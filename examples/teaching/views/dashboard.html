@@ -44,6 +44,16 @@
 	
 	$(function() {
 		
+		
+		var find_teacher = $.post("/find_teacher", {
+			"teachable":"This is fun"
+		})
+		
+		find_teacher.done(function(find_teacher) {
+			console.log(find_teacher);
+		});
+		
+		
 		$("#provide-interests .save").click(function() {
 			$("#provide-interests").modal('hide');
 		})

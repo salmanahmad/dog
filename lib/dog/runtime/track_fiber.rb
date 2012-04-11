@@ -16,12 +16,18 @@ module Dog
     end
     
     attr_accessor :track
+    attr_accessor :context
     
     def initialize
       super
       self.class.fibers ||= []
       self.class.fibers << self
       return self
+    end
+    
+    def context
+      @context ||= {}
+      @context
     end
     
     def track

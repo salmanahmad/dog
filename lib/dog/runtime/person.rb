@@ -175,8 +175,6 @@ module Dog
       self.profile ||= {}
       self.profile[community.name] ||= {}
       
-      puts "Udpating Profile with: #{properties}"
-      
       old_profile = self.profile[community.name]
       
       for key, value in properties do
