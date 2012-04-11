@@ -27,14 +27,32 @@ Dog.bark! do
   end
   
   class FindTeacher < Dog::Event
-    property "teachable", :type => String, :direction => "input"
+    property "learnable", :type => String, :direction => "input"
+    property "teachers", :type => Array, :direction => "output"
+  end
+  
+  class MatchedTeachers < Dog::Event
     property "teachers", :type => Array, :direction => "output"
   end
   
   class FindTeacherHandler < Dog::Handler
     def run
       request = Dog::Variable.named("request")
-      Dog::reply("teachers" => [request.value.teachable])
+      teachers = Dog::Person.find(Dog::People.from("learners").where("teachables" => request.value.learnable)).to_a
+      Dog::reply("teachers" => teachers)
+    end
+  end
+  
+  class MatchedTeachersHandler < Dog::Handler
+    def run
+      request = Dog::Variable.named("request")
+      person = Dog::Person.from(request)
+      teachers = Dog::Person.find(Dog::People.from("learners").where("teachables" => {"$in" => person.profile["learners"]["learnables"]})).to_a
+      teachers.map! do |teacher|
+        teacher = Dog::Person.from_hash(teacher)
+        teacher.to_hash_for_event
+      end
+      Dog::reply("teachers" => teachers)
     end
   end
   
@@ -60,9 +78,9 @@ Dog.bark! do
     end    
   end
   
-  
   Dog::Server.listen(:event => Dog::SystemEvents::Account::Create, :handler => CreateAccountHandler.new("account_create"))
   Dog::Server.listen(:event => FindTeacher, :at => "find_teacher", :eligibility => Dog::People, :handler => FindTeacherHandler.new("request"))
+  Dog::Server.listen(:event => MatchedTeachers, :at => "matched_teachers", :eligibility => Dog::People, :handler => MatchedTeachersHandler.new("request"))
   
 end
 

@@ -93,6 +93,10 @@ module Dog
       self.find_one({"email" => email})
     end
     
+    def self.find_ids_for_predicate(conditions)
+      self.find(conditions, {:fields => ["_id"]}).to_a
+    end
+    
     # TODO - Update the API so this will return multiple
     # people and accept and array not only an id
     def self.from(data)

@@ -40,7 +40,7 @@ module Dog
       object = super
       
       for name, property in object.properties do
-        property["type"] = Kernel.const_get(property["type"])
+        property["type"] = Kernel.qualified_const_get(property["type"])
       end
       
       return object

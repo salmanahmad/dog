@@ -20,7 +20,7 @@ module Dog
     
     def from_hash(hash)
       object = super
-      object.type = Kernel.const_get(object.type)
+      object.type = Kernel.qualified_const_get(object.type)
       return object
     end
     

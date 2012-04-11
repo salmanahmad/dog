@@ -35,7 +35,7 @@ module Dog
       end
 
       def convert_value_to_type(value, type)
-        type = Kernel.const_get(type) if type.class == String
+        type = Kernel.qualified_const_get(type) if type.class == String
         
         return value if value.kind_of? type
         return nil if value.nil?

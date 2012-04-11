@@ -24,7 +24,7 @@ module Dog
     end
     
     def self.from_hash(hash)
-      type = Kernel.const_get(hash["type"])
+      type = Kernel.qualified_const_get(hash["type"])
       object = type.new(hash["variable_name"])
       return object
     end

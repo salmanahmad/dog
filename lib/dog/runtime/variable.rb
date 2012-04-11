@@ -54,7 +54,7 @@ module Dog
       
       type = hash["type"]
       if type then
-        type = Kernel.const_get(type)
+        type = Kernel.qualified_const_get(type)
         if type.ancestors.include? Structure then
           object.value = type.import(object.value)
         end
