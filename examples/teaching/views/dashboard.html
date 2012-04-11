@@ -1,62 +1,162 @@
 <%= layout "/layout.html" %>
 
 <style type="text/css" media="screen">
-  #provide-interests {
-    display:none;
-  }
+	#provide-interests {
+		display:none;
+	}
+	
+	.overview .learnables, .overview .teachables {
+		border:1px solid #ccc;
+		border-radius:3px;
+		padding:10px;
+		margin-bottom:25px;
+		overflow:auto;
+		height:50px;
+	}
+	
+	.main-content .profile {
+		display:none;
+	}
+	
+	.input {
+		padding:5px;
+	}
+	
+	.profile .error {
+		display:none;
+	}
+	
+	.profile .success {
+		display:none;
+	}
+	
+	.main-content .messages {
+		display:none;
+	}
 </style>
 
 <script type="text/javascript" charset="utf-8">
-	
-
-	
+		
 	function provideThreeInterests(task) {
 		$("#provide-interests").modal({keyboard:false});
 		$("#provide-interests").data("dog.task", task);
 	}
 	
-  	$(function() {
+	$(function() {
 		
-	    $("#provide-interests .save").click(function() {
+		$("#provide-interests .save").click(function() {
 			$("#provide-interests").modal('hide');
-	    })
+		})
 
-	    $('#provide-interests').on('hide', function () {
-			
+		$('#provide-interests').on('hide', function () {
 			var objective = $("#provide-interests .objective").val()
-			var learnables = $("#provide-interests .teachables").val()
+			var learnables = $("#provide-interests .learnables").val()
 			var teachables = $("#provide-interests .teachables").val()
 			
 			var request = $.post("/dog/tasks.respond", {
 				"id": $(this).data("dog.task")._id,
 				"response": {
 					"objective":objective,
-					"learnables":[learnables],
-					"teachables":[teachables]	
+					"learnables":learnables.split(/\s*,\s*/),
+					"teachables":teachables.split(/\s*,\s*/)
 				}
 			});
 			
 			request.done(function(output) {
 				if(output.success) {
-					$(".profile .teachables").val(teachables)
-					$(".profile .learnables").val(learnables)
+					$(".overview .teachables").val(teachables)
+					$(".overview .learnables").val(learnables)
 				}
 			})
-	    });
-	
-	
-		var request = $.post("/dog/tasks.list", {
-			"completed":false
 		});
-
-		request.done(function(dog) {
-			for(i in dog.tasks) {
-				var task = dog.tasks[i];
-				if (task.type == "ProvideThreeInterests") {
-					provideThreeInterests(task);
+		
+		$("#profile form").submit(function() {
+			
+			var update = $.post("/dog/profile.update", {
+				"value": {
+					"learners": {
+						"learnables": $(".profile .learnables").val().split(/\s*,\s*/),
+						"teachables": $(".profile .teachables").val().split(/\s*,\s*/),
+						"objective": $(".profile .objective").val()
+					}
 				}
-			}
+			});
+			
+			var form = $(this);
+			
+			update.done(function(data) {
+				$(form).find(".success").show();
+				setTimeout(function() {
+					$(form).find(".success").fadeOut();
+				}, 1000)
+			});
+			
+			update.fail(function(data) {
+				$(form).find(".error").show();
+				setTimeout(function() {
+					$(form).find(".error").fadeOut();
+				}, 1000)
+				
+			});
+			
+			return false;
 		})
+		
+		$(".sidebar a").click(function() {
+			var id = $(this).attr("href");
+			$(".sidebar .active").removeClass("active");
+			$(this).parent().addClass("active")
+			$(".main-content > *").hide();
+			$(id).show();
+		})
+		
+		var account_status = $.post("/dog/account.status")
+		
+		account_status.done(function(data) {
+			
+			if(data.logged_in) {
+				var tasks = $.post("/dog/tasks.list", {
+					"completed":false
+				});
+				
+				tasks.done(function(data) {
+					for(i in data.tasks) {
+						var task = data.tasks[i];
+						if (task.type == "ProvideThreeInterests") {
+							provideThreeInterests(task);
+						}
+					}
+				});
+				
+				var profile = $.post("/dog/profile.view")
+				profile.done(function(user) {
+					profile = user.value.profile
+					
+					var gravatar = "http://www.gravatar.com/avatar/" + md5(user.value.email) + "?d=mm&f=y&s=256";
+					$("#icon").attr("src", gravatar);
+					
+					if (profile.learners.learnables == null) {
+						profile.learners.learnables = []
+					}
+					
+					if (profile.learners.teachables == null) {
+						profile.learners.teachables = []
+					}
+					
+					
+					$(".overview .learnables").html(profile.learners.learnables.join(", "));
+					$(".overview .teachables").html(profile.learners.teachables.join(", "));
+					
+					$(".profile .email").html(user.value.email)
+					$(".profile .objective").val(profile.learners.objective);
+					$(".profile .learnables").val(profile.learners.learnables.join(", "))
+					$(".profile .teachables").val(profile.learners.teachables.join(", "))
+				});
+				
+			} else {
+				window.location = "/"
+			}
+		});
 	});
 </script>
 
@@ -84,26 +184,26 @@
 <div class="row-fluid profile-box">
     <div class="span4">
       <div class="image">
-        <img src="http://www.gravatar.com/avatar/d7b205a61db76f545dd527b4d8670dea?s=256" />  
+        <img id="icon" />  
       </div>
     </div>
     <div class="span8">
       
-      <form class="profile">
+      <form class="overview">
         <div class="control-group">
           <h3 class="control-label" for="input01">
-            Learnables
+            Your Learnables
           </h3>
           <div class="controls">
-            <textarea class="input-xlarge learnables" rows="4" style="width:100%"></textarea>
+            <div class="input-xlarge learnables" rows="4" style="width:100%"></div>
           </div>
         </div>
         <div class="control-group">
           <h3 class="control-label" for="input01">
-            Teachables
+            Your Teachables
           </h3>
           <div class="controls">
-            <textarea class="input-xlarge teachables" rows="4" style="width:100%"></textarea>
+            <div class="input-xlarge teachables" rows="4" style="width:100%"></div>
           </div>
         </div>
       </form>
@@ -119,19 +219,73 @@
           Explore
         </li>
         <li class="active">
-          <a href="#">Dashboard</a>
+          <a href="#dashboard">Dashboard</a>
         </li>
         <li>
-          <a href="#">Profile</a>
+          <a href="#profile">Profile</a>
         </li>
         <li>
-          <a href="#">Messages</a>
+          <a href="#messages">Messages</a>
         </li>
       </ul>
     </div>
     <div class="span8">
-      <div class=well>
-        <center><h3>No Meetings Found</h3></center>
+      <div class="well main-content">
+				<div id="dashboard" class="dashboard">
+					Dashboard
+				</div>
+				<div id="profile" class="profile">
+					
+					<form class="form-horizontal">
+					  <fieldset>
+							
+							<div class="control-group">
+								<label class="control-label">Email</label>
+								<div class="controls">
+									<p id="email" class="email input"></p>
+								</div>
+							</div>
+							
+							<div class="control-group">
+								<label class="control-label">Objective</label>
+								<div class="controls">
+									<textarea name="learners[objective]" class="objective" style="width:90%" rows="4"></textarea>
+								</div>
+							</div>
+							
+							<div class="control-group">
+								<label class="control-label">Learnables</label>
+								<div class="controls">
+									<textarea name="learners[learnables]" class="learnables" style="width:90%" rows="4"></textarea>
+								</div>
+							</div>
+							
+							<div class="control-group">
+								<label class="control-label">Teachables</label>
+								<div class="controls">
+									<textarea name="learners[teachables]" class="teachables" style="width:90%" rows="4"></textarea>
+								</div>
+							</div>
+							
+							<div class="form-actions">
+								<button type="submit" class="btn btn-primary">Save Profile</button> 
+								<span class="control-group success">
+									<span class="help-inline">Successfully saved profile.</span>
+								</span>
+								<span class="control-group error">
+									<span class="help-inline">There was an error saving your profile.</span>
+								</span>
+							</div>
+
+					
+					  </fieldset>
+					</form>
+					
+					
+				</div>
+				<div id="messages" class="messages">
+					Messages
+				</div>
       </div>
     </div>  
 </div>

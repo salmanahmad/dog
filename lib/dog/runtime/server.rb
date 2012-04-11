@@ -384,7 +384,9 @@ module Dog
           
           person = Person.find_by_id(session[:current_user])
           success = person.write_profile(@event.value)
+          person.save if success
           @event.success = success
+          
           
           notify_handlers
           process_outgoing_event
@@ -397,6 +399,7 @@ module Dog
           
           person = Person.find_by_id(session[:current_user])
           success = person.update_profile(@event.value)
+          person.save if success
           @event.success = success
           
           notify_handlers
@@ -410,6 +413,7 @@ module Dog
           
           person = Person.find_by_id(session[:current_user])
           success = person.push_profile(@event.value)
+          person.save if success
           @event.success = success
           
           notify_handlers
@@ -423,6 +427,7 @@ module Dog
           
           person = Person.find_by_id(session[:current_user])
           success = person.pull_profile(@event.value)
+          person.save if success
           @event.success = success
           
           notify_handlers

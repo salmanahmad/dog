@@ -26,6 +26,11 @@ Dog.bark! do
     property "teachables", :type => Array, :direction => "input"
   end
   
+  class FindTeacher < Dog::Event
+    property "teachable", :type => String, :direction => "input"
+    property "teachers", :direction => "output"
+  end
+  
   class CreateAccountHandler < Dog::Handler
     def run
       variable = Dog::Variable.named("account_create")

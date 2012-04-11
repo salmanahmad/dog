@@ -154,6 +154,8 @@ module Dog
       leave_community(Community.find_by_name(community_name))
     end
     
+     # TODO - Clean up all of these update methods...
+    
     def update_profile(properties = {})
       # TODO - Validate profile information with community type definitions
       old_profile = self.profile
@@ -161,7 +163,7 @@ module Dog
       begin
         for key, value in properties do
           community = Community.find_by_name(key)
-          self.update_profile_for_community(community, value)
+          self.update_profile_for_community(community, value) if community
         end
       rescue => exception
         self.profile = old_profile
@@ -173,6 +175,8 @@ module Dog
       self.profile ||= {}
       self.profile[community.name] ||= {}
       
+      puts "Udpating Profile with: #{properties}"
+      
       old_profile = self.profile[community.name]
       
       for key, value in properties do
@@ -182,7 +186,10 @@ module Dog
         type = property["type"]
         
         if type then
-          self.profile[community.name][key] = Structure.convert_value_to_type(value, type)
+          converted_value = Structure.convert_value_to_type(value, type)
+          if !converted_value.nil? || value.nil? then
+            self.profile[community.name][key] = converted_value
+          end
         else
           self.profile[community.name][key] = value
         end
@@ -196,7 +203,7 @@ module Dog
       begin
         for key, value in properties do
           community = Community.find_by_name(key)
-          self.write_profile_for_community(community, value)
+          self.write_profile_for_community(community, value) if community
         end
       rescue => exception
         self.profile = old_profile
@@ -218,7 +225,10 @@ module Dog
         type = property["type"]
         
         if type then
-          self.profile[community.name][key] = Properties.convert_value_to_type(value, type)
+          converted_value = Structure.convert_value_to_type(value, type)
+          if !converted_value.nil? || value.nil? then
+            self.profile[community.name][key] = converted_value
+          end
         else
           self.profile[community.name][key] = value
         end
@@ -232,7 +242,7 @@ module Dog
       begin
         for key, value in properties do
           community = Community.find_by_name(key)
-          self.push_profile_for_community(community, value)
+          self.push_profile_for_community(community, value) if community
         end
       rescue => exception
         self.profile = old_profile
@@ -266,7 +276,7 @@ module Dog
       begin
         for key, value in properties do
           community = Community.find_by_name(key)
-          self.pull_profile_for_community(community, value)
+          self.pull_profile_for_community(community, value) if community
         end
       rescue => exception
         self.profile = old_profile
