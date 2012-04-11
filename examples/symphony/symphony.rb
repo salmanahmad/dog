@@ -219,6 +219,7 @@ class Symphony < Sinatra::Base
       
       users = User.all
       for user in users do
+        user.profile ||= {}
         unless user.profile["unsubscribe"] then
           results << user
         end
