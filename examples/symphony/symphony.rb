@@ -230,7 +230,7 @@ class Symphony < Sinatra::Base
       for user in users do
         user.profile ||= {}
         unless user.profile["unsubscribe"] then
-          if params[:torontonian] then
+          if params["torontonian"] then
             next unless user.profile["torontonian"] == 1
           end
           
