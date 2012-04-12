@@ -221,19 +221,20 @@ class Symphony < Sinatra::Base
       for user in users do
         user.profile ||= {}
         unless user.profile["unsubscribe"] then
-          results << user
+          results << user.email
         end
       end
       
-      return jsonp {
+      
+      return jsonp({
         success:true,
         results: results
-      }
+      })
     else
-      return jsonp {
+      return jsonp({
         success:false,
         errors: ["You are not an administrator."]
-      }
+      })
     end
     
   end
