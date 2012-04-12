@@ -51,6 +51,15 @@ DB.create_table? :journey_three do
   index :user_id
 end
 
+DB.create_table? :journey_four do
+  primary_key :id
+  foreign_key :user_id
+  string :audio_filename
+  string :audio_url
+  
+  index :user_id
+end
+
 DB.create_table? :password_recovery_requests do
   primary_key :id
   foreign_key :user_id
@@ -217,11 +226,24 @@ class Symphony < Sinatra::Base
     if admins.include? user.email then
       results = []
       
-      users = User.all
+      users = []
+      if params[:torontonian]
+        users = User.filter(torontonian:true).all
+      else
+        users = User.all
+      end
+      
       for user in users do
         user.profile ||= {}
         unless user.profile["unsubscribe"] then
-          results << user.email
+          results << ({
+            email:user.email,
+            first_name:user.first_name,
+            last_name:user.last_name,
+            profile: {
+              torontonian:user.torontonian
+            }
+          })
         end
       end
       
@@ -469,6 +491,31 @@ EOD
       redirect params['redirect_to']
     end
   end
+  
+  post '/my/journeys/four/save' do
+    verify_current_user
+    user = current_user
+    
+    unless user
+      return "You have to be logged in to perform this action."
+    else
+      journey = JourneyFour.find_or_create(:user_id => user.id)
+      journey.audio_filename = params["audio"][:filename]
+      journey.audio_url = params["audio_url"]
+      journey.save
+      
+      directory = File.join(File.dirname(__FILE__), "public", "journeys", "4")
+      audio_name = File.join(directory, "audio", "#{journey.id}_#{journey.audio_filename}")
+      
+      File.delete(audio_name) if File.exists?(audio_name)
+      
+      File.open(audio_name, "w") do |f|
+        f.write(params['audio'][:tempfile].read)
+      end
+      
+      redirect params['redirect_to']
+    end
+  end
 
   get '/my/journeys/one' do
     return jsonp(not_logged_in) if not_logged_in
@@ -507,6 +554,25 @@ EOD
       }
     })
   end
+  
+  get '/my/journeys/four' do
+    return jsonp(not_logged_in) if not_logged_in
+    user = current_user
+    
+    journey = JourneyFour.find_or_create(:user_id => user.id)
+    
+    audio = nil
+    
+    audio = "http://#{request.host_with_port}/journeys/4/audio/#{journey.id}_#{journey.audio_filename}" if journey.audio_filename
+    
+    jsonp({
+      success:true, 
+      journey_four:{ 
+        audio_url: journey.audio_url,
+        audio: audio
+      }
+    })
+  end
 
   get '/journeys/one/all' do
     return "#{params[:callback]}(#{JourneyOne.to_json})"
@@ -524,6 +590,19 @@ EOD
         story: journey.story,
         audio: "http://#{request.host_with_port}/journeys/3/audio/#{journey.id}_#{journey.audio_filename}",
         picture: "http://#{request.host_with_port}/journeys/3/picture/#{journey.id}_#{journey.picture_filename}"
+      }
+    end
+    
+    return "#{params[:callback]}(#{output.to_json})"
+  end
+  
+  get '/journeys/four/all' do
+    output = []
+    journeys = JourneyFour.all
+    for journey in journeys do
+      output << {
+        audio_url: journey.audio_url,
+        audio: "http://#{request.host_with_port}/journeys/4/audio/#{journey.id}_#{journey.audio_filename}"
       }
     end
     
