@@ -226,23 +226,19 @@ class Symphony < Sinatra::Base
     if admins.include? user.email then
       results = []
       
-      users = []
-      if params[:torontonian]
-        users = User.filter(torontonian:true).all
-      else
-        users = User.all
-      end
-      
+      users = User.all
       for user in users do
         user.profile ||= {}
         unless user.profile["unsubscribe"] then
+          if params[:torontonian] then
+            next unless user.profile["torontonian"] == 1
+          end
+          
           results << ({
             email:user.email,
             first_name:user.first_name,
             last_name:user.last_name,
-            profile: {
-              torontonian:user.torontonian
-            }
+            profile: user.profile
           })
         end
       end
