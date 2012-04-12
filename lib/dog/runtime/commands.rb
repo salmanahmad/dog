@@ -8,6 +8,15 @@
 #
 
 module Dog
+  
+  def self.wait(variable = nil)
+    if variable then
+      # TODO - Do something with waiting on a variable
+    end
+    
+    Fiber.yield
+  end
+  
   def self.reply(data)
     fiber = Fiber.current.context[:reply_fiber]
     
@@ -16,7 +25,7 @@ module Dog
     end
   end
   
-  def self.ask(users, task)
+  def self.ask(users, task, options = {})
     users = People.from_list(users) if users.kind_of?(Array)
     
     if task.kind_of? Task then
@@ -29,6 +38,9 @@ module Dog
       routed_task.type = task.class
       routed_task.value = task.to_hash
       routed_task.routing = users
+      routed_task.replication = options[:replication]
+      routed_task.duplication = options[:duplication]
+      
       routed_task.save
       
       return routed_task

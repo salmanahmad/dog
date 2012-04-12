@@ -40,11 +40,29 @@ Dog.bark! do
     property "person", :type => String, :direction => "input"
   end
   
+  class Talk < Dog::Task
+    property "message", :type => String, :direction => "output"
+  end
+  
+  class OnConversationMesage < Dog::Handler
+    def run
+      puts "On Conversation Message!"
+    end
+  end
+  
   class Conversation < Dog::Workflow
     people "conversants"
     
     def run
-      puts "Hello, Here!"
+      conversants = Dog::Variable.named("conversants")
+      
+      messages = Dog::Variable.named("messages")
+      
+      messages.value = Dog::ask(conversants.value, Talk.new(), {:replication => -1, :duplication => -1})
+      messages.listen(OnConversationMesage.new("message"))
+      messages.save
+      
+      Dog::wait
     end
   end
   
@@ -79,6 +97,8 @@ Dog.bark! do
       requestee = Dog::Person.find_by_id(request.value.person)
       
       Dog::ask([requester, requestee], Conversation.new())
+      
+      puts "Meeting Conversation Handler"
     end
   end
   
@@ -93,14 +113,12 @@ Dog.bark! do
       output = Dog::Variable.named("interests").value.first
       
       person = Dog::Person.from(output)
-      puts person
       
       person.update_profile({
         "learners" => output
       })
       person.save
       
-      puts "Here I am ! #{output}"
     end    
   end
   

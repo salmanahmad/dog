@@ -59,7 +59,8 @@ module Dog
       response ||= {}
       self.responses ||= []
       
-      if self.responses.count >= self.replication then
+      # TODO - Handle Duplication
+      if self.responses.count >= self.replication && (self.replication != -1) then
         raise "The task has already been answered."
       end
       

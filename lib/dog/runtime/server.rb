@@ -162,6 +162,7 @@ module Dog
               track = Track.create(:parent_id => Track.root.id)
               fiber = TrackFiber.new do
                 handler.run
+                ::Dog::reply nil
               end
               
               variable = Variable.named(handler.variable_name, track)

@@ -39,7 +39,7 @@ module Dog
         track_id: self.track_id,
         person_id: self.person_id,
         task_id: self.task_id,
-        handlers: self.handlers,
+        handlers: (self.handlers || []),
         track_depth: self.track_depth,
         name: self.name,
         type: type,
@@ -68,22 +68,57 @@ module Dog
     end
     
     def self.notify_handlers_for_task(task)
-      # TODO
       
       variable = Variable.find_one({"task_id" => task._id})
-      variable.value = task.responses
-      variable.save
       
       if variable then
-        for fiber in TrackFiber.fibers do
-          if fiber.track._id == variable.track_id then
-            fiber.resume
-            return
+        variable.value = task.responses
+        variable.save
+        
+        if task.completed? then
+          for fiber in TrackFiber.fibers do
+            # TODO If the fiber is not there, what do I do? Start a new one? I need to have my start up logic to do that...
+            if fiber.track._id == variable.track_id then
+              EM.next_tick do
+                fiber.resume
+              end
+              break
+            end
+          end
+        end
+        
+        response = task.responses.last
+        for handler in variable.handlers do
+          variable_name = handler["variable_name"]
+          handler_class = Kernel.qualified_const_get(handler["type"])
+          
+          # TODO - Is this parent_id correct?
+          track = Track.create(:parent_id => variable.track_id)
+          
+          fiber = TrackFiber.new do
+            handler_class.new.run
+          end
+          
+          variable = Variable.create(variable_name, track)
+          variable.value = response
+          variable.save
+          track.fiber = fiber
+          
+          EM.next_tick do
+            track.fiber.resume
           end
         end
       end
+    end
+    
+    def listen(handler)
+      return unless handler.kind_of? Handler
       
-      # If the fiber is not there, what do I do? Start a new one? I need to have my start up logic to do that...
+      self.handlers ||= []
+      self.handlers << {
+        "type" => handler.class.name,
+        "variable_name" =>  handler.variable_name
+      }
     end
     
     def self.exists?(name, track = nil)
