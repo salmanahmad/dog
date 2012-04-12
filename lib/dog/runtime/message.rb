@@ -21,6 +21,7 @@ module Dog
     def from_hash(hash)
       object = super
       object.type = Kernel.qualified_const_get(object.type)
+      object.routing = People.from_database(object.routing || "{}")
       return object
     end
     
@@ -28,7 +29,7 @@ module Dog
       return {
         type: self.type.name,
         value: self.value,
-        routing: (self.routing || {}),
+        routing: People.to_database(self.routing || {}),
         created_at: (self.created_at || Time.now)
       }
     end

@@ -324,6 +324,64 @@ module Dog
     
     attr_accessor :community_hint
     
+    def self.to_database(object)
+      rename(object, true)
+    end
+    
+    def self.from_database(object)
+      rename(object, false)
+    end
+    
+    def self.rename(object, to_database)
+      if object.kind_of? Array then
+        object.map! do |value|
+          if value.kind_of?(Array) || value.kind_of?(Hash) then
+            rename(value, to_database)
+          else
+            value
+          end
+        end
+      elsif object.kind_of? Hash then
+        object.keys.each do |key|
+          
+          search = "$"
+          replace = "@"
+          
+          if !to_database then
+            search = "@"
+            replace = "$"
+          end
+          
+          
+          if key[0] == search then
+            old_key = key
+            
+            key = key[1..-1]
+            key = replace + key
+            
+            object[key] = object[old_key]
+            object.delete(old_key)
+          end
+          
+          value = object[key]
+          if value.kind_of?(Array) || value.kind_of?(Hash) then
+            object[key] = rename(value, to_database)
+          end
+        end
+        return object
+      end
+    end
+    
+    
+    def self.from_list(people)
+      ids = []
+      for person in people do
+        ids << person._id
+      end
+      
+      return {"_id" => {"$in" => ids}}
+    end
+    
     def self.from(community)
       people = People.new
       people.from(community)

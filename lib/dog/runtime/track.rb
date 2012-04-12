@@ -13,6 +13,9 @@ module Dog
     collection "tracks"
     
     attr_accessor :_id
+    
+    # TODO - Change ancestors to access_ancestors
+    # TODO - Add new property called control_ancestors
     attr_accessor :ancestors
     attr_accessor :checkpoint
     attr_accessor :depth

@@ -17,6 +17,8 @@ module Dog
   end
   
   def self.ask(users, task)
+    users = People.from_list(users) if users.kind_of?(Array)
+    
     if task.kind_of? Task then
       unless task.required_input_present?
         raise "Required input parameters are missing."
@@ -28,11 +30,40 @@ module Dog
       routed_task.value = task.to_hash
       routed_task.routing = users
       routed_task.save
+      
       return routed_task
+    elsif task.kind_of? Workflow then
+      unless task.required_input_present?
+        raise "Required input parameters are missing."
+        return
+      end
+      
+      routed_workflow = RoutedWorkflow.new
+      routed_workflow.type = task.class
+      routed_workflow.value = task.to_hash
+      routed_workflow.routing = users
+      routed_workflow.save
+      
+      # TODO - I need to set the control and access links correctly
+      track = Track.create(:parent_id => Track.root.id)
+        
+      fiber = TrackFiber.new do
+        task.run
+      end
+        
+      variable = Variable.create(task.class.people_variable_name, track)
+      variable.type = People
+      variable.value = users
+      variable.save
+      
+      track.fiber = fiber
+      track.fiber.resume
     end
   end
   
   def self.notify(users, message)
+    users = People.from_list(users) if users.kind_of?(Array)
+    
     if task.kind_of? Message then
       unless task.required_input_present?
         raise "Required input parameters are missing."

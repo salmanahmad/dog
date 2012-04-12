@@ -8,7 +8,7 @@
 #
 
 module Dog
-  class Workflow < DatabaseObject
+  class RoutedWorkflow < DatabaseObject
     include Routability
     collection "workflows"
     
@@ -16,16 +16,25 @@ module Dog
     attr_accessor :track_id
     attr_accessor :type
     attr_accessor :name
+    attr_accessor :value
     attr_accessor :routing
     attr_accessor :created_at
     
+    def self.from_hash(hash)
+      object = super
+      object.type = Kernel.qualified_const_get(object.type)
+      object.routing = People.from_database(object.routing || "{}")
+      return object
+    end
+    
     def to_hash
       return {
-        type: self.type,
+        type: self.type.name,
         name: self.name,
+        value: self.value,
         track_id: self.track_id,
-        routing: (self.routing || {}),
-        created_at: (self.created_at || DateTime.now)
+        routing: People.to_database(self.routing || {}),
+        created_at: (self.created_at || Time.now)
       }
     end
     
@@ -34,4 +43,17 @@ module Dog
     end
     
   end
+  
+  class Workflow < Structure
+    
+    class << self
+      attr_accessor :people_variable_name
+    end
+    
+    def self.people(name)
+      self.people_variable_name = name
+    end
+    
+  end
+  
 end

@@ -14,6 +14,10 @@ module Dog
       attr_accessor :collection_name
     end
     
+    def self.collection(name)
+      self.collection_name = name
+    end
+    
     def self.create(hash)
       object = self.from_hash(hash)
       object.save
@@ -33,10 +37,6 @@ module Dog
       object = self.new
       object.from_hash(hash)
       return object
-    end
-    
-    def self.collection(name)
-      self.collection_name = name
     end
     
     def self.find_by_id(id)

@@ -66,6 +66,20 @@
 	
 	$(function() {
 		
+		$(".btn-meet").live("click", function() {
+			var meet = $.post("/meet", {
+				person:$(this).data("person-id")
+			})
+			
+			meet.done(function() {
+				alert("done")
+			});
+			
+			meet.fail(function() {
+				alert("fail")
+			})
+		})
+		
 		$("#provide-interests .save").click(function() {
 			$("#provide-interests").modal('hide');
 		})
@@ -99,6 +113,7 @@
 			})
 
 			find_teacher.done(function(output) {
+				$("#no-found-teachers").hide();
 				if (output.teachers.length == 0) {
 					$("#no-found-teachers").show();
 				} else {
@@ -109,7 +124,7 @@
 						
 						
 						$(teacher_markup).append($('<div class="icon"><img src="' + gravatar + '" /></div>'));
-						$(teacher_markup).append($('<div class="meet"><input type="button" value="Meet" class="btn btn-success"></div>'));
+						$(teacher_markup).append($('<div class="meet"><input data-person-id="' + teacher._id + '" type="button" value="Meet" class="btn btn-success btn-meet"></div>'));
 						
 						$(teacher_markup).append($('<div class="name">' + teacher.email + '</div>'))
 						$(teacher_markup).append($('<div class="teachables"><b>Teachables: </b>' + teacher.profile.learners.teachables.join(", ") + '</div>')) 
@@ -220,7 +235,7 @@
 								
 								
 								$(teacher_markup).append($('<div class="icon"><img src="' + gravatar + '" /></div>'));
-								$(teacher_markup).append($('<div class="meet"><input type="button" value="Meet" class="btn btn-success"></div>'));
+								$(teacher_markup).append($('<div class="meet"><input data-person-id="' + teacher._id["$oid"] + '" type="button" value="Meet" class="btn btn-success btn-meet"></div>'));
 								
 								$(teacher_markup).append($('<div class="name">' + teacher.email + '</div>'))
 								$(teacher_markup).append($('<div class="teachables"><b>Teachables: </b>' + teacher.profile.learners.teachables.join(", ") + '</div>')) 

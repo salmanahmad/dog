@@ -55,7 +55,7 @@ module Dog
         ::Dog.database[Variable.collection_name].ensure_index("track_id")
         ::Dog.database[Variable.collection_name].ensure_index("track_depth")
         
-        ::Dog.database[Workflow.collection_name].ensure_index("type")        
+        ::Dog.database[RoutedWorkflow.collection_name].ensure_index("type")        
       end 
     end
   end    

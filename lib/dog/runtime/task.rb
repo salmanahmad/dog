@@ -21,6 +21,35 @@ module Dog
     attr_accessor :responses
     attr_accessor :created_at
     
+    def self.from_hash(hash)
+      object = super
+      object.type = Kernel.qualified_const_get(object.type)
+      object.routing = People.from_database(object.routing || "{}")
+      return object
+    end
+    
+    def to_hash
+      return {
+        type: self.type.name,
+        value: self.value,
+        routing: People.to_database(self.routing || {}),
+        replication: (self.replication || 1),
+        duplication: (self.duplication || 1),
+        responses: (self.responses || []),
+        created_at: (self.created_at || Time.now)
+      }
+    end
+    
+    def to_hash_for_event
+      hash = to_hash
+      hash["_id"] = self._id.to_s
+      hash.delete(:replication)
+      hash.delete(:duplication)
+      hash.delete(:responses)
+      return hash
+    end
+    
+    
     def completed?
       self.responses ||= []
       return self.responses.length >= self.replication
@@ -58,12 +87,6 @@ module Dog
       end
     end
     
-    def self.from_hash(hash)
-      object = super
-      object.type = Kernel.qualified_const_get(object.type)
-      return object
-    end
-    
     def self.for_person(person, options = {})
       # TODO - Refactor this with routability
       results = []
@@ -93,26 +116,6 @@ module Dog
       return results
     end
     
-    def to_hash
-      return {
-        type: self.type.name,
-        value: self.value,
-        routing: (self.routing || {}),
-        replication: (self.replication || 1),
-        duplication: (self.duplication || 1),
-        responses: (self.responses || []),
-        created_at: (self.created_at || Time.now)
-      }
-    end
-    
-    def to_hash_for_event
-      hash = to_hash
-      hash["_id"] = self._id.to_s
-      hash.delete(:replication)
-      hash.delete(:duplication)
-      hash.delete(:responses)
-      return hash
-    end
     
   end
   

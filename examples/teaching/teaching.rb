@@ -40,9 +40,11 @@ Dog.bark! do
     property "person", :type => String, :direction => "input"
   end
   
-  class Conversation < Dog::Handler
+  class Conversation < Dog::Workflow
+    people "conversants"
+    
     def run
-      
+      puts "Hello, Here!"
     end
   end
   
@@ -73,9 +75,10 @@ Dog.bark! do
     def run
       request = Dog::Variable.named("request")
       requester = Dog::Person.from(request)
-      requestee = Dog::Person.find_by_id(request.person)
       
-      Dog::ask([requester, requestee], Conversation.new)
+      requestee = Dog::Person.find_by_id(request.value.person)
+      
+      Dog::ask([requester, requestee], Conversation.new())
     end
   end
   
