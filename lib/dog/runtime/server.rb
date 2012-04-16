@@ -326,6 +326,7 @@ module Dog
               
               person = Person.new
               person.email = @event.email
+              person.google = @event.google
               person.password = Digest::SHA1.hexdigest @event.password
               person.join_community_named(Config.get("default_community"))
               person.save

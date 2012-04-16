@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 
+
 require File.join(File.dirname(__FILE__), "../../lib/dog.rb")
 
+Dog::Config.set("port", 4500)
 
 Dog.bark! do
   

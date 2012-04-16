@@ -6,12 +6,16 @@ body {
 header {
   padding:15px;
   margin-bottom:10px;
-  border-bottom:5px solid #08c;
+  border-bottom:5px solid #45a546;
   
 }
 
 header a {
     color:inherit;
+}
+
+a {
+	color:#45a546;
 }
 
 header a:hover {
@@ -50,7 +54,7 @@ footer #dog-powered {
   border-radius:0;
   background-color:#fff;
   border:none;
-  border-bottom:5px solid #08c;
+  border-bottom:5px solid #45a546;
 }
 
 .hero-unit h1 {
@@ -100,6 +104,24 @@ footer #dog-powered {
     line-height:200%;
 }
 
+#create-account-form, #sign-in-form {
+	padding-bottom:10px;
+	border-bottom:5px solid #45a546;
+}
 
 
+#profile form {
+	margin-top:15px;
+}
 
+#profile label, #profile input, #profile textarea {
+	font-size:18px;
+	font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-weight:200;
+	
+}
+
+
+#getting-started {
+	margin-top:15px;
+}

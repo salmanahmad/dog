@@ -2,6 +2,7 @@
 
 require File.join(File.dirname(__FILE__), "../../lib/dog.rb")
 
+Dog::Config.set("port", 4000)
 Dog::Config.set("default_community", "learners")
 
 Dog.bark! do

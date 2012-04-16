@@ -2,130 +2,126 @@
 
 require File.join(File.dirname(__FILE__), "../../lib/dog.rb")
 
-Dog::Config.set("default_community", "learners")
+Dog::Config.set("port", 5000)
+Dog::Config.set("default_community", "vark")
+
+$tasks = {}
+
+class Question
+  attr_accessor :category
+  attr_accessor :body
+  attr_accessor :state
+  attr_accessor :asker
+  
+  def categorize(q)
+    self.body = q
+    self.state = "initial"
+    
+    if self.body.index /computer/i
+      self.category = "computer"
+    elsif self.body.index /surfing/i
+      self.category = "surfing"
+    elsif self.body.index /programming/i
+      self.category = "programming"
+    elsif self.body.index /piano/i
+      self.category = "piano"
+    elsif self.body.index /boston/i
+      self.category = "boston"
+    elsif self.body.index /san fran/i
+      self.category = "san fran"
+    elsif self.body.index /chicago/i
+      self.category = "chicago"
+    end
+  end
+  
+end
 
 Dog.bark! do
   
-  Learners = Dog::Community.establish("learners") do
-    property "objective", :type => String
-    property "teachables", :type => Array
-    property "learnables", :type => Array
+  Vark = Dog::Community.establish("vark") do
+    property "location", :type => String
+    property "expertise", :type => Array
   end
+  
+  EM.next_tick do
     
-  class ProvideThreeInterests < Dog::Task
-    property "instructions", :value => "Please provide three things that you are interested in learning and teaching."
-    property "objective", :type => String, :required => true, :direction => "output"
-    property "learnables", :type => Array, :required => true, :direction => "output"
-    property "teachables", :type => Array, :required => true, :direction => "output"
-  end
-  
-  class Match < Dog::Message
-    property "body", :value => "We found a possible match for you!"
-    property "possible_match", :type => String, :direction => "input"
-    property "learnables", :type => Array, :direction => "input"
-    property "teachables", :type => Array, :direction => "input"
-  end
-  
-  class FindTeacher < Dog::Event
-    property "learnable", :type => String, :direction => "input"
-    property "teachers", :type => Array, :direction => "output"
-  end
-  
-  class MatchedTeachers < Dog::Event
-    property "teachers", :type => Array, :direction => "output"
-  end
-  
-  class MeetingConversation < Dog::Event
-    # TODO - Some sort of person type in event...
-    property "person", :type => String, :direction => "input"
-  end
-  
-  class Talk < Dog::Task
-    property "message", :type => String, :direction => "output"
-  end
-  
-  class OnConversationMesage < Dog::Handler
-    def run
-      puts "On Conversation Message!"
-    end
-  end
-  
-  class Conversation < Dog::Workflow
-    people "conversants"
+    client = ::Blather::Client.setup 'aardvark@dormou.se', 'helloworld123'
     
-    def run
-      conversants = Dog::Variable.named("conversants")
-      
-      messages = Dog::Variable.named("messages")
-      
-      messages.value = Dog::ask(conversants.value, Talk.new(), {:replication => -1, :duplication => -1})
-      messages.listen(OnConversationMesage.new("message"))
-      messages.save
-      
-      Dog::wait
+    client.register_handler(:ready) do
+      puts ">> Connected to gchat at #{client.jid.stripped}"
     end
-  end
-  
-  class FindTeacherHandler < Dog::Handler
-    def run
-      request = Dog::Variable.named("request")
-      teachers = Dog::Person.find(Dog::People.from("learners").where("teachables" => request.value.learnable)).to_a
-      Dog::reply("teachers" => teachers)
+    
+    client.register_handler :subscription, :request? do |s|
+      client.write s.approve!
     end
-  end
-  
-  class MatchedTeachersHandler < Dog::Handler
-    def run
-      request = Dog::Variable.named("request")
-      person = Dog::Person.from(request)
+    
+    client.register_handler :message, :chat?, :body do |m|
+      handle = m.from.to_s
+      handle = handle.split("/").first
       
-      person.profile["learners"]["learnables"] ||= []
-      teachers = Dog::Person.find(Dog::People.from("learners").where("teachables" => {"$in" => person.profile["learners"]["learnables"]})).to_a
-      teachers.map! do |teacher|
-        teacher = Dog::Person.from_hash(teacher)
-        teacher.to_hash_for_event
+      user = Dog::Person.find_by_google(handle.to_s)
+      if user then
+        tasks = $tasks[user.id]
+        tasks ||= []
+        task = tasks.first
+        
+        if task then
+          if task.state == "initial" then
+            task.state = "pending"
+            if m.body == "yes" then
+              message = "Great, here it is:"
+              client.write Blather::Stanza::Message.new(handle, message)
+              client.write Blather::Stanza::Message.new(handle, task.body)
+            else
+              message = "Okay, no problem!"
+              client.write Blather::Stanza::Message.new(handle, message)
+            
+              message = "Sorry! I could not find anyone right now. Please try again."
+              client.write Blather::Stanza::Message.new(task.asker, message)
+              $tasks[user.id] = nil
+            end
+          else
+            
+            
+            client.write Blather::Stanza::Message.new(handle, "Thanks so much. I'll send that along.")
+            client.write Blather::Stanza::Message.new(task.asker, "I got an answer for you from *#{handle}*.")
+            client.write Blather::Stanza::Message.new(task.asker, m.body)
+            
+            $tasks[user.id] = nil
+          end
+        else
+          message = "Hey! I'll try to find someone who can answer that for you."
+          client.write Blather::Stanza::Message.new(handle, message)
+          
+          question = Question.new
+          question.categorize(m.body)
+          question.asker = handle
+          
+          people = Dog::Person.find(Dog::People.from("vark").where({"expertise" => question.category})).to_a
+          
+          if people.empty? then
+            message = "Sorry! I could not find anyone right now. Please try again."
+            client.write Blather::Stanza::Message.new(handle, message)
+          else
+            person = people.first
+            $tasks[person["_id"]] = [question]
+            
+            message = "Hi! I have a question for you about *#{question.category}*. Do you have time to answer it?"
+            client.write Blather::Stanza::Message.new(person["google"], message)
+          end
+          
+        end
+      else
+        client.write Blather::Stanza::Message.new(handle, "Hi! This is Dog!")
+        client.write Blather::Stanza::Message.new(handle, "I see that you are not registered. Please go to http://saahmad.media.mit.edu:5000/ to register for Aardvark.")
       end
-      Dog::reply("teachers" => teachers)
+      
     end
+    
+    client.connect
+    
   end
-  
-  class MeetingConversationHandler < Dog::Handler
-    def run
-      request = Dog::Variable.named("request")
-      requester = Dog::Person.from(request)
-      
-      requestee = Dog::Person.find_by_id(request.value.person)
-      
-      Dog::ask([requester, requestee], Conversation.new())
-      
-      puts "Meeting Conversation Handler"
-    end
-  end
-  
-  class CreateAccountHandler < Dog::Handler
-    def run
-      variable = Dog::Variable.named("account_create")
-      interests = Dog::Variable.named("interests")
-      
-      interests.value = Dog::ask(Dog::People.where("_id" => variable.person_id), ProvideThreeInterests.new)
-      interests.save
-      
-      output = Dog::Variable.named("interests").value.first
-      
-      person = Dog::Person.from(output)
-      
-      person.update_profile({
-        "learners" => output
-      })
-      person.save
-      
-    end    
-  end
-  
-  Dog::Server.listen(:event => Dog::SystemEvents::Account::Create, :handler => CreateAccountHandler.new("account_create"))
-  Dog::Server.listen(:event => FindTeacher, :at => "find_teacher", :eligibility => Dog::People, :handler => FindTeacherHandler.new("request"))
-  Dog::Server.listen(:event => MatchedTeachers, :at => "matched_teachers", :eligibility => Dog::People, :handler => MatchedTeachersHandler.new("request"))
-  Dog::Server.listen(:event => MeetingConversation, :at => "meet", :eligibility => Dog::People, :handler => MeetingConversationHandler.new("request"))
+
   
 end
 
