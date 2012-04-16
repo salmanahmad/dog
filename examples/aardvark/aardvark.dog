@@ -1,4 +1,8 @@
+#!/usr/bin/env dog
 
+# ===================
+# = Data Structures =
+# ===================
 
 CONFIG default_community = "vark"
 
@@ -7,12 +11,62 @@ vark = community {
   array expertise
 }
 
+# ===================
+# = Human Functions =
+# ===================
+
+indicate_willingness = task {
+  string input instructions
+  string output response
+}
+
+answer_question = task {
+  string input instructions
+  string output response
+}
+
 questions = event {
   input string body
 }
 
+# ========
+# = Main =
+# ========
+
 LISTEN TO vark VIA gchat FOR questions
 
 ON question DO
-  # TODO
+  asker = PERSON FROM question
+  
+  NOTIFY asker OF "Hey! I'll try to find someone who can answer that for you."
+  
+  category = COMPUTE classify ON question.body
+  ranked_users = COMPUTE ranking ON vark USING category = category
+  
+  answered = false
+  
+  FOR user IN ranked_users DO
+    response = ASK user VIA gchat TO indicate_willingness USING instructions = "Hi! I have a question for you about *{category}*. Do you have time to answer it?"
+    potential_answerer = PERSON FROM response
+    IF response == "yes"
+      NOTIFY potential_answerer VIA gchat OF "Great, here it is:"
+      response = ASK potential_answerer VIA gchat TO answer_question USING instructions = question
+      
+      WAIT ON response
+      
+      answered = true
+      NOTIFY potential_answerer VIA gchat OF "Thanks so much. I'll send that along."
+      NOTIFY asker VIA gchat OF "I got an answer for you from *#{potential_answerer}*."
+      NOTIFY asker VIA gchat OF response
+    ELSE
+      NOTIFY potential_answerer VIA gchat OF "Okay, no problem!"
+      
+    END
+  UNTIL answered
+  
+  IF !answered THEN
+    NOTIFY asker VIA gchat OF "Sorry! I could not find anyone right now. Please try again."
+  END
+  
 END
+

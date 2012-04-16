@@ -369,9 +369,10 @@ module Dog
         end
         
         get_or_post prefix + 'profile.view' do
+          return unless verify_current_user("You have to be logged in to view your profile.")
+          
           @event = process_incoming_event(::Dog::SystemEvents::Profile::View) rescue return
           
-          return unless verify_current_user("You have to be logged in to view your profile.")
           
           person = Person.find_by_id(session[:current_user])
           @event.value = person.to_hash_for_event
