@@ -1,0 +1,136 @@
+
+# =================
+# = Configuration =
+# =================
+
+CONFIG default_community = "answerers"
+
+
+
+# ===================
+# = Data Structures =
+# ===================
+
+answerers = community {
+  string gender
+  array expertise
+}
+
+questions = []
+
+
+
+# ========
+# = Main =
+# ========
+
+question_submissions = event {
+  input string title
+  input string body
+  input array tags
+  output string id
+}
+
+LISTEN TO answerers FOR question_submissions
+
+ON question_submission DO
+  question = question_submission
+  question.asker = PERSON FROM question_submission
+  question.responses = []
+  question.answered = false
+  
+  COMPUTE insert ON questions, question
+  
+  REPLY TO PERSON FROM question_submission WITH "id" = question.id
+END
+
+
+
+
+
+
+question_responses = event {
+  input string question_id
+  input string body
+}
+
+LISTEN TO answerers FOR question_responses
+
+ON question_response DO
+  response = question_response
+  response.responder = PERSON FROM question_response
+  response.votes = 0
+  response.correct = false
+  
+  question = questions["id" == question_response.question_id]
+  COMPUTE push ON question.responses, response
+  
+  COMPUTE update ON questions, question
+END
+
+
+
+
+
+
+response_upvotes = event {
+  input string question_id
+  input number response_index
+}
+
+LISTEN TO answerers FOR response_upvotes
+
+ON response_upvote DO
+  question = questions["id" == response_upvote.question_id][0]
+  question.responses[response_upvote.response_index].votes += 1
+END
+
+
+
+
+
+
+response_correct_indicators = event {
+  input string question_id
+  input number response_index
+}
+
+LISTEN TO answerers FOR response_correct_indicators
+
+ON response_correct_indicator DO
+  question = questions["id" == response_correct_indicator.question_id][0]
+  question.responses[response_upvote.response_index].votes += 1
+END
+
+
+
+
+
+
+question_search_requests = event {
+  input string query
+  output array questions
+}
+
+LISTEN TO PUBLIC FOR question_search_requests
+
+ON question_search_requests DO
+  results = questions["title" CONTAINS question_view_request.query OR "body" CONTAINS question_view_request.query]
+  REPLY TO PERSON FROM question_search_requests WITH "questions" = results
+END
+
+
+
+
+
+
+question_view_requests = event {
+  input string question_id
+  output hash question
+}
+
+LISTEN TO PUBLIC FOR question_view_requests
+
+ON question_view_request DO
+  REPLY TO PERSON FROM question_view_request WITH "question" = questions["id" == question_view_request.question_id][0]
+END

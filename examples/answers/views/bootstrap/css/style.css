@@ -1,0 +1,192 @@
+body {
+  margin-top:0px;
+  background-color:#eee;
+}
+
+h3 {
+	margin-bottom:10px;
+}
+
+header {
+  padding:15px;
+  margin-bottom:10px;
+  border-bottom:5px solid #E00C23;
+  
+}
+
+header a {
+    color:inherit;
+}
+
+header a:hover {
+    color:inherit;
+    text-decoration: none;
+}
+
+header h1 {
+  font-family: 'Sansita One', cursive;
+  font-weight:normal;
+  
+}
+
+footer {
+  padding:25px 50px;
+  margin:-50px;
+  margin-top:30px;
+  background-color:#eee;
+}
+
+footer ul {
+  margin:0px;
+  padding:0px;
+}
+
+footer ul li {
+  display:inline;
+  margin-right:15px;
+}
+
+footer #dog-powered {
+  float:right;
+}
+
+.hero-unit {
+  border-radius:0;
+  background-color:#fff;
+  border:none;
+  border-bottom:5px solid #E00C23;
+}
+
+.hero-unit h1 {
+  font-size:40px;
+}
+
+.container {
+  background-color:white;
+  padding:50px;
+  box-shadow:0px 0px 10px #555;
+}
+
+#create-account-form {
+  display:none;
+}
+
+#sign-in-form {
+  display:none;
+}
+
+.profile-box {
+    /*
+    border-radius:5px;
+    background-color:#eee;
+    */
+    margin-bottom:20px;
+      border-bottom:5px solid #E00C23;
+}
+
+.profile-box > div > * {
+    margin:25px;
+}
+
+.profile-box .image {
+    padding:20px;
+    border:1px solid #ccc;
+    background-color:white;
+}
+
+.profile-box img {
+    width:100%;
+}
+
+
+.sidebar li {
+    font-size:15px;
+    line-height:200%;
+}
+
+#create-account-form, #sign-in-form {
+	padding-bottom:10px;
+	border-bottom:5px solid #E00C23;
+}
+
+.navigation a {
+	color: #E00C23;
+	font-weight:bold;
+}
+
+.ask {
+	margin-top:35px;
+}
+
+.ask input {
+	font-size:25px;
+	padding:15px;
+}
+
+.ask input[type=text] {
+	width:70%;
+}
+
+.sign-in-status {
+	display:none;
+}
+
+.sign-in-buttons {
+	display:none;
+}
+
+#ask-question {
+	display:none;
+}
+
+#questions {
+	display:none;
+}
+
+#ask-question form {
+	margin:auto;
+	width:75%;
+}
+
+#view-question form {
+	margin:auto;
+	width:75%;
+}
+
+#view-question form textarea {
+	width:100%;
+	height:150px;
+}
+
+
+#ask-question form input[type=text] {
+	width:100%;
+}
+
+#ask-question form textarea {
+	margin:auto;
+	width:100%;
+	height:150px;
+}
+
+.question {
+	border:1px solid #ccc;
+	margin:10px 0px;
+	padding:10px;
+}
+
+#view-question {
+	display:none;
+}
+
+.responses {
+	margin-top:15px;
+}
+
+.response {
+	border:1px solid #ccc;
+	margin:10px 0px;
+	padding:10px;
+}
+
+

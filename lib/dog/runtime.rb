@@ -18,6 +18,8 @@ require 'uuid'
 require 'json'
 require 'mongo'
 
+require 'blather/client/client'
+
 require File.join(File.dirname(__FILE__), 'runtime/database_object.rb')
 require File.join(File.dirname(__FILE__), 'runtime/routability.rb')
 require File.join(File.dirname(__FILE__), 'runtime/structure.rb')
@@ -62,9 +64,36 @@ module Dog
       # TODO - This is here for testing
       Server.global_track = track
       Server.boot
+      
+      EM.next_tick do
 
+        client = ::Blather::Client.setup 'aardvark@dormou.se', 'helloworld123'
+        
+        client.register_handler(:ready) do
+          puts ">> Connected to gchat at #{client.jid.stripped}"
+        end
+
+        client.register_handler :subscription, :request? do |s|
+          client.write s.approve!
+        end
+
+        client.register_handler :message, :chat?, :body => 'exit' do |m|
+          client.write Blather::Stanza::Message.new(m.from, 'Exiting...')
+          client.close
+        end
+
+        client.register_handler :message, :chat?, :body do |m|
+          client.write Blather::Stanza::Message.new(m.from, "You sent: #{m.body}")
+        end
+        
+        client.connect
+      end
+      
       # TODO - Are there times where you don't want to run the server?
       Server.run if run
+      
+      
+      
     end
 
     # TODO - This is here for testing

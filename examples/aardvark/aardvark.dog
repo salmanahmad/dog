@@ -1,0 +1,18 @@
+
+
+CONFIG default_community = "vark"
+
+vark = community {
+  string location
+  array expertise
+}
+
+questions = event {
+  input string body
+}
+
+LISTEN TO vark VIA gchat FOR questions
+
+ON question DO
+  # TODO
+END

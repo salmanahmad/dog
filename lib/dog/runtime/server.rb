@@ -124,11 +124,12 @@ module Dog
       event = options[:event]
       location = options[:at]
       
+      
       if event.ancestors.include? ::Dog::SystemEvents::SystemEvent then
         location = Config.get('dog_prefix') + event.identifier
         @@handlers[location] ||= []
         @@handlers[location].push(handler)
-      elsif
+      else
         # TODO - Validate that the location is not part of the prefix
         if location[0] != '/' then
           location = '/' + location   
@@ -490,7 +491,7 @@ module Dog
           
           # TODO Task options
           current_user = Person.find_by_id(session[:current_user])
-          @event.tasks = RoutedTask.for_person(current_user, {:completed => @event.completed, :after_task_id => @event.after_task_id})
+          @event.tasks = RoutedTask.for_person(current_user, {:completed => @event.completed, :after_task_id => @event.after_task_id, :type => @event.type})
           @event.success = true
           
           notify_handlers

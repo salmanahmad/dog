@@ -1,0 +1,215 @@
+<%= layout "/layout.html" %>
+
+<script type="text/javascript" charset="utf-8">
+	
+	
+	function viewQuestion(id) {
+		var question = $.get("/Questions", {
+			"id":id
+		});
+		
+		question.done(function(question) {
+			$(".tab-content").hide()
+			$("#view-question").show()
+			
+			$("#view-question").data("question_id", question["_id"]["$oid"])
+			$("#view-question .title").html(question.title)
+			$("#view-question .body").html(question.body)
+			$("#view-question .responses").html("");
+			
+			$.each(question.responses, function(index, value) {
+				$("#view-question .responses").append('<div class="response">' + value + '</div>')
+			})
+			
+		})
+
+	}
+	
+	$(function() {
+		
+		$("#view-question .back").click(function() {
+			$(".tab-content").show()
+			$("#view-question").hide()
+			return false
+		})
+		
+		$("#view-question form").submit(function() {
+			
+			var form = $(this)
+			var body = $(form).find("textarea").val()
+			var question_id = $("#view-question").data("question_id")
+			
+			var request = $.post("/QuestionResponses", {
+				"question_id":question_id,
+				"body":body
+			})
+			
+			request.done(function() {
+				$(form)[0].reset();
+				$("#view-question .responses").append('<div class="response">' + body + '</div>')
+			});
+			
+			return false;
+		})
+		
+		$(".question a").live('click', function() {
+			viewQuestion($(this).data("question_id"))
+		})
+		
+		$("form.ask").submit(function() {
+			
+			var data = $(this).serialize()
+			var search = $.get("/QuestionSearchRequests", data)
+			
+			search.done(function(results) {
+				
+				$("#questions").show()
+				
+				if (results.length > 0) {
+					
+					$("#questions .found").show();
+					$("#questions .not-found").hide();
+					
+					$("#questions .list").html("")
+					$.each(results, function(index, value) {
+						var question = $('<div class="question"></div>')
+						$(question).append('<h3><a href="#" data-question_id=' + value._id["$oid"] + '>' + value.title + '</a></h3>')
+						$(question).append('<p>' + value.body + '</p>')
+						$("#questions .list").append(question);
+					})
+				} else {
+					$("#questions .found").hide();
+					$("#questions .not-found").show();
+				}
+				
+				$("#ask-question").show();
+				$("#ask-question #title").val($("form.ask #query").val());
+			}) 
+			
+			return false;
+		})
+		
+		$("#ask-question form").submit(function() {
+			
+			var request = $.post("/QuestionSubmissions", $(this).serialize())
+			
+			request.done(function(question) {
+				console.log(question)
+				viewQuestion(question["id"])
+			})
+			
+			return false;
+		})
+		
+		$("#answer-button").click(function() {
+			var search = $.get("/QuestionSearchRequests", {})
+			
+			search.done(function(results) {
+				$("#browse-questions").show()
+				
+				if (results.length > 0) {
+					$("#browse-questions .found").show();
+					$("#browse-questions .not-found").hide();
+					
+					$("#browse-questions .list").html("")
+					$.each(results, function(index, value) {
+						var question = $('<div class="question"></div>')
+						$(question).append('<h3><a href="#" data-question_id=' + value._id["$oid"] + '>' + value.title + '</a></h3>')
+						$(question).append('<p>' + value.body + '</p>')
+						$("#browse-questions .list").append(question);
+					})
+				} else {
+					$("#browse-questions .found").hide();
+					$("#browse-questions .not-found").show();
+				}
+				
+			});
+			
+		})
+	})
+</script>
+
+<div class="tabbable">
+	<ul class="nav nav-tabs navigation">
+	  <li class="active">
+	    <a href="#ask" data-toggle="tab">Ask / Search for Questions</a>
+	  </li>
+	  <li>
+	    <a href="#answer"id="answer-button" data-toggle="tab">Answer / Browse Questions</a>
+	  </li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active" id="ask">
+			<form action="" method="get" class="form-inline ask" accept-charset="utf-8">
+				<center>
+					<input type="text" name="query" id="query" value="" placeholder="ask / search for questions">
+					<input type="submit" class="btn btn-danger" value="Go &rarr;">
+				</center>
+			</form>
+		
+			<div id="questions" class="well">
+				<h2 class="found">Questions that may be relevant...</h2>
+				<h2 class="not-found">Could not find any relevant questions...</h2>
+				<div class="list">
+				
+				</div>
+			</div>
+			
+			<div id="ask-question" class="well">
+				<h2>Can't find your answer? Ask here...</h2>
+					<br>
+					<form action="" method="get" accept-charset="utf-8">
+					
+						<p>
+							<input type="text" name="title" value="" placeholder="Title" id="title">
+						</p>
+					
+						<p>
+							<textarea name="body" id="body" placeholder="Body"></textarea>
+						</p>
+						<p><input type="submit" class="btn-danger" value="Ask Question"></p>
+					</form>
+					<div class="sign-in-notice">
+						You must sign in to ask a question.
+					</div>
+			</div>
+		
+		</div>
+		<div class="tab-pane" id="answer">
+			<div id="browse-questions" class="well">
+				<h2 class="found">Questions...</h2>
+				<h2 class="not-found">Could not find any questions...</h2>
+				<div class="list">
+				
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="view-question" data-question_id="">
+		<a href="#" class="pull-right back btn btn-danger">&laquo; Back</a>
+		<h2 class="title"></h2>
+		<p class="body"></p>
+		
+		<div class="well">
+			<h3>Responses...</h3>
+			<div class="responses">
+				
+			</div>
+			<h3>Add a response...</h3>
+			<form action="" method="get" accept-charset="utf-8">
+				<textarea placeholder="Your response..." name="body"></textarea>
+				<p><input type="submit" class="btn-danger" value="Post Response"></p>
+			</form>
+			<div class="sign-in-notice">
+				You must sign in to respond to a question.
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+
+
+
+
+ 
