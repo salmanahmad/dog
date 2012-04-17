@@ -103,8 +103,6 @@ Dog.bark! do
           
           people = Dog::Person.find(Dog::People.from("vark").where({"expertise" => question.category})).to_a
           
-          puts people.inspect
-          
           if people.empty? then
             message = "Sorry! I could not find anyone right now. Please try again."
             client.write Blather::Stanza::Message.new(handle, message)
