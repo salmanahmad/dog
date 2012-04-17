@@ -70,7 +70,9 @@ Dog.bark! do
         if task then
           if task.state == "initial" then
             task.state = "pending"
-            if m.body == "yes" then
+            body = m.body
+            body ||= ""
+            if body.index /yes/i then
               message = "Great, here it is:"
               client.write Blather::Stanza::Message.new(handle, message)
               client.write Blather::Stanza::Message.new(handle, task.body)
@@ -100,6 +102,8 @@ Dog.bark! do
           question.asker = handle
           
           people = Dog::Person.find(Dog::People.from("vark").where({"expertise" => question.category})).to_a
+          
+          puts people.inspect
           
           if people.empty? then
             message = "Sorry! I could not find anyone right now. Please try again."
