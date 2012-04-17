@@ -31,6 +31,8 @@ class Question
       self.category = "san fran"
     elsif self.body.index /chicago/i
       self.category = "chicago"
+    elsif self.body.index /cqa/i
+      self.category = "cqa"
     end
   end
   

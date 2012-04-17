@@ -5,7 +5,6 @@
 # ===================
 
 IMPORT FUNCTION "classify.rb" AS classify
-IMPORT FUNCTION 
 
 CONFIG default_community = "vark"
 
