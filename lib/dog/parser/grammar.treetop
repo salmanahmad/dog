@@ -16,25 +16,45 @@ grammar Dog
   # ================
   
   rule program
-    program_statements+ <::Dog::Nodes::Program> 
+    statements <::Dog::Nodes::Program> 
     / 
     '' <::Dog::Nodes::Program>
   end
   
-  rule program_statements
-    (top_level_statement / statement / s) t <::Dog::Nodes::ProgramStatements>
-    / 
-    "\n" / comment
-  end
+	# TODO: I removed program statements because I don't need them anymore...
+
+  #rule program_statements
+  #  (top_level_statement / statement / s) t <::Dog::Nodes::ProgramStatements>
+  #  / 
+  #  "\n" / comment
+  #end
   
+	# TODO - what about ;;;;;;
+
   rule statements
     ((statement / s t) / ("\n" / comment))+ <::Dog::Nodes::Statements>
   end
   
-  rule top_level_statement
-    (import / config / reply_disallow) s? <::Dog::Nodes::TopLevelStatement>
-  end
-  
+	# TODO: I removed import, config, reply_disallow as top_level_statements. They are
+	# just normal statements now, but I can restrict their  useage in the postprocess/codegen
+	# compilation phase. 
+
+  #rule top_level_statement
+  #  (import / config / reply_disallow) s? <::Dog::Nodes::TopLevelStatement>
+  #end
+	
+	rule statement
+		s? (assignment / expression) s?
+	end
+	
+	rule assignment 
+		access s? assignment_operator s? expression
+	end
+	
+	rule expression
+		literal / access / operation / command / '(' s? expression s?')'
+	end
+	
   rule statement 
     s? (command / expression) s? <::Dog::Nodes::Statement>
   end
@@ -44,7 +64,7 @@ grammar Dog
   end
   
   rule command
-     listen / allow / notify / structure_definition / on / ask / compute / people / control_structure / function / reply / print / inspect
+     listen / allow / notify / on / ask / compute / people / control_structure / function / reply / print / inspect / import / config
   end
   
   # ===============
