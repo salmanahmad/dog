@@ -1,54 +1,55 @@
 
-
 CONFIG default_community = "learners"
 
 learners = community {
-  string objective
-  array teachables
-  array learnables
+  optional objective
+  optional teachables
+  optional learnables
 }
 
 provide_three_interests = task {
-  instructions = "Please provide three things that you are interested in learning and teaching."
-  output string objective
-  output array learnables
-  output array teachables
+  input instructions = "Please provide three things that you are interested in learning and teaching."
+  output objective
+  output learnables
+  output teachables
 }
 
 find_teacher = event {
-  input string learnable
-  output array teachers
+  input learnable
+  output teachers
 }
 
 matched_teachers = event {
-  output array teachers
+  output teachers
 }
 
 meeting_conversation = event {
-  input person person
+  input person
 }
 
-chat = task {
-  output string message
+chat = event {
+  output message
 }
 
-DEFINE FUNCTION converse FOR people DO
-  messages = ASK people TO chat REPEAT INDEFINITELY
+DEFINE converse FOR people DO
+  LISTEN TO people FOR chats
   
-  ON message IN messages DO
-    NOTIFY people OF message.message
+  # TODO: Discuss this during meeting. What happens with ON EACH
+  message = "Foobar"
+  
+  ON EACH chat DO
+    NOTIFY people OF message
   END
-  
-  WAIT FOREVER
 END
 
 LISTEN TO learners VIA http FOR find_teacher
 LISTEN TO learners VIA http FOR matched_teachers
-LISTEN TO learners VIA http AT '/meet' FOR meeting_conversation
+LISTEN TO learners VIA http FOR meeting_conversation
 
-ON request IN find_teacher DO
-  user = PERSON FROM request
-  REPLY WITH request.teachers = PEOPLE FROM learners WHERE teachables IN request.learnable
+ON EACH request IN find_teacher DO
+  # TODO: Discuss how to clear this
+  REPLY TO requester WITH request.teachers = PEOPLE FROM learners WHERE teachables IN request.learnable
+
 END
 
 ON request IN matched_teachers DO

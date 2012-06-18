@@ -20,6 +20,10 @@ module Dog
     attr_accessor :checkpoint
     attr_accessor :depth
     
+    attr_accessor :references
+    attr_accessor :variables
+    attr_accessor :status
+    
     # Volatile properties
     attr_accessor :fiber
     
@@ -45,7 +49,7 @@ module Dog
       track.depth = parent.depth + 1
       track.checkpoint = 0
       track.save
-        
+      
       return track
     end
     

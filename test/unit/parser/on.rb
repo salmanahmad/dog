@@ -31,7 +31,7 @@ class ParserTests::OnTest < Test::Unit::TestCase
   def test_in
     program = <<-EOD
     
-    ON offer IN offers DO
+    ON EACH offer IN offers DO
       PRINT 'hello, world!'
     END
     
@@ -43,7 +43,7 @@ class ParserTests::OnTest < Test::Unit::TestCase
   def test_event
     program = <<-EOD
     
-    ON dog.account.create DO
+    ON EACH dog.account.create DO
       PRINT 'hello, world!'
     END
     
@@ -53,7 +53,7 @@ class ParserTests::OnTest < Test::Unit::TestCase
     
     program = <<-EOD
     
-    ON request IN dog.account.signin DO
+    ON EACH request IN dog.account.signin DO
       PRINT 'hello, world!'
     END
     

@@ -47,6 +47,48 @@ module Dog::Application
     # Something else
   end
   
+  require "fiber"
+
+  class Fiber
+  	attr_accessor :callback
+  end
+
+
+  f = Fiber.new do
+    Fiber.current.callback.call
+  end
+
+  f.callback = lambda do
+    puts "Hi!"
+  end
+  f.resume
+  
+  foo = [ 
+    command { }
+    command { }
+    command { }
+    command { }
+    while_statement { }
+    if_statement {  }
+  ]
+  
+    
+  
+  foo = [
+    lambda { }, [1]
+    lambda { }, [2]
+    lambda { }, [3]
+    lambda { if then }, [4, 0, 0]
+    [ 
+      [
+        
+      ],
+      [
+        
+      ]
+    ]
+  ]
+  
   Track.current.checkpoint do
     # Creating a checkpoint inside of another checkpoint creates an augmented
     # checkpoint number. For example, [5, 1] instead of [6].

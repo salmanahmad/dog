@@ -32,7 +32,7 @@ grammar Dog
   end
   
   rule top_level_statement
-    (listen / allow / import / config / function / structure_definition / reply_disallow) s? <::Dog::Nodes::TopLevelStatement>
+    (import / config / reply_disallow) s? <::Dog::Nodes::TopLevelStatement>
   end
   
   rule statement 
@@ -44,7 +44,7 @@ grammar Dog
   end
   
   rule command
-     notify / on / ask / compute / people / control_structure / reply / print / inspect
+     listen / allow / notify / structure_definition / on / ask / compute / people / control_structure / function / reply / print / inspect
   end
   
   # ===============
