@@ -11,7 +11,16 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_hel
 
 class RuntimeTests::AccessTest < RuntimeTestCase
   
+  def setup
+    @parser = Dog::Parser.new
+    @parser.parser.root = :access
+  end
+  
+  
   def test_simple
+    
+    @parser.parse("foo")
+    
     # TODO
     return
     

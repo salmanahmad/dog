@@ -15,13 +15,7 @@ grammar Dog
   # = Core Program =
   # ================
   
-  rule program
-    statements <::Dog::Nodes::Program> 
-    / 
-    '' <::Dog::Nodes::Program>
-  end
-  
-	# TODO: I removed program statements because I don't need them anymore...
+  # TODO: I removed program statements because I don't need them anymore...
 
   #rule program_statements
   #  (top_level_statement / statement / s) t <::Dog::Nodes::ProgramStatements>
@@ -29,78 +23,113 @@ grammar Dog
   #  "\n" / comment
   #end
   
-	# TODO - what about ;;;;;;
+  
+  # TODO: I removed import, config, reply_disallow as top_level_statements. They are
+  # just normal statements now, but I can restrict their  useage in the postprocess/codegen
+  # compilation phase. 
+
+  #rule top_level_statement
+  #  (import / config / reply_disallow) s? <::Dog::Nodes::TopLevelStatement>
+  #end
+
+
+
+
+
+  # TODO: Add logic and code for identifying void expressions... (assignent to a return, assignment to an ask, assignment to a define, etc...)
+
+  rule program
+    statements <::Dog::Nodes::Program> 
+    / 
+    '' <::Dog::Nodes::Program>
+  end
+
+  # TODO - what about ;;;;;;
 
   rule statements
     ((statement / s t) / ("\n" / comment))+ <::Dog::Nodes::Statements>
   end
   
-	# TODO: I removed import, config, reply_disallow as top_level_statements. They are
-	# just normal statements now, but I can restrict their  useage in the postprocess/codegen
-	# compilation phase. 
-
-  #rule top_level_statement
-  #  (import / config / reply_disallow) s? <::Dog::Nodes::TopLevelStatement>
-  #end
-	
-	rule statement
-		s? (assignment / expression) s?
-	end
-	
-	rule assignment 
-		access s? assignment_operator s? expression
-	end
-	
-	rule expression
-		literal / access / operation / command / '(' s? expression s?')'
-	end
-	
-  rule statement 
-    s? (command / expression) s? <::Dog::Nodes::Statement>
+  rule statement
+    s? (assignment / expression) s?
+  end
+  
+  rule assignment 
+    access s? assignment_operator s? expression
   end
   
   rule expression
-    assignment / primary
+    command / operation / access
   end
   
   rule command
-     listen / allow / notify / on / ask / compute / people / control_structure / function / reply / print / inspect / import / config
+     import / config / listen / allow / notify / on / ask / compute / people / control_structure / definition / reply / print / inspect
   end
   
   # ===============
   # = Expressions =
   # ===============
   
-  rule assignment
-    lhs s? assignment_operator s? (ask / notify / compute / people / person) <::Dog::Nodes::Assignment>
-    / 
-    lhs s? assignment_operator s? primary <::Dog::Nodes::Assignment>
-  end
+  #rule assignment
+  #  lhs s? assignment_operator s? (ask / notify / compute / people / person) <::Dog::Nodes::Assignment>
+  #  / 
+  #  lhs s? assignment_operator s? primary <::Dog::Nodes::Assignment>
+  #end
   
-  rule primary
-    operation / access / literal / identifier / '(' s? primary s? ')' <::Dog::Nodes::Primary>
-  end
+  #rule primary
+  #  operation / access / literal / identifier / '(' s? primary s? ')' <::Dog::Nodes::Primary>
+  #end
+  
+  #rule operation
+  #  operation_first s? binary_operator s? (operation / operation_first) <::Dog::Nodes::Operation>
+  #  / 
+  #  unary_operator s? primary <::Dog::Nodes::Operation>
+  #end
+  
+  #rule operation_first
+  #  literal / access / identifier / '(' s? primary s? ')' <::Dog::Nodes::Primary>
+  #end
+  
+  #rule access
+  #  access_first access_tail <::Dog::Nodes::Access>
+  #end
+  
+  #rule access_first
+  #  literal / identifier / '(' s? primary s? ')' / '(' s? operation s? ')'
+  #end
+  
+  #rule access_tail
+  #  access_dot / access_bracket / access_possessive
+  #end
+  
+  #rule access_possessive
+  #  ('\'s' / '\'') s identifier access_tail? <::Dog::Nodes::AccessPossessive>
+  #end
+  
+  #rule lhs
+  #  (access / identifier)
+  #end
   
   rule operation
-    operation_first s? binary_operator s? (operation / operation_first) <::Dog::Nodes::Operation>
+    operation_head s? binary_operator s? (expression / operation_head) <::Dog::Nodes::Operation>
     / 
-    unary_operator s primary <::Dog::Nodes::Operation>
+    unary_operator s? expression <::Dog::Nodes::Operation>
   end
   
-  rule operation_first
-    literal / access / identifier / '(' s? primary s? ')' <::Dog::Nodes::Primary>
+  rule operation_head
+    command / access
   end
   
   rule access
-    access_first access_tail <::Dog::Nodes::Access>
+    access_head access_tail?
   end
   
-  rule access_first
-    literal / identifier / '(' s? primary s? ')' / '(' s? operation s? ')'
+  rule access_head
+    literal / identifier / '(' s? expression s? ')'
   end
   
   rule access_tail
-    access_dot / access_bracket / access_possessive
+    access_dot / access_bracket
   end
   
   rule access_dot
@@ -108,15 +137,7 @@ grammar Dog
   end
   
   rule access_bracket
-    s? '[' s? primary s? ']' s? access_tail? <::Dog::Nodes::AccessBracket>
-  end
-  
-  rule access_possessive
-    ('\'s' / '\'') s identifier access_tail? <::Dog::Nodes::AccessPossessive>
-  end
-  
-  rule lhs
-    (access / identifier)
+    '[' s? expression s? ']' access_tail? <::Dog::Nodes::AccessBracket>
   end
   
   rule identifier
@@ -151,6 +172,8 @@ grammar Dog
     union_operator / intersect_operator / difference_operator / append_operator / prepend_operator
   end
   
+  # TODO: Order of operations...
+
   rule addition_operator
     '+' <::Dog::Nodes::AdditionOperator>
   end
@@ -474,6 +497,10 @@ grammar Dog
   # TODO - Support for primaries instead of literals
   rule config
     'CONFIG' s identifier s '=' s literal <::Dog::Nodes::Config>
+  end
+  
+  rule definition
+    'define'
   end
   
   rule function

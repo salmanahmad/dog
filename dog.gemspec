@@ -31,6 +31,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency 'async_sinatra'
   s.add_dependency 'tilt'
   s.add_dependency 'uuid'
+  s.add_dependency 'rack-test'
   
   s.add_dependency 'blather'
   
