@@ -15,131 +15,12 @@ grammar Dog
   # = Core Program =
   # ================
   
-  # TODO: I removed program statements because I don't need them anymore...
-  
-  #rule program_statements
-  #  (top_level_statement / statement / s) t <::Dog::Nodes::ProgramStatements>
-  #  / 
-  #  "\n" / comment
-  #end
-  
-  
   # TODO: I removed import, config, reply_disallow as top_level_statements. They are
   # just normal statements now, but I can restrict their  useage in the postprocess/codegen
   # compilation phase. 
   
+  # TODO: Add logic for identifying illegal expression (top level reply, etc.)
   
-  #rule top_level_statement
-  #  (import / config / reply_disallow) s? <::Dog::Nodes::TopLevelStatement>
-  #end
-  
-  #rule assignment
-  #  lhs s? assignment_operator s? (ask / notify / compute / people / person) <::Dog::Nodes::Assignment>
-  #  / 
-  #  lhs s? assignment_operator s? primary <::Dog::Nodes::Assignment>
-  #end
-  
-  #rule primary
-  #  operation / access / literal / identifier / '(' s? primary s? ')' <::Dog::Nodes::Primary>
-  #end
-  
-  #rule operation
-  #  operation_first s? binary_operator s? (operation / operation_first) <::Dog::Nodes::Operation>
-  #  / 
-  #  unary_operator s? primary <::Dog::Nodes::Operation>
-  #end
-  
-  #rule operation_first
-  #  literal / access / identifier / '(' s? primary s? ')' <::Dog::Nodes::Primary>
-  #end
-  
-  #rule access
-  #  access_first access_tail <::Dog::Nodes::Access>
-  #end
-  
-  #rule access_first
-  #  literal / identifier / '(' s? primary s? ')' / '(' s? operation s? ')'
-  #end
-  
-  #rule access_tail
-  #  access_dot / access_bracket / access_possessive
-  #end
-  
-  #rule access_possessive
-  #  ('\'s' / '\'') s identifier access_tail? <::Dog::Nodes::AccessPossessive>
-  #end
-  
-  #rule lhs
-  #  (access / identifier)
-  #end
-  
-  #rule reply_disallow
-  #  reply '' <::Dog::Nodes::ReplyDisallow>
-  #end
-  
-  
-  # ==============
-  # = Structures =
-  # ==============
-  
-  #rule structure_definition
-  #  identifier s identifier s '{' sn? structure_properties? sn? '}' <::Dog::Nodes::StructureDefinition>
-  #end
-  
-  # TODO - It is so stupid that I have to do this. Figure out a better way to get PEGs to work
-  # or figure out a bettery way to "clean_tree" in the parser. This is kind of annoying...
-  
-  #rule structure_nested_definition
-  #  structure_definition sn <::Dog::Nodes::StructureNestedDefinition>
-  #end
-  
-  #rule structure_properties
-  #  (structure_nested_definition / structure_relationship_property / structure_property)+ <::Dog::Nodes::StructureProperties>
-  #end
-  
-  #rule structure_relationship_property
-  #  'relationship' s structure_property_name s? structure_relationship_property_inverse? sn <::Dog::Nodes::StructurePropertyRelationship>
-  #end
-  
-  #rule structure_relationship_property_inverse
-  #  ',' s?  (structure_relationship_property_inverse_identifier_path / identifier) <::Dog::Nodes::StructurePropertyRelationshipInverse>
-  #end
-  
-  #rule structure_relationship_property_inverse_identifier_path
-  #  identifier '.' identifier <::Dog::Nodes::StructurePropertyRelationshipPath>
-  #end
-
-  #rule structure_property
-  #  s? event_property_direction? (structure_property_type / structure_property_name) (s '=' s primary)? sn <::Dog::Nodes::StructureProperty>
-  #end
-  
-  #rule structure_property_type
-  #  identifier s identifier <::Dog::Nodes::StructurePropertyType>
-  #end
-  
-  #rule structure_property_name
-  #  identifier '' <::Dog::Nodes::StructurePropertyName>
-  #end
-  
-  #rule event_property_direction
-  #  (event_property_direction_input / event_property_direction_output) s <::Dog::Nodes::StructurePropertyDirection>
-  #end
-  
-  #rule event_property_direction_input
-  #  'input' <::Dog::Nodes::StructurePropertyDirectionInput>
-  #end
-  
-  #rule event_property_direction_output
-  #  'output' <::Dog::Nodes::StructurePropertyDirectionOutput>
-  #end
-  
-  #rule structure 
-  #  identifier s '{' sn? structure_properties? sn? '}' <::Dog::Nodes::Structure>
-  #end
-  
-
-
-
   # TODO: Add logic and code for identifying void expressions... (assignent to a return, assignment to an ask, assignment to a define, etc...)
 
   rule program
@@ -325,7 +206,6 @@ grammar Dog
   end
   
   
-  
   # ==================
   # = Listen Command = 
   # ==================
@@ -346,7 +226,6 @@ grammar Dog
   rule listen_at_clause
     s 'AT' s string <::Dog::Nodes::ListenAtClause>
   end
-  
   
   
   # =========
@@ -386,7 +265,6 @@ grammar Dog
   # ==========
   # = Notify =
   # ==========
-
   
   # TODO - Messages will never has any mandatory arguments
   
@@ -397,7 +275,6 @@ grammar Dog
   rule notify_of_clause
     s 'OF' s (string / access) <::Dog::Nodes::NotifyOfClause>
   end
-
   
   # =========
   # = Reply =
@@ -493,23 +370,19 @@ grammar Dog
   # ===============
   
   rule definition
-    'define'
+    define_variable / define_function
   end
   
-  rule function
-    'DEFINE' s identifier function_on? function_using? s? 'DO' sn statements? 'END' <::Dog::Nodes::Function>
+  rule define_variable
+    'DEFINE' s identifier s? assignment_operator s? expression
+  end
+  
+  rule define_function
+    'DEFINE' s identifier function_on? function_using? s? 'DO' sn statements? s? 'END' <::Dog::Nodes::Function>
   end
   
   rule function_on
-    s 'ON' s function_parameters <::Dog::Nodes::FunctionOn>
-  end
-  
-  rule function_parameters
-    function_parameter+ <::Dog::Nodes::FunctionParameters>
-  end
-  
-  rule function_parameter
-    s? identifier ((s? ',' &function_parameter) / ('' !function_parameter)) <::Dog::Nodes::FunctionParameter>
+    s 'ON' s identifier_list <::Dog::Nodes::FunctionOn>
   end
   
   rule function_using
@@ -521,7 +394,7 @@ grammar Dog
   end
   
   rule function_optional_parameter
-    s? identifier s? '=' s? literal s? (',' &function_optional_parameter / '' !function_optional_parameter) <::Dog::Nodes::FunctionOptionalParameter>
+    s? identifier s? '=' s? expression s? (',' &function_optional_parameter / '' !function_optional_parameter) <::Dog::Nodes::FunctionOptionalParameter>
   end
   
   
@@ -639,6 +512,8 @@ grammar Dog
     identifier ('.' &key_path / '' !key_path) <::Dog::Nodes::KeyPath>
   end
   
+  # TODO - Add newlines?
+  
   rule identifier_associations
     identifier_association+ <::Dog::Nodes::IdentifierAssociations>
   end
@@ -646,6 +521,16 @@ grammar Dog
   rule identifier_association
     sn? identifier s? ':' s? expression s? (',' &identifier_association / '' !identifier_association) <::Dog::Nodes::IdentifierAssociation>
   end
+  
+  rule identifier_list
+    identifier_list_item+
+  end
+  
+  rule identifier_list_item
+    s? identifier s? (',' &identifier_list_item / '' !identifier_list_item)
+  end
+  
+  # TODO - combine with items -- perhaps renamed to expresion_list -- add newlines?
   
   rule argument_list
     argument_list_item+
