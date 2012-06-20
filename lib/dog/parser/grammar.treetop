@@ -233,7 +233,7 @@ grammar Dog
   # =========
   
   rule allow
-    'ALLOW' s (user / access) s 'TO' s allow_modifier s (allow_profile / identifier)
+    'ALLOW' s (user / access) s 'TO' s allow_modifier s (allow_profile / identifier) <::Dog::Nodes::Allow>
   end
   
   rule allow_modifier

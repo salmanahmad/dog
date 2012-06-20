@@ -59,7 +59,7 @@ module Dog::Nodes
     end
     
   end
-  
+
   module CompileChild
     def compile(buffer)
       if self.elements.size == 1 then
@@ -116,7 +116,7 @@ module Dog::Nodes
   ###################################
   
   
-  class CollarNode< Treetop::Runtime::SyntaxNode
+  class CollarNode < Treetop::Runtime::SyntaxNode
     # TODO - Remove these???
     #include NotRunnable
     #include CompileOperationState
@@ -135,10 +135,6 @@ module Dog::Nodes
     end
   end
   
-  class ProgramStatements < CollarNode
-    include CompileChild
-  end
-  
   class Statements < CollarNode
     def compile
       states = []
@@ -150,32 +146,6 @@ module Dog::Nodes
       end
       
       return code.string
-    end
-  end
-  
-  class TopLevelStatement < CollarNode
-    include CompileChild
-    # TODO - I have to do something here. With newlines, or, something
-  end
-  
-  class Statement < CollarNode
-    include CompileChild
-    # TODO - I have to do something here
-  end
-  
-  class Primary < CollarNode
-    include CompileChild
-    # TODO - I have to do something here...for parenthesis
-  end
-  
-  class Access < CollarNode
-    def compile
-      if elements[1] then
-        # TODO - Error message if the identifier is not an array or a hash
-        return "(#{elements[0].compile})#{elements[1].compile}"
-      else
-        return elements[0].compile
-      end
     end
   end
   
@@ -194,34 +164,6 @@ module Dog::Nodes
       path = "[#{elements[0].text_value}]"
       path += "#{elements[1].compile}" if elements[1]
       return path
-    end
-  end
-  
-  class AccessPossessive < CollarNode
-    def compile
-      %s|raise "#{self.class} not implemented."|
-    end
-  end
-  
-  class Assignment < CollarNode
-    def compile
-      lhs = elements[0].compile
-      rhs = elements[2].compile
-      
-      variable = nil
-      if elements[0].class == Access 
-        variable = elements[0].elements[0].text_value
-      elsif elements[0].class == Identifier
-        variable = elements[0].text_value
-      end
-      
-      # TODO - I have to implement how Server.register works...
-      # TODO - I have to implement Variable#has_changed
-      code = ""
-      code += "#{lhs} = #{rhs}\n"
-      code += "Variable.named(#{variable}).has_changed\n"
-      code += "Server.register(#{lhs})\n" if elements[2].class == Ask
-      return code
     end
   end
   
@@ -365,92 +307,7 @@ module Dog::Nodes
     def compile
       # TODO
     end
-    
-    #def run(arg1, arg2)
-    #  arg1.include? arg2
-    #end
   end
-  
-  
-  
-  class Structure < CollarNode
-    def compile
-      
-    end
-  end
-  
-  class StructureDefinition < CollarNode
-    def compile
-      
-    end
-  end
-  
-  class StructureNestedDefinition < CollarNode
-    def compile
-      
-    end
-  end
-  
-  class StructureProperties < CollarNode
-  
-  end
-  
-  class StructureProperty < CollarNode
-    def compile
-      
-    end
-  end
-  
-  class StructurePropertyType < CollarNode
-    def compile
-      
-    end
-  end
-  
-  class StructurePropertyName < CollarNode
-    def compile
-      
-    end
-  end
-  
-  class StructurePropertyRelationship < CollarNode
-    
-  end
-  
-  class StructurePropertyRelationshipInverse < CollarNode
-    
-  end
-  
-  class StructurePropertyRelationshipPath < CollarNode
-    
-  end
-  
-  class StructurePropertyDirection < CollarNode
-    def compile
-      
-    end
-  end
-  
-  class StructurePropertyDirectionInput < CollarNode
-    def compile
-      
-    end
-  end
-  
-  class StructurePropertyDirectionOutput < CollarNode
-    def compile
-      
-    end
-  end
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   class Listen < CollarNode
     def compile
@@ -613,15 +470,6 @@ module Dog::Nodes
     end
   end
   
-  class ReplyDisallow < CollarNode
-    def compile
-      raise "Compilation error: REPLY can only exist inside of an ON block."
-    end
-  end
-  
-  
-  
-  
   class Compute < CollarNode
     def compile
       # TODO
@@ -638,33 +486,12 @@ module Dog::Nodes
     end
   end
   
-  class OnClauseItems < CollarNode
-    def run
-      
-    end
-  end
-  
-  class OnClauseItem < CollarNode
-    def run
-      
-    end
-  end
-  
   class ViaClause < CollarNode
     include CompileChildAsText
   end
   
   class InClause < CollarNode
     include CompileChild
-  end
-  
-  class InClauseIdentifiers < CollarNode
-    def compile
-      identifiers = []
-      identifiers << elements[0].text_value
-      identifiers << elements[1].text_value if elements[1]
-      return identifiers
-    end
   end
   
   class IdentifierAssociations < CollarNode
@@ -704,7 +531,7 @@ module Dog::Nodes
       
       where = nil
       where = elements[1].compile if elements[1]
-      
+    
       return "People.find_one(:from => #{from}, :where => #{where})"
     end
   end
@@ -845,15 +672,9 @@ module Dog::Nodes
     end
   end
   
-  ### Function stuff start
+  #### Function stuff start
   
   class Function < CollarNode
-  end
-  
-  class FunctionParameters < CollarNode
-  end
-  
-  class FunctionParameter < CollarNode
   end
   
   class FunctionOn < CollarNode
@@ -868,7 +689,7 @@ module Dog::Nodes
   class FunctionOptionalParameter < CollarNode
   end
   
-  ### Function stuff stop
+  #### Function stuff stop
   
   class On < CollarNode
     def compile
@@ -950,6 +771,12 @@ module Dog::Nodes
   end
   
   class Break < CollarNode
+    def compile
+      "break;"
+    end
+  end
+  
+  class Return < CollarNode
     def compile
       "break;"
     end
@@ -1050,5 +877,5 @@ module Dog::Nodes
       "false"
     end
   end
-  
+
 end
