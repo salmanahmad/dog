@@ -18,8 +18,8 @@ class ParserTests::ReplyTest < Test::Unit::TestCase
   
   def test_simple
     @parser.parse("REPLY TO PERSON FROM request WITH data")
-    @parser.parse("REPLY TO PERSON FROM request WITH data, constant = 7")
-    @parser.parse("REPLY TO PERSON FROM request WITH data, constant = 7, name = 'spongebob'")
+    @parser.parse("REPLY TO PERSON FROM request WITH data: 5, constant: 7")
+    @parser.parse("REPLY TO PERSON FROM request WITH constant:7, name : 'spongebob'")
   end
   
   def test_with_required
@@ -39,9 +39,7 @@ class ParserTests::ReplyTest < Test::Unit::TestCase
   end
   
   def test_not_allowed_top_level
-    @parser.parser.root = :program
-    program = @parser.parse("REPLY TO PEOPLE FROM request WITH data")
-    assert_equal(program.elements.first.elements.first.elements.first.class, Dog::Nodes::ReplyDisallow)
+    # TODO - Add postprocess test cases...
   end
   
 end

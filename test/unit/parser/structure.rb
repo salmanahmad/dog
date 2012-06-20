@@ -10,7 +10,8 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
 class ParserTests::StructureTest < Test::Unit::TestCase
-  
+
+=begin TODO - Potentially reuse these test cases?
   def setup
     @parser = Dog::Parser.new
     @parser.parser.root = :structure_definition
@@ -139,5 +140,5 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     struct.strip!
     @parser.parse(struct)
   end
-  
+=end
 end

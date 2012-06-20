@@ -18,7 +18,7 @@ class ParserTests::AccessTest < Test::Unit::TestCase
   end
   
   def test_simple
-    puts @parser.parse("foo['bar' + 6]").inspect
+    @parser.parse("foo['bar' + 6]")
   end
   
   

@@ -27,10 +27,10 @@ class ParserTests::NotifyTest < Test::Unit::TestCase
     @parser.parse("NOTIFY users VIA email OF message")
     @parser.parse("NOTIFY users VIA email OF 'message'")
     
+    # TODO - The semantics here are that notify of a literal constant will 
+    # create a default message with the to_string() as the body...
     @parser.parse("NOTIFY users VIA email OF '5'")
-    assert_raise Dog::ParseError do
-      @parser.parse("NOTIFY users VIA email OF 5")
-    end
+    @parser.parse("NOTIFY users VIA email OF 5")
   end
   
   def test_users_mandatory

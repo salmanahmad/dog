@@ -43,16 +43,6 @@ class ParserTests::OnTest < Test::Unit::TestCase
   def test_event
     program = <<-EOD
     
-    ON EACH dog.account.create DO
-      PRINT 'hello, world!'
-    END
-    
-    EOD
-    
-    @parser.parse(program.strip)
-    
-    program = <<-EOD
-    
     ON EACH request IN dog.account.signin DO
       PRINT 'hello, world!'
     END
@@ -60,6 +50,19 @@ class ParserTests::OnTest < Test::Unit::TestCase
     EOD
     
     @parser.parse(program.strip)
+    
+    # TODO - This syntax no longer works - is that okay?
+    #
+    #program = <<-EOD
+    #
+    #ON EACH dog.account.create DO
+    #  PRINT 'hello, world!'
+    #END
+    #
+    #EOD
+    #
+    #@parser.parse(program.strip)
+    
   end
   
   

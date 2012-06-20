@@ -24,7 +24,7 @@ grammar Dog
   # TODO: Add logic and code for identifying void expressions... (assignent to a return, assignment to an ask, assignment to a define, etc...)
 
   rule program
-    statements <::Dog::Nodes::Program> 
+    statements '' <::Dog::Nodes::Program> 
     / 
     '' <::Dog::Nodes::Program>
   end
@@ -58,7 +58,7 @@ grammar Dog
   
   # TODO - Implement event / message / task
   rule command
-     import / config / listen / allow / notify / on / ask / compute / user / event / message / task / control_structure / definition / reply / print / inspect
+     import / config / listen / allow / notify / on / ask / compute / user / control_structure / definition / reply / print / inspect
   end
   
   rule operation
@@ -460,7 +460,7 @@ grammar Dog
   end
 
   rule if
-    'IF' s primary s 'THEN' sn statements? else_clause? s? 'END' <::Dog::Nodes::If>
+    'IF' s expression s 'THEN' sn statements? else_clause? s? 'END' <::Dog::Nodes::If>
   end
   
   rule else_clause
@@ -512,14 +512,14 @@ grammar Dog
     identifier ('.' &key_path / '' !key_path) <::Dog::Nodes::KeyPath>
   end
   
-  # TODO - Add newlines?
+  # TODO - Add newlines? -- perhaps combine with associations below?
   
   rule identifier_associations
     identifier_association+ <::Dog::Nodes::IdentifierAssociations>
   end
 
   rule identifier_association
-    sn? identifier s? ':' s? expression s? (',' &identifier_association / '' !identifier_association) <::Dog::Nodes::IdentifierAssociation>
+    sn? identifier s? ':' s? expression (s? ',' &identifier_association / '' !identifier_association) <::Dog::Nodes::IdentifierAssociation>
   end
   
   rule identifier_list
@@ -527,7 +527,7 @@ grammar Dog
   end
   
   rule identifier_list_item
-    s? identifier s? (',' &identifier_list_item / '' !identifier_list_item)
+    s? identifier (s? ',' &identifier_list_item / '' !identifier_list_item)
   end
   
   # TODO - combine with items -- perhaps renamed to expresion_list -- add newlines?
@@ -536,8 +536,13 @@ grammar Dog
     argument_list_item+
   end
   
+  # TODO - To get this to work, I had to move the 's?' into the parenthesis with
+  # &argument_list_item. if I try to do that with association i get test errors.
+  # is this correct? I also did the same thing with identifier_list and 
+  # identifier_association will that break in the future also?
+  
   rule argument_list_item
-    s? expression s? (',' &argument_list_item / '' !argument_list_item)
+    s? expression (s? ',' &argument_list_item / '' !argument_list_item)
   end
   
   # ================

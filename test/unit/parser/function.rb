@@ -13,7 +13,7 @@ class ParserTests::FunctionTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :function
+    @parser.parser.root = :definition
   end
   
   def test_simple
