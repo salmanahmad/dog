@@ -32,7 +32,7 @@ grammar Dog
   # TODO - what about ;;;;;;
 
   rule statements
-    ((statement / s t) / ("\n" / comment))+ <::Dog::Nodes::Statements>
+    ((statement t) / (s t) / ("\n" / ";" / comment))+ <::Dog::Nodes::Statements>
   end
   
   # TODO - Perhaps include your "void" expressions here for common cases. Like return...
