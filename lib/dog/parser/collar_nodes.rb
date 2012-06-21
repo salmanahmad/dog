@@ -40,12 +40,12 @@ module Dog::Nodes
     end
     
     def self.from_hash(hash)
-      offset = hash[:offset]
-      text_value = hash[:text_value]
-      name = hash[:name]
+      self.offset = hash[:offset]
+      self.text_value = hash[:text_value]
+      self.name = hash[:name]
       
-      input = hash[:input]
-      interval = hash[:interval]
+      self.input = hash[:input]
+      self.interval = hash[:interval]
       
       elements = hash[:elements]
       elements.map! do |element|

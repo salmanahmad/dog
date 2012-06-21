@@ -1,24 +1,23 @@
-### Global data and records:
 
-variable {
-  name
-  type
-  track
-}
+Ensure the proper ASTs
 
-When I create a person, do I save it in a normal array?
+Add events, communities, messages, tasks
 
-There are a couple of problems with this approach:
-  Array size limitations (mongo for example can only save 16mb of data).
-  Query and index the array.
-  
-Alternatives:
-  Support "indexed collection" data type
-  This create a mongo collection that actually can be queried
-  The collections are scoped to a track - a variable identifies it.
-  Expose a special api to all you to query this stuff...
-  
-### Relationships:
+Remove old compiler crap
 
-How do I store relationships?
+Handle TODO
 
+Move "should_clean_tree" as a compilation rule ... maybe not...
+
+
+
+
+
+
+Serialize the stack
+
+Runtime tree traversal... (updating the "program counter")
+
+What do things like "AccessHead" return and place on the stack?
+
+What about non-primative stack placements like people? Do we need a language wide "json" serialization architecture...

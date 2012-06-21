@@ -28,17 +28,21 @@ grammar Dog
     / 
     '' <::Dog::Nodes::Program>
   end
-
-  # TODO - what about ;;;;;;
-
+  
   rule statements
-    ((statement t) / (s t) / ("\n" / ";" / comment))+ <::Dog::Nodes::Statements>
+    statement+ <::Dog::Nodes::Statements>
   end
   
-  # TODO - Perhaps include your "void" expressions here for common cases. Like return...
-  
   rule statement
-    s? (assignment / expression) s? <::Dog::Nodes::Statement>
+    s? (assignment / expression) s? t <::Dog::Nodes::Statement>
+    /
+    s t
+    / 
+    "\n"
+    /
+    ";"
+    /
+    comment
   end
   
   # ==============
