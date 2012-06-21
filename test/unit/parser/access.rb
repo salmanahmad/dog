@@ -14,11 +14,12 @@ class ParserTests::AccessTest < Test::Unit::TestCase
   def setup
     @parser = Dog::Parser.new
     @parser.parser.root = :access
-    @parser.should_clean_tree = false
+    @parser.should_clean_tree = true
   end
   
   def test_simple
-    @parser.parse("foo['bar' + 6]")
+    pp @parser.parse("foo['bar' + 6]")
+    pp @parser.parse("foo['bar' + 6]['foo']['bar']")
   end
   
   

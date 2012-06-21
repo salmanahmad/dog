@@ -38,22 +38,22 @@ grammar Dog
   # TODO - Perhaps include your "void" expressions here for common cases. Like return...
   
   rule statement
-    s? (assignment / expression) s?
+    s? (assignment / expression) s? <::Dog::Nodes::Statement>
   end
   
-  # ===============
-  # = Expressions =
-  # ===============
+  # ==============
+  # = Statements =
+  # ==============
   
   # TODO - I can do things like 5 = 7 right now, I need to fix that...
   # Perhaps changing access_head from literal to collection?
   
   rule assignment 
-    access s? assignment_operator s? expression
+    access s? assignment_operator s? expression <::Dog::Nodes::Assignment>
   end
   
   rule expression
-    command / operation / access
+    command / operation / access '' <::Dog::Nodes::Expression>
   end
   
   # TODO - Implement event / message / task
@@ -68,19 +68,27 @@ grammar Dog
   end
   
   rule operation_head
-    command / access
+    command '' <::Dog::Nodes::OperationHead>
+    / 
+    access '' <::Dog::Nodes::OperationHead>
   end
   
   rule access
-    access_head access_tail?
+    access_head access_tail? <::Dog::Nodes::Access>
   end
   
   rule access_head
-    literal / identifier / '(' s? expression s? ')'
+    literal '' <::Dog::Nodes::AccessHead>
+    / 
+    identifier '' <::Dog::Nodes::AccessHead>
+    / 
+    '(' s? expression s? ')' <::Dog::Nodes::AccessHead>
   end
   
   rule access_tail
-    access_dot / access_bracket
+    access_dot '' <::Dog::Nodes::AccessTail>
+    / 
+    access_bracket '' <::Dog::Nodes::AccessTail>
   end
   
   rule access_dot
@@ -94,6 +102,10 @@ grammar Dog
   rule identifier
     lower (lower / digit / '_')* <::Dog::Nodes::Identifier>
   end
+
+  # =============
+  # = Operators =
+  # =============
 
   rule binary_operator
     arithmetic_operator / collection_operator / comparative_operator / and_operator / or_operator
@@ -374,11 +386,11 @@ grammar Dog
   end
   
   rule define_variable
-    'DEFINE' s identifier s? assignment_operator s? expression
+    'DEFINE' s identifier s? assignment_operator s? expression <::Dog::Nodes::DefineVariable>
   end
   
   rule define_function
-    'DEFINE' s identifier function_on? function_using? s? 'DO' sn statements? s? 'END' <::Dog::Nodes::Function>
+    'DEFINE' s identifier function_on? function_using? s? 'DO' sn statements? s? 'END' <::Dog::Nodes::DefineFunction>
   end
   
   rule function_on
@@ -581,6 +593,26 @@ grammar Dog
     sn? string s? ':' s? expression sn? (',' &association / '' !association) <::Dog::Nodes::HashAssociation>
   end
 
+  rule string
+    (
+    '"' ('\"' / !'"' .)* '"' <::Dog::Nodes::StringLiteral>
+    /
+    '\'' ('\\\'' / !'\'' .)* '\'' <::Dog::Nodes::StringLiteral>
+    )
+  end
+
+  rule number
+    float / integer
+  end
+
+  rule integer 
+    ('-' s?)? digit+ <::Dog::Nodes::IntegerLiteral>
+  end
+
+  rule float
+    ('-' s?)? digit+ '.' digit* <::Dog::Nodes::FloatLiteral>
+  end
+
   rule bool
     (true / false)
   end
@@ -609,25 +641,9 @@ grammar Dog
     ) 
   end
 
-  rule number
-    float / integer
-  end
-
-  rule integer 
-    ('-' s?)? digit+ <::Dog::Nodes::IntegerLiteral>
-  end
-
-  rule float
-    ('-' s?)? digit+ '.' digit* <::Dog::Nodes::FloatLiteral>
-  end
-
-  rule string
-    (
-    '"' ('\"' / !'"' .)* '"' <::Dog::Nodes::StringLiteral>
-    /
-    '\'' ('\\\'' / !'\'' .)* '\'' <::Dog::Nodes::StringLiteral>
-    )
-  end
+  # ===================
+  # = Building Blocks =
+  # ===================
 
   rule digit
     [0-9]
