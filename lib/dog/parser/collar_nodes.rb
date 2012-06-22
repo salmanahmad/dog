@@ -218,6 +218,38 @@ module Dog::Nodes
   # ============
   # = Commands =
   # ============
+
+  class Community < CollarNode
+    
+  end
+  
+  class Event < CollarNode
+    
+  end
+  
+  class Task < CollarNode
+    
+  end
+  
+  class Message < CollarNode
+    
+  end
+  
+  class Properties < CollarNode
+    
+  end
+  
+  class Property < CollarNode
+    
+  end
+  
+  class PropertyDefaultValue < CollarNode
+    
+  end
+  
+  class PropertyRequirementModifier < CollarNode
+    
+  end
   
   class Listen < CollarNode
    

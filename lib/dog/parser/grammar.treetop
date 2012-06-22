@@ -60,9 +60,8 @@ grammar Dog
     command / operation / access '' <::Dog::Nodes::Expression>
   end
   
-  # TODO - Implement event / message / task
   rule command
-     import / config / listen / allow / notify / on / ask / compute / user / control_structure / definition / reply / print / inspect
+     community / event / task / message / listen / allow / ask / notify / reply / compute / on / user / definition / control_structure / config / import / print / inspect
   end
   
   rule operation
@@ -221,6 +220,48 @@ grammar Dog
     "CONTAINS" <::Dog::Nodes::ContainsOperator>
   end
   
+  
+  # ====================
+  # = Human Interfaces =
+  # ====================
+  
+  rule structure
+    community / event / task / message
+  end
+  
+  rule community
+    'community' sn? '{' sn?  sn? '}' <::Dog::Nodes::Community>
+  end
+  
+  rule event
+    'event' sn? '{' sn? properties sn? '}' <::Dog::Nodes::Event>
+  end
+  
+  rule task
+    'task' sn? '{' sn? properties sn? '}' <::Dog::Nodes::Task>
+  end
+  
+  rule message
+    'message' sn? '{' sn? properties sn? '}' <::Dog::Nodes::Message>
+  end
+  
+  rule properties
+    property+ <::Dog::Nodes::Properties>
+  end
+  
+  rule property
+    sn? property_requirement_modifier? identifier property_default_value? s? t <::Dog::Nodes::Property>
+  end
+  
+  rule property_default_value
+    s? '=' s? expression <::Dog::Nodes::PropertyDefaultValue>
+  end
+  
+  rule property_requirement_modifier
+    'required' s <::Dog::Nodes::PropertyRequirementModifier>
+    /
+    'optional' s <::Dog::Nodes::PropertyRequirementModifier>
+  end
   
   # ==================
   # = Listen Command = 

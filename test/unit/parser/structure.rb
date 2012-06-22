@@ -11,49 +11,27 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_hel
 
 class ParserTests::StructureTest < Test::Unit::TestCase
 
-=begin TODO - Potentially reuse these test cases?
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :structure_definition
-    #@parser.should_clean_tree = false
+    @parser.parser.root = :structure
   end
-  
-  def test_event
+
+  def test_simple
     struct = <<-EOD
-      event data {
-        string name
-        input string name
+      event {
+        name
+        string
       }
     EOD
     struct.strip!
     @parser.parse(struct)
   end
   
-  def test_relationship
+  def test_optional
     struct = <<-EOD
-      record data {
-        string name
-        relationship friends
-        relationship followers, followees
-        relationship books, book.readers
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-  end
-  
-  def test_additional
-    struct = <<-EOD
-      record data {
-        string name
-        input string name
-        
-        
-        relationship friends
-        
-        
-        relationship followers, followees
-        relationship books, book.readers
+      event {
+        optional name
+        string
       }
     EOD
     struct.strip!
@@ -62,83 +40,14 @@ class ParserTests::StructureTest < Test::Unit::TestCase
   
   def test_default
     struct = <<-EOD
-      record data {
-        input string name = "Hi"
+      event {
+        optional name = "foo"
+        string
       }
     EOD
     struct.strip!
     @parser.parse(struct)
+    
+  end
 
-    struct = <<-EOD
-      record data {
-        string name = "Hi"
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-    
-    struct = <<-EOD
-      record data {
-        name = "Foobar"
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-  end
-  
-  def test_instance
-    @parser.parser.root = :structure
-    struct = <<-EOD
-      person {
-        first_name = "Salman"
-        string address = "Unknown"
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-    
-    @parser.parser.root = :program
-    struct = <<-EOD
-      salman = person {
-        first_name = "Salman"
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-    
-  end
-  
-  def test_nested
-    struct = <<-EOD
-      event book {
-        event create {
-          input string title
-          number_of_chapters
-          table_of_contents
-        }
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-    
-    struct = <<-EOD
-      event book {
-        event create {
-          event foo {
-            event bar {
-              input
-            }
-          }
-          
-          
-          input string title
-          number_of_chapters
-          table_of_contents
-        }
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-  end
-=end
 end
