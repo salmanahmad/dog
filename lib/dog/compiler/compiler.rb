@@ -11,19 +11,16 @@ module Dog
   
   class Compiler
     
-    def initialize
-      
-    end
-    
     def self.compile(bark)
       compiler = self.new
       compiler.compile(bark)
     end
     
     def compile(bark)
-      Rule.apply(bark)
+      Rules::Rule.apply(bark)
       
-      bark.elements.each do |node|
+      elements = bark.elements || []
+      elements.each do |node|
         compile(node)
       end
       
