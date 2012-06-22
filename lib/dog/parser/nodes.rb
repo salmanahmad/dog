@@ -32,6 +32,9 @@ module Dog::Nodes
     end
     
     def self.from_hash(hash)
+      
+      # TODO - This is completely broken. I have to set parent correctly and I should not be using 'self'
+      
       self.offset = hash["offset"]
       self.text_value = hash["text_value"]
       self.name = hash["name"]
@@ -39,9 +42,11 @@ module Dog::Nodes
       self.input = hash["input"]
       self.interval = hash["interval"]
       
-      elements = hash["elements"]
-      elements.map! do |element|
+      self.elements = hash["elements"]
+      self.elements.map! do |element|
         element = self.from_hash(element)
+        element.parent = node
+        element
       end
       
       node_type = Object::const_get(name)

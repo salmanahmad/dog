@@ -11,10 +11,16 @@ module Dog::Rules
   
   class MapFunction < Rule
     
+    class << self
+      
+      
+      
+    end
+    
     Rule.register(self)
     
     def applicable_nodes
-      []
+      [::Dog::Nodes::DefineFunction]
     end
     
     def apply(node)

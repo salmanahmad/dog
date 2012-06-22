@@ -33,6 +33,13 @@ grammar Dog
     statement+ <::Dog::Nodes::Statements>
   end
   
+  # TODO - Perhaps add assignments to expressions. In ruby you can 
+  # technically do stuff like this: j = (i = 5) and j = i = 5
+  # Also, by combining them, we can add inline conditionals like:
+  # i = 5 if true and i = 5 unless true. Right now, we can only attach
+  # inline conditionals to statements, not expressions which means we can
+  # only have one per "line"
+  
   rule statement
     s? (assignment / expression) s? t <::Dog::Nodes::Statement>
     /
@@ -139,7 +146,7 @@ grammar Dog
   end
   
   # TODO: Order of operations...
-
+  
   rule addition_operator
     '+' <::Dog::Nodes::AdditionOperator>
   end

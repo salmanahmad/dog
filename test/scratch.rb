@@ -14,17 +14,16 @@
 #
 # Yes, he is kinda strange...
 
-require File.join(File.dirname(__FILE__), 'test_helper.rb')
+require File.expand_path(File.join(File.dirname(__FILE__), 'test_helper.rb'))
 
 class ScratchTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :scratch
   end
   
   def test_assignment
-    @parser.parse("")
+    pp @parser.parse("LISTEN TO public VIA http FOR images")
   end
   
 end
