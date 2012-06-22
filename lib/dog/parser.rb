@@ -10,6 +10,6 @@
 require "treetop"
 
 require File.join(File.dirname(__FILE__), 'parser/parser.rb')
-require File.join(File.dirname(__FILE__), 'parser/collar_nodes.rb')
+require File.join(File.dirname(__FILE__), 'parser/nodes.rb')
 
 module Dog end

@@ -64,9 +64,6 @@ module Dog::Nodes
     
   end
   
-  # TODO - Remove FormattedString 
-  # TODO - Remove CompilationContext
-  
   # ================
   # = Core Program =
   # ================
