@@ -30,26 +30,15 @@ else
 end
 
 
-=begin
-begin
-  Dog::Parser.parse(dog_code)
-  puts "Valid Dog Program"
-rescue Dog::ParseError => e
-  puts "Invalid Dog Program"
-  puts
-  puts "Parse error at line: #{e.line}, column: #{e.column}."
-  puts
-  puts e.failure_reason
-end
-=end
+
 
 # Parse the dog code into an AST (called a bark)
-dog_collar = Dog::Parser.parse(dog_code)
+bark = Dog::Parser.parse(dog_code)
 
-# Compute the AST into a state machine (called a bark)
-dog_bark = Dog::Compiler.compile(dog_collar)
+# Compute the AST into a vm byte code (called bite code)
+bite = Dog::Compiler.compile(bark)
 
 # Execute the state machine. This may save state 
 # as an execution graph (called a track)
-Dog::Runtime.run(dog_bark)
+Dog::Runtime.run(bite)
 

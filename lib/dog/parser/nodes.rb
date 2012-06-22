@@ -11,43 +11,35 @@ module Dog::Nodes
   
   class Treetop::Runtime::SyntaxNode
     
-    def to_collar
-      to_hash
-    end
-    
-    def self.from_collar(collar)
-      self.from_hash(collar)
-    end
-    
     def to_hash
       hash = {}
-      hash[:offset] = self.interval.first
-      hash[:text_value] = self.text_value
-      hash[:name] = self.class.name
+      hash["offset"] = self.interval.first
+      hash["text_value"] = self.text_value
+      hash["name"] = self.class.name
       
-      hash[:input] = self.input
-      hash[:interval] = self.interval
+      hash["input"] = self.input
+      hash["interval"] = self.interval
       
       unless self.elements.nil?
-        hash[:elements] = self.elements.map do |element|
+        hash["elements"] = self.elements.map do |element|
           element.to_hash
         end
       else
-        hash[:elements] = nil
+        hash["elements"] = nil
       end
       
       return hash
     end
     
     def self.from_hash(hash)
-      self.offset = hash[:offset]
-      self.text_value = hash[:text_value]
-      self.name = hash[:name]
+      self.offset = hash["offset"]
+      self.text_value = hash["text_value"]
+      self.name = hash["name"]
       
-      self.input = hash[:input]
-      self.interval = hash[:interval]
+      self.input = hash["input"]
+      self.interval = hash["interval"]
       
-      elements = hash[:elements]
+      elements = hash["elements"]
       elements.map! do |element|
         element = self.from_hash(element)
       end
@@ -61,7 +53,13 @@ module Dog::Nodes
   end
   
   class Node < Treetop::Runtime::SyntaxNode
+    def to_bark
+      to_hash
+    end
     
+    def self.from_bark(bark)
+      self.from_hash(bark)
+    end
   end
   
   # ================

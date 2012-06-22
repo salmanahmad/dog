@@ -11,18 +11,23 @@ module Dog
   
   class Compiler
     
-    def self.compile(collar)
-      compiler = self.new
-      compiler.compile(collar)
-    end
-    
     def initialize
       
     end
     
-    def compile(collar)
-      state = collar.compile
-      return state
+    def self.compile(bark)
+      compiler = self.new
+      compiler.compile(bark)
+    end
+    
+    def compile(bark)
+      Rule.apply(bark)
+      
+      bark.elements.each do |node|
+        compile(node)
+      end
+      
+      return bark
     end
     
   end
