@@ -7,6 +7,11 @@
 # above copyright notice is included.
 #
 
+
+# TODO - Remove this entire file. I am kinda keeping it around for now
+# because it is so cute how stupid I was before to think that this was 
+# a good idea... Awww how innocent and adorable I was back then...
+
 module Dog
   
   class State

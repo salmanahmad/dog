@@ -1,10 +1,6 @@
 
 Ensure the proper ASTs
 
-Add communities
-
-Remove old compiler crap
-
 Handle TODO
 
 Move "should_clean_tree" as a compilation rule ... maybe not...
