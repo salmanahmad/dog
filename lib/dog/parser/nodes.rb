@@ -60,7 +60,7 @@ module Dog::Nodes
     
   end
   
-  class CollarNode < Treetop::Runtime::SyntaxNode
+  class Node < Treetop::Runtime::SyntaxNode
     
   end
   
@@ -68,15 +68,15 @@ module Dog::Nodes
   # = Core Program =
   # ================
   
-  class Program < CollarNode
+  class Program < Node
     
   end
   
-  class Statements < CollarNode
+  class Statements < Node
     
   end
   
-  class Statement < CollarNode
+  class Statement < Node
     
   end
   
@@ -84,43 +84,43 @@ module Dog::Nodes
   # = Statements =
   # ==============
   
-  class Assignment < CollarNode
+  class Assignment < Node
     
   end
   
-  class Expression < CollarNode
+  class Expression < Node
     
   end
 
-  class Operation < CollarNode
+  class Operation < Node
     
   end
   
-  class OperationHead < CollarNode
+  class OperationHead < Node
     
   end
 
-  class Access < CollarNode
+  class Access < Node
     
   end
   
-  class AccessHead < CollarNode
+  class AccessHead < Node
     
   end
 
-  class AccessTail < CollarNode
+  class AccessTail < Node
     
   end
   
-  class AccessBracket < CollarNode
+  class AccessBracket < Node
     
   end
   
-  class AccessDot < CollarNode
+  class AccessDot < Node
     
   end
   
-  class Identifier < CollarNode
+  class Identifier < Node
     
   end
   
@@ -128,87 +128,87 @@ module Dog::Nodes
   # = Operators =
   # =============
   
-  class AssignmentOperator < CollarNode
+  class AssignmentOperator < Node
     
   end
   
-  class AdditionOperator < CollarNode
+  class AdditionOperator < Node
     
   end
   
-  class SubtractionOperator < CollarNode
+  class SubtractionOperator < Node
     
   end
   
-  class MultiplicationOperator < CollarNode
+  class MultiplicationOperator < Node
     
   end
   
-  class DivisionOperator < CollarNode
+  class DivisionOperator < Node
     
   end
   
-  class EqualityOperator < CollarNode
+  class EqualityOperator < Node
     
   end
   
-  class InequalityOperator < CollarNode
+  class InequalityOperator < Node
     
   end
   
-  class GreaterThanOperator < CollarNode
+  class GreaterThanOperator < Node
     
   end
   
-  class LessThanOperator < CollarNode
+  class LessThanOperator < Node
     
   end
   
-  class GreaterThanEqualOperator < CollarNode
+  class GreaterThanEqualOperator < Node
     
   end
   
-  class LessThanEqualOperator < CollarNode
+  class LessThanEqualOperator < Node
     
   end
   
-  class AndOperator < CollarNode
+  class AndOperator < Node
     
   end
   
-  class OrOperator < CollarNode
+  class OrOperator < Node
     
   end
   
-  class NotOperator < CollarNode
+  class NotOperator < Node
     
   end
   
-  class UnionOperator < CollarNode
+  class UnionOperator < Node
     
   end
   
-  class IntersectOperator < CollarNode
+  class IntersectOperator < Node
     
   end
   
-  class DifferenceOperator < CollarNode
+  class DifferenceOperator < Node
     
   end
   
-  class AppendOperator < CollarNode
+  class AppendOperator < Node
     
   end
   
-  class PrependOperator < CollarNode
+  class PrependOperator < Node
     
   end
   
-  class AssociatesOperator < CollarNode
+  class AssociatesOperator < Node
     
   end
   
-  class ContainsOperator < CollarNode
+  class ContainsOperator < Node
     
   end
   
@@ -216,163 +216,163 @@ module Dog::Nodes
   # = Commands =
   # ============
 
-  class Community < CollarNode
+  class Community < Node
     
   end
     
-  class Community < CollarNode
-    
-  end
-  
-  class CommunityProperties < CollarNode
+  class Community < Node
     
   end
   
-  class CommunityProperty < CollarNode
+  class CommunityProperties < Node
     
   end
   
-  class CommunityPropertyAttribute < CollarNode
+  class CommunityProperty < Node
     
   end
   
-  class CommunityPropertyRelationship < CollarNode
+  class CommunityPropertyAttribute < Node
     
   end
   
-  class CommunityPropertyRelationshipInverse < CollarNode
+  class CommunityPropertyRelationship < Node
     
   end
   
-  class CommunityPropertyRelationshipInverseCommunity < CollarNode
+  class CommunityPropertyRelationshipInverse < Node
     
   end
   
-  class Event < CollarNode
+  class CommunityPropertyRelationshipInverseCommunity < Node
     
   end
   
-  class Task < CollarNode
+  class Event < Node
     
   end
   
-  class Message < CollarNode
+  class Task < Node
     
   end
   
-  class Properties < CollarNode
+  class Message < Node
     
   end
   
-  class Property < CollarNode
+  class Properties < Node
     
   end
   
-  class PropertyDefaultValue < CollarNode
+  class Property < Node
     
   end
   
-  class PropertyRequirementModifier < CollarNode
+  class PropertyDefaultValue < Node
     
   end
   
-  class Listen < CollarNode
+  class PropertyRequirementModifier < Node
+    
+  end
+  
+  class Listen < Node
    
   end 
   
-  class ListenToClause < CollarNode
+  class ListenToClause < Node
     
   end
   
-  class ListenForClause < CollarNode
+  class ListenForClause < Node
     
   end
   
-  class ListenAtClause < CollarNode
+  class ListenAtClause < Node
     
   end
   
-  class Allow < CollarNode
+  class Allow < Node
     
   end
   
-  class AllowModifier < CollarNode
+  class AllowModifier < Node
     
   end
   
-  class AllowProfile < CollarNode
+  class AllowProfile < Node
     
   end
   
-  class Ask < CollarNode
+  class Ask < Node
     
   end
   
-  class AskToClause < CollarNode
+  class AskToClause < Node
     
   end
   
-  class Notify < CollarNode
+  class Notify < Node
     
   end
   
-  class NotifyOfClause < CollarNode
+  class NotifyOfClause < Node
     
   end
   
-  class Reply < CollarNode
+  class Reply < Node
     
   end
   
-  class ReplyWithClause < CollarNode
+  class ReplyWithClause < Node
     
   end
   
-  class Compute < CollarNode
+  class Compute < Node
     
   end
   
-  class On < CollarNode
+  class On < Node
     
   end
   
-  class Me < CollarNode
+  class Me < Node
     
   end
   
-  class Public < CollarNode
+  class Public < Node
     
   end
   
-  class Person < CollarNode
+  class Person < Node
     
   end
   
-  class People < CollarNode
+  class People < Node
     
   end
   
-  class Predicate < CollarNode
+  class Predicate < Node
     
   end
   
-  class PeopleFromClause < CollarNode
+  class PeopleFromClause < Node
     
   end
   
-  class PeopleWhereClause < CollarNode
+  class PeopleWhereClause < Node
     
   end
   
-  class PredicateBinary < CollarNode
+  class PredicateBinary < Node
     
   end
   
-  class PredicateUnary < CollarNode
+  class PredicateUnary < Node
     
   end
   
-  class PredicateConditonal < CollarNode
+  class PredicateConditonal < Node
     
   end
   
@@ -380,27 +380,27 @@ module Dog::Nodes
   # = Definitions =
   # ===============
   
-  class DefineVariable < CollarNode
+  class DefineVariable < Node
     
   end
   
-  class DefineFunction < CollarNode
+  class DefineFunction < Node
     
   end
   
-  class FunctionOn < CollarNode
+  class FunctionOn < Node
     
   end
   
-  class FunctionUsing < CollarNode
+  class FunctionUsing < Node
     
   end
   
-  class FunctionOptionalParameters < CollarNode
+  class FunctionOptionalParameters < Node
     
   end
   
-  class FunctionOptionalParameter < CollarNode
+  class FunctionOptionalParameter < Node
     
   end
   
@@ -408,47 +408,47 @@ module Dog::Nodes
   # = Other Commands =
   # ==================
   
-  class Config < CollarNode
+  class Config < Node
     
   end
   
-  class Import < CollarNode
+  class Import < Node
     
   end
   
-  class ImportAsClause < CollarNode
+  class ImportAsClause < Node
     
   end
   
-  class ImportFunction < CollarNode
+  class ImportFunction < Node
     
   end
   
-  class ImportData < CollarNode
+  class ImportData < Node
     
   end
   
-  class ImportCommunity < CollarNode
+  class ImportCommunity < Node
     
   end
   
-  class ImportTask < CollarNode
+  class ImportTask < Node
     
   end
   
-  class ImportMessage < CollarNode
+  class ImportMessage < Node
     
   end
   
-  class ImportConfig < CollarNode
+  class ImportConfig < Node
     
   end
   
-  class Print < CollarNode
+  class Print < Node
     
   end
   
-  class Inspect < CollarNode
+  class Inspect < Node
     
   end
   
@@ -456,27 +456,27 @@ module Dog::Nodes
   # = Control Structures =
   # ======================
   
-  class Repeat < CollarNode
+  class Repeat < Node
     
   end
   
-  class If < CollarNode
+  class If < Node
     
   end
   
-  class ElseClause < CollarNode
+  class ElseClause < Node
     
   end
   
-  class For < CollarNode
+  class For < Node
     
   end
   
-  class Break < CollarNode
+  class Break < Node
     
   end
   
-  class Return < CollarNode
+  class Return < Node
     
   end
   
@@ -484,19 +484,19 @@ module Dog::Nodes
   # = Shared Clauses =
   # ==================
   
-  class UsingClause < CollarNode
+  class UsingClause < Node
     
   end
   
-  class OnClause < CollarNode
+  class OnClause < Node
     
   end
   
-  class ViaClause < CollarNode
+  class ViaClause < Node
     
   end
   
-  class InClause < CollarNode
+  class InClause < Node
     
   end
   
@@ -504,35 +504,35 @@ module Dog::Nodes
   # = Lists =
   # =========
   
-  class KeyPaths < CollarNode
+  class KeyPaths < Node
     
   end
   
-  class KeyPath < CollarNode
+  class KeyPath < Node
     
   end
   
-  class IdentifierAssociations < CollarNode
+  class IdentifierAssociations < Node
     
   end
   
-  class IdentifierAssociation < CollarNode
+  class IdentifierAssociation < Node
     
   end
   
-  class IdentifierList < CollarNode
+  class IdentifierList < Node
     
   end
   
-  class IdentifierListItem < CollarNode
+  class IdentifierListItem < Node
     
   end
   
-  class ArgumentList < CollarNode
+  class ArgumentList < Node
     
   end
   
-  class ArgumentListItem < CollarNode
+  class ArgumentListItem < Node
     
   end
   
@@ -540,47 +540,47 @@ module Dog::Nodes
   # = Literal =
   # ===========
   
-  class ArrayLiteral < CollarNode
+  class ArrayLiteral < Node
     
   end
   
-  class ArrayItems < CollarNode
+  class ArrayItems < Node
     
   end
   
-  class ArrayItem < CollarNode
+  class ArrayItem < Node
     
   end
   
-  class HashLiteral < CollarNode
+  class HashLiteral < Node
     
   end
   
-  class HashAssociations < CollarNode
+  class HashAssociations < Node
     
   end
   
-  class HashAssociation < CollarNode
+  class HashAssociation < Node
     
   end
   
-  class StringLiteral < CollarNode
+  class StringLiteral < Node
     
   end
   
-  class IntegerLiteral < CollarNode
+  class IntegerLiteral < Node
     
   end
   
-  class FloatLiteral < CollarNode
+  class FloatLiteral < Node
     
   end
   
-  class TrueLiteral < CollarNode
+  class TrueLiteral < Node
     
   end
   
-  class FalseLiteral < CollarNode
+  class FalseLiteral < Node
     
   end
 
