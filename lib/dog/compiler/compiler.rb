@@ -28,6 +28,7 @@ module Dog
         errors = Rules::Rule.errors
         unless errors.empty?
           # Report errors
+          # TODO - Abstract his into a CompilerError class and raise that. The actual printing should not be handled by the framework it should be handled by the client (aka the Dog executable, the test cases, etc.) I should never use 'puts' like this... change it, okay?
           puts "The following compilation errors occured:"
           puts
           
