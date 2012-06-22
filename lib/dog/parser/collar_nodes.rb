@@ -222,6 +222,34 @@ module Dog::Nodes
   class Community < CollarNode
     
   end
+    
+  class Community < CollarNode
+    
+  end
+  
+  class CommunityProperties < CollarNode
+    
+  end
+  
+  class CommunityProperty < CollarNode
+    
+  end
+  
+  class CommunityPropertyAttribute < CollarNode
+    
+  end
+  
+  class CommunityPropertyRelationship < CollarNode
+    
+  end
+  
+  class CommunityPropertyRelationshipInverse < CollarNode
+    
+  end
+  
+  class CommunityPropertyRelationshipInverseCommunity < CollarNode
+    
+  end
   
   class Event < CollarNode
     

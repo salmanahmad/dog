@@ -230,7 +230,33 @@ grammar Dog
   end
   
   rule community
-    'community' sn? '{' sn?  sn? '}' <::Dog::Nodes::Community>
+    'community' sn? '{' sn? community_properties sn? '}' <::Dog::Nodes::Community>
+  end
+  
+  rule community_properties
+    community_property+ <::Dog::Nodes::CommunityProperties>
+  end
+  
+  rule community_property
+    community_property_attribute '' <::Dog::Nodes::CommunityProperty>
+    /
+    community_property_relationship '' <::Dog::Nodes::CommunityProperty>
+  end
+  
+  rule community_property_attribute
+    sn? identifier s? t <::Dog::Nodes::CommunityPropertyAttribute>
+  end
+  
+  rule community_property_relationship
+    sn? 'relationship' s identifier community_property_relationship_inverse? s? t <::Dog::Nodes::CommunityPropertyRelationship>
+  end
+  
+  rule community_property_relationship_inverse
+    s? ',' s? community_property_relationship_inverse_community? identifier <::Dog::Nodes::CommunityPropertyRelationshipInverse>
+  end
+  
+  rule community_property_relationship_inverse_community
+    identifier '.' <::Dog::Nodes::CommunityPropertyRelationshipInverseCommunity>
   end
   
   rule event
