@@ -13,6 +13,7 @@ module Dog::Rules
     
     class << self
       attr_accessor :registered_rules
+      attr_accessor :errors
       
       def applicable_nodes
         rule = self.new
@@ -28,6 +29,17 @@ module Dog::Rules
         self.registered_rules ||= []
         self.registered_rules << rule
       end
+      
+      def errors
+        @errors ||= []
+        @errors
+      end
+      
+      def report_error_for_node(node, description)
+        line = 1 + node.input.slice(0, node.interval.begin).count("\n")
+        self.errors << "(line: #{line}) - #{description}."
+      end
+      
     end
     
     def applicable_nodes

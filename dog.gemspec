@@ -8,7 +8,7 @@ spec = Gem::Specification.new do |s|
   
   s.author = "Salman Ahmad"
   s.email = "salman@salmanahmad.com"
-  s.homepage = "http://jabber.wocky.org"
+  s.homepage = "http://www.dog-lang.org"
   
   s.files = Dir['lib/**/*'] + Dir['bin/**/*'] + Dir['test/**/*.rb'] + ['AUTHORS', 'LICENSE', 'README', 'dog.gemspec']
   
