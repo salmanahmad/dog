@@ -19,3 +19,10 @@ Runtime tree traversal... (updating the "program counter")
 What do things like "AccessHead" return and place on the stack?
 
 What about non-primative stack placements like people? Do we need a language wide "json" serialization architecture...
+
+
+
+Ruby API (similar to the C api for ruby)
+
+How do you "require" a C module in ruby and what woudl that look like for Dog???
+
