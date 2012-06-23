@@ -9,6 +9,10 @@
 
 module Dog
   
+  class CompilationError < RuntimeError
+    attr_accessor :errors
+  end
+  
   class Compiler
     
     def self.compile(bark)
@@ -27,22 +31,16 @@ module Dog
       unless bark.parent
         errors = Rules::Rule.errors
         unless errors.empty?
-          # Report errors
-          # TODO - Abstract his into a CompilerError class and raise that. The actual printing should not be handled by the framework it should be handled by the client (aka the Dog executable, the test cases, etc.) I should never use 'puts' like this... change it, okay?
-          puts "The following compilation errors occured:"
-          puts
-          
-          for error in errors do
-            puts error
-            puts
-          end
+          compilation_error = nil
           
           if errors.size == 1 then 
-            raise "Compilation Error: There was #{errors.size} error that took place."
+            compilation_error = CompilationError.new("Compilation Error: There was #{errors.size} error that took place.\n\n#{errors.join("\n\n")}\n")
           else 
-            raise "Compilation Error: There were #{errors.size} errors that took place."
+            compilation_error = CompilationError.new("Compilation Error: There were #{errors.size} errors that took place.\n\n#{errors.join("\n\n")}\n")
           end
           
+          compilation_error.errors = errors
+          raise compilation_error
         end
         
       end

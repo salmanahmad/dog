@@ -17,8 +17,9 @@ class CompilerTests::RulesTest < Test::Unit::TestCase
   end
   
   def test_simple
-    bark = @parser.parse("1 + LISTEN TO public VIA http FOR images")
-    @compiler.compile(bark)
+    assert_raises Dog::CompilationError do
+      @compiler.compile(@parser.parse("1 + LISTEN TO public VIA http FOR images"))
+    end
   end
   
 end
