@@ -15,13 +15,20 @@ module Dog
   
   class Compiler
     
+    attr_accessor :errors
+    
     def self.compile(bark)
       compiler = self.new
       compiler.compile(bark)
     end
     
+    def initialize
+      self.errors = []
+    end
+    
     def compile(bark)
-      Rules::Rule.apply(bark)
+      rule = Rules::Rule.new(self)
+      rule.apply(bark)
       
       elements = bark.elements || []
       elements.each do |node|
@@ -29,7 +36,6 @@ module Dog
       end
       
       unless bark.parent
-        errors = Rules::Rule.errors
         unless errors.empty?
           compilation_error = nil
           

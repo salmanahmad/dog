@@ -13,33 +13,22 @@ module Dog::Rules
     
     class << self
       attr_accessor :registered_rules
-      attr_accessor :errors
-      
-      def applicable_nodes
-        rule = self.new
-        rule.applicable_nodes
-      end
-      
-      def apply(node)
-        rule = self.new
-        rule.apply(node)
-      end
       
       def register(rule)
         self.registered_rules ||= []
         self.registered_rules << rule
       end
       
-      def errors
-        @errors ||= []
-        @errors
+      def applicable_nodes
+        rule = self.new
+        rule.applicable_nodes
       end
-      
-      def report_error_for_node(node, description)
-        line = 1 + node.input.slice(0, node.interval.begin).count("\n")
-        self.errors << "(line: #{line}) - #{description}."
-      end
-      
+    end
+    
+    attr_accessor :compiler
+    
+    def initialize(compiler = nil)
+      self.compiler = compiler
     end
     
     def applicable_nodes
@@ -50,10 +39,16 @@ module Dog::Rules
       for rule in self.class.registered_rules do
         for applicable_node in rule.applicable_nodes do
           if node.kind_of? applicable_node then
+            rule = rule.new(self.compiler)
             rule.apply(node)
           end
         end
       end
+    end
+    
+    def report_error_for_node(node, description)
+      line = 1 + node.input.slice(0, node.interval.begin).count("\n")
+      self.compiler.errors << "(line: #{line}) - #{description}."
     end
     
   end

@@ -9,7 +9,7 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class CompilerTests::StandAloneCommandsTest < Test::Unit::TestCase
+class CompilerTests::TopLevelExpressionsTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
@@ -17,9 +17,20 @@ class CompilerTests::StandAloneCommandsTest < Test::Unit::TestCase
   end
   
   def test_simple
-    assert_raises Dog::CompilationError do
-      @compiler.compile(@parser.parse("1 + LISTEN TO public VIA http FOR images"))
+    assert_raises ::Dog::CompilationError do
+      @compiler.compile(@parser.parse("RETURN 5"))
     end
+  end
+  
+  def test_another_simple
+    program = <<-EOD
+      DEFINE foo DO
+        RETURN 5
+      END
+    EOD
+
+    output = @parser.parse(program)
+    @compiler.compile(output)
   end
   
 end

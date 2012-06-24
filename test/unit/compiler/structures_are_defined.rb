@@ -9,36 +9,33 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class ParserTests::CommunityTest < Test::Unit::TestCase
-
+class CompilerTests::StructuresAreDefinedTest < Test::Unit::TestCase
+  
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :community
-  end
-
-  def test_simple
-    struct = <<-EOD
-      community {
-        name
-        age
-        gender
-        relationship friends
-        relationship followers, followees
-        relationship student, teachers.teacher
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
+    @compiler = Dog::Compiler.new
   end
   
-  def test_empty
-    struct = <<-EOD
-      community {
+  def test_valid
+    program = <<-EOD
+      DEFINE stanford = community {
         
       }
     EOD
-    struct.strip!
-    @parser.parse(struct)
+    
+    @compiler.compile(@parser.parse(program.strip))
   end
-
+  
+  def test_invalid
+    program = <<-EOD
+      stanford = community {
+        
+      }
+    EOD
+    
+    assert_raises ::Dog::CompilationError do
+      @compiler.compile(@parser.parse(program.strip))
+    end
+  end
+  
 end

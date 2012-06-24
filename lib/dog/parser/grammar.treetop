@@ -237,7 +237,7 @@ grammar Dog
   end
   
   rule community
-    'community' sn? '{' sn? community_properties sn? '}' <::Dog::Nodes::Community>
+    'community' sn? '{' sn? community_properties? sn? '}' <::Dog::Nodes::Community>
   end
   
   rule community_properties
@@ -267,15 +267,15 @@ grammar Dog
   end
   
   rule event
-    'event' sn? '{' sn? properties sn? '}' <::Dog::Nodes::Event>
+    'event' sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Event>
   end
   
   rule task
-    'task' sn? '{' sn? properties sn? '}' <::Dog::Nodes::Task>
+    'task' sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Task>
   end
   
   rule message
-    'message' sn? '{' sn? properties sn? '}' <::Dog::Nodes::Message>
+    'message' sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Message>
   end
   
   rule properties
@@ -566,7 +566,11 @@ grammar Dog
   end
   
   rule return
-    'RETURN' <::Dog::Nodes::Return>
+    'RETURN' return_expression? <::Dog::Nodes::Return>
+  end
+  
+  rule return_expression 
+    s expression <::Dog::Nodes::ReturnExpression>
   end
   
   

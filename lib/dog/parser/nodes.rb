@@ -483,6 +483,10 @@ module Dog::Nodes
     
   end
   
+  class ReturnExpression < Node
+    
+  end
+  
   # ==================
   # = Shared Clauses =
   # ==================
