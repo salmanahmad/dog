@@ -14,14 +14,6 @@ grammar Dog
   # ================
   # = Core Program =
   # ================
-  
-  # TODO: I removed import, config, reply_disallow as top_level_statements. They are
-  # just normal statements now, but I can restrict their  useage in the postprocess/codegen
-  # compilation phase. 
-  
-  # TODO: Add logic for identifying illegal expression (top level reply, etc.)
-  
-  # TODO: Add logic and code for identifying void expressions... (assignent to a return, assignment to an ask, assignment to a define, etc...)
 
   rule program
     statements '' <::Dog::Nodes::Program> 
@@ -418,10 +410,8 @@ grammar Dog
     'PEOPLE' people_from_clause? (people_where_clause)? <::Dog::Nodes::People>
   end
   
-  # TODO - fix the AST for PERSON FROM variable
   # TODO - Add back community list. Right now, you can only access people from 
   # one community at a time...
-  # TODO - I don't know if FROM is a community literal or an access...how do I handle that? make it a string?
   rule people_from_clause
     sn 'FROM' sn access <::Dog::Nodes::PeopleFromClause>
   end
