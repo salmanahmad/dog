@@ -45,6 +45,9 @@ module Dog::Nodes
     end
     
     def to_hash
+      # TODO: Update this so that input is not saved every single time for every node.
+      # That causes my output compiled code to be much smaller...
+      
       hash = {}
       
       hash["interval_begin"] = self.interval.begin
