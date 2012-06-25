@@ -18,7 +18,7 @@ class CompilerTests::RulesTest < Test::Unit::TestCase
   
   def test_simple
     bark = @parser.parse("1+1")
-    @compiler.compile(bark)
+    bite = @compiler.compile(bark)
   end
   
 end

@@ -26,6 +26,7 @@ module Dog::Rules
     end
     
     def apply(node)
+      
       # TODO - Compile the string that is reported and insert it into the tree. You will need to add the symbols 
       # to the symbol table and report any compilation errors that may arise as well as any symbol mismatches...
     end

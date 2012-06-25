@@ -18,6 +18,24 @@ module Dog::Nodes
     attr_accessor :filename
     attr_accessor :line
     
+    def path
+      path = []
+      
+      if self.parent then
+        index = 0
+        
+        for element in self.parent.elements do
+          break if element.object_id == self
+          index += 1
+        end
+        
+        path = self.parent.path
+        path << index
+      end
+      
+      return path
+    end
+    
     def to_bark
       to_hash
     end
@@ -393,6 +411,10 @@ module Dog::Nodes
   end
   
   class DefineFunction < Node
+    
+    def name
+      return self.elements[0].text_value
+    end
     
   end
   

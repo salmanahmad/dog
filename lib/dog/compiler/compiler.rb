@@ -56,14 +56,17 @@ module Dog
         end
         
         bite = {}
-        bite["version"] = Dog::VERSION::STRING
-        bite["version_codename"] = Dog::VERSION::CODENAME
+        bite["version"] = VERSION::STRING
+        bite["version_codename"] = VERSION::CODENAME
         bite["time"] = Time.now
         bite["signature"] = ""
         bite["symbols"] = symbols
-        bite["code"] = bark
         
-        bite["signature"] = Digest::SHA1.hexdigest(bite.to_json)
+        # TODO - I need to work on this line a bit...
+        bite["code"] = bark.to_hash
+        
+        # TODO - Error here... to_json gives a nesting error...
+        bite["signature"] = Digest::SHA1.hexdigest(bite.inspect)
         
         return bite
       else
