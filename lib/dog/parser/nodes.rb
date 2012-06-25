@@ -47,8 +47,10 @@ module Dog::Nodes
     def to_hash
       hash = {}
       
+      hash["interval_begin"] = self.interval.begin
+      hash["interval_end"] = self.interval.end
+      hash["interval_exclusive"] = self.interval.exclude_end?
       hash["input"] = self.input
-      hash["interval"] = self.interval
       hash["text_value"] = self.text_value
       hash["name"] = self.class.name
       hash["filename"] = self.filename
@@ -66,8 +68,8 @@ module Dog::Nodes
     end
     
     def self.from_hash(hash)
+      internal = Range.new(hash["interval_begin"], hash["interval_end"], hash["interval_exclusive"])
       input = hash["input"]
-      interval = hash["interval"]
       text_value = hash["text_value"]
       name = hash["name"]
       filename = hash["filename"]
