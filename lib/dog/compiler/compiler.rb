@@ -16,6 +16,8 @@ module Dog
   class Compiler
     
     attr_accessor :errors
+    attr_accessor :symbols
+    attr_accessor :filename
     
     def self.compile(bark)
       compiler = self.new
@@ -24,6 +26,7 @@ module Dog
     
     def initialize
       self.errors = []
+      self.symbols = {}
     end
     
     def compile(bark)
@@ -49,11 +52,23 @@ module Dog
           raise compilation_error
         end
         
+        bite = {}
+        bite["version"] = Dog::VERSION::STRING
+        bite["version_codename"] = Dog::VERSION::CODENAME
+        bite["time"] = Time.now
+        bite["signature"] = ""
+        bite["symbols"] = symbols
+        bite["code"] = bark
+        
+        bite["signature"] = Digest::SHA1.hexdigest(bite.to_json)
+        
+        return bite
+      else
+        return bark
       end
-      
-      return bark
     end
     
   end
   
 end
+

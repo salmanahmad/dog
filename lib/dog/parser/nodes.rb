@@ -9,8 +9,6 @@
 
 module Dog::Nodes
   
-  # TODO - Create a way to add non-standard properties to sytnax nodes. In particular, how to store the program file name in the node somehow?
-  
   class Treetop::Runtime::SyntaxNode
     
   end
@@ -18,6 +16,7 @@ module Dog::Nodes
   class Node < Treetop::Runtime::SyntaxNode
     
     attr_accessor :filename
+    attr_accessor :line
     
     def to_bark
       to_hash
@@ -35,6 +34,7 @@ module Dog::Nodes
       hash["text_value"] = self.text_value
       hash["name"] = self.class.name
       hash["filename"] = self.filename
+      hash["line"] = self.line
       
       unless self.elements.nil?
         hash["elements"] = self.elements.map do |element|
@@ -53,10 +53,12 @@ module Dog::Nodes
       text_value = hash["text_value"]
       name = hash["name"]
       filename = hash["filename"]
+      line = hash["line"]
       
       node_type = Object::const_get(name)
       node = node_type.new(input, interval, elements)
       node.filename = filename
+      node.line = line
       
       elements = hash["elements"]
       elements.map! do |element|

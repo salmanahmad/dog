@@ -9,13 +9,7 @@
 
 module Dog::Rules
   
-  class MapFunction < Rule
-    
-    class << self
-      
-      
-      
-    end
+  class BuildSymbolTable < Rule
     
     Rule.register(self)
     

@@ -7,7 +7,8 @@
 # above copyright notice is included.
 #
 
-require 'stringio'
+require 'digest/sha1'
+require 'json'
 
 require File.join(File.dirname(__FILE__), 'compiler/compiler.rb')
 require File.join(File.dirname(__FILE__), 'compiler/state.rb')
