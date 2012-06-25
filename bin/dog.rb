@@ -19,8 +19,6 @@ if ARGV.empty? then
   exit
 end
 
-Dog::Environment.program_path = File.absolute_path(ARGV.last)
-
 # TODO - Fix this hack for TextMate Ruby module
 if ARGV.first == "-KU" then
   dog_code = File.open(ARGV.last).read
@@ -30,15 +28,13 @@ else
 end
 
 
-
-
 # Parse the dog code into an AST (called a bark)
 bark = Dog::Parser.parse(dog_code)
 
 # Compute the AST into a vm byte code (called bite code)
 bite = Dog::Compiler.compile(bark)
 
-# Execute the state machine. This may save state 
+# Execute the byte code. This may save state 
 # as an execution graph (called a track)
 Dog::Runtime.run(bite)
 

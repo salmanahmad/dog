@@ -9,6 +9,7 @@ How do communities and tasks and messages get created? Are they mapped (like fun
 
 How are defined_variables handled? are they mapped (like functions) as well? 
 
+Right now we have static linked libraries (with import). We may want to introduce a capability to dynamically link as well... maybe?
 
 
 

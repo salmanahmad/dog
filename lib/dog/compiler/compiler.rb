@@ -18,15 +18,18 @@ module Dog
     attr_accessor :errors
     attr_accessor :symbols
     attr_accessor :filename
+    attr_accessor :imported_filenames
     
-    def self.compile(bark)
+    def self.compile(bark, filename = nil)
       compiler = self.new
+      compiler.filename = filename
       compiler.compile(bark)
     end
     
     def initialize
       self.errors = []
       self.symbols = {}
+      self.imported_filenames = []
     end
     
     def compile(bark)
