@@ -13,44 +13,38 @@ module Dog::Nodes
     
     def to_hash
       hash = {}
-      hash["offset"] = self.interval.first
-      hash["text_value"] = self.text_value
-      hash["name"] = self.class.name
       
       hash["input"] = self.input
       hash["interval"] = self.interval
+      hash["text_value"] = self.text_value
+      hash["name"] = self.class.name
       
       unless self.elements.nil?
         hash["elements"] = self.elements.map do |element|
           element.to_hash
         end
       else
-        hash["elements"] = nil
+        hash["elements"] = []
       end
       
       return hash
     end
     
     def self.from_hash(hash)
+      input = hash["input"]
+      interval = hash["interval"]
+      text_value = hash["text_value"]
+      name = hash["name"]
       
-      # TODO - This is completely broken. I have to set parent correctly and I should not be using 'self'
+      node_type = Object::const_get(name)
+      node = node_type.new(input, interval, elements)
       
-      self.offset = hash["offset"]
-      self.text_value = hash["text_value"]
-      self.name = hash["name"]
-      
-      self.input = hash["input"]
-      self.interval = hash["interval"]
-      
-      self.elements = hash["elements"]
-      self.elements.map! do |element|
+      elements = hash["elements"]
+      elements.map! do |element|
         element = self.from_hash(element)
         element.parent = node
         element
       end
-      
-      node_type = Object::const_get(name)
-      node = node_type.new(input, interval, elements)
       
       return node
     end
