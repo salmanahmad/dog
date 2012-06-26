@@ -452,7 +452,9 @@ module Dog::Nodes
   end
   
   class Import < Node
-    
+    def filename
+      return Shellwords::shellwords(self.elements[1].text_value).first
+    end
   end
   
   class ImportAsClause < Node

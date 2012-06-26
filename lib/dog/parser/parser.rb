@@ -19,9 +19,9 @@ module Dog
     
     Treetop.load(File.expand_path(File.join(File.dirname(__FILE__), 'grammar.treetop')))
     
-    def self.parse(program)
+    def self.parse(program, filename = "")
       parser = self.new
-      parser.parse(program)
+      parser.parse(program, filename)
     end
     
     attr_accessor :parser
@@ -32,11 +32,13 @@ module Dog
       @should_clean_tree = true
     end
     
-    def parse(program)
+    def parse(program, filename = "")
+      filename = File.expand_path(filename)
+      
       tree = @parser.parse(program)
       
       if(tree.nil?)
-        error = ParseError.new("Parse error at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason.inspect}")
+        error = ParseError.new("Parse error in file: #{filename} at line: #{@parser.failure_line}, column: #{@parser.failure_column}.\n#{@parser.failure_reason.inspect}")
         
         error.line = @parser.failure_line
         error.column = @parser.failure_column

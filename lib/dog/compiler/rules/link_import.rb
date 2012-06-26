@@ -18,18 +18,17 @@ module Dog::Rules
     end
     
     def apply(node)
-      # TODO
-      return
-      
       filename = node.filename
       
-      # TODO - Add the filename to the parser...
-      parser = ::Dog::Parser.new
-      bark = parser.parse(File.open(filename, "r").read)
+      if filename[0,1] != "/" then
+        filename = File.join(File.dirname(self.compiler.current_filename), filename)
+      end
       
       old_filename = self.compiler.current_filename
       
       self.compiler.current_filename = filename
+      parser = ::Dog::Parser.new
+      bark = parser.parse(File.open(self.compiler.current_filename, "r").read, self.compiler.current_filename)
       self.compiler.compile(bark)
       
       self.compiler.current_filename = old_filename

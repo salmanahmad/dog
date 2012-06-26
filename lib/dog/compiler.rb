@@ -7,8 +7,9 @@
 # above copyright notice is included.
 #
 
-require 'digest/sha1'
 require 'json'
+require 'shellwords'
+require 'digest/sha1'
 require 'base64'
 
 require File.join(File.dirname(__FILE__), 'compiler/compiler.rb')

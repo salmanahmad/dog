@@ -7,7 +7,8 @@
 # above copyright notice is included.
 #
 
-require "treetop"
+require 'treetop'
+require 'shellwords'
 
 require File.join(File.dirname(__FILE__), 'parser/parser.rb')
 require File.join(File.dirname(__FILE__), 'parser/nodes.rb')

@@ -30,14 +30,18 @@ module Dog
       
       self.errors = []
       self.bite = {
-        "version": VERSION::STRING,
-        "version_codename": VERSION::CODENAME,
-        "time": Time.now,
-        "main_filename": filename,
-        "signature": "",
-        "symbols": {},
-        "code": {}
+        "version" => VERSION::STRING,
+        "version_codename" => VERSION::CODENAME,
+        "time" => Time.now,
+        "main_filename" => filename,
+        "signature" => "",
+        "symbols" => {},
+        "code" => {}
       }
+    end
+    
+    def current_filename=(filename)
+      @current_filename = File.expand_path(filename)
     end
     
     def compile(bark)

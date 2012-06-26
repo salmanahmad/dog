@@ -5,22 +5,21 @@ Handle TODOs
 
 Right now we have static linked libraries (with import). We may want to introduce a capability to dynamically link as well... maybe?
 
-Create the Dog commandline utility
-
-How does import actually work?
-	- Code is indexed by absolute file name...
+Right now import will always import files relative to the current file. In this way it acts much like require_relative in ruby instead of plain require. We may want a way to add a non-relative import that uses a LOAD_PATH to use shared libraries in a common system location.
 
 Organize the symbol table hierarchically
 	- Makes it easier to find stuff by the funciton scopes
-
-symbols: {
-	"foo": {
-		"@path": [1,2,3]
-		"bar": {
-			"@path": [1,2,3,4]
+	- Maybe something like this will work:
+		symbols: {
+			"foo": {
+				"@path": [1,2,3]
+				"bar": {
+					"@path": [1,2,3,4]
+				}
+			}
 		}
-	}
-}
+
+Create the Dog commandline utility
 
 How does the runtime actually work?
 
