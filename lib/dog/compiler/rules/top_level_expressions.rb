@@ -28,7 +28,7 @@ module Dog::Rules
         end
       end
       
-      report_error_for_node(node, "#{node.class.name.split("::").last} cannot appear in top level scope. They must appear inside a function")
+      report_error_for_node(node, "#{node.class.name.split("::").last} cannot appear in top level scope. They must appear inside a function.")
     end
     
   end 

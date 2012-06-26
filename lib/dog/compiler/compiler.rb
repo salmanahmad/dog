@@ -15,21 +15,29 @@ module Dog
   
   class Compiler
     
+    attr_accessor :bite
     attr_accessor :errors
-    attr_accessor :symbols
-    attr_accessor :filename
-    attr_accessor :imported_filenames
+    attr_accessor :current_filename
     
-    def self.compile(bark, filename = nil)
-      compiler = self.new
-      compiler.filename = filename
+    
+    def self.compile(bark, filename = "")
+      compiler = self.new(filename)
       compiler.compile(bark)
     end
     
-    def initialize
+    def initialize(filename = "")
+      self.current_filename = filename
+      
       self.errors = []
-      self.symbols = {}
-      self.imported_filenames = []
+      self.bite = {
+        "version": VERSION::STRING,
+        "version_codename": VERSION::CODENAME,
+        "time": Time.now,
+        "main_filename": filename,
+        "signature": "",
+        "symbols": {},
+        "code": {}
+      }
     end
     
     def compile(bark)
@@ -42,6 +50,9 @@ module Dog
       end
       
       unless bark.parent
+        
+        bite["code"][self.current_filename] = bark.to_hash
+        
         unless errors.empty?
           compilation_error = nil
           
@@ -55,18 +66,10 @@ module Dog
           raise compilation_error
         end
         
-        bite = {}
-        bite["version"] = VERSION::STRING
-        bite["version_codename"] = VERSION::CODENAME
-        bite["time"] = Time.now
-        bite["signature"] = ""
-        bite["symbols"] = symbols
-        
-        # TODO - I need to work on this line a bit...
-        bite["code"] = bark.to_hash
-        
-        # TODO - Error here... to_json gives a nesting error...
-        bite["signature"] = Digest::SHA1.hexdigest(bite.inspect)
+        if(self.current_filename == bite["code"]["main_filename"]) then
+          # TODO - Error here... to_json gives a nesting error...
+          bite["signature"] = Digest::SHA1.hexdigest(bite.inspect)
+        end
         
         return bite
       else

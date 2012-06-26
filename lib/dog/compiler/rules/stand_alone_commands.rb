@@ -35,7 +35,7 @@ module Dog::Rules
     
     def apply(node)
       if node.parent.class != ::Dog::Nodes::Statement
-        report_error_for_node(node, "#{node.class.name.split("::").last} cannot be nested in other expressions")
+        report_error_for_node(node, "#{node.class.name.split("::").last} cannot be nested in other expressions.")
       end
     end
     

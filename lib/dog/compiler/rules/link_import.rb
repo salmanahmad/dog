@@ -7,14 +7,6 @@
 # above copyright notice is included.
 #
 
-# TODO - Right now linked libraries have to be statically linked. We may
-# want the ability to dynamically link in the future as well...
-
-# Current limitation with import:
-#  - You have to link at compile time (static linked only)
-#  - You cannot import the same file twice. The second import
-#    will be ignored. And a compilation error will be reported...
-
 module Dog::Rules
   
   class LinkImport < Rule
@@ -26,9 +18,21 @@ module Dog::Rules
     end
     
     def apply(node)
+      # TODO
+      return
       
-      # TODO - Compile the string that is reported and insert it into the tree. You will need to add the symbols 
-      # to the symbol table and report any compilation errors that may arise as well as any symbol mismatches...
+      filename = node.filename
+      
+      # TODO - Add the filename to the parser...
+      parser = ::Dog::Parser.new
+      bark = parser.parse(File.open(filename, "r").read)
+      
+      old_filename = self.compiler.current_filename
+      
+      self.compiler.current_filename = filename
+      self.compiler.compile(bark)
+      
+      self.compiler.current_filename = old_filename
     end
     
   end 

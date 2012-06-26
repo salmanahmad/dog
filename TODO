@@ -13,6 +13,15 @@ How does import actually work?
 Organize the symbol table hierarchically
 	- Makes it easier to find stuff by the funciton scopes
 
+symbols: {
+	"foo": {
+		"@path": [1,2,3]
+		"bar": {
+			"@path": [1,2,3,4]
+		}
+	}
+}
+
 How does the runtime actually work?
 
 

@@ -24,7 +24,7 @@ module Dog::Rules
     end
     
     def apply(node)
-      path = node.path
+      path = node.path.unshift(self.compiler.current_filename)
       name = [self.name]
       
       parent = node
@@ -37,7 +37,7 @@ module Dog::Rules
       name = name.join(".")
       
       if self.compiler.symbols.include? name then
-        report_error_for_node(node, "The symbol named #{name} has been used twice. Symbols used to identify functions, events, task, and messages must be unique throughout the entire system")
+        report_error_for_node(node, "The symbol named #{name} has been used twice. Symbols used to identify functions, events, task, and messages must be unique throughout the entire system.")
       else
         self.compiler.symbols[name] = path
       end
