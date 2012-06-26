@@ -17,6 +17,10 @@ module Dog::Rules
       [
         ::Dog::Nodes::DefineVariable,
         ::Dog::Nodes::DefineFunction,
+        ::Dog::Nodes::Community,
+        ::Dog::Nodes::Event,
+        ::Dog::Nodes::Task,
+        ::Dog::Nodes::Message,
         ::Dog::Nodes::Listen,
         ::Dog::Nodes::Allow,
         ::Dog::Nodes::On,

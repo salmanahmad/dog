@@ -229,7 +229,7 @@ grammar Dog
   end
   
   rule community
-    'community' sn? '{' sn? community_properties? sn? '}' <::Dog::Nodes::Community>
+    'DEFINE' s 'community' s identifier sn? '{' sn? community_properties? sn? '}' <::Dog::Nodes::Community>
   end
   
   rule community_properties
@@ -259,15 +259,15 @@ grammar Dog
   end
   
   rule event
-    'event' sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Event>
+    'DEFINE' s 'event' s identifier sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Event>
   end
   
   rule task
-    'task' sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Task>
+    'DEFINE' s 'task' s identifier sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Task>
   end
   
   rule message
-    'message' sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Message>
+    'DEFINE' s 'message' s identifier sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Message>
   end
   
   rule properties

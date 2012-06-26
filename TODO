@@ -3,13 +3,29 @@ Ensure the proper ASTs
 
 Handle TODO
 
-Move "should_clean_tree" as a compilation rule ... maybe not...
-
-How do communities and tasks and messages get created? Are they mapped (like functions) as well?
-
 How are defined_variables handled? are they mapped (like functions) as well? 
 
 Right now we have static linked libraries (with import). We may want to introduce a capability to dynamically link as well... maybe?
+
+
+
+Create the Dog commandline utility
+
+How does import actually work?
+	- Code is indexed by absolute file name...
+
+How do tasks and messages work?
+	- DEFINE event foo {  }
+	- These do add stuff to the symbol table
+	- DEFINE variable = 5 does not expose a symbol - just exports the variables to other scopes...
+
+Organize the symbol table hierarchically
+	- Makes it easier to find stuff by the funciton scopes
+
+How does the runtime actually work?
+
+
+
 
 
 

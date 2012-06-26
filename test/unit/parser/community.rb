@@ -18,7 +18,7 @@ class ParserTests::CommunityTest < Test::Unit::TestCase
 
   def test_simple
     struct = <<-EOD
-      community {
+      DEFINE community twitter {
         name
         age
         gender
@@ -33,7 +33,7 @@ class ParserTests::CommunityTest < Test::Unit::TestCase
   
   def test_empty
     struct = <<-EOD
-      community {
+      DEFINE community foobar {
         
       }
     EOD

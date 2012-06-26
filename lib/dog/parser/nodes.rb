@@ -248,11 +248,9 @@ module Dog::Nodes
   # ============
 
   class Community < Node
-    
-  end
-    
-  class Community < Node
-    
+    def name
+      return self.elements[0].text_value
+    end
   end
   
   class CommunityProperties < Node
@@ -280,15 +278,21 @@ module Dog::Nodes
   end
   
   class Event < Node
-    
+    def name
+      return self.elements[0].text_value
+    end
   end
   
   class Task < Node
-    
+    def name
+      return self.elements[0].text_value
+    end
   end
   
   class Message < Node
-    
+    def name
+      return self.elements[0].text_value
+    end
   end
   
   class Properties < Node

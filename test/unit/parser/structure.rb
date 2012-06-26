@@ -18,7 +18,7 @@ class ParserTests::StructureTest < Test::Unit::TestCase
 
   def test_simple
     struct = <<-EOD
-      event {
+      DEFINE event post {
         name
         string
       }
@@ -29,7 +29,7 @@ class ParserTests::StructureTest < Test::Unit::TestCase
   
   def test_optional
     struct = <<-EOD
-      event {
+      DEFINE event post {
         optional name
         string
       }
@@ -40,14 +40,13 @@ class ParserTests::StructureTest < Test::Unit::TestCase
   
   def test_default
     struct = <<-EOD
-      event {
+      DEFINE event post {
         optional name = "foo"
         string
       }
     EOD
     struct.strip!
     @parser.parse(struct)
-    
   end
 
 end
