@@ -23,11 +23,6 @@ Create the Dog commandline utility
 
 How does the runtime actually work?
 
-
-
-
-
-
 Serialize the stack
 
 Runtime tree traversal... (updating the "program counter")
@@ -35,6 +30,14 @@ Runtime tree traversal... (updating the "program counter")
 What do things like "AccessHead" return and place on the stack?
 
 What about non-primative stack placements like people? Do we need a language wide "json" serialization architecture...
+
+
+
+
+
+
+
+
 
 
 
