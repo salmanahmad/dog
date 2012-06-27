@@ -84,11 +84,16 @@ class Init < Command
   end
   
   def usage
-    
+    super
+    puts
+    puts "Usage: dog init [DIRECTORY]"
+    puts
+    puts "  WARNING: This command is not yet implemented."
+    puts
   end
   
   def run(args)
-    
+    usage
   end  
 end
 
@@ -100,11 +105,30 @@ class Compile < Command
   end
   
   def usage
-    
+    super
+    puts
+    puts "Usage: dog compile [FILE.dog]"
+    puts
   end
   
   def run(args)
+    source_filename = args.first
+    source_code = File.open(source_filename).read
     
+    bark = Dog::Parser.parse(source_code)
+    bite = Dog::Compiler.compile(bark)
+    
+    # TODO - Handle error reporting here...
+    begin
+      bite_code_filename = File.basename(source_filename, ".dog") + ".bite"
+      bite_code_file = File.open(bite_code_filename, "w")
+      bite_code_file.write(Base64.encode64(bite.to_hash.inspect))
+      bite_code_file.close
+    rescue Dog::CompilationError => error
+      raise error
+    rescue Dog::ParseError => error
+      raise error
+    end
   end
 end
 
@@ -116,7 +140,10 @@ class Run < Command
   end
   
   def usage
-    
+    super
+    puts
+    puts "Usage: dog run [FILE.bite]"
+    puts
   end
   
   def run(args)
@@ -132,11 +159,16 @@ class Shell < Command
   end
   
   def usage
-    
+    super
+    puts
+    puts "Usage: dog shell [URL]"
+    puts
+    puts "  WARNING: This command is not yet implemented."
+    puts
   end
   
   def run(args)
-    
+    usage
   end
 end
 
@@ -188,35 +220,6 @@ class Help < Command
 end
 
 
+# All of that for this:
 Command.run(ARGV.clone)
-
-
-
-
-
-__END__
-
-
-
-dog_file = ARGV.last
-dog_code = File.open(dog_file).read
-bite_code_filename = File.basename(dog_file, ".dog") + ".bite"
-
-# TODO - Fix this hack for TextMate Ruby module
-#if ARGV.first == "-KU" then
-#  dog_code = File.open(ARGV.last).read
-#else
-#  # Read the dog code from the file
-#  dog_code = ARGF.read
-#end
-
-# Parse the dog code into an AST (called a bark)
-bark = Dog::Parser.parse(dog_code)
-
-# Compute the AST into a vm byte code (called bite code)
-bite = Dog::Compiler.compile(bark)
-
-bite_code_file = File.open(bite_code_filename, "w")
-bite_code_file.write(Base64.encode64(bite.to_hash.inspect))
-
 

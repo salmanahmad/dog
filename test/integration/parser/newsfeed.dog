@@ -16,6 +16,6 @@ END
 
 ON EACH post DO
   poster = PERSON FROM post
-  friends = PEOPLE FROM poster's newsfeed's friends
+  friends = PEOPLE FROM poster.newsfeed.friends
   NOTIFY friends VIA feed OF post
 END

@@ -19,7 +19,11 @@ Organize the symbol table hierarchically
 			}
 		}
 
-Create the Dog commandline utility
+Handle the really slow start up for Dog
+
+Handle No such file errors with importing...
+
+Handle error reporting with Dog commandline utility...
 
 How does the runtime actually work?
 

@@ -24,6 +24,8 @@ module Dog::Rules
         filename = File.join(File.dirname(self.compiler.current_filename), filename)
       end
       
+      # TODO - Handle No such file errors with importing...
+      
       old_filename = self.compiler.current_filename
       
       self.compiler.current_filename = filename
