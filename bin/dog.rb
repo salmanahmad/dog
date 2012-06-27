@@ -129,22 +129,23 @@ class Compile < Command
       exit
     end
     
-    
     begin
       bark = Dog::Parser.parse(source_code, source_filename)
       bite = Dog::Compiler.compile(bark, source_filename)
       
       bite_code_filename = File.basename(source_filename, ".dog") + ".bite"
       bite_code_file = File.open(bite_code_filename, "w")
-      bite_code_file.write(Marshal.dump(bite.to_hash))
+      
+      bite_code_file.write(JSON.dump(bite))
       bite_code_file.close
     rescue Dog::CompilationError => error
       puts error
     rescue Dog::ParseError => error
       puts error
-    else
+    rescue Exception => error
       puts "Error: An unknown compilation error occured."
       puts
+      puts error
     end
   end
 end

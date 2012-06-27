@@ -33,7 +33,7 @@ module Dog
         "version" => VERSION::STRING,
         "version_codename" => VERSION::CODENAME,
         "time" => Time.now,
-        "main_filename" => filename,
+        "main_filename" => self.current_filename,
         "signature" => "",
         "symbols" => {},
         "code" => {}
@@ -42,9 +42,9 @@ module Dog
     
     def current_filename=(filename)
       if filename.strip.length == 0 then
-        @current_filename = File.expand_path(filename)
-      else
         @current_filename = ""
+      else
+        @current_filename = File.expand_path(filename)
       end
     end
     
@@ -76,9 +76,8 @@ module Dog
           raise compilation_error
         end
         
-        if(self.current_filename == bite["code"]["main_filename"]) then
-          # TODO - Error here... to_json gives a nesting error...
-          bite["signature"] = Digest::SHA1.hexdigest(bite.inspect)
+        if(self.current_filename == bite["main_filename"]) then
+          bite["signature"] = Digest::SHA1.hexdigest(JSON.dump(bite))
         end
         
         return bite
