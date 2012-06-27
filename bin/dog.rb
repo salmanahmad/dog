@@ -136,7 +136,7 @@ class Compile < Command
       
       bite_code_filename = File.basename(source_filename, ".dog") + ".bite"
       bite_code_file = File.open(bite_code_filename, "w")
-      bite_code_file.write(Base64.encode64(bite.to_hash.inspect))
+      bite_code_file.write(Marshal.dump(bite.to_hash))
       bite_code_file.close
     rescue Dog::CompilationError => error
       puts error
