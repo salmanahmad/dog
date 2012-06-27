@@ -55,19 +55,23 @@ class Command
     
   end
   
+  def dog_version_string
+    "Dog #{Dog::VERSION::STRING} (Codename: #{Dog::VERSION::CODENAME})"
+  end
+  
   def name
     self.class.name.downcase
   end
   
   def usage
-    puts "Dog #{Dog::VERSION::STRING} (Codename: #{Dog::VERSION::CODENAME})"
+    puts dog_version_string
   end
   
   def run(args)
     command = self.class.find_command_by_name((args.first || "").downcase)
     
     if command then
-      unless command.class == Help then
+      unless [Help, Version].include? command.class then
         require File.join(File.dirname(__FILE__), '../lib/dog.rb')
       end
       
@@ -116,21 +120,31 @@ class Compile < Command
   
   def run(args)
     source_filename = args.first
-    source_code = File.open(source_filename).read
+    source_code = ""
     
-    bark = Dog::Parser.parse(source_code)
-    bite = Dog::Compiler.compile(bark)
-    
-    # TODO - Handle error reporting here...
     begin
+      source_code = File.open(source_filename).read
+    rescue
+      puts "Error: Could not read '#{source_filename}'"
+      exit
+    end
+    
+    
+    begin
+      bark = Dog::Parser.parse(source_code)
+      bite = Dog::Compiler.compile(bark)
+      
       bite_code_filename = File.basename(source_filename, ".dog") + ".bite"
       bite_code_file = File.open(bite_code_filename, "w")
       bite_code_file.write(Base64.encode64(bite.to_hash.inspect))
       bite_code_file.close
     rescue Dog::CompilationError => error
-      raise error
+      puts error
     rescue Dog::ParseError => error
-      raise error
+      puts error
+    else
+      puts "Error: An unknown compilation error occured."
+      puts
     end
   end
 end
@@ -240,7 +254,7 @@ class Version < Command
   end
   
   def run(args)
-    puts "Dog #{Dog::VERSION::STRING} (Codename: #{Dog::VERSION::CODENAME})"
+    puts dog_version_string
   end
 end
 

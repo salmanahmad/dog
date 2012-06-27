@@ -19,10 +19,6 @@ Organize the symbol table hierarchically
 			}
 		}
 
-Handle No such file errors with importing...
-
-Handle error reporting with Dog commandline utility...
-
 Fix the issue with expand_path if filename is empty ""
 
 How does the runtime actually work?

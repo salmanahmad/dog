@@ -24,13 +24,20 @@ module Dog::Rules
         filename = File.join(File.dirname(self.compiler.current_filename), filename)
       end
       
-      # TODO - Handle No such file errors with importing...
+      file_contents = ""
+      
+      begin
+        file = File.open(self.compiler.current_filename, "r")
+        file_contents = file.read
+      rescue
+        report_error_for_node(node, "Could not open the imported file named: #{filename}.")
+      end
       
       old_filename = self.compiler.current_filename
       
       self.compiler.current_filename = filename
       parser = ::Dog::Parser.new
-      bark = parser.parse(File.open(self.compiler.current_filename, "r").read, self.compiler.current_filename)
+      bark = parser.parse(file_contents, self.compiler.current_filename)
       self.compiler.compile(bark)
       
       self.compiler.current_filename = old_filename

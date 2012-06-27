@@ -48,7 +48,7 @@ module Dog::Rules
     
     def report_error_for_node(node, description)
       line = 1 + node.input.slice(0, node.interval.begin).count("\n")
-      self.compiler.errors << "(#{self.compiler.current_filename}:#{line}) - #{description}."
+      self.compiler.errors << "(#{self.compiler.current_filename}:#{line}) - #{description}"
     end
     
   end
