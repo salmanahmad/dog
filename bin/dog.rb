@@ -27,7 +27,7 @@
 
 require 'rubygems'
 #require 'bundler/setup'
-require File.join(File.dirname(__FILE__), '../lib/dog.rb')
+require File.join(File.dirname(__FILE__), '../lib/dog/version.rb')
 
 
 class Command
@@ -67,6 +67,10 @@ class Command
     command = self.class.find_command_by_name((args.first || "").downcase)
     
     if command then
+      unless command.class == Help then
+        require File.join(File.dirname(__FILE__), '../lib/dog.rb')
+      end
+      
       args.shift
       command.run(args)
     else
