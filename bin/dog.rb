@@ -131,8 +131,8 @@ class Compile < Command
     
     
     begin
-      bark = Dog::Parser.parse(source_code)
-      bite = Dog::Compiler.compile(bark)
+      bark = Dog::Parser.parse(source_code, source_filename)
+      bite = Dog::Compiler.compile(bark, source_filename)
       
       bite_code_filename = File.basename(source_filename, ".dog") + ".bite"
       bite_code_file = File.open(bite_code_filename, "w")

@@ -21,13 +21,13 @@ module Dog::Rules
       filename = node.filename
       
       if filename[0,1] != "/" then
-        filename = File.join(File.dirname(self.compiler.current_filename), filename)
+        filename = File.expand_path(File.join(File.dirname(self.compiler.current_filename), filename))
       end
       
       file_contents = ""
       
       begin
-        file = File.open(self.compiler.current_filename, "r")
+        file = File.open(filename, "r")
         file_contents = file.read
       rescue
         report_error_for_node(node, "Could not open the imported file named: #{filename}.")
