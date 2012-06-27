@@ -16,6 +16,7 @@ module Dog::Rules
     def applicable_nodes
       [
         ::Dog::Nodes::DefineFunction,
+        ::Dog::Nodes::On,
         ::Dog::Nodes::Community,
         ::Dog::Nodes::Event,
         ::Dog::Nodes::Task,
@@ -25,7 +26,7 @@ module Dog::Rules
     
     def apply(node)
       path = node.path.unshift(self.compiler.current_filename)
-      name = [self.name]
+      name = [node.name]
       
       parent = node
       while parent = parent.parent do
@@ -36,10 +37,10 @@ module Dog::Rules
       
       name = name.join(".")
       
-      if self.compiler.symbols.include? name then
+      if self.compiler.bite["symbols"].include? name then
         report_error_for_node(node, "The symbol named #{name} has been used twice. Symbols used to identify functions, events, task, and messages must be unique throughout the entire system.")
       else
-        self.compiler.symbols[name] = path
+        self.compiler.bite["symbols"][name] = path
       end
     end
     

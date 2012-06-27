@@ -93,6 +93,18 @@ module Dog::Nodes
       return node
     end
     
+    def elements_by_class(klass)
+      result = []
+      
+      self.elements.each do |element|
+        if element.class == klass then
+          result << element
+        end
+      end
+      
+      result
+    end
+    
   end
   
   # ================
@@ -372,6 +384,25 @@ module Dog::Nodes
   end
   
   class On < Node
+    def name
+      name = "@"
+      if self.elements_by_class(OnEach).empty? then
+        name += "on:"
+      else
+        name += "each:"
+      end
+      
+      name += self.elements_by_class(InClause).first.elements_by_class(Identifier).first.text_value
+      
+      return name
+    end
+  end
+  
+  class OnEach < Node
+    
+  end
+  
+  class OnEachCount < Node
     
   end
   

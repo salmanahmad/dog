@@ -388,10 +388,16 @@ grammar Dog
   # = On Command =
   # ==============
   
-  # TODO - I need to break this out a bit...
-  
   rule on
-    'ON' (s 'EACH' (s integer)?)? in_clause 'DO' sn statements? s? 'END' <::Dog::Nodes::On>
+    'ON' on_each? in_clause 'DO' sn statements? s? 'END' <::Dog::Nodes::On>
+  end
+  
+  rule on_each
+    s 'EACH' on_each_count? <::Dog::Nodes::OnEach>
+  end
+  
+  rule on_each_count
+    s integer <::Dog::Nodes::OnEachCount>
   end
   
   # ==================

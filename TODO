@@ -22,10 +22,6 @@ Organize the symbol table hierarchically
 
 Improve the space efficiency of the bite code generation
 
-
-
-Fix the issue where ON blocks are not being treated as symbols...
-
 How does the runtime actually work?
 
 Serialize the stack
