@@ -41,7 +41,11 @@ module Dog
     end
     
     def current_filename=(filename)
-      @current_filename = File.expand_path(filename)
+      if filename.strip.length == 0 then
+        @current_filename = File.expand_path(filename)
+      else
+        @current_filename = ""
+      end
     end
     
     def compile(bark)

@@ -40,8 +40,7 @@ module Dog
     end
     
     def parse(program, filename = "")
-      # TODO - This is a bug if filename is blank...
-      filename = File.expand_path(filename)
+      filename = File.expand_path(filename) unless filename.strip.length == 0
       
       tree = @parser.parse(program)
       

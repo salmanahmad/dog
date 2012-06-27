@@ -19,7 +19,6 @@ Organize the symbol table hierarchically
 			}
 		}
 
-Fix the issue with expand_path if filename is empty ""
 
 How does the runtime actually work?
 
