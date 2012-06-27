@@ -311,6 +311,10 @@ module Dog::Nodes
     
   end
   
+  class PropertyDirectionModifier < Node
+    
+  end
+  
   class Listen < Node
    
   end 

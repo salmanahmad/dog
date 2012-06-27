@@ -275,7 +275,7 @@ grammar Dog
   end
   
   rule property
-    sn? property_requirement_modifier? identifier property_default_value? s? t <::Dog::Nodes::Property>
+    sn? property_requirement_modifier? property_direction_modifier? identifier property_default_value? s? t <::Dog::Nodes::Property>
   end
   
   rule property_default_value
@@ -286,6 +286,12 @@ grammar Dog
     'required' s <::Dog::Nodes::PropertyRequirementModifier>
     /
     'optional' s <::Dog::Nodes::PropertyRequirementModifier>
+  end
+  
+  rule property_direction_modifier
+    'input' s <::Dog::Nodes::PropertyDirectionModifier>
+    /
+    'output' s <::Dog::Nodes::PropertyDirectionModifier>
   end
   
   # ==================

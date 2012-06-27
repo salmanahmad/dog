@@ -48,5 +48,27 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     struct.strip!
     @parser.parse(struct)
   end
+  
+  def test_input_output
+    struct = <<-EOD
+      DEFINE event post {
+        optional input name = "foo"
+        output string
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+  end
+  
+  def test_input_output_2
+    struct = <<-EOD
+      DEFINE event post {
+        optional input name = "foo"
+        required output string
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+  end
 
 end
