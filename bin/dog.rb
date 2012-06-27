@@ -60,7 +60,7 @@ class Command
   end
   
   def usage
-    puts "Dog #{Dog::VERSION::STRING} (#{Dog::VERSION::CODENAME})"
+    puts "Dog #{Dog::VERSION::STRING} (Codename: #{Dog::VERSION::CODENAME})"
   end
   
   def run(args)
@@ -222,6 +222,27 @@ class Help < Command
   end
 end
 
+
+class Version < Command
+  Command.register(self)
+  
+  def description
+    "Show the dog version"
+  end
+  
+  def usage
+    super
+    puts 
+    puts "Usage: dog version"
+    puts
+    puts "  #{description}"
+    puts    
+  end
+  
+  def run(args)
+    puts "Dog #{Dog::VERSION::STRING} (Codename: #{Dog::VERSION::CODENAME})"
+  end
+end
 
 # All of that for this:
 Command.run(ARGV.clone)
