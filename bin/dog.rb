@@ -26,12 +26,11 @@
 #ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
 
 require 'rubygems'
-require 'bundler/setup'
+#require 'bundler/setup'
 require File.join(File.dirname(__FILE__), '../lib/dog.rb')
 
 
 class Command
-  
   class << self
     
     attr_accessor :registered_commands

@@ -17,7 +17,9 @@ module Dog
   
   class Parser
     
-    Treetop.load(File.expand_path(File.join(File.dirname(__FILE__), 'grammar.treetop')))
+    class << self
+      attr_accessor :grammar_loaded
+    end
     
     def self.parse(program, filename = "")
       parser = self.new
@@ -28,11 +30,17 @@ module Dog
     attr_accessor :should_clean_tree
     
     def initialize
+      unless Parser.grammar_loaded then
+        Treetop.load(File.expand_path(File.join(File.dirname(__FILE__), 'grammar.treetop')))
+        Parser.grammar_loaded = true
+      end
+      
       @parser = DogParser.new
       @should_clean_tree = true
     end
     
     def parse(program, filename = "")
+      # TODO - This is a bug if filename is blank...
       filename = File.expand_path(filename)
       
       tree = @parser.parse(program)

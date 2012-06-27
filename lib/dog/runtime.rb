@@ -7,6 +7,7 @@
 # above copyright notice is included.
 #
 
+
 require 'fiber'
 require 'digest/sha1'
 
@@ -18,7 +19,7 @@ require 'uuid'
 require 'json'
 require 'mongo'
 
-require 'blather/client/client'
+#require 'blather/client/client'
 
 require File.join(File.dirname(__FILE__), 'runtime/database_object.rb')
 require File.join(File.dirname(__FILE__), 'runtime/routability.rb')
