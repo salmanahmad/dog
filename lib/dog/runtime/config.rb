@@ -13,17 +13,31 @@ module Dog
     
     class << self
       
+      def initialize(config_file = nil, config = {})
+        return if @initialized
+        @initialized = true
+        
+        @config ||= {
+          'port' => 4567, 
+          'dog_prefix' => '/dog/',
+          'database' => File.basename(Runtime.bite_code_filename, File.extname(Runtime.bite_code_filename))
+        }
+        
+        config_file ||= File.join(File.dirname(Runtime.bite_code_filename), "config.json")
+        
+        @config.merge!(JSON.parse(File.open(config_file).read))
+        @config.merge!(config)
+      end
+      
       def reset
         @config = {}
       end
       
       def set(key, value)
-        @config ||= {'port' => 4567, 'dog_prefix' => '/dog/' }
         @config[key] = value
       end
       
       def get(key)
-        @config ||= {'port' => 4567, 'dog_prefix' => '/dog/' }
         @config[key]
       end
       

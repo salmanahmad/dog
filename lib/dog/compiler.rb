@@ -10,7 +10,6 @@
 require 'json'
 require 'shellwords'
 require 'digest/sha1'
-require 'base64'
 
 require File.join(File.dirname(__FILE__), 'compiler/compiler.rb')
 require File.join(File.dirname(__FILE__), 'compiler/state.rb')

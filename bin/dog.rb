@@ -165,7 +165,7 @@ class Run < Command
   end
   
   def run(args)
-    
+    Dog::Runtime.run_file(args.first)
   end
 end
 

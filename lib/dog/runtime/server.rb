@@ -247,7 +247,6 @@ module Dog
     end
     
     class << self
-      attr_accessor :global_track
       
       def boot
         prefix = Config.get('dog_prefix')

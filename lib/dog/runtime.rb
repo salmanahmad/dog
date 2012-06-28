@@ -19,6 +19,7 @@ require 'uuid'
 require 'json'
 require 'mongo'
 
+# TODO Add back the Instant Messaging Capabilities.
 #require 'blather/client/client'
 
 require File.join(File.dirname(__FILE__), 'runtime/database_object.rb')
@@ -45,44 +46,29 @@ require File.join(File.dirname(__FILE__), 'runtime/workflow.rb')
 
 module Dog
   
-  def self.bark!(run = true, &block)
-    
-    # I need to handle the fast startup logic here
-    Database.initialize
-    
-    EM.run do
-      track = Track.root
-      fiber = TrackFiber.new do
-        yield if block
+  class Runtime
+    class << self
+      attr_accessor :bite_code
+      attr_accessor :bite_code_filename
+      
+      def run_file(bite_code_filename, options = {})
+        self.run(File.open(bite_code_filename).read, bite_code_filename, options)
       end
       
-      fiber.track = track
-      fiber.resume
-      
-      # TODO - This is here for testing
-      Server.global_track = track
-      Server.boot
-      
-      # TODO - Are there times where you don't want to run the server?
-      Server.run if run
-      
+      def run(bite_code, bite_code_filename, options = {})
+        # TODO - Parse the bite code initially.
+        self.bite_code = bite_code
+        self.bite_code_filename = bite_code_filename
+        
+        Config.initialize(options["config_file"], options["config"])
+        Database.initialize
+        
+        # Add root track if one does not already exist
+        
+        # Start the server
+        Server.run
+      end
     end
-
-    # TODO - This is here for testing
-    return Server
   end
-
-  class Runtime
-
-    def self.run(bark)
-      runtime = self.new
-      runtime.run(bark)
-    end
-
-    def run(bark)
-      eval(bark)
-    end
-
-  end
-
+  
 end

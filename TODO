@@ -22,7 +22,20 @@ Organize the symbol table hierarchically
 
 Improve the space efficiency of the bite code generation
 
-How does the runtime actually work?
+
+
+
+
+
+
+
+
+
+Parse the bite code
+
+Server architecture
+
+Node object modeling (eval, etc.)
 
 Serialize the stack
 
@@ -35,6 +48,48 @@ What about non-primative stack placements like people? Do we need a language wid
 
 
 
+
+ON EACH variable and LISTEN / ASK collections...
+
+	We have two conflicting goals: search and variable scoping
+	
+	title
+	
+	ON EACH video DO
+		# does 'title' refer to the global variable or the video
+	END
+	
+	vs
+	
+	LISTEN FOR videos
+	
+	videos[title == "hello"]
+	
+	videos[video.title == "hello"]
+	
+	vs
+	
+	@each:videos[video.title == "Hello"]
+	
+
+Application Configuration
+	Options (pick any of these, can choose multiple):
+		
+		Command arguments
+		
+		Stand-alone configuration file
+			What should the default name be:
+			config.json
+			project.json
+			project.config
+			application.json
+			specification.json
+			
+		CONFIG statements (either a block with {} or key = value) automatically generate the app config
+		
+		Also consider including a read only CONFIG command to give access from within Dog
+		
+	
 
 
 

@@ -10,7 +10,7 @@
 module Dog
   
   class << self 
-    attr_accessor :database    
+    attr_accessor :database
   end
   
   module Database
@@ -24,7 +24,6 @@ module Dog
         @initialized = true
         
         database_name = Config.get "database"
-        database_name = File.basename($0, File.extname($0)) if database_name.nil?
         
         ::Dog.database = Mongo::Connection.new.db(database_name)
         
