@@ -1,33 +1,33 @@
 
 CONFIG default_community = "learners"
 
-learners = community {
+DEFINE community learners {
   optional objective
   optional teachables
   optional learnables
 }
 
-provide_three_interests = task {
+task provide_three_interests {
   input instructions = "Please provide three things that you are interested in learning and teaching."
   output objective
   output learnables
   output teachables
 }
 
-find_teacher = event {
+event find_teacher {
   input learnable
   output teachers
 }
 
-matched_teachers = event {
+event matched_teachers {
   output teachers
 }
 
-meeting_conversation = event {
+event meeting_conversation {
   input person
 }
 
-chat = event {
+event chat {
   output message
 }
 

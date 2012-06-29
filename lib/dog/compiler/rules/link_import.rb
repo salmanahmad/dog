@@ -30,7 +30,7 @@ module Dog::Rules
         file = File.open(filename, "r")
         file_contents = file.read
       rescue
-        report_error_for_node(node, "Could not open the imported file named: #{filename}.")
+        report_error_for_node(node, "I could not open the imported file named: #{filename}. Are you sure this file exists?")
       end
       
       old_filename = self.compiler.current_filename

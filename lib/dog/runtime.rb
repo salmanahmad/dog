@@ -62,10 +62,9 @@ module Dog
         
         Config.initialize(options["config_file"], options["config"])
         Database.initialize
+        Track.initialize_root([bite_code["main_filename"], 0])
+        Server.initialize
         
-        # Add root track if one does not already exist
-        
-        # Start the server
         Server.run
       end
     end

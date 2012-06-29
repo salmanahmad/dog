@@ -3,6 +3,21 @@ Ensure the proper ASTs
 
 Handle TODOs
 
+Check status on http_response
+
+dog compile and dog run
+	Extensions are optional..
+
+Error codes
+	Integration with a discussion page
+	Integration with stack overflow
+	Integration with a documentation URL
+
+Abreviate file paths to relative paths in error message
+
+Line numbers should be formatted as:
+	"In line {number} of {file}" rather than "file:number"
+
 Right now we have static linked libraries (with import). We may want to introduce a capability to dynamically link as well... maybe?
 
 Right now import will always import files relative to the current file. In this way it acts much like require_relative in ruby instead of plain require. We may want a way to add a non-relative import that uses a LOAD_PATH to use shared libraries in a common system location.
@@ -18,6 +33,7 @@ Organize the symbol table hierarchically
 				}
 			}
 		}
+
 
 
 Improve the space efficiency of the bite code generation

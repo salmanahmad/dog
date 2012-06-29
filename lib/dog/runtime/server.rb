@@ -248,9 +248,12 @@ module Dog
     
     class << self
       
-      def boot
+      def initialize
+        return if @initialized
+        @initialized = true
+        
         prefix = Config.get('dog_prefix')
-
+        
         # TODO - I have to figure this out for production
         set :static, false
         set :public_folder, Proc.new { File.join(File.dirname($0), "views") }
@@ -601,7 +604,8 @@ module Dog
       end
       
       def run
-        # TODO - You must call boot first. Right now we are not because of testing.
+        # Server.initialize will not execute anything if it has already been run once...
+        Server.initialize
         Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
       

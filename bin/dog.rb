@@ -160,7 +160,18 @@ class Run < Command
   def usage
     super
     puts
-    puts "Usage: dog run [FILE.bite]"
+    puts "Usage: dog run [FILE.bite] [options]"
+    puts
+    puts "  Execute the Dog bite code in FILE.bite. If no file is provided, Dog will first check 'config.json'"
+    puts "  for the name of the main application file in the current directory. If 'config.json' does not exist"
+    puts "  then Dog will default to the first .bite file it finds in the current directory. If there is no .bite"
+    puts "  file Dog will return an error."
+    puts
+    puts "Options include: "
+    puts "  -c config_file      # Specify the application configuration file. Default: config.json."
+    puts "  -d database_name    # Specify the MongoDB database name. Default: the same name as the bite code file."
+    puts "  -u url_prefix       # Specify the URL prefix to mount Dog. Default: /dog"
+    puts "  -p port             # Specify the port to run Dog's server. Default: 4242."
     puts
   end
   

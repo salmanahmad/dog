@@ -12,6 +12,14 @@ module Dog
   class Track < DatabaseObject
     collection "tracks"
     
+    module Status
+      RUNNING = "running"
+      WAITING = "waiting"
+      FINISHED = "finished" 
+      ERROR = "error"
+      DELETED = "deleted"
+    end
+    
     attr_accessor :_id
     
     # TODO - Change ancestors to access_ancestors
@@ -83,23 +91,31 @@ module Dog
       if root then
         return root
       else
+        nil
+      end
+    end
+    
+    def self.initialize_root(checkpoint)
+      root = self.root
+      
+      unless root
         root = Track.new
         root.ancestors = []
         root.depth = 0
-        root.checkpoint = 0
+        root.checkpoint = checkpoint
         root.save
-        
-        return root
       end
+      
+      return root
     end
     
     def self.current
       track = Fiber.current.track
-
+      
       if track.nil?
         raise "Attempting to access a track outside of a fiber"
       end
-
+      
       return track
     end
     

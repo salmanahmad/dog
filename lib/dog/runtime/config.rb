@@ -25,7 +25,7 @@ module Dog
         
         config_file ||= File.join(File.dirname(Runtime.bite_code_filename), "config.json")
         
-        @config.merge!(JSON.parse(File.open(config_file).read))
+        @config.merge!(JSON.parse(File.open(config_file).read)) rescue nil
         @config.merge!(config)
       end
       
