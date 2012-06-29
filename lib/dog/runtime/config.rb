@@ -18,7 +18,7 @@ module Dog
         @initialized = true
         
         @config ||= {
-          'port' => 4567, 
+          'port' => 4242, 
           'dog_prefix' => '/dog/',
           'database' => File.basename(Runtime.bite_code_filename, File.extname(Runtime.bite_code_filename))
         }
