@@ -56,7 +56,15 @@ module Dog
       end
       
       def run(bite_code, bite_code_filename, options = {})
-        # TODO - Parse the bite code initially.
+        
+        bite_code = JSON.load(bite_code)
+        
+        if bite_code["version"] != VERSION::STRING then
+          raise "This program was compiled using a different version of Dog. It was compiled with #{bite_code["version"]}. I am Dog version #{VERSION::STRING}."
+        end
+        
+        bite_code["code"] = Nodes::Node.from_hash(bite_code["code"])
+        
         self.bite_code = bite_code
         self.bite_code_filename = bite_code_filename
         

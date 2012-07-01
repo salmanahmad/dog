@@ -143,7 +143,7 @@ class Compile < Command
     rescue Dog::ParseError => error
       puts error
     rescue Exception => error
-      puts "Error: An unknown compilation error occured."
+      puts "Error: An unknown compilation error occured: "
       puts
       puts error
     end

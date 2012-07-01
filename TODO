@@ -15,6 +15,14 @@ Error codes
 
 Abreviate file paths to relative paths in error message
 
+Configuration file should be called:
+	project.config
+	
+	Dog init will add in project.config
+	
+	Also consider including a read only CONFIG command to give access from within Dog
+	
+
 Line numbers should be formatted as:
 	"In line {number} of {file}" rather than "file:number"
 
@@ -46,8 +54,6 @@ Improve the space efficiency of the bite code generation
 
 
 
-
-Parse the bite code
 
 Server architecture
 
@@ -87,26 +93,7 @@ ON EACH variable and LISTEN / ASK collections...
 	
 	@each:videos[video.title == "Hello"]
 	
-
-Application Configuration
-	Options (pick any of these, can choose multiple):
-		
-		Command arguments
-		
-		Stand-alone configuration file
-			What should the default name be:
-			config.json
-			project.json
-			project.config
-			application.json
-			specification.json
-			
-		CONFIG statements (either a block with {} or key = value) automatically generate the app config
-		
-		Also consider including a read only CONFIG command to give access from within Dog
-		
 	
-
 
 
 
