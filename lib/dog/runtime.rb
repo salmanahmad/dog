@@ -38,6 +38,7 @@ require File.join(File.dirname(__FILE__), 'runtime/message.rb')
 require File.join(File.dirname(__FILE__), 'runtime/person.rb')
 require File.join(File.dirname(__FILE__), 'runtime/record.rb')
 require File.join(File.dirname(__FILE__), 'runtime/server.rb')
+require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
 require File.join(File.dirname(__FILE__), 'runtime/task.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track_fiber.rb')
@@ -71,8 +72,6 @@ module Dog
         Config.initialize(options["config_file"], options["config"])
         Database.initialize
         Track.initialize_root([bite_code["main_filename"], 0])
-        Server.initialize
-        
         Server.run
       end
     end
