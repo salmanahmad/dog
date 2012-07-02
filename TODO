@@ -49,13 +49,6 @@ Improve the space efficiency of the bite code generation
 
 
 
-
-
-
-
-
-Node object modeling (eval, etc.)
-
 Serialize the stack
 
 Runtime tree traversal... (updating the "program counter")

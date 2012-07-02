@@ -482,7 +482,7 @@ module Dog
         
         
         
-        tracks = Track.find({"status": Track::STATUS::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
+        tracks = Track.find({"status": Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
         for track in tracks do
           track = Track.from_hash(track)
           track.continue

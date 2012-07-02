@@ -12,7 +12,7 @@ module Dog
   class Track < DatabaseObject
     collection "tracks"
     
-    module Status
+    module STATE
       RUNNING = "running"
       WAITING = "waiting"
       FINISHED = "finished" 
@@ -22,24 +22,34 @@ module Dog
     
     attr_accessor :_id
     
-    # TODO - Change ancestors to access_ancestors
-    # TODO - Add new property called control_ancestors
-    attr_accessor :ancestors
-    attr_accessor :checkpoint
-    attr_accessor :depth
+    attr_accessor :function_name
+    attr_accessor :current_node_path
     
-    attr_accessor :references
+    attr_accessor :access_ancestors
+    attr_accessor :control_ancestors
+    
+    attr_accessor :state
+    attr_accessor :stack
     attr_accessor :variables
-    attr_accessor :status
     
-    # Volatile properties
-    # None - for now
+    attr_accessor :return_value
+    attr_accessor :error_value
+    
+    # TODO - Think about adding back references when we
+    # decide on the object model for the language
+    #attr_accessor :references
     
     def to_hash
       return {
-        ancestors: self.ancestors,
-        checkpoint: self.checkpoint,
-        depth: self.depth
+        function_name: self.function_name
+        current_node_path: self.current_node_path
+        access_ancestors: self.access_ancestors
+        control_ancestors: self.control_ancestors
+        state: self.state
+        stack: self.stack
+        variables: self.variables
+        return_value: self.return_value
+        error_value: self.error_value
       }
     end
     
@@ -105,7 +115,7 @@ module Dog
     end
     
     def continue
-      # TODO
+      Runtime.node_at_path(self.current_node_path).eval(self)
     end
     
   end
