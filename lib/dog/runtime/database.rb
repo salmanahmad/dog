@@ -29,6 +29,8 @@ module Dog
         
         # TODO - Add compound indices for queries.
         
+        # TODO - Add events
+        
         ::Dog.database[Community.collection_name].ensure_index("name", {unique:true})
         
         ::Dog.database[RoutedMessage.collection_name].ensure_index("type")
@@ -49,12 +51,6 @@ module Dog
         
         ::Dog.database[Track.collection_name].ensure_index("depth")
         ::Dog.database[Track.collection_name].ensure_index("ancestors")
-        
-        ::Dog.database[Variable.collection_name].ensure_index("name")
-        ::Dog.database[Variable.collection_name].ensure_index("track_id")
-        ::Dog.database[Variable.collection_name].ensure_index("track_depth")
-        
-        ::Dog.database[RoutedWorkflow.collection_name].ensure_index("type")        
       end 
     end
   end    

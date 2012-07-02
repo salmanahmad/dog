@@ -33,7 +33,7 @@ module Dog
     attr_accessor :status
     
     # Volatile properties
-    attr_accessor :fiber
+    # None - for now
     
     def to_hash
       return {
@@ -68,15 +68,10 @@ module Dog
       return ancestors
     end
     
-    def fiber=(f)
-      @fiber = f
-      f.instance_variable_set(:@track, self._id)
-    end
-    
     def checkpoint &block
       # TODO
     end
-
+    
     def reset_checkpoint &block
       # TODO
     end
@@ -107,16 +102,6 @@ module Dog
       end
       
       return root
-    end
-    
-    def self.current
-      track = Fiber.current.track
-      
-      if track.nil?
-        raise "Attempting to access a track outside of a fiber"
-      end
-      
-      return track
     end
     
     def continue

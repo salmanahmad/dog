@@ -12,8 +12,6 @@ require 'shellwords'
 require 'digest/sha1'
 
 require File.join(File.dirname(__FILE__), 'compiler/compiler.rb')
-require File.join(File.dirname(__FILE__), 'compiler/state.rb')
-
 require File.join(File.dirname(__FILE__), 'compiler/rules/rule.rb')
 Dir[File.join(File.dirname(__FILE__), "compiler/rules", "*.rb")].each { |file| require file }
 

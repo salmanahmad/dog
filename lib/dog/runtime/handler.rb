@@ -7,6 +7,8 @@
 # above copyright notice is included.
 #
 
+# TODO - Convert this into an embedded document that will work in conjunction with variable
+
 module Dog
   class Handler
     

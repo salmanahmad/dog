@@ -7,6 +7,8 @@
 # above copyright notice is included.
 #
 
+# TODO - Convert this into an "embedded document" for variables...
+
 module Dog
   
   class Variable < DatabaseObject

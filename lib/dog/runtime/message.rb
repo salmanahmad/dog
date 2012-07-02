@@ -39,8 +39,4 @@ module Dog
     end
     
   end
-  
-  class Message < Structure
-    
-  end
 end

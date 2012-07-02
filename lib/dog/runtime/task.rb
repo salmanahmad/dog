@@ -119,9 +119,5 @@ module Dog
     
     
   end
-  
-  class Task < Structure
-    
-  end
 end
 
