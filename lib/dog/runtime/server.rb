@@ -357,124 +357,97 @@ module Dog
         
         
         get prefix + '/stream/tasks' do
+          return unless verify_current_user("You have to be logged in to view tasks.")
           
+          @output = {}
+          
+          # TODO Task options
+          current_user = Person.find_by_id(session[:current_user])
+          @output["tasks"] = RoutedTask.for_person(current_user, {:completed => params["completed"], :type => params["type"]})
+          @output["success"] = true
+          
+          @output.to_json
         end
         
         get prefix + '/stream/tasks/:id' do
+          return unless verify_current_user("You have to be logged in to view tasks.")
           
+          @output = {}
+          
+          current_user = Person.find_by_id(session[:current_user])
+          task = RoutedTask.find_by_id(params["id"])
+          
+          if task.route_to_person? current_user then
+            @output["success"] = true
+            @output["task"] = task.to_hash_for_event
+          else
+            @output["success"] = false
+            @output["errors"] ||= []
+            @output["errors"] << "You are not eligible for this task."
+          end
+          
+          @output.to_json
         end
         
         post prefix + '/stream/tasks/:id' do
+          return unless verify_current_user("You have to be logged in to respond to tasks.")
           
+          @output = {}
+          
+          current_user = Person.find_by_id(session[:current_user])
+          current_task = RoutedTask.find_by_id(params["id"])
+          
+          if current_task.route_to_person?(current_user) then
+            current_task.process_response(params["response"], current_user)
+            current_task.save
+            Variable.notify_handlers_for_task(current_task)
+            @output["success"] = true
+          else
+            @output["success"] = false
+            @output["errors"] ||= []
+            @output["errors"] << "You are not eligible for this task"
+            return
+          end          
+          
+          @output.to_json
         end
         
         
         
         
         get prefix + '/stream/messages' do
+          return unless verify_current_user("You have to be logged in to view messages.")
           
+          @output = {}
+          
+          current_user = Person.find_by_id(session[:current_user])
+          @output["messages"] = RoutedMessage.for_person(current_user)
+          @output["success"] = true
+          
+          @output.to_json
         end
         
         get prefix + '/stream/messages/:id' do
-          
-        end
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        get_or_post prefix + 'tasks.view' do
-          @event = process_incoming_event(::Dog::SystemEvents::Tasks::View) rescue return
-          
-          return unless verify_current_user("You have to be logged in to view tasks.")
-          
-          current_user = Person.find_by_id(session[:current_user])
-          task = RoutedTask.find_by_id(@event.id)
-          
-          if task.route_to_person? current_user then
-            @event.success = true
-            @event.task = task.to_hash_for_event
-          else
-            @event.success = false
-            @event.errors ||= []
-            @event.errors << "You are not eligible for this task."
-          end
-          
-          process_outgoing_event
-        end
-        
-        get_or_post prefix + 'tasks.list' do
-          @event = process_incoming_event(::Dog::SystemEvents::Tasks::List) rescue return
-          
-          return unless verify_current_user("You have to be logged in to view tasks.")
-          
-          # TODO Task options
-          current_user = Person.find_by_id(session[:current_user])
-          @event.tasks = RoutedTask.for_person(current_user, {:completed => @event.completed, :after_task_id => @event.after_task_id, :type => @event.type})
-          @event.success = true
-          
-          process_outgoing_event
-        end
-        
-        get_or_post prefix + 'messages.view' do
-          @event = process_incoming_event(::Dog::SystemEvents::Messages::View) rescue return
-          
           return unless verify_current_user("You have to be logged in to view messages.")
           
+          @output = {}
+          
           current_user = Person.find_by_id(session[:current_user])
-          message = RoutedMessage.find_by_id(@event.id)
+          message = RoutedMessage.find_by_id(params["id"])
           
           if message.route_to_person? current_user then
-            @event.success = true
-            @event.message = message.to_hash_for_event
+            @output["success"] = true
+            @output["message"] = message.to_hash_for_event
           else
-            @event.success = false
-            @event.errors ||= []
-            @event.errors << "You are not eligible for this message."
+            @output["success"] = false
+            @output["errors"] ||= []
+            @output["errors"] << "You are not eligible for this message."
           end
           
-          process_outgoing_event
+          @output.to_json
         end
         
-        get_or_post prefix + 'messages.list' do
-          @event = process_incoming_event(::Dog::SystemEvents::Messages::List) rescue return
-          
-          return unless verify_current_user("You have to be logged in to view messages.")
-          
-          current_user = Person.find_by_id(session[:current_user])
-          @event.messages = RoutedMessage.for_person(current_user)
-          @event.success = true
-          
-          process_outgoing_event
-        end
         
-        get_or_post prefix + 'tasks.respond' do
-          @event = process_incoming_event(::Dog::SystemEvents::Tasks::Respond) rescue return
-          
-          return unless verify_current_user("You have to be logged in to respond to tasks.")
-          
-          current_user = Person.find_by_id(session[:current_user])
-          current_task = RoutedTask.find_by_id(@event.id)
-          
-          if current_task.route_to_person?(current_user) then
-            current_task.process_response(@event.response, current_user)
-            current_task.save
-            Variable.notify_handlers_for_task(current_task)
-            @event.success = true
-          else
-            
-            @event.success = false
-            @event.errors ||= []
-            @event.errors << "You are not eligible for this task"
-            return
-          end          
-          
-          process_outgoing_event
-        end
         
         
         get '*' do
@@ -502,6 +475,9 @@ module Dog
             404
           end
         end
+        
+        
+        
         
         # TODO - Restart the active tracks
         
