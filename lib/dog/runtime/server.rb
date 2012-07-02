@@ -51,10 +51,12 @@ module Dog
       end
       
       def verify_current_user(message = "You need to be logged in when performing this operation")
+        @output = {}
+        
         unless session[:current_user]
-          @event.success = false
-          @event.errors = [message]
-          process_outgoing_event
+          @output["success"] = false
+          @output["errors"] = [message]
+          body @output.to_json
           return false
         end
         
@@ -62,10 +64,12 @@ module Dog
       end
       
       def verify_not_current_user(message = "You cannot be logged in when performing this operation.")
+        @output = {}
+        
         if session[:current_user]
-          @event.success = false
-          @event.errors = [message]
-          process_outgoing_event
+          @output["success"] = false
+          @output["errors"] = [message]
+          body @output.to_json
           return false
         end
         
@@ -147,210 +151,241 @@ module Dog
         
         self.initialize_vet
         
-        get_or_post prefix + 'account.status' do
-          @event = process_incoming_event(::Dog::SystemEvents::Account::LoginStatus) rescue return
+        get prefix + '/account/status' do
+          @output = {}
           
           if session[:current_user]
-            @event.success = true
-            @event.logged_in = true
+            @output["success"] = true
+            @output["logged_in"] = true
           else
-            @event.success = true
-            @event.logged_in = false
+            @output["success"] = true
+            @output["logged_in"] = false
           end
           
-          notify_handlers
-          process_outgoing_event
+          @output.to_json
         end
         
-        get_or_post prefix + 'account.login' do
-          @event = process_incoming_event(::Dog::SystemEvents::Account::Login) rescue return
+        get prefix + '/account/login' do
+          @output = {}
           
-          person = Person.find_by_email(@event.email)
-          if person && person.password == Digest::SHA1.hexdigest(@event.password)
-            @event.success = true
+          person = Person.find_by_email(params["email"])
+          if person && person.password == Digest::SHA1.hexdigest(params["password"])
+            @output["success"] = true
             session[:current_user] = person.id
           else
-            @event.success = false
-            @event.errors ||= []
-            @event.errors << "Wrong Username/Email and password combination."
+            @output["success"] = false
+            @output["errors"] ||= []
+            @output["errors"] << "Wrong Username/Email and password combination."
           end
           
-          notify_handlers
-          process_outgoing_event
+          @output.to_json
         end
 
-        get_or_post prefix + 'account.logout' do
-          @event = process_incoming_event(::Dog::SystemEvents::Account::Logout) rescue return
+        get prefix + '/account/logout' do
+          @output = {}
           
           session.clear
-          @event.success = true
-
-          notify_handlers
-          process_outgoing_event
+          @output["success"] = true
+          
+          @output.to_json
         end
         
-        get_or_post prefix + 'account.create' do
-          @event = process_incoming_event(::Dog::SystemEvents::Account::Create) rescue return
-          
+        post prefix + '/account/create' do
           return unless verify_not_current_user("You cannot be logged in when creating a new account.")
           
-          @event.password ||= ""
-          @event.confirm ||= ""
+          @output = {}
           
-          person = Person.find_by_email(@event.email)
+          params["password"] ||= ""
+          params["confirm"] ||= ""
+          
+          person = Person.find_by_email(params["email"])
           
           if person then
-            @event.success = false
-            @event.errors ||= []
-            @event.errors << "User name has already been taken."
+            @output["success"] = false
+            @output["errors"] ||= []
+            @output["errors"] << "User name has already been taken."
           else
-            if @event.password != @event.confirm then
-              @event.success = false
-              @event.errors ||= []
-              @event.errors << "Password and Confirmation does not match."
+            if params["password"] != params["confirm"] then
+              @output["success"] = false
+              @output["errors"] ||= []
+              @output["errors"] << "Password and Confirmation does not match."
             else
-              @event.success = true
+              @output.success = true
               
               person = Person.new
-              person.email = @event.email
-              person.google = @event.google
-              person.password = Digest::SHA1.hexdigest @event.password
+              person.email = params["email"]
+              person.password = Digest::SHA1.hexdigest params["password"]
               person.join_community_named(Config.get("default_community"))
               person.save
                 
               session[:current_user] = person.id
-              notify_handlers
             end
           end
           
-          process_outgoing_event
+          @output.to_json
         end
+        
+        get prefix + '/profile/view' do
+          return unless verify_current_user("You have to be logged in to view your profile.")
+          
+          @output = {}
+          
+          person = Person.find_by_id(session[:current_user])
+          @output["value"] = person.to_hash_for_event
+          @output["success"] = true
+          
+          @output.to_json
+        end
+        
+        post prefix + '/profile/write' do
+          return unless verify_current_user("You have to be logged in to write to your profile.")
+          
+          @output = {}
+          
+          person = Person.find_by_id(session[:current_user])
+          success = person.write_profile(params["value"])
+          person.save if success
+          @output["success"] = success
+          
+          @output.to_json
+        end
+        
+        post prefix + '/profile/update' do          
+          return unless verify_current_user("You have to be logged in to update your profile.")
+          
+          @output = {}
+          
+          person = Person.find_by_id(session[:current_user])
+          success = person.update_profile(params["value"])
+          person.save if success
+          @output["success"] = success
+          
+          @output.to_json
+        end
+        
         
         # TODO - Privacy considerations need to go here...
         
-        get_or_post prefix + 'people.search' do
-          @event = process_incoming_event(::Dog::SystemEvents::People::Search) rescue return
+        
+        get prefix + '/people/search' do
+          @output = {}
           
-          @event.results = Person.search(@event.query)
-          @event.success = true
+          @output["results"] = Person.search(params["query"])
+          @output["success"] = true
           
-          notify_handlers
-          process_outgoing_event
+          @output.to_json
         end
         
-        get_or_post prefix + 'people.view' do
-          @event = process_incoming_event(::Dog::SystemEvents::People::View) rescue return
+        get prefix + '/people/:id' do
+          @output = {}
           
-          person = Person.find_by_id(@event.id)
+          person = Person.find_by_id(params["id"])
           if person then
-            @event.person = person.to_hash_for_event
-            @event.success = true
+            @output["person"] = person.to_hash_for_event
+            @output["success"] = true
           else
-            @event.success = false
-            @event.errors ||= []
-            @event.errors << "Could not find the user with that identifier."
+            @output["success"] = false
+            @output["errors"] ||= []
+            @output["errors"] << "Could not find the user with that identifier."
           end
           
-          notify_handlers
-          process_outgoing_event
+          @output.to_json
         end
         
-        get_or_post prefix + 'profile.view' do
-          return unless verify_current_user("You have to be logged in to view your profile.")
+        post prefix + '/community/:name/join' do
+          return unless verify_current_user("You have to be logged in to join a community.")          
           
-          @event = process_incoming_event(::Dog::SystemEvents::Profile::View) rescue return
-          
+          @output = {}
           
           person = Person.find_by_id(session[:current_user])
-          @event.value = person.to_hash_for_event
-          @event.success = true
+          success = person.join_community_named(params["name"])
+          @output["success"] = success
           
-          notify_handlers
-          process_outgoing_event
+          @output.to_json
         end
         
-        get_or_post prefix + 'profile.write' do
-          @event = process_incoming_event(::Dog::SystemEvents::Profile::Write) rescue return
-          
-          return unless verify_current_user("You have to be logged in to write to your profile.")
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.write_profile(@event.value)
-          person.save if success
-          @event.success = success
-          
-          
-          notify_handlers
-          process_outgoing_event
-        end
-        
-        get_or_post prefix + 'profile.update' do
-          @event = process_incoming_event(::Dog::SystemEvents::Profile::Update) rescue return
-          
-          return unless verify_current_user("You have to be logged in to update your profile.")
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.update_profile(@event.value)
-          person.save if success
-          @event.success = success
-          
-          notify_handlers
-          process_outgoing_event
-        end
-        
-        get_or_post prefix + 'profile.push' do
-          @event = process_incoming_event(::Dog::SystemEvents::Profile::Push) rescue return
-          
-          return unless verify_current_user("You have to be logged in to update your profile.")
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.push_profile(@event.value)
-          person.save if success
-          @event.success = success
-          
-          notify_handlers
-          process_outgoing_event
-        end
-        
-        get_or_post prefix + 'profile.pull' do
-          @event = process_incoming_event(::Dog::SystemEvents::Profile::Pull) rescue return
-          
-          return unless verify_current_user("You have to be logged in to update your profile.")
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.pull_profile(@event.value)
-          person.save if success
-          @event.success = success
-          
-          notify_handlers
-          process_outgoing_event
-        end
-        
-        get_or_post prefix + 'community.join' do
-          @event = process_incoming_event(::Dog::SystemEvents::Community::Join) rescue return
-          
-          return unless verify_current_user("You have to be logged in to join a community.")
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.join_community_named(@event.name)
-          @event.success = success
-          
-          notify_handlers
-          process_outgoing_event
-        end
-
-        get_or_post prefix + 'community.leave' do
-          @event = process_incoming_event(::Dog::SystemEvents::Community::Leave) rescue return
-          
+        post prefix + '/community/:name/leave' do
           return unless verify_current_user("You have to be logged in to leave a community.")
           
-          person = Person.find_by_id(session[:current_user])
-          success = person.leave_community_named(@event.name)
-          @event.success = success
+          @output = {}
           
-          notify_handlers
-          process_outgoing_event
+          person = Person.find_by_id(session[:current_user])
+          success = person.leave_community_named(params["name"])
+          @output["success"] = success
+          
+          @output.to_json
         end
+        
+        
+        
+        
+        get prefix + '/stream/poll' do
+          
+        end
+        
+        
+        
+        
+        get prefix + '/stream/tracks' do
+          
+        end
+        
+        get prefix + '/stream/tracks/root' do
+          
+        end
+        
+        get prefix + '/stream/tracks/:id ' do
+          
+        end
+        
+        
+        
+        
+        get prefix + '/stream/events' do
+          
+        end
+        
+        get prefix + '/stream/events/:id' do
+          
+        end
+        
+        post prefix + '/stream/events/:id' do
+          
+        end
+        
+        
+        
+        
+        get prefix + '/stream/tasks' do
+          
+        end
+        
+        get prefix + '/stream/tasks/:id' do
+          
+        end
+        
+        post prefix + '/stream/tasks/:id' do
+          
+        end
+        
+        
+        
+        
+        get prefix + '/stream/messages' do
+          
+        end
+        
+        get prefix + '/stream/messages/:id' do
+          
+        end
+        
+        
+        
+        
+        
+        
+        
+        
         
         get_or_post prefix + 'tasks.view' do
           @event = process_incoming_event(::Dog::SystemEvents::Tasks::View) rescue return
@@ -363,7 +398,6 @@ module Dog
           if task.route_to_person? current_user then
             @event.success = true
             @event.task = task.to_hash_for_event
-            notify_handlers
           else
             @event.success = false
             @event.errors ||= []
@@ -383,7 +417,6 @@ module Dog
           @event.tasks = RoutedTask.for_person(current_user, {:completed => @event.completed, :after_task_id => @event.after_task_id, :type => @event.type})
           @event.success = true
           
-          notify_handlers
           process_outgoing_event
         end
         
@@ -398,7 +431,6 @@ module Dog
           if message.route_to_person? current_user then
             @event.success = true
             @event.message = message.to_hash_for_event
-            notify_handlers
           else
             @event.success = false
             @event.errors ||= []
@@ -417,7 +449,6 @@ module Dog
           @event.messages = RoutedMessage.for_person(current_user)
           @event.success = true
           
-          notify_handlers
           process_outgoing_event
         end
         
@@ -445,18 +476,6 @@ module Dog
           process_outgoing_event
         end
         
-        get_or_post prefix + 'workflows.list' do
-          @event = process_incoming_event(::Dog::SystemEvents::Workflows::List) rescue return
-          
-          return unless verify_current_user("You have to be logged in to view workflows.")
-          
-          current_user = Person.find_by_id(session[:current_user])
-          @event.workflows = Workflow.for_person(current_user)
-          @event.success = true
-          
-          notify_handlers
-          process_outgoing_event
-        end
         
         get '*' do
           path = params[:splat].first
@@ -483,6 +502,10 @@ module Dog
             404
           end
         end
+        
+        # TODO - Restart the active tracks
+        
+        
         
         # This is very important. Do not remove this or testing will not work
         return self

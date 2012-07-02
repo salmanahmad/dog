@@ -20,31 +20,6 @@ module Dog
       end
     end
 
-    class Account < SystemEvent
-
-      class LoginStatus < SystemEvent
-        property "logged_in", :type => Boolean, :direction => "output"
-      end
-      
-      class Login < SystemEvent
-        property "email", :type => String, :direction => "input"
-        property "password", :type => String, :direction => "input"
-      end
-
-      class Logout < SystemEvent
-
-      end
-      
-      class Create < SystemEvent
-        property "email", :type => String, :required => true, :direction => "input"
-        property "facebook", :type => String, :direction => "input"
-        property "twitter", :type => String, :direction => "input"
-        property "google", :type => String, :direction => "input"
-        property "password", :type => String, :direction => "input"
-        property "confirm", :type => String, :direction => "input"
-      end
-
-    end
     
     class People < SystemEvent
       
