@@ -321,12 +321,15 @@ module Dog
         
         get prefix + '/stream/poll' do
           
+          # TODO
+          
         end
         
         
         
         
         get prefix + '/stream/tracks' do
+          
           
         end
         
@@ -454,7 +457,7 @@ module Dog
           path = params[:splat].first
           path = "/index.html" if path == "/"
           path = settings.public_folder + path
-
+          
           if File.exists? path then
             if File.extname(path) == ".html" then
               line = File.open(path, &:readline)
@@ -463,7 +466,7 @@ module Dog
                 template = settings.public_folder + match[1]
                 template_content = File.open(template, &:read)
                 path_content = File.open(path, &:read)
-
+                
                 erb path_content, :layout => template_content, :views => '/'
               else
                 send_file path
@@ -479,7 +482,12 @@ module Dog
         
         
         
-        # TODO - Restart the active tracks
+        tracks = Track.find({"status": Track::STATUS::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
+        for track in tracks do
+          track = Track.from_hash(track)
+          track.continue
+        end
+        
         
         
         

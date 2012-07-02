@@ -119,6 +119,10 @@ module Dog
       return track
     end
     
+    def continue
+      # TODO
+    end
+    
   end
   
 end

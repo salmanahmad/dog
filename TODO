@@ -54,9 +54,6 @@ Improve the space efficiency of the bite code generation
 
 
 
-
-Server architecture
-
 Node object modeling (eval, etc.)
 
 Serialize the stack
