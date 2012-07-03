@@ -159,7 +159,7 @@ module Dog::Nodes
       # And then return the next node_path for the runtime to visit next
       
       for element in elements do
-        if element.read_stack(track) == nil then
+        if !track.has_stack_path(element.path) then
           return element.path
         end
       end
@@ -725,13 +725,28 @@ module Dog::Nodes
     def visit(track)
       path = super
       
-      
-      
+      if path then
+        return path
+      else
+        puts elements.first.read_stack(track)
+        write_stack(track, nil)
+        return parent.path
+      end
     end
   end
   
   class Inspect < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        puts elements.first.read_stack(track).inspect
+        write_stack(track, nil)
+        return parent.path
+      end
+    end
   end
   
   # ======================

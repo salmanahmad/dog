@@ -40,6 +40,19 @@ module Dog
     # decide on the object model for the language
     #attr_accessor :references
     
+    def has_stack_path(path)
+      pointer = self.stack
+      for item in path do
+        if pointer.class == Hash && pointer.has_key? item
+          pointer = pointer[item]
+        else
+          return false
+        end
+      end
+      
+      return true
+    end
+    
     def to_hash
       return {
         function_name: self.function_name,
