@@ -105,7 +105,7 @@ module Dog::Nodes
       result
     end
     
-    def evaluate(context)
+    def evaluate(track)
       
     end
     
@@ -116,19 +116,19 @@ module Dog::Nodes
   # ================
   
   class Program < Node
-    def evaluate(context)
+    def evaluate(track)
       
     end
   end
   
   class Statements < Node
-    def evaluate(context)
+    def evaluate(track)
       
     end
   end
   
   class Statement < Node
-    def evaluate(context)
+    def evaluate(track)
       
     end
   end
@@ -138,31 +138,31 @@ module Dog::Nodes
   # ==============
   
   class Assignment < Node
-    def evaluate(context)
+    def evaluate(track)
       
     end
   end
   
   class Expression < Node
-    def evaluate(context)
+    def evaluate(track)
       
     end
   end
   
   class Operation < Node
-    def evaluate(context)
+    def evaluate(track)
       
     end
   end
   
   class OperationHead < Node
-    def evaluate(context)
+    def evaluate(track)
       
     end
   end
   
   class Access < Node
-    def evaluate(context)
+    def evaluate(track)
       
     end
   end

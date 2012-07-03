@@ -97,3 +97,41 @@ How do you "require" a C module in ruby and what woudl that look like for Dog???
 	Do these do what we expect: "require 'hello'" vs "require 'hello.so'" vs "require 'hello.rb'"
 	Should we have the similar approach??? 
 
+
+
+
+
+
+
+functional languages
+	Everything in the language is immutable
+	
+	Objects / Methods exist from a syntax standpoint
+	
+	Manipulating an object create a new version thus preserving immutability
+	
+	You can hold references to the same object but it is your "view" of the object
+	
+		You cannot "synchronize" an object down its timeline...
+		
+		It may not make a lot of sense for an object to store a value that does not compose it
+		
+	There is no "canonical" view of an object - just "your" view of the object
+	
+		You can however, check for identity and equality. Objects can:
+		
+			equal and identical
+		
+			equal but not identical
+		
+			not equal and not identical
+		
+			identical but not equal (aka different versions of the same thing)
+		
+	In Dog, we have a problem of wanting the public to see the "up to date" version of a resource --- but there i not way to merge different views.
+	
+		Perhaps we model the outside world as an actor that does have a "view" and that view is constructed by the event stream
+	
+
+
+
