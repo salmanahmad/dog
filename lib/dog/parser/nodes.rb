@@ -9,6 +9,26 @@
 
 module Dog::Nodes
   
+  module VisitOperator
+    def visit(track)
+      self.write_stack(track, self.text_value)
+      return parent.path
+    end
+  end
+  
+  module VisitAllChildrenReturnLast
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        write_stack(track, elements.last.read_stack(track))
+        return parent.path
+      end
+    end
+  end
+  
   class Treetop::Runtime::SyntaxNode
     
   end
@@ -34,6 +54,33 @@ module Dog::Nodes
       end
       
       return path
+    end
+    
+    def write_stack(track, value)
+      path = self.path.clone
+      last = path.pop
+      
+      stack = track["stack"]
+      for index in path do
+        stack[index] ||= {}
+        stack = stack[index]
+      end
+      
+      stack[last] = value
+    end
+    
+    def read_stack(track)
+      path = self.path.clone
+      stack = track["stack"]
+      
+      begin
+        for index in path do
+          stack = stack[index]
+        end
+        return stack
+      rescue
+        return nil
+      end
     end
     
     def to_bark
@@ -84,6 +131,7 @@ module Dog::Nodes
       node.line = line
       
       elements = hash["elements"]
+      
       elements.map! do |element|
         element = self.from_hash(element)
         element.parent = node
@@ -105,8 +153,18 @@ module Dog::Nodes
       result
     end
     
-    def evaluate(track)
+    def visit(track)
+      # It is the node's responsibility to do whatever it needs to do
+      # Then it needs to write some information to the "stack"
+      # And then return the next node_path for the runtime to visit next
       
+      for element in elements do
+        if element.read_stack(track) == nil then
+          return element.path
+        end
+      end
+      
+      return nil
     end
     
   end
@@ -116,21 +174,15 @@ module Dog::Nodes
   # ================
   
   class Program < Node
-    def evaluate(track)
-      
-    end
+    include VisitAllChildrenReturnLast
   end
   
   class Statements < Node
-    def evaluate(track)
-      
-    end
+    include VisitAllChildrenReturnLast
   end
   
   class Statement < Node
-    def evaluate(track)
-      
-    end
+    include VisitAllChildrenReturnLast
   end
   
   # ==============
@@ -138,53 +190,182 @@ module Dog::Nodes
   # ==============
   
   class Assignment < Node
-    def evaluate(track)
+    def visit(track)
+      path = super
       
+      if path then 
+        return path
+      else
+        value = elements.last.read_stack(track)
+        path = elements.first.read_stack(track)
+        
+        # TODO - This may raise an exception...
+        pointer = track["variables"]
+        last = path.pop
+        for index in path do
+          pointer = pointer[index]
+        end
+        
+        pointer[last] = value
+        
+        write_stack(track, value)
+        return parent.path
+      end
+    end
+  end
+  
+  
+  class AssignmentAccess < Node
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        pointer = []
+        pointer << elements.first.read_stack(track)
+        
+        tail = elements_by_class(AccessTail).first
+        if tail then
+          tail_pointer = tail.read_stack(track)
+          for item in tail_pointer do
+            pointer << item
+          end
+        end
+        
+        write_stack(track, pointer)
+        return parent.path
+      end
     end
   end
   
   class Expression < Node
-    def evaluate(track)
-      
-    end
+    include VisitAllChildrenReturnLast
   end
   
   class Operation < Node
-    def evaluate(track)
+    def visit(track)
+      path = super
       
+      if path then
+        return path
+      else
+        if elements.size == 2 then
+          operand = elements.last.read_stack(track)
+          value = elements.first.perform(operand)
+          
+          write_stack(track, value)
+          return parent.path
+        elsif elements.size == 3 then
+          operand1 = elements[0].read_stack(track)
+          operand2 = elements[2].read_stack(track)
+          value = elements[1].perform(operand1, operand2)
+          
+          write_stack(track, value)
+          return parent.path
+        else
+          raise "Executing an invalid operation"
+        end
+      end
     end
   end
   
   class OperationHead < Node
-    def evaluate(track)
-      
-    end
+    include VisitAllChildrenReturnLast
+  end
+  
+  class OperationTail < Node
+    include VisitAllChildrenReturnLast
   end
   
   class Access < Node
-    def evaluate(track)
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        pointer = []
+        pointer << elements.first.read_stack(track)
+        
+        tail = elements_by_class(AccessTail).first
+        if tail then
+          tail_pointer = tail.read_stack(track)
+          for item in tail_pointer do
+            pointer << item
+          end
+        end
+        
+        # TODO - This may raise an exception...
+        value = track["variables"]
+        for index in pointer do
+          value = value[index]
+        end
+        
+        write_stack(track, value)
+        return parent.path
+      end
       
     end
   end
   
   class AccessHead < Node
-    
+    include VisitAllChildrenReturnLast
   end
-
+  
   class AccessTail < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class AccessBracket < Node
+    path = super
     
+    if path then
+      return path
+    else
+      pointer = []
+      pointer << elements.first.read_stack(track)
+      
+      tail = elements_by_class(AccessTail).first
+      if tail then
+        tail_pointer = tail.read_stack(track)
+        for item in tail_pointer do
+          pointer << item
+        end
+      end
+      
+      write_stack(track, pointer)
+      return parent.path
+    end
   end
   
   class AccessDot < Node
+    path = super
     
+    if path then
+      return path
+    else
+      pointer = []
+      pointer << elements.first.read_stack(track)
+      
+      tail = elements_by_class(AccessTail).first
+      if tail then
+        tail_pointer = tail.read_stack(track)
+        for item in tail_pointer do
+          pointer << item
+        end
+      end
+      
+      write_stack(track, pointer)
+      return parent.path
+    end
   end
   
   class Identifier < Node
-    
+    def visit(track)
+      write_stack(track, self.text_value)
+      return parent.path
+    end
   end
   
   # =============
@@ -192,87 +373,87 @@ module Dog::Nodes
   # =============
   
   class AssignmentOperator < Node
-    
+    include VisitOperator
   end
   
   class AdditionOperator < Node
-    
+    include VisitOperator
   end
   
   class SubtractionOperator < Node
-    
+    include VisitOperator
   end
   
   class MultiplicationOperator < Node
-    
+    include VisitOperator
   end
   
   class DivisionOperator < Node
-    
+    include VisitOperator
   end
   
   class EqualityOperator < Node
-    
+    include VisitOperator
   end
   
   class InequalityOperator < Node
-    
+    include VisitOperator
   end
   
   class GreaterThanOperator < Node
-    
+    include VisitOperator
   end
   
   class LessThanOperator < Node
-    
+    include VisitOperator
   end
   
   class GreaterThanEqualOperator < Node
-    
+    include VisitOperator
   end
   
   class LessThanEqualOperator < Node
-    
+    include VisitOperator
   end
   
   class AndOperator < Node
-    
+    include VisitOperator
   end
   
   class OrOperator < Node
-    
+    include VisitOperator
   end
   
   class NotOperator < Node
-    
+    include VisitOperator
   end
   
   class UnionOperator < Node
-    
+    include VisitOperator
   end
   
   class IntersectOperator < Node
-    
+    include VisitOperator
   end
   
   class DifferenceOperator < Node
-    
+    include VisitOperator
   end
   
   class AppendOperator < Node
-    
+    include VisitOperator
   end
   
   class PrependOperator < Node
-    
+    include VisitOperator
   end
   
   class AssociatesOperator < Node
-    
+    include VisitOperator
   end
   
   class ContainsOperator < Node
-    
+    include VisitOperator
   end
   
   # ============
@@ -541,7 +722,12 @@ module Dog::Nodes
   end
   
   class Print < Node
-    
+    def visit(track)
+      path = super
+      
+      
+      
+    end
   end
   
   class Inspect < Node
@@ -665,23 +851,38 @@ module Dog::Nodes
   end
   
   class StringLiteral < Node
-    
+    def visit(track)
+      write_stack(track, Shellwords::shellwords(self.text_value).first)
+      return parent.path
+    end
   end
   
   class IntegerLiteral < Node
-    
+    def visit(track)
+      write_stack(track, self.text_value.to_i)
+      return parent.path
+    end
   end
   
   class FloatLiteral < Node
-    
+    def visit(track)
+      write_stack(track, self.text_value.to_f)
+      return parent.path
+    end
   end
   
   class TrueLiteral < Node
-    
+    def visit(track)
+      write_stack(track, true)
+      return parent.path
+    end
   end
   
   class FalseLiteral < Node
-    
+    def visit(track)
+      write_stack(track, false)
+      return parent.path
+    end
   end
 
 end

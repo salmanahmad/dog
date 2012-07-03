@@ -52,7 +52,11 @@ grammar Dog
   # Perhaps changing access_head from literal to collection?
   
   rule assignment 
-    access s? assignment_operator s? expression <::Dog::Nodes::Assignment>
+    assignment_access s? assignment_operator s? expression <::Dog::Nodes::Assignment>
+  end
+  
+  rule assignment_access
+    identifier access_tail? <::Dog::Nodes::AssignmentAccess>
   end
   
   rule expression
@@ -64,7 +68,7 @@ grammar Dog
   end
   
   rule operation
-    operation_head s? binary_operator s? (expression / operation_head) <::Dog::Nodes::Operation>
+    operation_head s? binary_operator s? operation_tail <::Dog::Nodes::Operation>
     / 
     unary_operator s? expression <::Dog::Nodes::Operation>
   end
@@ -73,6 +77,12 @@ grammar Dog
     command '' <::Dog::Nodes::OperationHead>
     / 
     access '' <::Dog::Nodes::OperationHead>
+  end
+  
+  rule operation_tail
+    expression '' <::Dog::Nodes::OperationTail>
+    /
+    operation_head '' <::Dog::Nodes::OperationTail>
   end
   
   rule access

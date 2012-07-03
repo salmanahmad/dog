@@ -63,13 +63,11 @@ module Dog
         
         Config.initialize(options["config_file"], options["config"])
         Database.initialize
-        Track.initialize_root([bite_code["main_filename"]])
+        Track.initialize_root("root", bite_code["main_filename"])
         Server.run
       end
       
-      def node_at_path(path)
-        path = path.clone 
-        file = path.shift
+      def node_at_path_for_filename(path, file)
         node = self.bite_code["code"][file]
         
         for index in path do

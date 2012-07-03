@@ -23,6 +23,7 @@ module Dog
     attr_accessor :_id
     
     attr_accessor :function_name
+    attr_accessor :function_filename
     attr_accessor :current_node_path
     
     attr_accessor :access_ancestors
@@ -41,14 +42,14 @@ module Dog
     
     def to_hash
       return {
-        function_name: self.function_name
-        current_node_path: self.current_node_path
-        access_ancestors: self.access_ancestors
-        control_ancestors: self.control_ancestors
-        state: self.state
-        stack: self.stack
-        variables: self.variables
-        return_value: self.return_value
+        function_name: self.function_name,
+        current_node_path: self.current_node_path,
+        access_ancestors: self.access_ancestors,
+        control_ancestors: self.control_ancestors,
+        state: self.state,
+        stack: self.stack,
+        variables: self.variables,
+        return_value: self.return_value,
         error_value: self.error_value
       }
     end
@@ -100,14 +101,16 @@ module Dog
       end
     end
     
-    def self.initialize_root(checkpoint)
+    def self.initialize_root(name, filename)
       root = self.root
       
       unless root
         root = Track.new
+        root.function_name = name
+        root.function_filename = filename
         root.ancestors = []
         root.depth = 0
-        root.checkpoint = checkpoint
+        root.checkpoint = [0]
         root.save
       end
       
@@ -115,7 +118,14 @@ module Dog
     end
     
     def continue
-      Runtime.node_at_path(self.current_node_path).eval(self)
+      # TODO - check for state first
+      while self.current_node_path do
+         node_path = Runtime.node_at_path_for_filename(self.current_node_path, self.function_filename).visit(self)
+         self.current_node_path = node_path
+         # TODO - when do I save this stuff?
+      end
+      
+      # Return from the function call...
     end
     
   end
