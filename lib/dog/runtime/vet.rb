@@ -11,7 +11,7 @@ module Dog
   
   class Server < Sinatra::Base
     class << self
-      def self.initialize_vet
+      def initialize_vet
         return if @initialize_vet
         @initialize_vet = true
         

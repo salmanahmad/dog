@@ -43,7 +43,7 @@ module Dog
     def has_stack_path(path)
       pointer = self.stack
       for item in path do
-        if pointer.class == Hash && pointer.has_key? item
+        if pointer.respond_to?(:has_key?) && pointer.has_key?(item) then
           pointer = pointer[item]
         else
           return false
@@ -56,6 +56,7 @@ module Dog
     def to_hash
       return {
         function_name: self.function_name,
+        function_filename: self.function_filename,
         current_node_path: self.current_node_path,
         access_ancestors: self.access_ancestors,
         control_ancestors: self.control_ancestors,
@@ -102,7 +103,7 @@ module Dog
     
     def self.root
       root = self.find_one({
-        "ancestors" => {
+        "control_ancestors" => {
           "$size" => 0
         }
       })
@@ -121,9 +122,18 @@ module Dog
         root = Track.new
         root.function_name = name
         root.function_filename = filename
-        root.ancestors = []
-        root.depth = 0
-        root.checkpoint = [0]
+        root.current_node_path = []
+        
+        root.access_ancestors = []
+        root.control_ancestors = []
+        
+        root.state = STATE::RUNNING
+        root.stack = {}
+        root.variables = []
+        
+        root.return_value = nil
+        root.error_value = nil
+        
         root.save
       end
       
@@ -133,12 +143,16 @@ module Dog
     def continue
       # TODO - check for state first
       while self.current_node_path do
-         node_path = Runtime.node_at_path_for_filename(self.current_node_path, self.function_filename).visit(self)
+         node = Runtime.node_at_path_for_filename(self.current_node_path, self.function_filename)
+         node_path = node.visit(self)
          self.current_node_path = node_path
-         # TODO - when do I save this stuff?
       end
       
       # Return from the function call...
+      
+      puts self.to_hash
+      
+      self.save
     end
     
   end

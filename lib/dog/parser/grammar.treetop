@@ -92,9 +92,13 @@ grammar Dog
   rule access_head
     literal '' <::Dog::Nodes::AccessHead>
     / 
-    identifier '' <::Dog::Nodes::AccessHead>
+    variable '' <::Dog::Nodes::AccessHead>
     / 
     '(' s? expression s? ')' <::Dog::Nodes::AccessHead>
+  end
+  
+  rule variable 
+    identifier '' <::Dog::Nodes::Variable>
   end
   
   rule access_tail

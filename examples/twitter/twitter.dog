@@ -1,10 +1,12 @@
-tweet = event {
-  input username
-  input status
-}
+#tweet = event {
+#  input username
+#  input status
+#}
 
-LISTEN TO PUBLIC FOR tweets AT "/tweet"
+#LISTEN TO PUBLIC FOR tweets AT "/tweet"
 
-ON EACH tweet DO
-    NOTIFY PUBLIC OF tweet
-END
+#ON EACH tweet DO
+#    NOTIFY PUBLIC OF tweet
+#END
+
+PRINT 'hello, world!'

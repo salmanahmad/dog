@@ -24,7 +24,11 @@ module Dog::Nodes
         return path
       else
         write_stack(track, elements.last.read_stack(track))
-        return parent.path
+        if parent then
+          return parent.path
+        else
+          return nil
+        end
       end
     end
   end
@@ -45,7 +49,7 @@ module Dog::Nodes
         index = 0
         
         for element in self.parent.elements do
-          break if element.object_id == self
+          break if element.object_id == self.object_id
           index += 1
         end
         
@@ -60,7 +64,9 @@ module Dog::Nodes
       path = self.path.clone
       last = path.pop
       
-      stack = track["stack"]
+      return if last.nil?
+      
+      stack = track.stack
       for index in path do
         stack[index] ||= {}
         stack = stack[index]
@@ -71,7 +77,7 @@ module Dog::Nodes
     
     def read_stack(track)
       path = self.path.clone
-      stack = track["stack"]
+      stack = track.stack
       
       begin
         for index in path do
@@ -118,25 +124,30 @@ module Dog::Nodes
     end
     
     def self.from_hash(hash)
-      internal = Range.new(hash["interval_begin"], hash["interval_end"], hash["interval_exclusive"])
+      interval = Range.new(hash["interval_begin"], hash["interval_end"], hash["interval_exclusive"])
       input = hash["input"]
       text_value = hash["text_value"]
       name = hash["name"]
       filename = hash["filename"]
       line = hash["line"]
       
-      node_type = Object::const_get(name)
-      node = node_type.new(input, interval, elements)
-      node.filename = filename
-      node.line = line
-      
       elements = hash["elements"]
       
       elements.map! do |element|
         element = self.from_hash(element)
-        element.parent = node
         element
       end
+      
+      # TODO - Look over this... Is it really necessary to prefix with the root namespace?
+      node_type = Kernel::qualified_const_get(name)
+      node = node_type.new(input, interval, elements)
+      node.filename = filename
+      node.line = line
+      
+      elements.each do |element|
+        element.parent = node
+      end
+      
       
       return node
     end
@@ -174,7 +185,18 @@ module Dog::Nodes
   # ================
   
   class Program < Node
-    include VisitAllChildrenReturnLast
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        write_stack(track, elements.last.read_stack(track))
+        track.state = ::Dog::Track::STATE::FINISHED
+        return nil
+      end
+      
+    end
   end
   
   class Statements < Node
@@ -200,7 +222,7 @@ module Dog::Nodes
         path = elements.first.read_stack(track)
         
         # TODO - This may raise an exception...
-        pointer = track["variables"]
+        pointer = track.variables
         last = path.pop
         for index in path do
           pointer = pointer[index]
@@ -285,19 +307,16 @@ module Dog::Nodes
       if path then
         return path
       else
-        pointer = []
-        pointer << elements.first.read_stack(track)
+        value = elements.first.read_stack(track)
         
-        tail = elements_by_class(AccessTail).first
-        if tail then
-          tail_pointer = tail.read_stack(track)
-          for item in tail_pointer do
-            pointer << item
-          end
+        pointer = elements_by_class(AccessTail).first
+        if pointer then
+          pointer = pointer.read_stack(track)
+        else
+          pointer = []
         end
         
         # TODO - This may raise an exception...
-        value = track["variables"]
         for index in pointer do
           value = value[index]
         end
@@ -313,51 +332,69 @@ module Dog::Nodes
     include VisitAllChildrenReturnLast
   end
   
+  class Variable < Node
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        variable_name = elements.first.read_stack(track)
+        write_stack(track, track.variables[variable_name])
+        return parent.path
+      end
+    end
+  end
+  
   class AccessTail < Node
     include VisitAllChildrenReturnLast
   end
   
   class AccessBracket < Node
-    path = super
-    
-    if path then
-      return path
-    else
-      pointer = []
-      pointer << elements.first.read_stack(track)
-      
-      tail = elements_by_class(AccessTail).first
-      if tail then
-        tail_pointer = tail.read_stack(track)
-        for item in tail_pointer do
-          pointer << item
+    def visit(track)
+      path = super
+
+      if path then
+        return path
+      else
+        pointer = []
+        pointer << elements.first.read_stack(track)
+
+        tail = elements_by_class(AccessTail).first
+        if tail then
+          tail_pointer = tail.read_stack(track)
+          for item in tail_pointer do
+            pointer << item
+          end
         end
+
+        write_stack(track, pointer)
+        return parent.path
       end
-      
-      write_stack(track, pointer)
-      return parent.path
     end
   end
   
   class AccessDot < Node
-    path = super
-    
-    if path then
-      return path
-    else
-      pointer = []
-      pointer << elements.first.read_stack(track)
-      
-      tail = elements_by_class(AccessTail).first
-      if tail then
-        tail_pointer = tail.read_stack(track)
-        for item in tail_pointer do
-          pointer << item
+    def visit(track)
+      path = super
+
+      if path then
+        return path
+      else
+        pointer = []
+        pointer << elements.first.read_stack(track)
+
+        tail = elements_by_class(AccessTail).first
+        if tail then
+          tail_pointer = tail.read_stack(track)
+          for item in tail_pointer do
+            pointer << item
+          end
         end
+
+        write_stack(track, pointer)
+        return parent.path
       end
-      
-      write_stack(track, pointer)
-      return parent.path
     end
   end
   

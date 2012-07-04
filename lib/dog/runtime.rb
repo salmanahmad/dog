@@ -50,13 +50,23 @@ module Dog
       
       def run(bite_code, bite_code_filename, options = {})
         
+        options = {
+          "config_file" => nil,
+          "config" => {}
+        }.merge!(options)
+        
         bite_code = JSON.load(bite_code)
         
         if bite_code["version"] != VERSION::STRING then
           raise "This program was compiled using a different version of Dog. It was compiled with #{bite_code["version"]}. I am Dog version #{VERSION::STRING}."
         end
         
-        bite_code["code"] = Nodes::Node.from_hash(bite_code["code"])
+        code = {}
+        for filename, ast in bite_code["code"]
+          code[filename] = Nodes::Node.from_hash(ast)
+        end
+        
+        bite_code["code"] = code
         
         self.bite_code = bite_code
         self.bite_code_filename = bite_code_filename

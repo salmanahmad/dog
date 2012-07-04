@@ -481,23 +481,27 @@ module Dog
         
         
         
-        
-        tracks = Track.find({"status" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
-        for track in tracks do
-          track = Track.from_hash(track)
-          track.continue
-        end
-        
-        
-        
-        
         # This is very important. Do not remove this or testing will not work
         return self
       end
       
       def run
         Server.initialize
-        Thin::Server.start '0.0.0.0', Config.get('port'), Server
+        
+        tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
+        
+        for track in tracks do
+          track = Track.from_hash(track)
+          track.continue
+        end
+        
+        tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
+        
+        if tracks.count == 0 then
+          exit
+        else
+          Thin::Server.start '0.0.0.0', Config.get('port'), Server
+        end
       end
       
     end
