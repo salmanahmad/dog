@@ -42,7 +42,10 @@ module Dog
     
     def has_stack_path(path)
       pointer = self.stack
+      
       for item in path do
+        item = item.to_s
+        
         if pointer.respond_to?(:has_key?) && pointer.has_key?(item) then
           pointer = pointer[item]
         else
@@ -149,9 +152,6 @@ module Dog
       end
       
       # Return from the function call...
-      
-      puts self.to_hash
-      
       self.save
     end
     

@@ -68,11 +68,12 @@ module Dog::Nodes
       
       stack = track.stack
       for index in path do
+        index = index.to_s
         stack[index] ||= {}
         stack = stack[index]
       end
       
-      stack[last] = value
+      stack[last.to_s] = value
     end
     
     def read_stack(track)
@@ -81,6 +82,7 @@ module Dog::Nodes
       
       begin
         for index in path do
+          index = index.to_s
           stack = stack[index]
         end
         return stack
