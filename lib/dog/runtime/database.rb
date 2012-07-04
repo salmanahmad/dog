@@ -19,13 +19,22 @@ module Dog
     
     class << self
       
-      def initialize
+      def initialize(options = {})
         return if @initialized
         @initialized = true
         
         database_name = Config.get "database"
         
-        ::Dog.database = Mongo::Connection.new.db(database_name)
+        begin
+          connection = Mongo::Connection.new
+          
+          connection.drop_database(database_name) if options["reset"]
+          
+          ::Dog.database = connection.db(database_name)
+        rescue Exception => e
+          puts e
+          raise "I was unable to connect to the MongoDB database. Is it running?"
+        end
         
         # TODO - Add compound indices for queries.
         

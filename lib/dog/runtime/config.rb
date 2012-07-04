@@ -30,6 +30,7 @@ module Dog
       end
       
       def reset
+        @initialized = false
         @config = {}
       end
       

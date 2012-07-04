@@ -157,6 +157,36 @@ class Run < Command
     "Execute a Dog source file or application"
   end
   
+  def parse_options(args)
+    args = args.clone
+    args.shift
+    
+    options = {
+      "config_file" => "",
+      "config" => {}
+    }
+    
+    i = 0
+    while i < args.length do
+      arg = args[i]
+      next_arg = args[i + 1]
+      
+      if arg == "-c" then
+        options["config_file"] = next_arg
+      elsif arg == "-d"
+        options["config"]["database"] = next_arg
+      elsif arg == "-u"
+        options["config"]["dog_prefix"] = next_arg
+      elsif arg == "-p"
+        options["config"]["port"] = next_arg.to_i
+      end
+      
+      i = i + 2
+    end
+    
+    return options
+  end
+  
   def usage
     super
     puts
@@ -176,8 +206,51 @@ class Run < Command
   end
   
   def run(args)
-    Dog::Runtime.run_file(args.first)
+    begin
+      Dog::Runtime.run_file(args.first, parse_options(args))
+    rescue Exception => e
+      puts e
+    end
   end
+end
+
+class Debug < Command
+  Command.register(self)
+  
+  def description
+    "Compile and execute a dog program after clearing the database."
+  end
+  
+  def usage
+    super
+    puts
+    puts "Usage: dog debug [FILE.dog] [options]"
+    puts
+    puts "  Compile a Dog program and execute the resulting bite code. If this program has already been executed"
+    puts "  previously, 'debug' will clear that database so the code is run from a 'clean slate'. This command "
+    puts "  takes the same options as the 'run' command."
+    puts
+  end
+  
+  def run(args)
+    bite_code_file = File.basename(args.first, '.dog') + '.bite'
+    
+    compile_command = Compile.new
+    compile_command.run(args)
+    
+    run_command = Run.new
+    options = run_command.parse_options(args)
+    options["database"] = {
+      "reset" => true
+    }
+    
+    begin
+      Dog::Runtime.run_file(bite_code_file, options)
+    rescue Exception => e
+      puts e
+    end
+  end
+  
 end
 
 class Shell < Command

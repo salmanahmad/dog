@@ -52,7 +52,8 @@ module Dog
         
         options = {
           "config_file" => nil,
-          "config" => {}
+          "config" => {},
+          "database" => {}
         }.merge!(options)
         
         bite_code = JSON.load(bite_code)
@@ -72,7 +73,7 @@ module Dog
         self.bite_code_filename = bite_code_filename
         
         Config.initialize(options["config_file"], options["config"])
-        Database.initialize
+        Database.initialize(options["database"])
         Track.initialize_root("root", bite_code["main_filename"])
         Server.run
       end
