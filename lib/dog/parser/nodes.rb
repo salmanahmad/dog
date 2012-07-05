@@ -419,7 +419,12 @@ module Dog::Nodes
     include VisitOperator
     
     def perform(op1, op2)
-      return op1 + op2
+      
+      if op1.class == String then
+        return op1 + op2.to_s
+      else
+        return op1 + op2
+      end
     end
   end
   
@@ -775,7 +780,7 @@ module Dog::Nodes
   # ==================
   
   class Config < Node
-    
+    # SKIP
   end
   
   class Import < Node
@@ -785,31 +790,31 @@ module Dog::Nodes
   end
   
   class ImportAsClause < Node
-    
+    # SKIP
   end
   
   class ImportFunction < Node
-    
+    # SKIP
   end
   
   class ImportData < Node
-    
+    # SKIP
   end
   
   class ImportCommunity < Node
-    
+    # SKIP
   end
   
   class ImportTask < Node
-    
+    # SKIP
   end
   
   class ImportMessage < Node
-    
+    # SKIP
   end
   
   class ImportConfig < Node
-    
+    # SKIP
   end
   
   class Print < Node
@@ -849,27 +854,108 @@ module Dog::Nodes
   end
   
   class If < Node
-    
+    def visit(track)
+      expression = elements[0]
+      true_statements = elements[1]
+      false_statements = elements[2]
+      
+      if track.has_stack_path(expression.path) then
+        expression_value = expression.read_stack(track)
+        if expression_value then
+          if track.has_stack_path(true_statements.path) then
+            write_stack(track, true_statements.read_stack(track))
+            return parent.path
+          else
+            return true_statements.path
+          end
+        else
+          if false_statements then
+            if track.has_stack_path(false_statements.path) then
+              write_stack(track, false_statements.read_stack(track))
+              return parent.path
+            else
+              return false_statements.path
+            end
+          else
+            write_stack(track, nil)
+            return parent.path
+          end
+        end
+      else
+        return expression.path
+      end
+    end
   end
   
   class ElseClause < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class For < Node
-    
+    def visit(track)
+      in_clause = elements[0]
+      statements = elements[1]
+      
+      if(track.has_stack_path(in_clause.path)) then
+        in_clause = in_clause.read_stack(track)
+        
+        iterator_name = in_clause[0]
+        iterator_content = in_clause[1]
+        
+        iterator_index = track.variables["@iterator_index"]
+        track.variables["iterator_index"] = iterator_index
+        track.variables["@iterator_index"] += 1
+        
+        if statements then
+          if iterator_index < iterator_content.length then
+            track.variables[iterator_name] = iterator_content[iterator_index]
+            return statements.path
+          else
+            write_stack(track, statements.read_stack(track))
+            return parent.path
+          end
+        else
+          track.variables[iterator_name] = iterator_context.last
+          return parent.path
+        end
+      else
+        track.variables["@iterator_index"] = 0
+        return in_clause.path
+      end
+    end
   end
   
   class Break < Node
-    
+    def visit(track)
+      up = self
+      while up = up.parent do
+        if up.class == For then
+          up.write_stack(track, nil)
+          return up.parent.path
+        end
+      end
+    end
   end
   
   class Return < Node
-    
+    def visit(track)
+      return_expression = elements.first
+      if return_expression then
+        if track.has_stack_path(return_expression.path) then
+          write_stack(track, return_expression.read_stack(track))
+          return nil
+        else
+          return return_expression.path
+        end
+      else
+        write_stack(track, nil)
+        return nil
+      end
+    end
   end
   
   class ReturnExpression < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   # ==================
@@ -889,7 +975,27 @@ module Dog::Nodes
   end
   
   class InClause < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        iterator_name = elements.first.read_stack(track)
+        if elements[1] then
+          iterator_content = elements[1].read_stack(track)
+        else
+          iterator_content = track.variables["#{iterator_name}s"]
+        end
+        
+        write_stack(track, [iterator_name, iterator_content])
+        return parent.path
+      end
+    end
+  end
+  
+  class InClauseExpression < Node
+    include VisitAllChildrenReturnLast
   end
   
   # =========

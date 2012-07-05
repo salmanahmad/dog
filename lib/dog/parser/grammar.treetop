@@ -609,7 +609,11 @@ grammar Dog
   end
   
   rule in_clause
-    s identifier (s 'IN' s expression)? s <::Dog::Nodes::InClause>
+    s identifier in_clause_expression? s <::Dog::Nodes::InClause>
+  end
+  
+  rule in_clause_expression
+    s 'IN' s expression <::Dog::Nodes::InClauseExpression>
   end
   
   # =========

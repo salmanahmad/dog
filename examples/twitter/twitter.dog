@@ -16,18 +16,58 @@ PRINT i
 
 PRINT 5 + 5
 
-array = [1,2,3,4]
+items = [1,2,3,4]
+arr = [2,3,4,5]
 
-INSPECT array
+FOR EACH item DO
+  PRINT "Hello: " + arr[iterator_index]
+END
 
-PRINT array[0]
+FOR EACH monkies IN items DO
+  IF monkies == 3 THEN
+    BREAK
+  ELSE
+    PRINT "Monkey: " + monkies
+  END
+END
 
-hash = {
-  'key': 'value',
-  'foo': 'bar'
-}
 
-PRINT hash
 
-PRINT hash['key']
 
+#INSPECT items
+
+#PRINT items[0]
+
+
+
+#hash = {
+#  'key': 'value',
+#  'foo': 'bar'
+#}
+
+#PRINT hash
+
+#PRINT hash['key']
+#
+#i = false
+#
+#IF i THEN
+#  PRINT 'Truth!'
+#ELSE
+#  PRINT 'False!'
+#END
+#
+#PRINT 'Hello, World!'
+#
+#i = true
+#
+#PRINT i
+#
+#IF i THEN
+#  PRINT 'Truth!'
+#ELSE
+#  PRINT 'False!'
+#END
+#
+#
+#PRINT 'TEST'

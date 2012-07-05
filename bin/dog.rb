@@ -138,6 +138,8 @@ class Compile < Command
       
       bite_code_file.write(JSON.dump(bite))
       bite_code_file.close
+      
+      return true
     rescue Dog::CompilationError => error
       puts error
     rescue Dog::ParseError => error
@@ -147,6 +149,8 @@ class Compile < Command
       puts
       puts error
     end
+    
+    return false
   end
 end
 
@@ -236,7 +240,9 @@ class Debug < Command
     bite_code_file = File.basename(args.first, '.dog') + '.bite'
     
     compile_command = Compile.new
-    compile_command.run(args)
+    unless compile_command.run(args) then
+      exit
+    end
     
     run_command = Run.new
     options = run_command.parse_options(args)

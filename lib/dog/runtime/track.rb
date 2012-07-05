@@ -149,7 +149,11 @@ module Dog
          node = Runtime.node_at_path_for_filename(self.current_node_path, self.function_filename)
          node_path = node.visit(self)
          self.current_node_path = node_path
+         
+         
       end
+      
+      puts self.stack
       
       # Return from the function call...
       self.save
