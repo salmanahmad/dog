@@ -417,54 +417,106 @@ module Dog::Nodes
   
   class AdditionOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 + op2
+    end
   end
   
   class SubtractionOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 - op2
+    end
   end
   
   class MultiplicationOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 * op2
+    end
   end
   
   class DivisionOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 / op2
+    end
   end
   
   class EqualityOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 == op2
+    end
   end
   
   class InequalityOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 != op2
+    end
   end
   
   class GreaterThanOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 > op2
+    end
   end
   
   class LessThanOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 < op2
+    end
   end
   
   class GreaterThanEqualOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 >= op2
+    end
   end
   
   class LessThanEqualOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 <= op2
+    end
   end
   
   class AndOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 && op2
+    end
   end
   
   class OrOperator < Node
     include VisitOperator
+    
+    def perform(op1, op2)
+      return op1 || op2
+    end
   end
   
   class NotOperator < Node
     include VisitOperator
+    
+    def perform(op)
+      return !op
+    end
   end
   
   class UnionOperator < Node
@@ -881,27 +933,74 @@ module Dog::Nodes
   # ===========
   
   class ArrayLiteral < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class ArrayItems < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        array = []
+        for element in elements do
+          array << element.read_stack(track)
+        end
+        
+        write_stack(track, array)
+        return parent.path
+      end
+    end
   end
   
   class ArrayItem < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class HashLiteral < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class HashAssociations < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        hash = {}
+        
+        for element in elements do
+          element_hash = element.read_stack(track)
+          for key, value in element_hash do
+            hash[key] = value
+          end
+        end
+        
+        write_stack(track, hash)
+        return parent.path
+      end
+    end
   end
   
   class HashAssociation < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        key = elements[0].read_stack(track)
+        value = elements[1].read_stack(track)
+        
+        hash = {}
+        hash[key] = value
+        
+        write_stack(track, hash)
+        return parent.path
+      end
+    end
   end
   
   class StringLiteral < Node

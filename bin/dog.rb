@@ -248,6 +248,7 @@ class Debug < Command
       Dog::Runtime.run_file(bite_code_file, options)
     rescue Exception => e
       puts e
+      raise e
     end
   end
   

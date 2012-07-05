@@ -132,7 +132,7 @@ module Dog
         
         root.state = STATE::RUNNING
         root.stack = {}
-        root.variables = []
+        root.variables = {}
         
         root.return_value = nil
         root.error_value = nil

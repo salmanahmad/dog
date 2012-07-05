@@ -9,4 +9,25 @@
 #    NOTIFY PUBLIC OF tweet
 #END
 
+i = 'hello, world!'
+
 PRINT 'hello, world!'
+PRINT i
+
+PRINT 5 + 5
+
+array = [1,2,3,4]
+
+INSPECT array
+
+PRINT array[0]
+
+hash = {
+  'key': 'value',
+  'foo': 'bar'
+}
+
+PRINT hash
+
+PRINT hash['key']
+
