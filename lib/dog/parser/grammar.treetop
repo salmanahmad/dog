@@ -597,11 +597,19 @@ grammar Dog
   # ==================
   
   rule using_clause
-    s 'USING' s (identifier_associations / access) <::Dog::Nodes::UsingClause>
+    s 'USING' s using_clause_content <::Dog::Nodes::UsingClause>
+  end
+  
+  rule using_clause_content
+    identifier_associations / access '' <::Dog::Nodes::UsingClauseContent>
   end
   
   rule on_clause 
-    s ('ON' s)? (identifier_associations / argument_list) <::Dog::Nodes::OnClause>
+    s ('ON' s)? on_clause_content <::Dog::Nodes::OnClause>
+  end
+
+  rule on_clause_content
+    identifier_associations / argument_list '' <::Dog::Nodes::OnClauseContent>
   end
 
   rule via_clause 
@@ -639,17 +647,17 @@ grammar Dog
   end
   
   rule identifier_list
-    identifier_list_item+
+    identifier_list_item+ <::Dog::Nodes::IdentifierList>
   end
   
   rule identifier_list_item
-    s? identifier (s? ',' &identifier_list_item / '' !identifier_list_item)
+    s? identifier (s? ',' &identifier_list_item / '' !identifier_list_item) <::Dog::Nodes::IdentifierListItem>
   end
   
   # TODO - combine with items -- perhaps renamed to expresion_list -- add newlines?
   
   rule argument_list
-    argument_list_item+
+    argument_list_item+ <::Dog::Nodes::ArgumentList>
   end
   
   # TODO - To get this to work, I had to move the 's?' into the parenthesis with
@@ -658,7 +666,7 @@ grammar Dog
   # identifier_association will that break in the future also?
   
   rule argument_list_item
-    s? expression (s? ',' &argument_list_item / '' !argument_list_item)
+    s? expression (s? ',' &argument_list_item / '' !argument_list_item) <::Dog::Nodes::IdentifierListItem>
   end
   
   # ================

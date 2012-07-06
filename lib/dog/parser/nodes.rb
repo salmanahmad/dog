@@ -699,11 +699,15 @@ module Dog::Nodes
     def visit(track)
       path = super
       
-      identifier = elements_by_class(Identifier).first
       
       if path then
         return path
       else
+        
+          identifier = elements_by_class(Identifier).first
+          mandatory_args = elements_by_class(OnClause).first
+          optional_args = elements_by_class(UsingClause).first
+          
           # TODO - Really consider fixing this...
           # Compute does not get called twice. parent.path is 
           # set of the containing track in continue
@@ -713,7 +717,17 @@ module Dog::Nodes
           new_track.control_ancestors = track.control_ancestors.clone
           new_track.control_ancestors.push(track.id)
           
+          if mandatory_args then
+            new_track.mandatory_arguments = mandatory_args.read_stack(track)
+          end
+          
+          if optional_args then
+            new_track.optional_arguments = optional_args.read_stack(track)
+          end
+          
+          
           new_track.save
+          
           
           track.state = ::Dog::Track::STATE::CALLING
           track.save
@@ -810,8 +824,59 @@ module Dog::Nodes
         function_using = elements_by_class(FunctionUsing).first
         
         if path then
+          
           if statements && path == statements.path then
-            # TODO - Add variables here...
+
+            if function_using then
+              function_using = function_using.read_stack(track)
+
+              for key, value in function_using do
+                track.variables[key] = value
+              end
+
+              if track.optional_arguments
+                for key, value in track.optional_arguments do
+                  if function_using.include?(key) then
+                    track.variables[key] = value
+                  else
+                    # TODO - Raise error?
+                    raise "Error calling function: 1"
+                  end
+                end
+              end
+            end
+
+            if function_on then
+              function_on = function_on.read_stack(track)
+              if track.mandatory_arguments then
+                if track.mandatory_arguments.kind_of? Hash then
+                  for key, value in track.mandatory_arguments do
+                    if function_on.include? key then
+                      track.variables[key] = value
+                    else
+                      # TODO - Raise error?
+                      raise "Error calling function: 2"
+                    end
+                  end
+                else
+                  if track.mandatory_arguments.length == function_on.length then
+                    track.mandatory_arguments.each_index do |index|
+                      track.variables[function_on[index]] = track.mandatory_arguments[index]
+                    end
+                  else
+                    # TODO - Raise error?
+                    raise "Error calling function: 3"
+                  end
+                end
+              end
+
+              for value in function_on do
+                unless track.variables.include?(value) then
+                  raise "A mandatory argument was not passed to this function!"
+                end
+              end
+
+            end
           end
           
           return path
@@ -1081,7 +1146,11 @@ module Dog::Nodes
   end
   
   class OnClause < Node
-    
+    include VisitAllChildrenReturnLast
+  end
+  
+  class OnClauseContent < Node
+    include VisitAllChildrenReturnLast
   end
   
   class ViaClause < Node

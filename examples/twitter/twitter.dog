@@ -18,6 +18,10 @@ DEFINE bye_world DO
   RETURN 'Good byte cruel world!'
 END
 
+DEFINE add ON a, b DO
+  PRINT 'Hi!'
+  RETURN a + b
+END
 
 i = COMPUTE hello_world
 
@@ -26,6 +30,14 @@ PRINT 'Oh, hai!'
 
 
 PRINT COMPUTE bye_world
+
+PRINT 'Before Add!'
+
+
+PRINT COMPUTE add ON 5, 8
+PRINT COMPUTE add ON b:10, a:8
+
+PRINT 'After Add!'
 
 #i = 'hello, world!'
 

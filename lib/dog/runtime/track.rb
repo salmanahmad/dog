@@ -27,6 +27,9 @@ module Dog
     attr_accessor :function_filename
     attr_accessor :current_node_path
     
+    attr_accessor :mandatory_arguments
+    attr_accessor :optional_arguments
+    
     attr_accessor :access_ancestors
     attr_accessor :control_ancestors
     
@@ -51,8 +54,6 @@ module Dog
         self.function_name = name
         self.function_filename = filename
         self.current_node_path = path
-      else
-        
       end
       
       self.access_ancestors = []
@@ -87,6 +88,8 @@ module Dog
         function_name: self.function_name,
         function_filename: self.function_filename,
         current_node_path: self.current_node_path,
+        mandatory_arguments: self.mandatory_arguments,
+        optional_arguments: self.optional_arguments,
         access_ancestors: self.access_ancestors,
         control_ancestors: self.control_ancestors,
         state: self.state,
@@ -186,6 +189,7 @@ module Dog
           parent_current_node.write_stack(parent_track, self.return_value)
         
           parent_track.current_node_path = parent_current_node.parent.path
+          parent_track.state = STATE::RUNNING
           parent_track.continue
         end
       end
