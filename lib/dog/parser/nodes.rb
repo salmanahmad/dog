@@ -1413,7 +1413,7 @@ module Dog::Nodes
   
   class IntegerLiteral < Node
     def visit(track)
-      write_stack(track, self.text_value.to_i)
+      write_stack(track, self.text_value.to_f)
       return parent.path
     end
   end

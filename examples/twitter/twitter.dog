@@ -20,7 +20,7 @@ END
 
 DEFINE add ON a, b DO
   PRINT 'Hi!'
-  RETURN a + b
+  RETURN a / b
 END
 
 i = COMPUTE hello_world
