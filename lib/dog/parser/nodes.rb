@@ -16,6 +16,13 @@ module Dog::Nodes
     end
   end
   
+  module DoNotVisitMe
+    def visit(track)
+      write_stack(track, nil)
+      return parent.path
+    end
+  end
+  
   module VisitAllChildrenReturnLast
     def visit(track)
       path = super
@@ -571,53 +578,110 @@ module Dog::Nodes
     include VisitOperator
   end
   
-  # ============
-  # = Commands =
-  # ============
-
+  # ==============
+  # = Structures =
+  # ==============
+  
   class Community < Node
+    include DoNotVisitMe
+    
     def name
       return self.elements[0].text_value
+    end
+    
+    def properties
+      properties = []
+      community_properties = elements_by_class(CommunityProperties).first
+      
+      if community_properties then
+        properties = community_properties.properties
+      end
+      
+      return properties
     end
   end
   
   class CommunityProperties < Node
+    include DoNotVisitMe
+    
+    def properties
+      properties = []
+      
+      for element in elements do
+        properties << element.property
+      end
+      
+      return properties
+    end
     
   end
   
   class CommunityProperty < Node
+    include DoNotVisitMe
     
+    def property
+      return elements.first.property
+    end
   end
   
   class CommunityPropertyAttribute < Node
+    include DoNotVisitMe
     
+    def property
+      attribute = ::Dog::CommunityAttribute.new
+      attribute.identifier = elements.first.text_value
+      return attribute
+    end
   end
   
   class CommunityPropertyRelationship < Node
+    include DoNotVisitMe
     
+    def property
+      relationship = ::Dog::CommunityRelationship.new
+      relationship.identifier = elements.first.text_value
+      
+      inverse_identifer = elements_by_class(CommunityPropertyRelationshipInverse).first
+      if inverse_identifer then
+        relationship.inverse_identifier = inverse_identifer.elements_by_class(Identifier).first.text_value
+        
+        inverse_community = inverse_identifer.elements_by_class(CommunityPropertyRelationshipInverseCommunity).first
+        if inverse_community then
+          relationship.inverse_community = inverse_community.elements_by_class(Identifier).first.text_value
+        end
+      end
+      
+      return relationship
+    end
   end
   
   class CommunityPropertyRelationshipInverse < Node
-    
+    include DoNotVisitMe
   end
   
   class CommunityPropertyRelationshipInverseCommunity < Node
-    
+    include DoNotVisitMe
   end
   
   class Event < Node
+    include DoNotVisitMe
+    
     def name
       return self.elements[0].text_value
     end
   end
   
   class Task < Node
+    include DoNotVisitMe
+    
     def name
       return self.elements[0].text_value
     end
   end
   
   class Message < Node
+    include DoNotVisitMe
+    
     def name
       return self.elements[0].text_value
     end
@@ -642,6 +706,14 @@ module Dog::Nodes
   class PropertyDirectionModifier < Node
     
   end
+  
+  
+  
+  # ============
+  # = Commands =
+  # ============
+  
+  
   
   class Listen < Node
    
@@ -750,14 +822,31 @@ module Dog::Nodes
       
       return name
     end
+    
+    def visit(track)
+      # TODO - How do I handle this?
+    end
   end
   
   class OnEach < Node
-    
+    def visit(track)
+      on_each_count = elements_by_class(OnEachCount)
+      if on_each_count then
+        if track.has_stack_path(on_each_count) then
+          write_stack(track, on_each_count.read_stack(track))
+          return parent.path
+        else
+          return on_each_count.path
+        end
+      else
+        write_stack(track, 1)
+        return parent.path
+      end
+    end
   end
   
   class OnEachCount < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class Me < Node
@@ -1142,7 +1231,11 @@ module Dog::Nodes
   # ==================
   
   class UsingClause < Node
-    
+    include VisitAllChildrenReturnLast
+  end
+  
+  class UsingClauseContent < Node
+    include VisitAllChildrenReturnLast
   end
   
   class OnClause < Node
@@ -1154,7 +1247,7 @@ module Dog::Nodes
   end
   
   class ViaClause < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class InClause < Node
