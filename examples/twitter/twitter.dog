@@ -9,27 +9,45 @@
 #    NOTIFY PUBLIC OF tweet
 #END
 
-i = 'hello, world!'
+DEFINE hello_world DO
+  PRINT 'this is a function!'
+  RETURN 5
+END
 
-PRINT 'hello, world!'
+DEFINE bye_world DO
+  RETURN 'Good byte cruel world!'
+END
+
+
+i = COMPUTE hello_world
+
 PRINT i
+PRINT 'Oh, hai!'
 
-PRINT 5 + 5
 
-items = [1,2,3,4]
-arr = [2,3,4,5]
+PRINT COMPUTE bye_world
 
-FOR EACH item DO
-  PRINT "Hello: " + arr[iterator_index]
-END
+#i = 'hello, world!'
 
-FOR EACH monkies IN items DO
-  IF monkies == 3 THEN
-    BREAK
-  ELSE
-    PRINT "Monkey: " + monkies
-  END
-END
+#PRINT 'hello, world!'
+#PRINT i
+
+#PRINT 5 + 5
+
+#items = [1,2,3,4]
+#arr = [2,3,4,5]
+
+#FOR EACH item DO
+#  PRINT "Hello: " + arr[iterator_index]
+#END
+
+#FOR EACH monkies IN items DO
+#  IF monkies == 3 THEN
+#    BREAK
+#  ELSE
+#    PRINT "Monkey: " + monkies
+#  END
+#END
 
 
 

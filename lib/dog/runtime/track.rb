@@ -14,6 +14,7 @@ module Dog
     
     module STATE
       RUNNING = "running"
+      CALLING = "calling"
       WAITING = "waiting"
       FINISHED = "finished" 
       ERROR = "error"
@@ -39,6 +40,31 @@ module Dog
     # TODO - Think about adding back references when we
     # decide on the object model for the language
     #attr_accessor :references
+    
+    def initialize(name = nil)
+      
+      if name then
+        path = Runtime.bite_code["symbols"][name]
+        path = path.clone
+        filename = path.shift
+        
+        self.function_name = name
+        self.function_filename = filename
+        self.current_node_path = path
+      else
+        
+      end
+      
+      self.access_ancestors = []
+      self.control_ancestors = []
+      
+      self.state = STATE::RUNNING
+      self.stack = {}
+      self.variables = {}
+      
+      self.return_value = nil
+      self.error_value = nil
+    end
     
     def has_stack_path(path)
       pointer = self.stack
@@ -122,21 +148,7 @@ module Dog
       root = self.root
       
       unless root
-        root = Track.new
-        root.function_name = name
-        root.function_filename = filename
-        root.current_node_path = []
-        
-        root.access_ancestors = []
-        root.control_ancestors = []
-        
-        root.state = STATE::RUNNING
-        root.stack = {}
-        root.variables = {}
-        
-        root.return_value = nil
-        root.error_value = nil
-        
+        root = Track.new("root")
         root.save
       end
       
@@ -145,18 +157,42 @@ module Dog
     
     def continue
       # TODO - check for state first
+      
+      called_track = nil
+      
       while self.current_node_path do
          node = Runtime.node_at_path_for_filename(self.current_node_path, self.function_filename)
+         
+         # TODO - Really consider fixing this... it is gross
+         
          node_path = node.visit(self)
-         self.current_node_path = node_path
          
-         
+         if node_path.class == Track then
+           called_track = node_path
+           break
+         else
+          self.current_node_path = node_path
+         end
       end
       
-      puts self.stack
-      
-      # Return from the function call...
       self.save
+      
+      if self.state == STATE::FINISHED
+        # I'm done!...
+        parent_track = Track.find_by_id(self.control_ancestors.last)
+        
+        if parent_track then
+          parent_current_node = Runtime.node_at_path_for_filename(parent_track.current_node_path, parent_track.function_filename)
+          parent_current_node.write_stack(parent_track, self.return_value)
+        
+          parent_track.current_node_path = parent_current_node.parent.path
+          parent_track.continue
+        end
+      end
+      
+      if called_track then
+        called_track.continue 
+      end
     end
     
   end

@@ -33,6 +33,25 @@ module Dog::Nodes
     end
   end
   
+  module VisitAllChildrenReturnAll
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        array = []
+        
+        for element in elements do
+          array << element.read_stack(track)
+        end
+        
+        write_stack(track, array)
+        return parent.path
+      end
+    end
+  end
+  
   class Treetop::Runtime::SyntaxNode
     
   end
@@ -677,7 +696,31 @@ module Dog::Nodes
   end
   
   class Compute < Node
-    
+    def visit(track)
+      path = super
+      
+      identifier = elements_by_class(Identifier).first
+      
+      if path then
+        return path
+      else
+          # TODO - Really consider fixing this...
+          # Compute does not get called twice. parent.path is 
+          # set of the containing track in continue
+          identifier = identifier.read_stack(track)
+          
+          new_track = ::Dog::Track.new(identifier)
+          new_track.control_ancestors = track.control_ancestors.clone
+          new_track.control_ancestors.push(track.id)
+          
+          new_track.save
+          
+          track.state = ::Dog::Track::STATE::CALLING
+          track.save
+          
+          return new_track
+      end
+    end
   end
   
   class On < Node
@@ -748,31 +791,98 @@ module Dog::Nodes
   # ===============
   
   class DefineVariable < Node
-    
+    # SKIP
   end
   
   class DefineFunction < Node
-    
     def name
       return self.elements[0].text_value
     end
     
+    def visit(track)
+      if track.function_name != self.name then
+        write_stack(track, nil)
+        return parent.path
+      else
+        path = super
+        statements = elements_by_class(Statements).first
+        function_on = elements_by_class(FunctionOn).first
+        function_using = elements_by_class(FunctionUsing).first
+        
+        if path then
+          if statements && path == statements.path then
+            # TODO - Add variables here...
+          end
+          
+          return path
+        else
+          track.state = ::Dog::Track::STATE::FINISHED
+          
+          if statements then
+            unless track.return_value then
+              track.return_value = statements.read_stack(track)
+              self.write_stack(track, statements.read_stack(track))
+            end
+          else
+            unless track.return_value then
+              track.return_value = nil
+              self.write_stack(track, nil)
+            end
+          end
+          
+          return nil
+        end
+      end
+    end
   end
   
   class FunctionOn < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class FunctionUsing < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class FunctionOptionalParameters < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        hash = {}
+        
+        for element in elements do
+          element_hash = element.read_stack(track)
+          for key, value in element_hash do
+            hash[key] = value
+          end
+        end
+        
+        write_stack(track, hash)
+        return parent.path
+      end
+    end
   end
   
   class FunctionOptionalParameter < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        key = elements[0].read_stack(track)
+        value = elements[1].read_stack(track)
+        
+        hash = {}
+        hash[key] = value
+        
+        write_stack(track, hash)
+        return parent.path
+      end
+    end
   end
   
   # ==================
@@ -942,12 +1052,16 @@ module Dog::Nodes
       return_expression = elements.first
       if return_expression then
         if track.has_stack_path(return_expression.path) then
+          track.state = ::Dog::Track::STATE::FINISHED
+          track.return_value = return_expression.read_stack(track)
           write_stack(track, return_expression.read_stack(track))
           return nil
         else
           return return_expression.path
         end
       else
+        track.state = ::Dog::Track::STATE::FINISHED
+        track.return_value = nil
         write_stack(track, nil)
         return nil
       end
@@ -1003,35 +1117,68 @@ module Dog::Nodes
   # =========
   
   class KeyPaths < Node
-    
+    include VisitAllChildrenReturnAll
   end
   
   class KeyPath < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class IdentifierAssociations < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        hash = {}
+        
+        for element in elements do
+          element_hash = element.read_stack(track)
+          for key, value in element_hash do
+            hash[key] = value
+          end
+        end
+        
+        write_stack(track, hash)
+        return parent.path
+      end
+    end
   end
   
   class IdentifierAssociation < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        key = elements[0].read_stack(track)
+        value = elements[1].read_stack(track)
+        
+        hash = {}
+        hash[key] = value
+        
+        write_stack(track, hash)
+        return parent.path
+      end
+    end
   end
   
   class IdentifierList < Node
-    
+    include VisitAllChildrenReturnAll
   end
   
   class IdentifierListItem < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class ArgumentList < Node
-    
+    include VisitAllChildrenReturnAll
   end
   
   class ArgumentListItem < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   # ===========
@@ -1043,21 +1190,7 @@ module Dog::Nodes
   end
   
   class ArrayItems < Node
-    def visit(track)
-      path = super
-      
-      if path then
-        return path
-      else
-        array = []
-        for element in elements do
-          array << element.read_stack(track)
-        end
-        
-        write_stack(track, array)
-        return parent.path
-      end
-    end
+    include VisitAllChildrenReturnAll
   end
   
   class ArrayItem < Node

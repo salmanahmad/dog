@@ -77,6 +77,7 @@ module Dog
         end
         
         if(self.current_filename == bite["main_filename"]) then
+          bite["symbols"]["root"] = [bite["main_filename"]]
           bite["signature"] = Digest::SHA1.hexdigest(JSON.dump(bite))
         end
         

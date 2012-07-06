@@ -395,7 +395,7 @@ grammar Dog
   # ===================
 
   rule compute
-    'COMPUTE' s access on_clause? using_clause? <::Dog::Nodes::Compute>
+    'COMPUTE' s identifier on_clause? using_clause? <::Dog::Nodes::Compute>
   end
   
   # ==============
