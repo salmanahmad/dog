@@ -355,13 +355,18 @@ grammar Dog
   # ===============
   # = Ask Command =
   # ===============
-
+  
+  # TODO - Rework grammar and clean_tree so that I don't have to always break out 
+  # into random sub-rules like ask-count, etc.
+  
   rule ask
     'ASK' sn (integer sn)? (user / access) via_clause ask_to_clause on_clause? using_clause? <::Dog::Nodes::Ask>
   end
   
   rule ask_to_clause
-    s 'TO' s (string / access) <::Dog::Nodes::AskToClause>
+    # TODO - Bring this back
+    #s 'TO' s (string / access) <::Dog::Nodes::AskToClause>
+    s 'TO' s identifier <::Dog::Nodes::AskToClause>
   end
 
   # ==========

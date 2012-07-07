@@ -23,6 +23,35 @@ module Dog::Nodes
     end
   end
   
+  module VisitOnOwnTrack
+    def visit(track)
+      if track.function_name != self.name then
+        write_stack(track, nil)
+        return parent.path
+      else
+        path = super
+        
+        if path then
+          return path
+        else
+          properties = elements_by_class(Properties).first
+          
+          if properties then
+            properties = properties.read_stack(track)
+          end
+          
+          track.state =  ::Dog::Track::STATE::FINISHED
+          
+          track.return_value = properties
+          write_stack(track, properties)
+          
+          return nil
+        end
+      end
+    end
+  end
+  
+  
   module VisitAllChildrenReturnLast
     def visit(track)
       path = super
@@ -664,7 +693,7 @@ module Dog::Nodes
   end
   
   class Event < Node
-    include DoNotVisitMe
+    include VisitOnOwnTrack
     
     def name
       return self.elements[0].text_value
@@ -672,7 +701,7 @@ module Dog::Nodes
   end
   
   class Task < Node
-    include DoNotVisitMe
+    include VisitOnOwnTrack
     
     def name
       return self.elements[0].text_value
@@ -680,7 +709,7 @@ module Dog::Nodes
   end
   
   class Message < Node
-    include DoNotVisitMe
+    include VisitOnOwnTrack
     
     def name
       return self.elements[0].text_value
@@ -688,23 +717,67 @@ module Dog::Nodes
   end
   
   class Properties < Node
-    
+    include VisitAllChildrenReturnAll
   end
   
   class Property < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        identifier = elements_by_class(Identifier).first
+        default = elements_by_class(PropertyDefaultValue).first
+        requirement = elements_by_class(PropertyRequirementModifier).first
+        direction = elements_by_class(PropertyDirectionModifier).first
+        
+        property = ::Dog::Property.new
+        property.identifier = identifier.read_stack(track)
+        
+        if default then
+          property.default = default.read_stack(track)
+        else
+          property.default = nil
+        end
+        
+        if requirement then
+          property.requirement = requirement.read_stack(track)
+        else
+          property.requirement = false
+        end
+        
+        # TODO - Tasks need to have a direction. I need to check for that somewhere. Probably in the ASK
+        # Right now the direction is nil if it is not provided
+        
+        if direction then
+          property.direction = direction.read_stack(track)
+        else
+          property.direction = nil
+        end
+        
+        write_stack(track, property.to_hash)
+        return parent.path
+      end
+    end
   end
   
   class PropertyDefaultValue < Node
-    
+    include VisitAllChildrenReturnLast
   end
   
   class PropertyRequirementModifier < Node
-    
+    def visit(track)
+      write_stack(track, self.text_value.strip)
+      return parent.path
+    end
   end
   
   class PropertyDirectionModifier < Node
-    
+    def visit(track)
+      write_stack(track, self.text_value.strip)
+      return parent.path
+    end
   end
   
   
@@ -744,11 +817,55 @@ module Dog::Nodes
   end
   
   class Ask < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        
+        # TODO - I have gotten the task properties - but I have not
+        # gotten the actual task name yet. I need to do that at some point...
+        
+        ask_to_clause = elements_by_class(AskToClause).first
+        ask_to_clause = ask_to_clause.read_stack(track)
+        
+        properties = []
+        for p in ask_to_clause do
+          properties << ::Dog::Property.from_hash(p)
+        end
+        
+        puts properties.inspect
+        
+        
+        return parent.path
+      end
+    end
   end
   
   class AskToClause < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        identifier = elements_by_class(Identifier).first
+        identifier = identifier.read_stack(track)
+        
+        new_track = ::Dog::Track.new(identifier)
+        new_track.control_ancestors = track.control_ancestors.clone
+        new_track.control_ancestors.push(track.id)
+        
+        new_track.save
+        
+        
+        track.state = ::Dog::Track::STATE::CALLING
+        track.save
+        
+        return new_track
+      end
+    end
   end
   
   class Notify < Node
@@ -958,13 +1075,13 @@ module Dog::Nodes
                   end
                 end
               end
-
+              
               for value in function_on do
                 unless track.variables.include?(value) then
                   raise "A mandatory argument was not passed to this function!"
                 end
               end
-
+              
             end
           end
           
@@ -989,6 +1106,7 @@ module Dog::Nodes
       end
     end
   end
+  
   
   class FunctionOn < Node
     include VisitAllChildrenReturnLast

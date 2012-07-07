@@ -9,6 +9,29 @@
 #    NOTIFY PUBLIC OF tweet
 #END
 
+
+DEFINE task label {
+  input string
+}
+
+ASK salman VIA stream TO label ON images
+
+DEFINE fib ON n DO
+  IF n == 0 THEN
+    RETURN 0
+  END
+  
+  IF n == 1 THEN
+    RETURN 1
+  END
+  
+  RETURN (COMPUTE fib ON n - 1) + (COMPUTE fib ON n - 2)
+END
+
+PRINT 'here!'
+PRINT COMPUTE fib ON 10
+PRINT 'done!'
+
 DEFINE hello_world DO
   PRINT 'this is a function!'
   RETURN 5
