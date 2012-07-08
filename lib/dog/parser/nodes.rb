@@ -706,6 +706,29 @@ module Dog::Nodes
     def name
       return self.elements[0].text_value
     end
+    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        task = {}
+        
+        # TODO - I left off here... I need to create a task object with from_hash and to_hash
+        
+        properties = track.return_value
+        task["type"] = "task"
+        task["name"] = self.name
+        task["properties"] = properties
+        
+        track.return_value = task
+        write_stack(track, task)
+        
+        return nil
+      end
+    end
+    
   end
   
   class Message < Node
@@ -830,12 +853,14 @@ module Dog::Nodes
         ask_to_clause = elements_by_class(AskToClause).first
         ask_to_clause = ask_to_clause.read_stack(track)
         
-        properties = []
-        for p in ask_to_clause do
-          properties << ::Dog::Property.from_hash(p)
-        end
+        puts ask_to_clause.inspect
         
-        puts properties.inspect
+        #properties = []
+        #for p in ask_to_clause do
+        #  properties << ::Dog::Property.from_hash(p)
+        #end
+        
+        #puts properties.inspect
         
         
         return parent.path
