@@ -8,36 +8,20 @@
 #
 
 module Dog
-  class RoutedTask < DatabaseObject
-    include Routability
-    collection "tasks"
+  class RoutedTask < StreamObject
     
-    attr_accessor :_id
-    attr_accessor :type
-    attr_accessor :value
-    attr_accessor :routing
     attr_accessor :replication
     attr_accessor :duplication
     attr_accessor :responses
     attr_accessor :created_at
     
-    def self.from_hash(hash)
-      object = super
-      object.type = Kernel.qualified_const_get(object.type)
-      object.routing = People.from_database(object.routing || "{}")
-      return object
-    end
-    
     def to_hash
-      return {
-        type: self.type.name,
-        value: self.value,
-        routing: People.to_database(self.routing || {}),
+      hash = super
+      return hash.merge({
         replication: (self.replication || 1),
         duplication: (self.duplication || 1),
-        responses: (self.responses || []),
-        created_at: (self.created_at || Time.now)
-      }
+        responses: (self.responses || [])
+      })
     end
     
     def to_hash_for_event

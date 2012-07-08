@@ -38,13 +38,16 @@ module Dog
         
         # TODO - Add compound indices for queries.
         
-        # TODO - Add events
-        
         ::Dog.database[Community.collection_name].ensure_index("name", {unique:true})
         
-        ::Dog.database[RoutedMessage.collection_name].ensure_index("type")
-        ::Dog.database[RoutedMessage.collection_name].ensure_index("created_at")
-
+        ::Dog.database[StreamObject.collection_name].ensure_index("type")
+        ::Dog.database[StreamObject.collection_name].ensure_index("name")
+        ::Dog.database[StreamObject.collection_name].ensure_index("created_at")
+        
+        # Indices for Tasks. Perhaps I should break this out into different collections?
+        ::Dog.database[StreamObject.collection_name].ensure_index("replication")
+        ::Dog.database[StreamObject.collection_name].ensure_index("responses")
+        
         ::Dog.database[Person.collection_name].ensure_index("handle", { unique:true, sparse:true })
         ::Dog.database[Person.collection_name].ensure_index("email", { unique:true, sparse:true })
         ::Dog.database[Person.collection_name].ensure_index("facebook", { unique:true, sparse:true })
@@ -52,11 +55,6 @@ module Dog
         ::Dog.database[Person.collection_name].ensure_index("google", { unique:true, sparse:true })
         ::Dog.database[Person.collection_name].ensure_index("password")
         ::Dog.database[Person.collection_name].ensure_index("communities")
-        
-        ::Dog.database[RoutedTask.collection_name].ensure_index("type")
-        ::Dog.database[RoutedTask.collection_name].ensure_index("created_at")
-        ::Dog.database[RoutedTask.collection_name].ensure_index("replication")
-        ::Dog.database[RoutedTask.collection_name].ensure_index("responses")
         
         ::Dog.database[Track.collection_name].ensure_index("depth")
         ::Dog.database[Track.collection_name].ensure_index("ancestors")

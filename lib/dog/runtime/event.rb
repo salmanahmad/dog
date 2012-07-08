@@ -8,7 +8,7 @@
 #
 
 module Dog  
-  class RoutedMessage < StreamObject
+  class RoutedEvent < StreamObject
     
   end
 end

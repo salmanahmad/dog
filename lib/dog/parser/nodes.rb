@@ -698,6 +698,23 @@ module Dog::Nodes
     def name
       return self.elements[0].text_value
     end
+    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        task = ::Dog::RoutedEvent.new
+        task.name = self.name
+        task.properties = track.return_value
+        
+        track.return_value = task.to_hash
+        write_stack(track, task.to_hash)
+        
+        return nil
+      end
+    end
   end
   
   class Task < Node
@@ -713,17 +730,12 @@ module Dog::Nodes
       if path then
         return path
       else
-        task = {}
+        task = ::Dog::RoutedTask.new
+        task.name = self.name
+        task.properties = track.return_value
         
-        # TODO - I left off here... I need to create a task object with from_hash and to_hash
-        
-        properties = track.return_value
-        task["type"] = "task"
-        task["name"] = self.name
-        task["properties"] = properties
-        
-        track.return_value = task
-        write_stack(track, task)
+        track.return_value = task.to_hash
+        write_stack(track, task.to_hash)
         
         return nil
       end
@@ -736,6 +748,23 @@ module Dog::Nodes
     
     def name
       return self.elements[0].text_value
+    end
+    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        task = ::Dog::RoutedMessage.new
+        task.name = self.name
+        task.properties = track.return_value
+        
+        track.return_value = task.to_hash
+        write_stack(track, task.to_hash)
+        
+        return nil
+      end
     end
   end
   
@@ -846,22 +875,11 @@ module Dog::Nodes
       if path then
         return path
       else
-        
-        # TODO - I have gotten the task properties - but I have not
-        # gotten the actual task name yet. I need to do that at some point...
-        
         ask_to_clause = elements_by_class(AskToClause).first
         ask_to_clause = ask_to_clause.read_stack(track)
         
         puts ask_to_clause.inspect
-        
-        #properties = []
-        #for p in ask_to_clause do
-        #  properties << ::Dog::Property.from_hash(p)
-        #end
-        
-        #puts properties.inspect
-        
+        puts ::Dog::RoutedTask.from_hash(ask_to_clause).inspect
         
         return parent.path
       end
@@ -883,7 +901,6 @@ module Dog::Nodes
         new_track.control_ancestors.push(track.id)
         
         new_track.save
-        
         
         track.state = ::Dog::Track::STATE::CALLING
         track.save
