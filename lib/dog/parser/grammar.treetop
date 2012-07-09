@@ -383,7 +383,9 @@ grammar Dog
   end
 
   rule notify_of_clause
-    s 'OF' s (string / access) <::Dog::Nodes::NotifyOfClause>
+    # TODO - Bring this back
+    #s 'TO' s (string / access) <::Dog::Nodes::AskToClause>
+    s 'OF' s identifier <::Dog::Nodes::NotifyOfClause>
   end
   
   # =========

@@ -935,7 +935,6 @@ module Dog::Nodes
       if path then
         return path
       else
-        
         # TODO - I need to handle the routing... Probably after I box the values
         ask_to_clause = elements_by_class(AskToClause).first
         ask_to_clause = ask_to_clause.read_stack(track)
@@ -952,6 +951,14 @@ module Dog::Nodes
         
         if using_clause then
           using_clause = using_clause.read_stack(track)
+          
+          for key, value in using_clause do
+            for property in task.properties do
+              if property.identifier == key then
+                property.value = value
+              end
+            end
+          end
         end
         
         if on_clause then
@@ -1011,7 +1018,6 @@ module Dog::Nodes
         new_track = ::Dog::Track.new(identifier)
         new_track.control_ancestors = track.control_ancestors.clone
         new_track.control_ancestors.push(track.id)
-        
         new_track.save
         
         track.state = ::Dog::Track::STATE::CALLING
@@ -1023,11 +1029,68 @@ module Dog::Nodes
   end
   
   class Notify < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        # TODO - I need to handle the routing... Probably after I box the values
+        notify_of_clause = elements_by_class(NotifyOfClause).first
+        notify_of_clause = notify_of_clause.read_stack(track)
+        
+        using_clause = elements_by_class(UsingClause).first
+        
+        message = ::Dog::RoutedMessage.from_hash(notify_of_clause)
+        message.routing = nil # TODO
+        message.created_at = Time.now.utc
+        
+        if using_clause then
+          using_clause = using_clause.read_stack(track)
+          
+          for key, value in using_clause do
+            for property in message.properties do
+              if property.identifier == key then
+                property.value = value
+              end
+            end
+          end
+        end
+        
+        message.save
+        
+        write_stack(track, {
+          "dog_type" => "message",
+          "id" => message.id
+        })
+        
+        return parent.path
+      end
+    end
   end
   
   class NotifyOfClause < Node
-    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        identifier = elements_by_class(Identifier).first
+        identifier = identifier.read_stack(track)
+        
+        new_track = ::Dog::Track.new(identifier)
+        new_track.control_ancestors = track.control_ancestors.clone
+        new_track.control_ancestors.push(track.id)
+        
+        new_track.save
+        
+        track.state = ::Dog::Track::STATE::CALLING
+        track.save
+        
+        return new_track
+      end
+    end
   end
   
   class Reply < Node

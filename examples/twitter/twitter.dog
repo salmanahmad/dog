@@ -19,9 +19,15 @@ DEFINE event video {
   description
 }
 
+DEFINE message m {
+  body
+}
+
 LISTEN TO salman VIA http FOR videos
 
 ASK salman VIA stream TO label ON images
+
+NOTIFY salman VIA stream OF m USING body: "Hello, World!"
 
 DEFINE fib ON n DO
   IF n == 0 THEN
