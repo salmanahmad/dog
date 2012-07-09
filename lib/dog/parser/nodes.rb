@@ -51,7 +51,6 @@ module Dog::Nodes
     end
   end
   
-  
   module VisitAllChildrenReturnLast
     def visit(track)
       path = super
@@ -205,7 +204,6 @@ module Dog::Nodes
         element.parent = node
       end
       
-      
       return node
     end
     
@@ -237,6 +235,8 @@ module Dog::Nodes
     
   end
   
+  
+  
   # ================
   # = Core Program =
   # ================
@@ -263,6 +263,8 @@ module Dog::Nodes
   class Statement < Node
     include VisitAllChildrenReturnLast
   end
+  
+  
   
   # ==============
   # = Statements =
@@ -292,7 +294,6 @@ module Dog::Nodes
       end
     end
   end
-  
   
   class AssignmentAccess < Node
     def visit(track)
@@ -410,13 +411,13 @@ module Dog::Nodes
   class AccessBracket < Node
     def visit(track)
       path = super
-
+      
       if path then
         return path
       else
         pointer = []
         pointer << elements.first.read_stack(track)
-
+        
         tail = elements_by_class(AccessTail).first
         if tail then
           tail_pointer = tail.read_stack(track)
@@ -424,7 +425,7 @@ module Dog::Nodes
             pointer << item
           end
         end
-
+        
         write_stack(track, pointer)
         return parent.path
       end
@@ -434,13 +435,13 @@ module Dog::Nodes
   class AccessDot < Node
     def visit(track)
       path = super
-
+      
       if path then
         return path
       else
         pointer = []
         pointer << elements.first.read_stack(track)
-
+        
         tail = elements_by_class(AccessTail).first
         if tail then
           tail_pointer = tail.read_stack(track)
@@ -448,7 +449,7 @@ module Dog::Nodes
             pointer << item
           end
         end
-
+        
         write_stack(track, pointer)
         return parent.path
       end
@@ -461,6 +462,8 @@ module Dog::Nodes
       return parent.path
     end
   end
+  
+  
   
   # =============
   # = Operators =
@@ -606,6 +609,8 @@ module Dog::Nodes
   class ContainsOperator < Node
     include VisitOperator
   end
+  
+  
   
   # ==============
   # = Structures =
@@ -942,7 +947,6 @@ module Dog::Nodes
         on_clause = elements_by_class(OnClause).first
         using_clause = elements_by_class(UsingClause).first
         
-        
         task = ::Dog::RoutedTask.from_hash(ask_to_clause)
         task.routing = nil # TODO
         task.created_at = Time.now.utc
@@ -1105,40 +1109,36 @@ module Dog::Nodes
     def visit(track)
       path = super
       
-      
       if path then
         return path
       else
+        identifier = elements_by_class(Identifier).first
+        mandatory_args = elements_by_class(OnClause).first
+        optional_args = elements_by_class(UsingClause).first
         
-          identifier = elements_by_class(Identifier).first
-          mandatory_args = elements_by_class(OnClause).first
-          optional_args = elements_by_class(UsingClause).first
-          
-          # TODO - Really consider fixing this...
-          # Compute does not get called twice. parent.path is 
-          # set of the containing track in continue
-          identifier = identifier.read_stack(track)
-          
-          new_track = ::Dog::Track.new(identifier)
-          new_track.control_ancestors = track.control_ancestors.clone
-          new_track.control_ancestors.push(track.id)
-          
-          if mandatory_args then
-            new_track.mandatory_arguments = mandatory_args.read_stack(track)
-          end
-          
-          if optional_args then
-            new_track.optional_arguments = optional_args.read_stack(track)
-          end
-          
-          
-          new_track.save
-          
-          
-          track.state = ::Dog::Track::STATE::CALLING
-          track.save
-          
-          return new_track
+        # TODO - Really consider fixing this...
+        # Compute does not get called twice. parent.path is 
+        # set of the containing track in continue
+        identifier = identifier.read_stack(track)
+        
+        new_track = ::Dog::Track.new(identifier)
+        new_track.control_ancestors = track.control_ancestors.clone
+        new_track.control_ancestors.push(track.id)
+        
+        if mandatory_args then
+          new_track.mandatory_arguments = mandatory_args.read_stack(track)
+        end
+        
+        if optional_args then
+          new_track.optional_arguments = optional_args.read_stack(track)
+        end
+        
+        new_track.save
+        
+        track.state = ::Dog::Track::STATE::CALLING
+        track.save
+        
+        return new_track
       end
     end
   end
@@ -1222,6 +1222,8 @@ module Dog::Nodes
   class PredicateConditonal < Node
     
   end
+  
+  
   
   # ===============
   # = Definitions =
@@ -1324,7 +1326,6 @@ module Dog::Nodes
     end
   end
   
-  
   class FunctionOn < Node
     include VisitAllChildrenReturnLast
   end
@@ -1373,6 +1374,8 @@ module Dog::Nodes
       end
     end
   end
+  
+  
   
   # ==================
   # = Other Commands =
@@ -1443,6 +1446,8 @@ module Dog::Nodes
       end
     end
   end
+  
+  
   
   # ======================
   # = Control Structures =
@@ -1561,6 +1566,8 @@ module Dog::Nodes
     include VisitAllChildrenReturnLast
   end
   
+  
+  
   # ==================
   # = Shared Clauses =
   # ==================
@@ -1608,6 +1615,8 @@ module Dog::Nodes
   class InClauseExpression < Node
     include VisitAllChildrenReturnLast
   end
+  
+  
   
   # =========
   # = Lists =
@@ -1677,6 +1686,8 @@ module Dog::Nodes
   class ArgumentListItem < Node
     include VisitAllChildrenReturnLast
   end
+  
+  
   
   # ===========
   # = Literal =
@@ -1773,5 +1784,5 @@ module Dog::Nodes
       return parent.path
     end
   end
-
+  
 end
