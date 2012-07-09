@@ -313,20 +313,19 @@ grammar Dog
   # ==================
 
   rule listen
-    'LISTEN' listen_to_clause via_clause listen_at_clause? listen_for_clause <::Dog::Nodes::Listen>
+    'LISTEN' listen_to_clause via_clause listen_for_clause <::Dog::Nodes::Listen>
   end
 
   rule listen_to_clause
     s 'TO' s (user / access) <::Dog::Nodes::ListenToClause>
   end
   
-  # TODO - should this be an identifier or an access -- Perhaps this goes in the OF clause???
   rule listen_for_clause
-    s 'FOR' s identifier <::Dog::Nodes::ListenForClause>
+    s 'FOR' s identifier listen_of_clause? <::Dog::Nodes::ListenForClause>
   end
-
-  rule listen_at_clause
-    s 'AT' s string <::Dog::Nodes::ListenAtClause>
+  
+  rule listen_of_clause
+    s 'OF' s identifier <::Dog::Nodes::ListenOfClause>
   end
   
   
@@ -360,7 +359,11 @@ grammar Dog
   # into random sub-rules like ask-count, etc.
   
   rule ask
-    'ASK' sn (integer sn)? (user / access) via_clause ask_to_clause on_clause? using_clause? <::Dog::Nodes::Ask>
+    'ASK' sn ask_count? (user / access) via_clause ask_to_clause on_clause? using_clause? <::Dog::Nodes::Ask>
+  end
+  
+  rule ask_count
+    integer sn <::Dog::Nodes::AskCount>
   end
   
   rule ask_to_clause

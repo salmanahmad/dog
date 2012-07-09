@@ -788,15 +788,15 @@ module Dog::Nodes
         property.identifier = identifier.read_stack(track)
         
         if default then
-          property.default = default.read_stack(track)
+          property.value = default.read_stack(track)
         else
-          property.default = nil
+          property.value = nil
         end
         
         if requirement then
-          property.requirement = requirement.read_stack(track)
+          property.required = requirement.read_stack(track)
         else
-          property.requirement = false
+          property.required = false
         end
         
         # TODO - Tasks need to have a direction. I need to check for that somewhere. Probably in the ASK
@@ -820,7 +820,12 @@ module Dog::Nodes
   
   class PropertyRequirementModifier < Node
     def visit(track)
-      write_stack(track, self.text_value.strip)
+      if self.text_value.strip == "required" then
+        write_stack(track, true)
+      else
+        write_stack(track, false)
+      end
+      
       return parent.path
     end
   end
@@ -838,24 +843,6 @@ module Dog::Nodes
   # = Commands =
   # ============
   
-  
-  
-  class Listen < Node
-   
-  end 
-  
-  class ListenToClause < Node
-    
-  end
-  
-  class ListenForClause < Node
-    
-  end
-  
-  class ListenAtClause < Node
-    
-  end
-  
   class Allow < Node
     
   end
@@ -868,6 +855,79 @@ module Dog::Nodes
     
   end
   
+  class Listen < Node
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        # TODO - I need to handle the routing... Probably after I box the values
+        listen_for_clause = elements_by_class(ListenForClause).first
+        hashed_event = listen_for_clause.read_stack(track)
+        
+        event = ::Dog::RoutedEvent.from_hash(hashed_event)
+        event.routing = nil # TODO
+        event.created_at = Time.now.utc
+        event.save
+        
+        event = {
+          "dog_type" => "event",
+          "id" => event.id
+        }
+        
+        track.variables[listen_for_clause.identifier] = event
+        write_stack(track, event)
+        
+        return parent.path
+      end
+    end
+  end 
+  
+  class ListenToClause < Node
+    include VisitAllChildrenReturnLast
+  end
+  
+  class ListenForClause < Node
+    def identifier
+      elements_by_class(Identifier).first.text_value
+    end
+    
+    def visit(track)
+      path = super
+      
+      if path then
+        return path
+      else
+        event_name = nil
+        
+        identifier = elements_by_class(Identifier).first.read_stack(track)
+        listen_of_clause = elements_by_class(ListenOfClause).first
+        
+        if listen_of_clause then
+          event_name = listen_of_clause.read_stack(track)
+        else
+          event_name = identifier
+          event_name = event_name.chop
+        end
+        
+        new_track = ::Dog::Track.new(event_name)
+        new_track.control_ancestors = track.control_ancestors.clone
+        new_track.control_ancestors.push(track.id)
+        new_track.save
+        
+        track.state = ::Dog::Track::STATE::CALLING
+        track.save
+        
+        return new_track
+      end
+    end
+  end
+  
+  class ListenOfClause < Node
+    include VisitAllChildrenReturnLast
+  end
+  
   class Ask < Node
     def visit(track)
       path = super
@@ -875,15 +935,67 @@ module Dog::Nodes
       if path then
         return path
       else
+        
+        # TODO - I need to handle the routing... Probably after I box the values
         ask_to_clause = elements_by_class(AskToClause).first
         ask_to_clause = ask_to_clause.read_stack(track)
         
-        puts ask_to_clause.inspect
-        puts ::Dog::RoutedTask.from_hash(ask_to_clause).inspect
+        on_clause = elements_by_class(OnClause).first
+        using_clause = elements_by_class(UsingClause).first
+        
+        
+        task = ::Dog::RoutedTask.from_hash(ask_to_clause)
+        task.routing = nil # TODO
+        task.created_at = Time.now.utc
+        task.replication = elements_by_class(AskCount).first.read_stack(track) rescue 1
+        task.duplication = 1
+        
+        if using_clause then
+          using_clause = using_clause.read_stack(track)
+        end
+        
+        if on_clause then
+          on_clause = on_clause.read_stack(track)
+          
+          if on_clause.kind_of? Hash then
+            for key, value in on_clause do
+              for property in task.properties do
+                if property.identifier == key then
+                  property.value = value
+                end
+              end
+            end
+          else
+            index = 0
+            for property in task.properties do
+              if property.required then
+                property.value = on_clause[index]
+                index += 1
+              end
+            end
+          end
+        end
+        
+        for property in task.properties do
+          if property.required && property.value.nil? then
+            raise "A required property (#{property.identifier}) was not set for task (#{task.name})."
+          end
+        end
+        
+        task.save
+        
+        write_stack(track, {
+          "dog_type" => "task",
+          "id" => task.id
+        })
         
         return parent.path
       end
     end
+  end
+  
+  class AskCount < Node
+    include VisitAllChildrenReturnLast
   end
   
   class AskToClause < Node

@@ -19,6 +19,10 @@ module Dog
     attr_accessor :routing
     attr_accessor :created_at
     
+    def self.inherited(child)
+      child.collection "stream"
+    end
+    
     def initialize
       self.type = self.class
     end

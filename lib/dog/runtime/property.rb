@@ -7,19 +7,21 @@
 # above copyright notice is included.
 #
 
+# TODO - How do I handle multiple parameters of the same name?
+
 module Dog
   
   class Property
     attr_accessor :identifier
-    attr_accessor :default
-    attr_accessor :requirement
+    attr_accessor :value
+    attr_accessor :required
     attr_accessor :direction
     
     def self.from_hash(hash)
       property = self.new
       property.identifier = hash["identifier"]
-      property.default = hash["default"]
-      property.requirement = hash["requirement"]
+      property.value = hash["value"]
+      property.required = hash["required"]
       property.direction = hash["direction"]
       
       return property
@@ -28,8 +30,8 @@ module Dog
     def to_hash
       return {
         "identifier" => self.identifier,
-        "default" => self.default, 
-        "requirement" => self.requirement,
+        "value" => self.value, 
+        "required" => self.required,
         "direction" => self.direction
       }
     end

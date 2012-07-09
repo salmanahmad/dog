@@ -99,7 +99,7 @@ How do you "require" a C module in ruby and what woudl that look like for Dog???
 
 
 
-
+I need to add a VALUE class to hold all of the primitive stuff...
 
 
 

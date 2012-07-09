@@ -14,6 +14,13 @@ DEFINE task label {
   input string
 }
 
+DEFINE event video {
+  title
+  description
+}
+
+LISTEN TO salman VIA http FOR videos
+
 ASK salman VIA stream TO label ON images
 
 DEFINE fib ON n DO
@@ -29,7 +36,7 @@ DEFINE fib ON n DO
 END
 
 PRINT 'here!'
-PRINT COMPUTE fib ON 10
+#PRINT COMPUTE fib ON 10
 PRINT 'done!'
 
 DEFINE hello_world DO
