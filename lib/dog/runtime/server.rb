@@ -318,41 +318,24 @@ module Dog
         
         
         
-        
-        get prefix + '/stream/poll' do
+        get prefix + '/stream.json' do
           
-          # TODO
+          id = params["id"]
+          depth = (params["depth"] || 0).to_i
+          limit = (params["limit"] || 0).to_i
+          offset = (params["offset"] || 0).to_i
+          after = (params["after"])
           
+          items = ::Dog::Database["stream"].find({})
+          
+          stream = {}
+          stream["self"] = {}
+          stream["items"] = items.to_a
+          
+          return stream.to_json
         end
         
-        
-        
-        
-        get prefix + '/stream/tracks' do
-          
-          
-        end
-        
-        get prefix + '/stream/tracks/root' do
-          
-        end
-        
-        get prefix + '/stream/tracks/:id ' do
-          
-        end
-        
-        
-        
-        
-        get prefix + '/stream/events' do
-          
-        end
-        
-        get prefix + '/stream/events/:id' do
-          
-        end
-        
-        post prefix + '/stream/events/:id' do
+        post prefix + '/stream.json' do
           
         end
         
