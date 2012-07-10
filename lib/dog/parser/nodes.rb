@@ -40,7 +40,7 @@ module Dog::Nodes
             properties = properties.read_stack(track)
           end
           
-          track.state =  ::Dog::Track::STATE::FINISHED
+          track.finish
           
           track.return_value = properties
           write_stack(track, properties)
@@ -248,7 +248,7 @@ module Dog::Nodes
         return path
       else
         write_stack(track, elements.last.read_stack(track))
-        track.state = ::Dog::Track::STATE::FINISHED
+        track.finish
         return nil
       end
       
@@ -880,6 +880,7 @@ module Dog::Nodes
           "id" => event.id
         }
         
+        track.has_listen = true
         track.variables[listen_for_clause.identifier] = event
         write_stack(track, event)
         
@@ -1340,7 +1341,7 @@ module Dog::Nodes
           
           return path
         else
-          track.state = ::Dog::Track::STATE::FINISHED
+          track.finish
           
           if statements then
             unless track.return_value then
@@ -1580,7 +1581,7 @@ module Dog::Nodes
       return_expression = elements.first
       if return_expression then
         if track.has_stack_path(return_expression.path) then
-          track.state = ::Dog::Track::STATE::FINISHED
+          track.finish
           track.return_value = return_expression.read_stack(track)
           write_stack(track, return_expression.read_stack(track))
           return nil
@@ -1588,7 +1589,7 @@ module Dog::Nodes
           return return_expression.path
         end
       else
-        track.state = ::Dog::Track::STATE::FINISHED
+        track.finish
         track.return_value = nil
         write_stack(track, nil)
         return nil

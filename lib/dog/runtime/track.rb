@@ -16,6 +16,7 @@ module Dog
       RUNNING = "running"
       CALLING = "calling"
       WAITING = "waiting"
+      LISTENING = "listening"
       FINISHED = "finished" 
       ERROR = "error"
       DELETED = "deleted"
@@ -39,6 +40,8 @@ module Dog
     
     attr_accessor :return_value
     attr_accessor :error_value
+    
+    attr_accessor :has_listen
     
     # TODO - Think about adding back references when we
     # decide on the object model for the language
@@ -83,6 +86,14 @@ module Dog
       return true
     end
     
+    def finish
+      if self.has_listen then
+        self.state = ::Dog::Track::STATE::LISTENING
+      else
+        self.state = ::Dog::Track::STATE::FINISHED
+      end
+    end
+    
     def to_hash
       return {
         function_name: self.function_name,
@@ -96,7 +107,8 @@ module Dog
         stack: self.stack,
         variables: self.variables,
         return_value: self.return_value,
-        error_value: self.error_value
+        error_value: self.error_value,
+        has_listen: self.has_listen
       }
     end
     
@@ -180,7 +192,7 @@ module Dog
       
       self.save
       
-      if self.state == STATE::FINISHED
+      if self.state == STATE::FINISHED || self.state == STATE::LISTENING
         # I'm done!...
         parent_track = Track.find_by_id(self.control_ancestors.last)
         

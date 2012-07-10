@@ -495,7 +495,10 @@ module Dog
           track.continue
         end
         
-        tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
+        tracks = Track.find({"state" => { 
+          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING]
+          }
+        }, :sort => ["created_at", Mongo::DESCENDING])
         
         if tracks.count != 0 then
           Thin::Server.start '0.0.0.0', Config.get('port'), Server
