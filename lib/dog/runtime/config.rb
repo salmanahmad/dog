@@ -19,7 +19,7 @@ module Dog
         
         @config ||= {
           'port' => 4242, 
-          'dog_prefix' => '/dog/',
+          'dog_prefix' => '/dog',
           'database' => File.basename(Runtime.bite_code_filename, File.extname(Runtime.bite_code_filename))
         }
         
@@ -27,6 +27,11 @@ module Dog
         
         @config.merge!(JSON.parse(File.open(config_file).read)) rescue nil
         @config.merge!(config)
+        
+        if @config["dog_prefix"][-1,1] == "/" then
+          @config["dog_prefix"].chop!
+        end
+        
       end
       
       def reset

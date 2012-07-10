@@ -316,17 +316,14 @@ module Dog
           @output.to_json
         end
         
-        
-        
         get prefix + '/stream.json' do
-          
           id = params["id"]
           depth = (params["depth"] || 0).to_i
           limit = (params["limit"] || 0).to_i
           offset = (params["offset"] || 0).to_i
           after = (params["after"])
           
-          items = ::Dog::Database["stream"].find({})
+          items = ::Dog::StreamObject.find({})
           
           stream = {}
           stream["self"] = {}
