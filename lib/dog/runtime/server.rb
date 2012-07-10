@@ -371,6 +371,7 @@ module Dog
             end
           end
           
+          stream["success"] = true
           return stream.to_json
         end
         
@@ -388,7 +389,7 @@ module Dog
             argument[property.identifier] = params[property.identifier]
             
             if property.required && argument[property.identifier].nil? then
-              return [400, {"error" => "The required property '#{property.identifier}' was missing."}.to_json]
+              return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
             end
           end
           
@@ -400,7 +401,24 @@ module Dog
           
           track.save
           track.continue
+          
+          return {
+            "success" => true
+          }.to_json
         end
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         
