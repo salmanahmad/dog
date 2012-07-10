@@ -809,7 +809,7 @@ module Dog::Nodes
         if direction then
           property.direction = direction.read_stack(track)
         else
-          property.direction = nil
+          property.direction = "output"
         end
         
         write_stack(track, property.to_hash)
