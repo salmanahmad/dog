@@ -42,6 +42,7 @@ module Dog
     attr_accessor :error_value
     
     attr_accessor :has_listen
+    attr_accessor :listen_argument
     
     # TODO - Think about adding back references when we
     # decide on the object model for the language
@@ -108,7 +109,8 @@ module Dog
         "variables" => self.variables,
         "return_value" => self.return_value,
         "error_value" => self.error_value,
-        "has_listen" => self.has_listen
+        "has_listen" => self.has_listen,
+        "listen_argument" => self.listen_argument
       }
     end
     

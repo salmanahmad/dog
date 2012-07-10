@@ -328,13 +328,40 @@ module Dog
           stream["items"] = []
           
           if id then
-            object = ::Dog::StreamObject.find_by_id(id)
-            stream["self"] = object.to_hash_for_stream
-            
-            if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
-              # TODO - I need to add in all of the good stuff here...
+            if id.match(/^handler:(.*)/) then
+              
+              track = ::Dog::Track.find_by_id(id.match(/^handler:(.*)/)[1])
+              
+              stream["self"] = track.variables[track.listen_argument]
+              
+              items = ::Dog::StreamObject.find({"track_id" => track.id})
+              items.each do |item|
+                item = ::Dog::StreamObject.from_hash(item)
+                stream["items"] << item.to_hash_for_stream
+              end
+              
+            else
+              object = ::Dog::StreamObject.find_by_id(id)
+              stream["self"] = object.to_hash_for_stream
+              
+              if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
+                handler = object.handler
+                argument = object.handler_argument
+                
+                if handler then
+                  items = ::Dog::Track.find({"function_name" => handler})
+                  for item in items do
+                    item = ::Dog::Track.from_hash(item)
+                    if argument then
+                      stream_item = item.variables[argument]
+                      stream_item["id"] = "handler:#{item.id}"
+                    
+                      stream["items"] << stream_item
+                    end
+                  end
+                end
+              end
             end
-            
           else
             root = ::Dog::Track.root
             items = ::Dog::StreamObject.find({"track_id" => root.id})
@@ -368,6 +395,8 @@ module Dog
           if object.handler_argument then
             track.variables[object.handler_argument] = argument
           end
+          
+          track.listen_argument = object.handler_argument
           
           track.save
           track.continue
