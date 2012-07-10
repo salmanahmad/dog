@@ -1,12 +1,13 @@
 
 
 DEFINE event video {
-  title
+  required title
   description
 }
 
 LISTEN TO public VIA http FOR videos
 
 ON EACH video DO
-  PRINT "Hi!"
+  PRINT "Got a request!"
+  PRINT video.title
 END

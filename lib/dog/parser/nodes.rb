@@ -1191,7 +1191,7 @@ module Dog::Nodes
       else
         statements = elements_by_class(Statements).first
         
-        if statements then 
+        if statements && !track.has_stack_path(statements.path) then 
           return statements.path
         else
           return nil

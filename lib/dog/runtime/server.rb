@@ -329,9 +329,12 @@ module Dog
           
           if id then
             object = ::Dog::StreamObject.find_by_id(id)
-            
             stream["self"] = object.to_hash_for_stream
-            stream["items"] = []
+            
+            if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
+              # TODO - I need to add in all of the good stuff here...
+            end
+            
           else
             root = ::Dog::Track.root
             items = ::Dog::StreamObject.find({"track_id" => root.id})
@@ -345,7 +348,29 @@ module Dog
         end
         
         post prefix + '/stream.json' do
+          id = params["id"]
           
+          puts params.inspect
+          
+          object = ::Dog::StreamObject.find_by_id(id)
+          track = ::Dog::Track.new(object.handler)
+          
+          argument = {}
+          
+          for property in object.properties do
+            argument[property.identifier] = params[property.identifier]
+            
+            if property.required && argument[property.identifier].nil? then
+              return [400, {"error" => "The required property '#{property.identifier}' was missing."}.to_json]
+            end
+          end
+          
+          if object.handler_argument then
+            track.variables[object.handler_argument] = argument
+          end
+          
+          track.save
+          track.continue
         end
         
         
