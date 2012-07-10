@@ -17,6 +17,8 @@ module Dog
     attr_accessor :name
     attr_accessor :properties
     attr_accessor :routing
+    attr_accessor :handler
+    attr_accessor :handler_argument
     attr_accessor :created_at
     
     def self.inherited(child)
@@ -45,6 +47,8 @@ module Dog
           property.to_hash
         }),
         routing: People.to_database(self.routing || {}),
+        handler: self.handler,
+        handler_argument: self.handler_argument,
         created_at: (self.created_at || Time.now)
       }
     end

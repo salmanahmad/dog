@@ -1,0 +1,12 @@
+
+
+DEFINE event video {
+  title
+  description
+}
+
+LISTEN TO public VIA http FOR videos
+
+ON EACH video DO
+  PRINT "Hi!"
+END

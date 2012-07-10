@@ -232,7 +232,6 @@ module Dog::Nodes
       
       return nil
     end
-    
   end
   
   
@@ -1144,6 +1143,10 @@ module Dog::Nodes
   end
   
   class On < Node
+    
+    # TODO - This is not the correct name. I need to make sure that this is the full path name, especially when I am creating a new track in nodes like COMPUTE, ASK, MESSAGE, etc.
+    # Name is NOT the actual symbol name to look up from the compiled bite code...
+    
     def name
       name = "@"
       if self.elements_by_class(OnEach).empty? then
@@ -1158,13 +1161,44 @@ module Dog::Nodes
     end
     
     def visit(track)
-      # TODO - How do I handle this?
+      if track.function_name != self.name then
+        on_each = elements_by_class(OnEach).first
+        in_clause = elements_by_class(InClause).first
+        
+        if on_each && !track.has_stack_path(on_each.path) then
+          return on_each.path
+        end
+        
+        if in_clause && !track.has_stack_path(in_clause.path) then
+          return in_clause.path
+        end
+        
+        in_clause = in_clause.read_stack(track)
+        variable_name = in_clause[0]
+        stream_object_id = in_clause[1]["id"]
+        
+        stream_object = ::Dog::StreamObject.find_by_id(stream_object_id)
+        stream_object.handler = self.name
+        stream_object.handler_argument = variable_name
+        stream_object.save
+        
+        self.write_stack(track, nil)
+        return parent.path
+      else
+        statements = elements_by_class(Statements).first
+        
+        if statements then 
+          return statements.path
+        else
+          return nil
+        end
+      end
     end
   end
   
   class OnEach < Node
     def visit(track)
-      on_each_count = elements_by_class(OnEachCount)
+      on_each_count = elements_by_class(OnEachCount).first
       if on_each_count then
         if track.has_stack_path(on_each_count) then
           write_stack(track, on_each_count.read_stack(track))
