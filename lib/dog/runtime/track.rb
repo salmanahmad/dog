@@ -96,19 +96,19 @@ module Dog
     
     def to_hash
       return {
-        function_name: self.function_name,
-        function_filename: self.function_filename,
-        current_node_path: self.current_node_path,
-        mandatory_arguments: self.mandatory_arguments,
-        optional_arguments: self.optional_arguments,
-        access_ancestors: self.access_ancestors,
-        control_ancestors: self.control_ancestors,
-        state: self.state,
-        stack: self.stack,
-        variables: self.variables,
-        return_value: self.return_value,
-        error_value: self.error_value,
-        has_listen: self.has_listen
+        "function_name" => self.function_name,
+        "function_filename" => self.function_filename,
+        "current_node_path" => self.current_node_path,
+        "mandatory_arguments" => self.mandatory_arguments,
+        "optional_arguments" => self.optional_arguments,
+        "access_ancestors" => self.access_ancestors,
+        "control_ancestors" => self.control_ancestors,
+        "state" => self.state,
+        "stack" => self.stack,
+        "variables" => self.variables,
+        "return_value" => self.return_value,
+        "error_value" => self.error_value,
+        "has_listen" => self.has_listen
       }
     end
     

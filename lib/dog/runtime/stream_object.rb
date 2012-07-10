@@ -31,7 +31,13 @@ module Dog
     end
     
     def self.from_hash(hash)
-      object = super
+      klass = Kernel.qualified_const_get(hash["type"])
+      object = klass.new
+      
+      for key, value in hash do
+        object.instance_variable_set("@#{key}".intern, value)
+      end
+      
       object.type = Kernel.qualified_const_get(object.type)
       object.routing = People.from_database(object.routing || "{}")
       object.properties = object.properties.map { |property|
@@ -42,23 +48,26 @@ module Dog
     
     def to_hash
       return {
-        track_id: self.track_id,
-        type: self.type.name,
-        name: self.name,
-        properties: ((self.properties || []).map { |property|
+        "track_id" => self.track_id,
+        "type" => self.type.name,
+        "name" => self.name,
+        "properties" => ((self.properties || []).map { |property|
           property.to_hash
         }),
-        routing: People.to_database(self.routing || {}),
-        handler: self.handler,
-        handler_argument: self.handler_argument,
-        created_at: (self.created_at || Time.now)
+        "routing" => People.to_database(self.routing || {}),
+        "handler" => self.handler,
+        "handler_argument" => self.handler_argument,
+        "created_at" => (self.created_at || Time.now)
       }
     end
     
     def to_hash_for_stream
-      to_hash.merge({
-        "id" => self.id.to_s
-      })
+      hash = to_hash
+      hash.delete("_id")
+      hash["id"] = self.id.to_s
+      hash["track_id"] = self.track_id.to_s
+      
+      return hash
     end
     
   end

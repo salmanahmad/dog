@@ -18,18 +18,17 @@ module Dog
     def to_hash
       hash = super
       return hash.merge({
-        replication: (self.replication || 1),
-        duplication: (self.duplication || 1),
-        responses: (self.responses || [])
+        "replication" => (self.replication || 1),
+        "duplication" => (self.duplication || 1),
+        "responses" => (self.responses || [])
       })
     end
     
-    def to_hash_for_event
-      hash = to_hash
-      hash["_id"] = self._id.to_s
-      hash.delete(:replication)
-      hash.delete(:duplication)
-      hash.delete(:responses)
+    def to_hash_for_stream
+      hash = super
+      hash.delete("replication")
+      hash.delete("duplication")
+      hash.delete("responses")
       return hash
     end
     

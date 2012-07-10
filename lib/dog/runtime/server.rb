@@ -336,10 +336,8 @@ module Dog
             root = ::Dog::Track.root
             items = ::Dog::StreamObject.find({"track_id" => root.id})
             items.each do |item|
-              item["track_id"] = item["track_id"].to_s
-              item["id"] = item["_id"].to_s
-              item.delete("_id")
-              stream["items"] << item
+              item = ::Dog::StreamObject.from_hash(item)
+              stream["items"] << item.to_hash_for_stream
             end
           end
           
