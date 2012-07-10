@@ -871,6 +871,7 @@ module Dog::Nodes
         hashed_event = listen_for_clause.read_stack(track)
         
         event = ::Dog::RoutedEvent.from_hash(hashed_event)
+        event.track_id = track.id
         event.routing = nil # TODO
         event.created_at = Time.now.utc
         event.save
@@ -948,6 +949,7 @@ module Dog::Nodes
         using_clause = elements_by_class(UsingClause).first
         
         task = ::Dog::RoutedTask.from_hash(ask_to_clause)
+        task.track_id = track.id
         task.routing = nil # TODO
         task.created_at = Time.now.utc
         task.replication = elements_by_class(AskCount).first.read_stack(track) rescue 1
@@ -1046,6 +1048,7 @@ module Dog::Nodes
         using_clause = elements_by_class(UsingClause).first
         
         message = ::Dog::RoutedMessage.from_hash(notify_of_clause)
+        message.track_id = track.id
         message.routing = nil # TODO
         message.created_at = Time.now.utc
         

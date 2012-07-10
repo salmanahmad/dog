@@ -323,11 +323,25 @@ module Dog
           offset = (params["offset"] || 0).to_i
           after = (params["after"])
           
-          items = ::Dog::StreamObject.find({})
-          
           stream = {}
           stream["self"] = {}
-          stream["items"] = items.to_a
+          stream["items"] = []
+          
+          if id then
+            object = ::Dog::StreamObject.find_by_id(id)
+            
+            stream["self"] = object.to_hash_for_stream
+            stream["items"] = []
+          else
+            root = ::Dog::Track.root
+            items = ::Dog::StreamObject.find({"track_id" => root.id})
+            items.each do |item|
+              item["track_id"] = item["track_id"].to_s
+              item["id"] = item["_id"].to_s
+              item.delete("_id")
+              stream["items"] << item
+            end
+          end
           
           return stream.to_json
         end

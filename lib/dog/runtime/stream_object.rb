@@ -13,6 +13,7 @@ module Dog
     collection "stream"
     
     attr_accessor :_id
+    attr_accessor :track_id
     attr_accessor :type
     attr_accessor :name
     attr_accessor :properties
@@ -41,6 +42,7 @@ module Dog
     
     def to_hash
       return {
+        track_id: self.track_id,
         type: self.type.name,
         name: self.name,
         properties: ((self.properties || []).map { |property|
@@ -53,8 +55,10 @@ module Dog
       }
     end
     
-    def to_hash_for_event
-      to_hash
+    def to_hash_for_stream
+      to_hash.merge({
+        "id" => self.id.to_s
+      })
     end
     
   end
