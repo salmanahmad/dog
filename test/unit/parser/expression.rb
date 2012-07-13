@@ -32,7 +32,6 @@ class ParserTests::ExpressionTest < Test::Unit::TestCase
     @parser.parse("5 + 5 / 2")
     @parser.parse("5 / 2 + 5")
     @parser.parse("(5) + (5 + 5) + 5")
-    @parser.parse("(5) UNION (5 - 5) / 5")
   end
   
   def test_access

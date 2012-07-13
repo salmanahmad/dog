@@ -48,12 +48,6 @@ class ParserTests::LiteralTest < Test::Unit::TestCase
     
     @parser.parse("false")
     @parser.parse("FALSE")
-    
-    @parser.parse("yes")
-    @parser.parse("YES")
-    
-    @parser.parse("no")
-    @parser.parse("NO")
   end
   
   def test_strings
@@ -68,51 +62,50 @@ class ParserTests::LiteralTest < Test::Unit::TestCase
   end
   
   def test_array
-    @parser.parse("[]")
-    @parser.parse("[1]")
-    @parser.parse("[1,]")
-    @parser.parse("[1,2,3]")
-    @parser.parse("[1,2.0,-3]")
-    @parser.parse("[1   ,    2.0, -3]")
-    
-    @parser.parse("[1,'Foo Bar']")
-    @parser.parse("[1,'Foo Bar', true, false, YES]")
-    
-    @parser.parse("[[1],'Foo Bar', true, false, YES]")
-    @parser.parse("[[[[[[3.14]]]]]]")
-    @parser.parse("[{'key':5}]")
-    
-    assert_raise Dog::ParseError do
-      @parser.parse("[1items,]")
-    end
+    ## TODO - Consider bringing this back
+    #@parser.parse("[]")
+    #@parser.parse("[1]")
+    #@parser.parse("[1,]")
+    #@parser.parse("[1,2,3]")
+    #@parser.parse("[1,2.0,-3]")
+    #@parser.parse("[1   ,    2.0, -3]")
+    #
+    #@parser.parse("[1,'Foo Bar']")
+    #@parser.parse("[1,'Foo Bar', true, false, YES]")
+    #
+    #@parser.parse("[[1],'Foo Bar', true, false, YES]")
+    #@parser.parse("[[[[[[3.14]]]]]]")
+    #@parser.parse("[{'key':5}]")
+    #
+    #assert_raise Dog::ParseError do
+    #  @parser.parse("[1items,]")
+    #end
   end
   
   def test_hash
-    @parser.parse("{'key':'value'}")
-    @parser.parse("{\"key\":'value'}")
+    @parser.parse("{'key'='value'}")
+    @parser.parse("{\"key\"='value'}")
     
-    @parser.parse("{'key':1,}")
+    @parser.parse("{'key'=1,}")
     
-    @parser.parse("{'key':1}")
-    @parser.parse("{'key':true}")
-    @parser.parse("{'key':-4.5}")
+    @parser.parse("{'key'=1}")
+    @parser.parse("{'key'=true}")
+    @parser.parse("{'key'=-4.5}")
     
-    @parser.parse("{'key':1, 'key2':'value'}")
+    @parser.parse("{'key'=1, 'key2'='value'}")
     
-    @parser.parse("{'key':[1,2,3]}")
-    @parser.parse("{'key':[[1]]}")
-    @parser.parse("{'key':[[1,2,true]]}")
+    #@parser.parse("{'key'=[1,2,3]}")
+    #@parser.parse("{'key'=[[1]]}")
+    #@parser.parse("{'key'=[[1,2,true]]}")
     
-    @parser.parse("{'key':{'key':'value'}}")
+    @parser.parse("{'key'={'key'='value'}}")
     
-    @parser.parse("{  'key' :   1   , 'key2'  :  'value'  }")
-    @parser.parse("{\n\t'key':1,\n\t'key2':'value'\n}")
+    @parser.parse("{  'key' =   1   , 'key2'  =  'value'  }")
+    @parser.parse("{\n\t'key'=1,\n\t'key2'='value'\n}")
   end
   
-  def test_hash_key_must_be_string
-    assert_raises Dog::ParseError do
-      @parser.parse("{1:'value'}")
-    end
+  def test_hash_key_can_be_numbers
+    @parser.parse("{1='value'}")
   end
   
 end

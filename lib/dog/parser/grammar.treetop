@@ -16,13 +16,13 @@ grammar Dog
   # ================
 
   rule program
-    statements '' <::Dog::Nodes::Program> 
+    statements
     / 
-    '' <::Dog::Nodes::Program>
+    ''
   end
   
   rule statements
-    statement+ <::Dog::Nodes::Statements>
+    statement+
   end
   
   # TODO - Perhaps add assignments to expressions. In ruby you can 
@@ -33,7 +33,7 @@ grammar Dog
   # only have one per "line"
   
   rule statement
-    s? (assignment / expression) s? t <::Dog::Nodes::Statement>
+    s? (expression) s? t
     /
     s t
     / 
@@ -44,385 +44,329 @@ grammar Dog
     comment
   end
   
+  
+  
+  # ===============
+  # = Expressions =
+  # ===============
+  
+  rule expression
+    assignment_expression
+  end
+  
+  rule expression_no_assignment
+	or_expression
+  end
+  
+  rule assignment_expression
+    assignment
+    /
+    or_expression
+  end
+  
+  rule or_expression
+    and_expression s or_operator s or_expression
+    /
+    and_expression
+  end
+  
+  rule and_expression
+    relational_expression s and_operator s and_expression
+    /
+    relational_expression
+  end
+  
+  rule relational_expression
+    additive_expression s? relational_operator s? relational_expression
+    /
+    additive_expression
+  end
+  
+  rule additive_expression
+    multiplicative_expression s? additive_operator s? additive_expression
+    /
+    multiplicative_expression
+  end
+  
+  rule multiplicative_expression
+    unary_expression s? multiplicative_operator s? multiplicative_expression
+    /
+    unary_expression
+  end
+  
+  rule unary_expression
+    unary_operator s unary_expression
+    /
+    primary_expression
+  end
+  
+  rule primary_expression
+    literal
+    /
+    access
+    /
+    compute
+    /
+    ask
+    /
+    listen
+    /
+    notify
+    /
+    structure_instantiation
+    /
+    function_definition
+    /
+    structure_definition
+    /
+    collection_definition
+    /
+    control_structure
+    /
+    import
+    /
+    print
+    /
+    inspect
+    /
+    on
+    /
+    user
+    /
+    '(' sn? expression sn? ')'
+  end
+  
+  # TODO - Remove this. I am keeping it around for documentaiton purposes
+  # Mostly I am keep it around so that I can remember:
+  #    on
+  #    import
+  #    user
+  #
+  #rule command
+  #   community / event / task / message / listen / allow / ask / notify / reply / compute / on / user / definition / control_structure / config / import / print / inspect
+  #end
+  
+  
   # ==============
-  # = Statements =
+  # = Assignment =
   # ==============
   
-  # TODO - I can do things like 5 = 7 right now, I need to fix that...
-  # Perhaps changing access_head from literal to collection?
-  
-  rule assignment 
-    assignment_access s? assignment_operator s? expression <::Dog::Nodes::Assignment>
+  rule assignment
+    assignment_access s? assignment_operator s? expression
   end
   
   rule assignment_access
-    identifier access_tail? <::Dog::Nodes::AssignmentAccess>
-  end
-  
-  rule expression
-    command / operation / access '' <::Dog::Nodes::Expression>
-  end
-  
-  rule command
-     community / event / task / message / listen / allow / ask / notify / reply / compute / on / user / definition / control_structure / config / import / print / inspect
-  end
-  
-  rule operation
-    operation_head s? binary_operator s? operation_tail <::Dog::Nodes::Operation>
-    / 
-    unary_operator s? expression <::Dog::Nodes::Operation>
-  end
-  
-  rule operation_head
-    command '' <::Dog::Nodes::OperationHead>
-    / 
-    access '' <::Dog::Nodes::OperationHead>
-  end
-  
-  rule operation_tail
-    expression '' <::Dog::Nodes::OperationTail>
-    /
-    operation_head '' <::Dog::Nodes::OperationTail>
+    identifier access_tail?
   end
   
   rule access
-    access_head access_tail? <::Dog::Nodes::Access>
+    access_head access_tail?
   end
   
   rule access_head
-    literal '' <::Dog::Nodes::AccessHead>
+    literal
     / 
-    variable '' <::Dog::Nodes::AccessHead>
+    variable
     / 
-    '(' s? expression s? ')' <::Dog::Nodes::AccessHead>
+    '(' s? expression s? ')'
   end
   
   rule variable 
-    identifier '' <::Dog::Nodes::Variable>
+    identifier
   end
   
   rule access_tail
-    access_dot '' <::Dog::Nodes::AccessTail>
+    access_dot
     / 
-    access_bracket '' <::Dog::Nodes::AccessTail>
+    access_bracket
   end
   
   rule access_dot
-    '.' identifier access_tail? <::Dog::Nodes::AccessDot>
+    '.' identifier access_tail?
   end
   
   rule access_bracket
-    '[' s? expression s? ']' access_tail? <::Dog::Nodes::AccessBracket>
+    '[' s? expression s? ']' access_tail?
   end
   
-  rule identifier
-    lower (lower / digit / '_')* <::Dog::Nodes::Identifier>
-  end
-
+  
+  
   # =============
   # = Operators =
   # =============
-
-  rule binary_operator
-    arithmetic_operator / collection_operator / comparative_operator / and_operator / or_operator
+  
+  rule assignment_operator
+    '='
+  end
+  
+  rule relational_operator
+    equality_operator
+    / 
+    inequality_operator
+    / 
+    greater_than_equal_operator
+    / 
+    less_than_equal_operator
+    / 
+    greater_than_operator
+    / 
+    less_than_operator
+  end
+  
+  rule additive_operator
+    addition_operator 
+    / 
+    subtraction_operator
+  end
+  
+  rule multiplicative_operator
+    multiplication_operator 
+    / 
+    division_operator
   end
   
   rule unary_operator
     not_operator
   end
   
-  rule assignment_operator
-    '=' <::Dog::Nodes::AssignmentOperator>
-  end
-  
-  rule arithmetic_operator
-    addition_operator / subtraction_operator / multiplication_operator / division_operator
-  end
-  
-  rule comparative_operator
-    equality_operator / inequality_operator / greater_than_operator / less_than_operator / greater_than_equal_operator / less_than_equal_operator / associates_operator / contains_operator
-  end
-  
-  rule logical_operator
-    and_operator / or_operator / not_operator
-  end
-  
-  rule collection_operator
-    union_operator / intersect_operator / difference_operator / append_operator / prepend_operator
-  end
-  
-  # TODO: Order of operations...
-  
   rule addition_operator
-    '+' <::Dog::Nodes::AdditionOperator>
+    '+'
   end
   
   rule subtraction_operator
-    '-' <::Dog::Nodes::SubtractionOperator>
+    '-'
   end
   
   rule multiplication_operator
-    '*' <::Dog::Nodes::MultiplicationOperator>
+    '*'
   end
   
   rule division_operator
-    '/' <::Dog::Nodes::DivisionOperator>
+    '/'
   end
   
   rule equality_operator
-    '==' <::Dog::Nodes::EqualityOperator>
+    '=='
   end
   
   rule inequality_operator
-    '!=' <::Dog::Nodes::InequalityOperator>
+    '!='
   end
   
   rule greater_than_operator
-    '>' <::Dog::Nodes::GreaterThanOperator>
+    '>'
   end
   
   rule less_than_operator
-    '<' <::Dog::Nodes::LessThanOperator>
+    '<'
   end
   
   rule greater_than_equal_operator
-    '>=' <::Dog::Nodes::GreaterThanEqualOperator>
+    '>='
   end
   
   rule less_than_equal_operator
-    '<=' <::Dog::Nodes::LessThanEqualOperator>
+    '<='
   end
   
   rule and_operator
-    'AND' <::Dog::Nodes::AndOperator>
+    'AND'
   end
   
   rule or_operator
-    'OR' <::Dog::Nodes::OrOperator>
+    'OR'
   end
   
   rule not_operator
-    'NOT' <::Dog::Nodes::NotOperator>
-  end
-  
-  rule union_operator
-    'UNION' <::Dog::Nodes::UnionOperator>
-  end
-  
-  rule intersect_operator
-    'INTERSECT' <::Dog::Nodes::IntersectOperator>
-  end
-  
-  rule difference_operator
-    ('DIFFERENCE' / 'DIFF' / 'MINUS') <::Dog::Nodes::DifferenceOperator>
-  end
-  
-  rule append_operator
-    'APPEND' <::Dog::Nodes::AppendOperator>
-  end
-  
-  rule prepend_operator
-    'PREPEND' <::Dog::Nodes::PrependOperator>
-  end
-  
-  rule associates_operator
-    "ASSOCIATES" <::Dog::Nodes::AssociatesOperator>
-  end
-  
-  rule contains_operator
-    "CONTAINS" <::Dog::Nodes::ContainsOperator>
+    'NOT'
   end
   
   
-  # ====================
-  # = Human Interfaces =
-  # ====================
   
-  rule structure
-    community / event / task / message
+  # ===================
+  # = Compute Command =
+  # ===================
+  
+  rule compute
+    'COMPUTE' s identifier on_clause? using_clause?
   end
   
-  rule community
-    'DEFINE' s 'community' s identifier sn? '{' sn? community_properties? sn? '}' <::Dog::Nodes::Community>
+  
+  
+  # ===============
+  # = Ask Command =
+  # ===============
+  
+  rule ask
+    'ASK' sn ask_count? (user / access) via_clause ask_to_clause on_clause? using_clause?
   end
   
-  rule community_properties
-    community_property+ <::Dog::Nodes::CommunityProperties>
+  rule ask_count
+    integer sn
   end
   
-  rule community_property
-    community_property_attribute '' <::Dog::Nodes::CommunityProperty>
-    /
-    community_property_relationship '' <::Dog::Nodes::CommunityProperty>
+  rule ask_to_clause
+    # TODO - Bring this back
+    #s 'TO' s (string / access)
+    s 'TO' s identifier
   end
   
-  rule community_property_attribute
-    sn? identifier s? t <::Dog::Nodes::CommunityPropertyAttribute>
-  end
   
-  rule community_property_relationship
-    sn? 'relationship' s identifier community_property_relationship_inverse? s? t <::Dog::Nodes::CommunityPropertyRelationship>
-  end
-  
-  rule community_property_relationship_inverse
-    s? ',' s? community_property_relationship_inverse_community? identifier <::Dog::Nodes::CommunityPropertyRelationshipInverse>
-  end
-  
-  rule community_property_relationship_inverse_community
-    identifier '.' <::Dog::Nodes::CommunityPropertyRelationshipInverseCommunity>
-  end
-  
-  rule event
-    'DEFINE' s 'event' s identifier sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Event>
-  end
-  
-  rule task
-    'DEFINE' s 'task' s identifier sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Task>
-  end
-  
-  rule message
-    'DEFINE' s 'message' s identifier sn? '{' sn? properties? sn? '}' <::Dog::Nodes::Message>
-  end
-  
-  rule properties
-    property+ <::Dog::Nodes::Properties>
-  end
-  
-  rule property
-    sn? property_requirement_modifier? property_direction_modifier? identifier property_default_value? s? t <::Dog::Nodes::Property>
-  end
-  
-  rule property_default_value
-    s? '=' s? expression <::Dog::Nodes::PropertyDefaultValue>
-  end
-  
-  rule property_requirement_modifier
-    'required' s <::Dog::Nodes::PropertyRequirementModifier>
-    /
-    'optional' s <::Dog::Nodes::PropertyRequirementModifier>
-  end
-  
-  rule property_direction_modifier
-    'input' s <::Dog::Nodes::PropertyDirectionModifier>
-    /
-    'output' s <::Dog::Nodes::PropertyDirectionModifier>
-  end
   
   # ==================
   # = Listen Command = 
   # ==================
 
   rule listen
-    'LISTEN' listen_to_clause via_clause listen_for_clause <::Dog::Nodes::Listen>
+    'LISTEN' listen_to_clause via_clause listen_for_clause
   end
 
   rule listen_to_clause
-    s 'TO' s (user / access) <::Dog::Nodes::ListenToClause>
+    s 'TO' s (user / access)
   end
   
   rule listen_for_clause
-    s 'FOR' s identifier listen_of_clause? <::Dog::Nodes::ListenForClause>
+    s 'FOR' s identifier listen_of_clause?
   end
   
   rule listen_of_clause
-    s 'OF' s identifier <::Dog::Nodes::ListenOfClause>
+    s 'OF' s identifier
   end
   
   
-  # =========
-  # = Allow =
-  # =========
   
-  rule allow
-    'ALLOW' s (user / access) s 'TO' s allow_modifier s (allow_profile / identifier) <::Dog::Nodes::Allow>
-  end
-  
-  rule allow_modifier
-    'JOIN' <::Dog::Nodes::AllowModifier>
-    / 
-    'READ' <::Dog::Nodes::AllowModifier>
-    / 
-    'WRITE' <::Dog::Nodes::AllowModifier>
-    /
-    'ACCESS' <::Dog::Nodes::AllowModifier>
-  end
-  
-  rule allow_profile
-    'PROFILE' <::Dog::Nodes::AllowProfile>
-  end
-  
-  # ===============
-  # = Ask Command =
-  # ===============
-  
-  # TODO - Rework grammar and clean_tree so that I don't have to always break out 
-  # into random sub-rules like ask-count, etc.
-  
-  rule ask
-    'ASK' sn ask_count? (user / access) via_clause ask_to_clause on_clause? using_clause? <::Dog::Nodes::Ask>
-  end
-  
-  rule ask_count
-    integer sn <::Dog::Nodes::AskCount>
-  end
-  
-  rule ask_to_clause
-    # TODO - Bring this back
-    #s 'TO' s (string / access) <::Dog::Nodes::AskToClause>
-    s 'TO' s identifier <::Dog::Nodes::AskToClause>
-  end
-
   # ==========
   # = Notify =
   # ==========
   
-  # TODO - Messages will never has any mandatory arguments
-  
   rule notify
-    'NOTIFY' s (user / access) via_clause notify_of_clause using_clause? <::Dog::Nodes::Notify>
+    'NOTIFY' s (user / access) via_clause notify_of_clause
   end
 
   rule notify_of_clause
-    # TODO - Bring this back
-    #s 'TO' s (string / access) <::Dog::Nodes::AskToClause>
-    s 'OF' s identifier <::Dog::Nodes::NotifyOfClause>
+    s 'OF' s expression
   end
   
-  # =========
-  # = Reply =
-  # =========
-
-  rule reply
-    'REPLY' s 'TO' s (user / access) reply_with_clause <::Dog::Nodes::Reply>
-  end
   
-  rule reply_with_clause
-    s 'WITH' s (identifier_associations / access) <::Dog::Nodes::ReplyWithClause>
-  end
-  
-  # ===================
-  # = Compute Command =
-  # ===================
-
-  rule compute
-    'COMPUTE' s identifier on_clause? using_clause? <::Dog::Nodes::Compute>
-  end
   
   # ==============
   # = On Command =
   # ==============
   
   rule on
-    'ON' on_each? in_clause 'DO' sn statements? s? 'END' <::Dog::Nodes::On>
+    'ON' on_each? in_clause 'DO' sn statements? s? 'END'
   end
   
   rule on_each
-    s 'EACH' on_each_count? <::Dog::Nodes::OnEach>
+    s 'EACH' on_each_count?
   end
   
   rule on_each_count
-    s integer <::Dog::Nodes::OnEachCount>
+    s integer
   end
+  
+  
+  
   
   # ==================
   # = People Command =
@@ -433,29 +377,29 @@ grammar Dog
   end
   
   rule me
-    'ME' <::Dog::Nodes::Me>
+    'ME'
   end
   
   rule public
-    'PUBLIC' <::Dog::Nodes::Public>
+    'PUBLIC'
   end
   
   rule person
-    'PERSON' people_from_clause? (people_where_clause)? <::Dog::Nodes::Person>
+    'PERSON' people_from_clause? (people_where_clause)?
   end
   
   rule people
-    'PEOPLE' people_from_clause? (people_where_clause)? <::Dog::Nodes::People>
+    'PEOPLE' people_from_clause? (people_where_clause)?
   end
   
   # TODO - Add back community list. Right now, you can only access people from 
   # one community at a time...
   rule people_from_clause
-    sn 'FROM' sn access <::Dog::Nodes::PeopleFromClause>
+    sn 'FROM' sn access
   end
 
   rule people_where_clause
-    sn 'WHERE' sn predicate <::Dog::Nodes::PeopleWhereClause>
+    sn 'WHERE' sn predicate
   end
   
   rule predicate
@@ -463,11 +407,11 @@ grammar Dog
   end 
   
   rule predicate_unary
-    not_operator s? '(' s? predicate_primary s? ')' <::Dog::Nodes::PredicateUnary>
+    not_operator s? '(' s? predicate_primary s? ')'
   end
   
   rule predicate_binary
-    predicate_primary s (and_operator / or_operator) s predicate <::Dog::Nodes::PredicateBinary>
+    predicate_primary s (and_operator / or_operator) s predicate
   end
   
   rule predicate_primary 
@@ -475,131 +419,122 @@ grammar Dog
   end 
   
   rule predicate_parenthesis 
-    '(' s? predicate s? ')' <::Dog::Nodes::Predicate>
+    '(' s? predicate s? ')'
   end
   
   rule predicate_conditional
-    key_paths s? comparative_operator s? access <::Dog::Nodes::PredicateConditonal>
+    key_paths s? relational_operator s? access
   end
+  
+  
+  # ===========================
+  # = Structure Instantiation =
+  # ===========================
+  
+  rule structure_instantiation
+    identifier sn? structure
+  end
+  
   
   
   # ===============
   # = Definitions =
   # ===============
   
-  rule definition
-    define_variable / define_function
+  rule function_definition
+    'DEFINE' s identifier function_for? function_on? function_using? s 'DO' sn statements? s? 'END'
   end
   
-  rule define_variable
-    'DEFINE' s identifier s? assignment_operator s? expression <::Dog::Nodes::DefineVariable>
-  end
-  
-  rule define_function
-    'DEFINE' s identifier function_on? function_using? s? 'DO' sn statements? s? 'END' <::Dog::Nodes::DefineFunction>
+  rule function_for
+    s 'FOR' s identifier
   end
   
   rule function_on
-    s 'ON' s identifier_list <::Dog::Nodes::FunctionOn>
+    s 'ON' s identifier_list
   end
   
   rule function_using
-    s 'USING' s function_optional_parameters <::Dog::Nodes::FunctionUsing>
+    s 'USING' s function_optional_parameters
   end
   
   rule function_optional_parameters
-    function_optional_parameter+ <::Dog::Nodes::FunctionOptionalParameters>
+    function_optional_parameter+
   end
   
   rule function_optional_parameter
-    s? identifier s? '=' s? expression s? (',' &function_optional_parameter / '' !function_optional_parameter) <::Dog::Nodes::FunctionOptionalParameter>
+    s? identifier s? '=' s? expression (s? ',' &function_optional_parameter / '' !function_optional_parameter)
   end
+  
+  rule structure_definition
+    'DEFINE' s identifier sn? '{' sn? structure_property* sn? '}'
+  end
+  
+  rule structure_property
+    sn? (identifier s)? (identifier / string / number) (s? '=' s? expression)? s? ((',' / "\n") &structure_property / '' !structure_property)
+  end
+  
+  rule collection_definition
+    'DEFINE' s identifier s 'OF' identifier
+  end
+  
+  
   
   
   # ===================
   # = Others Commands =
   # ===================
   
-  rule config
-    'CONFIG' s identifier s '=' s expression <::Dog::Nodes::Config>
-  end
-  
-  rule import 
-    'IMPORT' s (import_function / import_data / import_community / import_task / import_message / import_config) s string import_as? <::Dog::Nodes::Import>
-  end
-  
-  rule import_as
-    s 'AS' s identifier <::Dog::Nodes::ImportAsClause>
-  end
-  
-  rule import_function
-    'FUNCTION' <::Dog::Nodes::ImportFunction>
-  end
-  
-  rule import_data
-    'DATA' <::Dog::Nodes::ImportData>
-  end
-  
-  rule import_community
-    'COMMUNITY' <::Dog::Nodes::ImportCommunity>
-  end
-  
-  rule import_task
-    'TASK' <::Dog::Nodes::ImportTask>
-  end
-  
-  rule import_message
-    'MESSAGE' <::Dog::Nodes::ImportMessage>
-  end
-  
-  rule import_config
-    'CONFIG' <::Dog::Nodes::ImportConfig>
+  # TODO
+  rule import
+  	'IMPORT'
   end
   
   rule print
-    'PRINT' space expression <::Dog::Nodes::Print>
+    'PRINT' space expression
   end
   
   rule inspect
-    'INSPECT' space expression <::Dog::Nodes::Inspect>
+    'INSPECT' space expression
   end
+  
   
   
   # ======================
   # = Control Structures =
   # ======================
-
+  
   rule control_structure
-    if / for / repeat / break / return
+    if / for / while / break / return
   end
-
-  rule repeat
-    'REPEAT' s integer s 'DO' sn statements? s? 'END' <::Dog::Nodes::Repeat>
-  end
-
+  
   rule if
-    'IF' s expression s 'THEN' sn statements? else_clause? s? 'END' <::Dog::Nodes::If>
+    'IF' s expression s 'THEN' sn statements? else_clause? s? 'END'
   end
   
   rule else_clause
-    sn? 'ELSE' sn statements? <::Dog::Nodes::ElseClause>
+    sn? 'ELSE' sn statements?
   end
 
   rule for
-    'FOR' s 'EACH' in_clause 'DO' sn statements? s? ('END' / ('UNTIL' s statement)) <::Dog::Nodes::For>
+    'FOR' s 'EACH' in_clause 'DO' sn statements? s? ('END' / ('UNTIL' s statement))
+  end
+  
+  rule while
+    'WHILE' s expression s 'DO' sn statements? s? 'END'
   end
   
   rule break
-    'BREAK' <::Dog::Nodes::Break>
+    'BREAK'
   end
   
   rule return
-    'RETURN' return_expression? <::Dog::Nodes::Return>
+    'RETURN' return_expression?
   end
   
   rule return_expression 
-    s expression <::Dog::Nodes::ReturnExpression>
+    s expression
   end
+  
   
   
   # ==================
@@ -607,67 +542,67 @@ grammar Dog
   # ==================
   
   rule using_clause
-    s 'USING' s using_clause_content <::Dog::Nodes::UsingClause>
+	(s 'USING' s (identifier s? '=' s? expression (s? ',' s? identifier s? '=' s? expression)*) )
   end
   
   rule using_clause_content
-    identifier_associations / access '' <::Dog::Nodes::UsingClauseContent>
+    identifier_associations / access
   end
   
-  rule on_clause 
-    s ('ON' s)? on_clause_content <::Dog::Nodes::OnClause>
+  rule on_clause
+	(s 'ON' s (expression (s? ',' s? expression)*) )
+	/
+	(s 'ON' s (identifier s? '=' s? expression ( s? ',' s? identifier s? '=' s? expression)*) )
   end
-
-  rule on_clause_content
-    identifier_associations / argument_list '' <::Dog::Nodes::OnClauseContent>
-  end
-
+  
   rule via_clause 
-    s 'VIA' s identifier <::Dog::Nodes::ViaClause>
+    s 'VIA' s identifier
   end
   
   rule in_clause
-    s identifier in_clause_expression? s <::Dog::Nodes::InClause>
+    s identifier in_clause_expression? s
   end
   
   rule in_clause_expression
-    s 'IN' s expression <::Dog::Nodes::InClauseExpression>
+    s 'IN' s expression
   end
+  
+  
   
   # =========
   # = Lists =
   # =========
   
   rule key_paths
-    key_path+ <::Dog::Nodes::KeyPaths>
+    key_path+
   end
   
   rule key_path
-    identifier ('.' &key_path / '' !key_path) <::Dog::Nodes::KeyPath>
+    identifier ('.' &key_path / '' !key_path)
   end
   
   # TODO - Add newlines? -- perhaps combine with associations below?
   
   rule identifier_associations
-    identifier_association+ <::Dog::Nodes::IdentifierAssociations>
+    identifier_association+
   end
 
   rule identifier_association
-    sn? identifier s? ':' s? expression (s? ',' &identifier_association / '' !identifier_association) <::Dog::Nodes::IdentifierAssociation>
+    sn? identifier s? ':' s? expression (s? ',' &identifier_association / '' !identifier_association)
   end
   
   rule identifier_list
-    identifier_list_item+ <::Dog::Nodes::IdentifierList>
+    identifier_list_item+
   end
   
   rule identifier_list_item
-    s? identifier (s? ',' &identifier_list_item / '' !identifier_list_item) <::Dog::Nodes::IdentifierListItem>
+    s? identifier (s? ',' &identifier_list_item / '' !identifier_list_item)
   end
   
   # TODO - combine with items -- perhaps renamed to expresion_list -- add newlines?
   
   rule argument_list
-    argument_list_item+ <::Dog::Nodes::ArgumentList>
+    argument_list_item+
   end
   
   # TODO - To get this to work, I had to move the 's?' into the parenthesis with
@@ -676,63 +611,59 @@ grammar Dog
   # identifier_association will that break in the future also?
   
   rule argument_list_item
-    s? expression (s? ',' &argument_list_item / '' !argument_list_item) <::Dog::Nodes::IdentifierListItem>
+    s? expression (s? ',' &argument_list_item / '' !argument_list_item)
   end
+  
+  
+  
   
   # ================
   # = Dog literals =
   # ================
-
+  
   rule literal
-    number / string / bool / collection
+    number / string / bool / structure
   end
-
-  rule collection
-    array / hash
+  
+  # TODO - I am keep this for the future if I choose to include this syntactic sugar
+  #rule array 
+  #  '[' sn? items? sn? (',' sn?)? ']' <::Dog::Nodes::ArrayLiteral>
+  #end
+  #
+  #rule items
+  #  item+ <::Dog::Nodes::ArrayItems>
+  #end
+  #
+  #rule item
+  #  sn? expression ((sn? ',' &item) / ('' !item)) <::Dog::Nodes::ArrayItem>
+  #end
+  
+  rule structure
+    '{' s? association* (sn? ',' sn?)? s? '}'
   end
-
-  rule array 
-    '[' sn? items? sn? (',' sn?)? ']' <::Dog::Nodes::ArrayLiteral>
-  end
-
-  rule items
-    item+ <::Dog::Nodes::ArrayItems>
-  end
-
-  rule item
-    sn? expression ((sn? ',' &item) / ('' !item)) <::Dog::Nodes::ArrayItem>
-  end
-
-  rule hash 
-    '{' sn? associations? (sn? ',' sn?)? '}' <::Dog::Nodes::HashLiteral>
-  end
-
-  rule associations
-    association+ <::Dog::Nodes::HashAssociations>
-  end
-
+  
   rule association 
-    sn? string s? ':' s? expression sn? (',' &association / '' !association) <::Dog::Nodes::HashAssociation>
+    sn? (identifier / string / number) s? '=' s? expression sn? ( (',' / "\n") &association / '' !association)
   end
-
+  
   rule string
     (
-    '"' ('\"' / !'"' .)* '"' <::Dog::Nodes::StringLiteral>
+    '"' ('\"' / !'"' .)* '"'
     /
-    '\'' ('\\\'' / !'\'' .)* '\'' <::Dog::Nodes::StringLiteral>
+    '\'' ('\\\'' / !'\'' .)* '\''
     )
   end
-
+  
   rule number
     float / integer
   end
-
+  
   rule integer 
-    ('-' s?)? digit+ <::Dog::Nodes::IntegerLiteral>
+    ('-' s?)? digit+
   end
-
+  
   rule float
-    ('-' s?)? digit+ '.' digit* <::Dog::Nodes::FloatLiteral>
+    ('-' s?)? digit+ '.' digit*
   end
 
   rule bool
@@ -740,33 +671,23 @@ grammar Dog
   end
 
   rule true
-    (
-      'TRUE' <::Dog::Nodes::TrueLiteral>
-      / 
-      'true' <::Dog::Nodes::TrueLiteral>
-      /
-      'YES' <::Dog::Nodes::TrueLiteral>
-      /
-      'yes' <::Dog::Nodes::TrueLiteral>
-    ) 
+    ('TRUE' / 'true')
   end
 
   rule false
-    (
-      'FALSE' <::Dog::Nodes::FalseLiteral>
-      / 
-      'false' <::Dog::Nodes::FalseLiteral>
-      / 
-      'NO' <::Dog::Nodes::FalseLiteral>
-      / 
-      'no' <::Dog::Nodes::FalseLiteral>
-    ) 
+    ('FALSE' / 'false') 
   end
-
+  
+  
+  
   # ===================
   # = Building Blocks =
   # ===================
-
+  
+  rule identifier
+    lower (lower / digit / '_')*
+  end
+  
   rule digit
     [0-9]
   end

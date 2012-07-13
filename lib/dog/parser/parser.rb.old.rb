@@ -36,7 +36,7 @@ module Dog
       end
       
       @parser = DogParser.new
-      @should_clean_tree = false
+      @should_clean_tree = true
     end
     
     def parse(program, filename = "")

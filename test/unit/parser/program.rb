@@ -19,7 +19,6 @@ class ParserTests::ProgramTest < Test::Unit::TestCase
   end
   
   def test_config
-    @parser.parse("CONFIG server = 'localhost:3000'")
     @parser.parse("foo; bar; baz;")
     @parser.parse("foo;bar;baz;")
     @parser.parse("foo;bar;baz")

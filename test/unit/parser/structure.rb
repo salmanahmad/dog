@@ -16,59 +16,23 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     @parser.parser.root = :structure
   end
 
-  def test_simple
+  def test_single_line
     struct = <<-EOD
-      DEFINE event post {
-        name
-        string
-      }
+      { name = "name", string = "String" }
     EOD
     struct.strip!
-    @parser.parse(struct)
-  end
-  
-  def test_optional
-    struct = <<-EOD
-      DEFINE event post {
-        optional name
-        string
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-  end
-  
-  def test_default
-    struct = <<-EOD
-      DEFINE event post {
-        optional name = "foo"
-        string
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-  end
-  
-  def test_input_output
-    struct = <<-EOD
-      DEFINE event post {
-        optional input name = "foo"
-        output string
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-  end
-  
-  def test_input_output_2
-    struct = <<-EOD
-      DEFINE event post {
-        optional input name = "foo"
-        required output string
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
+    #@parser.parse(struct)
   end
 
+  def test_multi_line
+    struct = <<-EOD
+      {
+        name = "Name"
+        string = "string"
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+  end
+  
 end

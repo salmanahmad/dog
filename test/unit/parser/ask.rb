@@ -23,7 +23,7 @@ class ParserTests::AskTest < Test::Unit::TestCase
     @parser.parse("ASK PEOPLE FROM facebook VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > 7 VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age VIA email TO validate")
-    @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age AND interests CONTAINS 'cards' VIA email TO validate")
+    @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age AND interests == 'cards' VIA email TO validate")
   end
   
   def test_user_count
@@ -43,30 +43,30 @@ class ParserTests::AskTest < Test::Unit::TestCase
   def test_on
     @parser.parse("ASK users VIA email TO validate ON data")
     @parser.parse("ASK users VIA sms TO validate ON user, friends")
+    @parser.parse("ASK users VIA sms TO validate ON user  , friends")
+    @parser.parse("ASK users VIA sms TO validate ON user  , 5 + 5")
     @parser.parse("ASK users VIA chat TO validate ON user,friends")
   end
   
   def test_using
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true")
+
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true, optional = false")
     
-    @parser.parse("ASK users VIA email TO validate ON data USING force : true")
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true, optional = false")
     
-    @parser.parse("ASK users VIA email TO validate ON data USING force : true, optional : false")
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true, optional = false")
     
-    @parser.parse("ASK users VIA email TO validate ON data USING force : true, optional : false")
-    
-    @parser.parse("ASK users VIA email TO validate ON data USING force : true, optional : false")
-    
-    @parser.parse("ASK users VIA email TO validate ON data USING force : true, bar : baz, bank : 'hai'")
+    @parser.parse("ASK users VIA email TO validate ON data USING force = true, bar = baz, bank = 'hai'")
     
     assert_raises Dog::ParseError do
       @parser.parse("ASK users VIA email TO validate ON dataUSING force = true")
     end
-    
   end
   
   def test_assignment
     @parser.parser.root = :program
-    @parser.parse('message = ASK PUBLIC VIA http_response TO "What is your favorite Number?"')
+    @parser.parse('message = ASK PUBLIC VIA http_response TO provide_favorite_color')
     
   end
   
