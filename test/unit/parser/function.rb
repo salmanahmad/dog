@@ -28,6 +28,29 @@ EOD
     
   end
   
+  
+  
+  def test_nested
+    program = <<-EOD
+DEFINE foo DO 
+  DEFINE bar DO
+    DEFINE bubble DO
+  
+    END
+  END
+  
+  DEFINE baz DO
+  
+  END
+END
+EOD
+    
+    program.strip!
+    @parser.parse(program)
+    
+  end
+  
+  
   def test_on_and_using
     
     @parser.should_clean_tree = true
@@ -57,5 +80,12 @@ EOD
     @parser.parse(program)
     
   end
+  
+  
+  
+  
+  
+  
+  
   
 end
