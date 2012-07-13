@@ -315,93 +315,101 @@ module Dog
           
           @output.to_json
         end
-        
-        get prefix + '/stream.json' do
-          id = params["id"]
+
+        # GET root stream
+        get prefix + '/stream' do
+
           depth = (params["depth"] || 0).to_i
           limit = (params["limit"] || 0).to_i
           offset = (params["offset"] || 0).to_i
           after = (params["after"])
-          
+
           stream = {}
           stream["self"] = {}
           stream["items"] = []
-          
-          if id then
-            if id.match(/^handler:(.*)/) then
-              
-              track = ::Dog::Track.find_by_id(id.match(/^handler:(.*)/)[1])
-              
-              stream["self"] = track.variables[track.listen_argument]
-              
-              items = ::Dog::StreamObject.find({"track_id" => track.id})
-              items.each do |item|
-                item = ::Dog::StreamObject.from_hash(item)
-                stream["items"] << item.to_hash_for_stream
-              end
-              
-            else
-              object = ::Dog::StreamObject.find_by_id(id)
-              stream["self"] = object.to_hash_for_stream
-              
-              if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
-                handler = object.handler
-                argument = object.handler_argument
-                
-                if handler then
-                  items = ::Dog::Track.find({"function_name" => handler})
-                  for item in items do
-                    item = ::Dog::Track.from_hash(item)
-                    if argument then
-                      stream_item = item.variables[argument]
-                      stream_item["id"] = "handler:#{item.id}"
-                    
-                      stream["items"] << stream_item
-                    end
-                  end
-                end
-              end
-            end
-          else
-            root = ::Dog::Track.root
-            items = ::Dog::StreamObject.find({"track_id" => root.id})
+
+          root = ::Dog::Track.root
+          items = ::Dog::StreamObject.find({"track_id" => root.id})
+          items.each do |item|
+            item = ::Dog::StreamObject.from_hash(item)
+            stream["items"] << item.to_hash_for_stream
+          end
+
+          content_type 'application/json'
+          return stream.to_json
+        end
+
+        # GET /stream/id for specific StreamObjects or handlers
+        get prefix + '/stream/:id' do | id |
+
+          depth = (params["depth"] || 0).to_i
+          limit = (params["limit"] || 0).to_i
+          offset = (params["offset"] || 0).to_i
+          after = (params["after"])
+
+          stream = {}
+          stream["self"] = {}
+          stream["items"] = []
+
+          if id.match(/^handler:(.*)/) then
+
+            track = ::Dog::Track.find_by_id(id.match(/^handler:(.*)/)[1])
+
+            stream["self"] = track.to_hash_for_stream
+
+            items = ::Dog::StreamObject.find({"track_id" => track.id})
             items.each do |item|
               item = ::Dog::StreamObject.from_hash(item)
               stream["items"] << item.to_hash_for_stream
             end
+
+          else
+            object = ::Dog::StreamObject.find_by_id(id)
+            stream["self"] = object.to_hash_for_stream
+
+            if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
+              handler = object.handler
+              argument = object.handler_argument
+
+              if handler then
+                items = ::Dog::Track.find({"function_name" => handler})
+                for item in items do
+                  item = ::Dog::Track.from_hash(item).to_hash_for_stream
+                  stream["items"] << item
+                end
+              end
+            end
           end
-          
-          stream["success"] = true
+          content_type 'application/json'
           return stream.to_json
         end
-        
-        post prefix + '/stream.json' do
-          id = params["id"]
-          
+
+        post prefix + '/stream/:id' do | id |
           puts params.inspect
-          
+
           object = ::Dog::StreamObject.find_by_id(id)
           track = ::Dog::Track.new(object.handler)
-          
+
           argument = {}
-          
+
           for property in object.properties do
             argument[property.identifier] = params[property.identifier]
-            
+
             if property.required && argument[property.identifier].nil? then
               return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
             end
           end
-          
+
           if object.handler_argument then
             track.variables[object.handler_argument] = argument
           end
-          
+
           track.listen_argument = object.handler_argument
-          
+
           track.save
           track.continue
-          
+
+          content_type 'application/json'
           return {
             "success" => true
           }.to_json

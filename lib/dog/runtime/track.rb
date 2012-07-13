@@ -113,7 +113,14 @@ module Dog
         "listen_argument" => self.listen_argument
       }
     end
-    
+
+    def to_hash_for_stream
+      return {
+        "id" => "handler:" + self._id.to_s,
+        "name" => self.function_name
+      }
+    end
+
     def self.create(hash)
       parent = nil
       

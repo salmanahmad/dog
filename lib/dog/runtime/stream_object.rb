@@ -66,7 +66,18 @@ module Dog
       hash.delete("_id")
       hash["id"] = self.id.to_s
       hash["track_id"] = self.track_id.to_s
-      
+      hash["type"] = case self.type.name
+      when 'Dog::RoutedEvent'
+        'listen'
+      when 'Dog::RoutedMessage'
+        'notify'
+      when 'Dog::RoutedTask'
+        'ask'
+      when 'Dog::Track'
+        'track'
+      else
+        raise 'helllp: ' + self.type.name
+      end
       return hash
     end
     
