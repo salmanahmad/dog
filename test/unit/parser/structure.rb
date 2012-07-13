@@ -21,18 +21,100 @@ class ParserTests::StructureTest < Test::Unit::TestCase
       { name = "name", string = "String" }
     EOD
     struct.strip!
-    #@parser.parse(struct)
+    @parser.parse(struct)
+    
+    
+    struct = <<-EOD
+      { name = "name"       ,      string = "String" }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
   end
 
   def test_multi_line
     struct = <<-EOD
-      {
-        name = "Name"
-        string = "string"
-      }
+{
+  name = "Name",
+  
+  ,,,,
+  
+  string = "string"
+}
     EOD
     struct.strip!
     @parser.parse(struct)
+    
+    
+    
+    struct = <<-EOD
+    {
+      name = "Name",
+      string = "string"
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+
+    struct = <<-EOD
+    {
+      name = "Name",,,
+      string = "string"
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+
+    
+    struct = <<-EOD
+    {
+      name = "Name"
+      string = "string"
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    
+    struct = <<-EOD
+    {
+      
+      name = "Name"
+      
+      
+      string = "string"
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    struct = <<-EOD
+    {
+      name = "Name"
+  
+  ,,   ,      
+  
+      string = "string"}
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    
+    
+    struct = <<-EOD
+    {name = "Name"
+  
+  ,,   ,      
+  
+      string = "string"
+    
+      ,,, 
+    }
+    EOD
+    struct.strip!
+    pp @parser.parse(struct)
+    
   end
   
 end

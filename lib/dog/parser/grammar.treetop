@@ -639,11 +639,13 @@ grammar Dog
   #end
   
   rule structure
-    '{' s? association* (sn? ',' sn?)? s? '}'
+	'{' sn? (association (((sn? "," sn?)+ / "\n")  association)* )? (sn? ','* sn?) '}'
+	#'{' s? association*  s? '}'
   end
-  
-  rule association 
-    sn? (identifier / string / number) s? '=' s? expression sn? ( (',' / "\n") &association / '' !association)
+	
+  rule association
+    sn? (identifier / string / number) s? '=' s? expression s?
+	#sn? (identifier / string / number) s? '=' s? expression s? ( "," &association / '' !association)
   end
   
   rule string
@@ -723,7 +725,7 @@ grammar Dog
   rule space_newline
     (" " / "\t" / "\n" / "\r" / comment)+
   end
-
+  
   rule s
     space
   end
