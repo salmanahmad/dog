@@ -182,8 +182,6 @@ grammar Dog
     /
     notify
     /
-    structure_instantiation
-    /
     function_definition
     /
     structure_definition
@@ -201,13 +199,6 @@ grammar Dog
     on
     /
     user
-    /
-    '(' sn? expression sn? ')' {
-      def compile
-        puts "HERERERE!"
-        return expression.compile
-      end
-    }
   end
   
   # TODO - Remove this. I am keeping it around for documentaiton purposes
@@ -215,6 +206,7 @@ grammar Dog
   #    on
   #    import
   #    user
+  #    community
   #
   #rule command
   #   community / event / task / message / listen / allow / ask / notify / reply / compute / on / user / definition / control_structure / config / import / print / inspect
@@ -228,15 +220,24 @@ grammar Dog
   rule assignment
     assignment_access s? assignment_operator s? expression {
       def compile
-        node = ::Dog::Nodes::Assignment
-        
+        node = ::Dog::Nodes::Assignment.new
+        node.expression = expression.compile
+        node.sequence = assignment_access.compile
         return node
       end
     }
   end
   
   rule assignment_access
-    identifier access_tail?
+    identifier access_tail:(access_tail)? {
+      def compile
+        if !access_tail.empty? then
+          return access_tail.compile.clone.unshift(identifier.text_value)
+        else
+          return [identifier.text_value]
+        end
+      end
+    }
   end
   
   rule access
@@ -244,10 +245,10 @@ grammar Dog
       def compile
         node = ::Dog::Nodes::Access.new
         
-        if self.access_tail.empty? then
-          node.sequence = [access_head.compile]
-        else
+        if !access_tail.empty? then
           node.sequence = access_tail.compile.clone.unshift(access_head.compile)
+        else
+          node.sequence = [access_head.compile]
         end
         
         return node
@@ -297,7 +298,6 @@ grammar Dog
         else
           return [expression.compile]
         end
-         
       end
     }
   end
@@ -593,15 +593,6 @@ grammar Dog
   
   rule predicate_conditional
     key_paths s? relational_operator s? access
-  end
-  
-  
-  # ===========================
-  # = Structure Instantiation =
-  # ===========================
-  
-  rule structure_instantiation
-    identifier sn? structure
   end
   
   

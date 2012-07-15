@@ -46,6 +46,7 @@ module Dog::Nodes
   
   class Assignment < Node
     attr_accessor :expression
+    attr_accessor :sequence
   end
   
   class FunctionDefinition < Node
