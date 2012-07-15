@@ -172,8 +172,6 @@ grammar Dog
   end
   
   rule primary_expression
-    literal
-    /
     access
     /
     compute
@@ -228,7 +226,13 @@ grammar Dog
   # ==============
   
   rule assignment
-    assignment_access s? assignment_operator s? expression
+    assignment_access s? assignment_operator s? expression {
+      def compile
+        node = ::Dog::Nodes::Assignment
+        
+        return node
+      end
+    }
   end
   
   rule assignment_access
@@ -236,19 +240,35 @@ grammar Dog
   end
   
   rule access
-    access_head access_tail?
+    access_head access_tail:(access_tail)? {
+      def compile
+        node = ::Dog::Nodes::Access.new
+        
+        if self.access_tail.empty? then
+          node.sequence = [access_head.compile]
+        else
+          node.sequence = access_tail.compile.clone.unshift(access_head.compile)
+        end
+        
+        return node
+      end
+    }
   end
   
   rule access_head
     literal
+    /
+    identifier {
+      def compile
+        return self.text_value
+      end
+    }
     / 
-    variable
-    / 
-    '(' s? expression s? ')'
-  end
-  
-  rule variable 
-    identifier
+    '(' sn? expression sn? ')' {
+      def compile
+        return expression.compile
+      end
+    }
   end
   
   rule access_tail
@@ -258,11 +278,28 @@ grammar Dog
   end
   
   rule access_dot
-    '.' identifier access_tail?
+    '.' identifier access_tail:(access_tail)? {
+      def compile
+        if !access_tail.empty? then
+          return access_tail.compile.clone.unshift(identifier.text_value)
+        else
+          return [identifier.text_value]
+        end
+      end
+    }
   end
   
   rule access_bracket
-    '[' s? expression s? ']' access_tail?
+    '[' s? expression s? ']' access_tail:(access_tail)? {
+      def compile
+        if !access_tail.empty? then
+          return access_tail.compile.clone.unshift(expression.compile)
+        else
+          return [expression.compile]
+        end
+         
+      end
+    }
   end
   
   
@@ -657,7 +694,7 @@ grammar Dog
         node = ::Dog::Nodes::If.new
         node.conditions = []
         
-        if statements then
+        if !statements.empty? then
           node.conditions << [expression.compile, statements.compile]
         else
           node.conditions << [expression.compile, nil]
@@ -667,7 +704,7 @@ grammar Dog
           node.conditions << clause.compile
         end
         
-        if else_clause then
+        if !else_clause.empty? then
           node.conditions << else_clause.compile
         end
         
@@ -679,7 +716,7 @@ grammar Dog
   rule else_if_clause
     sn? 'ELSE' s 'IF' s expression s 'THEN' sn statements:(statements)? {
       def compile
-        if statements then
+        if !statements.empty? then
           return [expression.compile, statements.compile]          
         else
           return [expression.compile, nil]
@@ -691,7 +728,7 @@ grammar Dog
   rule else_clause
     sn? 'ELSE' sn statements:(statements)? {
       def compile
-        if statements then
+        if !statements.empty? then
           return [nil, statements.compile]
         else
           return [nil, nil]
@@ -710,7 +747,7 @@ grammar Dog
         node.variable = clause.first
         node.collection = clause.last
         
-        if statements then
+        if !statements.empty? then
           node.statements = statements.compile
         end
         
@@ -725,7 +762,7 @@ grammar Dog
         node = ::Dog::Nodes::While.new
         node.condition = expression.compile
         
-        if statements then
+        if !statements.empty? then
           node.statements = statements.compile  
         end
         
@@ -747,7 +784,7 @@ grammar Dog
       def compile
         node = ::Dog::Nodes::Return.new
         
-        if (self.expression) then
+        if !expression.empty? then
           node.expression = self.expression.expression.compile
         end
         
@@ -784,7 +821,7 @@ grammar Dog
   rule in_clause
     s identifier in_clause_expression:(s 'IN' s expression)? s {
       def compile
-        if in_clause_expression then
+        if !in_clause_expression.empty? then
           return [identifier.text_value, in_clause_expression.expression.compile]
         else
           return [identifier.text_value, nil]

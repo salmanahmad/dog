@@ -16,6 +16,7 @@ class ParserTests::ReturnTest < Test::Unit::TestCase
   end
   
   def test_simple
+    @parser.parse("RETURN")
     @parser.parse("RETURN 5+5")
   end
   

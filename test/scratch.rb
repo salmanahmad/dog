@@ -23,7 +23,7 @@ class ScratchTest < Test::Unit::TestCase
   end
   
   def test_assignment
-    @parser.parse("5.52")
+    pp @parser.parse("foo.bar")
   end
   
 end

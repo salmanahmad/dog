@@ -41,11 +41,11 @@ module Dog::Nodes
   end
   
   class Access < Node
-    
+    attr_accessor :sequence
   end
   
   class Assignment < Node
-    
+    attr_accessor :expression
   end
   
   class FunctionDefinition < Node
