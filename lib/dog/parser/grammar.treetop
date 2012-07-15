@@ -908,13 +908,11 @@ grammar Dog
         literal = ::Dog::Nodes::StructureLiteral.new
         literal.value = []
         
-        identifier = self.type.identifier rescue nil
-        
-        if identifier then
-          literal.type = identifier.text_value
+        if !type.empty? then
+          literal.type = self.type.identifier.text_value
         end
         
-        if self.associations then
+        if !associations.empty? then
           literal.value << self.associations.first.compile
           
           if self.associations.rest then

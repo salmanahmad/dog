@@ -15,6 +15,15 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     @parser = Dog::Parser.new
     @parser.parser.root = :structure
   end
+  
+  def test_empty
+    struct = <<-EOD
+      {}
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+  end
 
   def test_single_line
     struct = <<-EOD
@@ -95,7 +104,11 @@ class ParserTests::StructureTest < Test::Unit::TestCase
   
   ,,   ,      
   
-      string = "string"}
+      string = "string"
+    
+      5 = 7
+    
+    }
     EOD
     struct.strip!
     @parser.parse(struct)
