@@ -83,37 +83,90 @@ grammar Dog
   end
   
   rule or_expression
-    and_expression s or_operator s or_expression
+    and_expression s or_operator s or_expression {
+      def compile
+        node = ::Dog::Nodes::OperatorInfixCall.new
+        node.arg1 = and_expression.compile
+        node.operator = or_operator.compile
+        node.arg2 = or_expression.compile
+        
+        return node
+      end
+    }
     /
     and_expression
   end
   
   rule and_expression
-    relational_expression s and_operator s and_expression
+    relational_expression s and_operator s and_expression {
+      def compile
+        node = ::Dog::Nodes::OperatorInfixCall.new
+        node.arg1 = relational_expression.compile
+        node.operator = and_operator.compile
+        node.arg2 = and_expression.compile
+        
+        return node
+      end
+    }
     /
     relational_expression
   end
   
   rule relational_expression
-    additive_expression s? relational_operator s? relational_expression
+    additive_expression s? relational_operator s? relational_expression {
+      def compile
+        node = ::Dog::Nodes::OperatorInfixCall.new
+        node.arg1 = additive_expression.compile
+        node.operator = relational_operator.compile
+        node.arg2 = relational_expression.compile
+        
+        return node
+      end
+    }
     /
     additive_expression
   end
   
   rule additive_expression
-    multiplicative_expression s? additive_operator s? additive_expression
+    multiplicative_expression s? additive_operator s? additive_expression {
+      def compile
+        node = ::Dog::Nodes::OperatorInfixCall.new
+        node.arg1 = multiplicative_expression.compile
+        node.operator = additive_operator.compile
+        node.arg2 = additive_expression.compile
+        
+        return node
+      end
+    }
     /
     multiplicative_expression
   end
   
   rule multiplicative_expression
-    unary_expression s? multiplicative_operator s? multiplicative_expression
+    unary_expression s? multiplicative_operator s? multiplicative_expression {
+      def compile
+        node = ::Dog::Nodes::OperatorInfixCall.new
+        node.arg1 = unary_expression.compile
+        node.operator = multiplicative_operator.compile
+        node.arg2 = multiplicative_expression.compile
+        
+        return node
+      end
+    }
     /
     unary_expression
   end
   
   rule unary_expression
-    unary_operator s unary_expression
+    unary_operator s unary_expression {
+      def compile
+        node = ::Dog::Nodes::OperatorPrefixCall.new
+        node.operator = unary_operator.compile
+        node.arg = unary_expression.compile
+        
+        return node
+      end
+    }
     /
     primary_expression
   end
@@ -151,7 +204,12 @@ grammar Dog
     /
     user
     /
-    '(' sn? expression sn? ')'
+    '(' sn? expression sn? ')' {
+      def compile
+        puts "HERERERE!"
+        return expression.compile
+      end
+    }
   end
   
   # TODO - Remove this. I am keeping it around for documentaiton purposes
@@ -214,7 +272,11 @@ grammar Dog
   # =============
   
   rule assignment_operator
-    '='
+    '=' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule relational_operator
@@ -248,55 +310,107 @@ grammar Dog
   end
   
   rule addition_operator
-    '+'
+    '+' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule subtraction_operator
-    '-'
+    '-' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule multiplication_operator
-    '*'
+    '*' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule division_operator
-    '/'
+    '/' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule equality_operator
-    '=='
+    '==' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule inequality_operator
-    '!='
+    '!=' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule greater_than_operator
-    '>'
+    '>' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule less_than_operator
-    '<'
+    '<' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule greater_than_equal_operator
-    '>='
+    '>=' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule less_than_equal_operator
-    '<='
+    '<=' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule and_operator
-    'AND'
+    'AND' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule or_operator
-    'OR'
+    'OR' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   rule not_operator
-    'NOT'
+    'NOT' {
+      def compile
+        return self.text_value
+      end
+    }
   end
   
   

@@ -27,7 +27,7 @@ module Dog::Nodes
     end
     
     def nodes
-        
+      
     end
     
   end
@@ -52,12 +52,15 @@ module Dog::Nodes
     
   end
   
-  class OperatorBinaryCall < Node
-    
+  class OperatorInfixCall < Node
+    attr_accessor :operator
+    attr_accessor :arg1
+    attr_accessor :arg2
   end
   
-  class OperatorUnaryCall < Node
-    
+  class OperatorPrefixCall < Node
+    attr_accessor :operator
+    attr_accessor :arg
   end
   
   class FunctionCall < Node
