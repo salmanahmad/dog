@@ -14,7 +14,6 @@ class ParserTests::WhileTest < Test::Unit::TestCase
   def setup
     @parser = Dog::Parser.new
     @parser.parser.root = :while
-    @parser.should_clean_tree = false
   end
   
   def test_simple

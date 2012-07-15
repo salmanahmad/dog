@@ -53,7 +53,6 @@ EOD
   
   def test_on_and_using
     
-    @parser.should_clean_tree = true
     
     program = <<-EOD
 DEFINE function ON input DO 

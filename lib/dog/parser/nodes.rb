@@ -9,16 +9,35 @@
 
 module Dog::Nodes
   
+  class Treetop::Runtime::SyntaxNode
+    def compile
+      if elements && elements.first then
+        return self.elements.first.compile  
+      else
+        return nil
+      end
+      
+    end
+  end
+  
   class Node
     
     def visit(track)
       
     end
     
+    def nodes
+        
+    end
+    
   end
   
   class Nodes < Node
+    attr_accessor :nodes
     
+    def initialize
+      self.nodes = []
+    end
   end
   
   class Access < Node
@@ -58,14 +77,21 @@ module Dog::Nodes
   end
   
   class If < Node
-    
+    attr_accessor :conditions
   end
   
   class While < Node
-    
+    attr_accessor :condition
+    attr_accessor :statements
   end
   
   class For < Node
+    attr_accessor :variable
+    attr_accessor :collection
+    attr_accessor :statements
+  end
+  
+  class Perform < Node
     
   end
   
@@ -74,18 +100,28 @@ module Dog::Nodes
   end
   
   class Return < Node
-    
+    attr_accessor :expression
   end
+  
+  class Print < Node
+    attr_accessor :expression
+  end
+  
+  class Inspect < Node
+    attr_accessor :expression
+  end
+  
   
   class LiteralNode
     attr_accessor :value
-    
-    def initialize(value)
-      self.value = value
-    end
   end
   
   class StructureLiteral < LiteralNode
+    attr_accessor :type
+    
+    def initialize
+      self.type = nil
+    end
     
     def visit(track)
       

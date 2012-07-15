@@ -113,8 +113,24 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     }
     EOD
     struct.strip!
-    pp @parser.parse(struct)
+    @parser.parse(struct)
     
+  end
+  
+  def test_instance
+    
+    struct = <<-EOD
+     person {name = "Name"
+  
+  ,,   ,      
+  
+      string = "string"
+    
+      ,,, 
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
   end
   
 end

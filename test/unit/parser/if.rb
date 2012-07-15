@@ -118,4 +118,19 @@ EOD
     @parser.parse(program.strip)
   end
   
+  def test_else_if
+    program = <<-EOD
+IF waiting_users.count > 0 THEN
+  PRINT 'foo'
+ELSE IF true THEN
+  PRINT "Hi"
+ELSE
+  PRINT 'bar'
+END
+EOD
+    
+    # TODO Add tests to ensure that ELSE is working correctly...
+    @parser.parse(program.strip)
+  end
+  
 end

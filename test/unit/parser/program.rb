@@ -15,7 +15,6 @@ class ParserTests::ProgramTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.should_clean_tree = false
   end
   
   def test_config

@@ -22,7 +22,21 @@ grammar Dog
   end
   
   rule statements
-    statement+
+    statement+ {
+      def compile
+        nodes = ::Dog::Nodes::Nodes.new
+        nodes.nodes = []
+        
+        if elements then
+          for element in elements do
+            element = element.compile
+            nodes.nodes << element if element
+          end
+        end
+        
+        return nodes
+      end  
+    }
   end
   
   # TODO - Perhaps add assignments to expressions. In ruby you can 
@@ -33,7 +47,11 @@ grammar Dog
   # only have one per "line"
   
   rule statement
-    s? (expression) s? t
+    s? expression s? t {
+      def compile
+        return self.expression.compile
+      end
+    }
     /
     s t
     / 
@@ -55,7 +73,7 @@ grammar Dog
   end
   
   rule expression_no_assignment
-	or_expression
+    or_expression
   end
   
   rule assignment_expression
@@ -486,15 +504,27 @@ grammar Dog
   
   # TODO
   rule import
-  	'IMPORT'
+    'IMPORT'
   end
   
   rule print
-    'PRINT' space expression
+    'PRINT' space expression {
+      def compile
+        node = ::Dog::Nodes::Print.new
+        node.expression = expression.compile
+        return node
+      end      
+    }
   end
   
   rule inspect
-    'INSPECT' space expression
+    'INSPECT' space expression {
+      def compile
+        node = ::Dog::Nodes::Inspect.new
+        node.expression = expression.compile
+        return node
+      end
+    }
   end
   
   
@@ -508,32 +538,110 @@ grammar Dog
   end
   
   rule if
-    'IF' s expression s 'THEN' sn statements? else_clause? s? 'END'
+    'IF' s expression s 'THEN' sn statements:(statements)? else_if_clause:(else_if_clause)* else_clause:(else_clause)? s? 'END' {
+      def compile
+        node = ::Dog::Nodes::If.new
+        node.conditions = []
+        
+        if statements then
+          node.conditions << [expression.compile, statements.compile]
+        else
+          node.conditions << [expression.compile, nil]
+        end
+        
+        for clause in else_if_clause.elements
+          node.conditions << clause.compile
+        end
+        
+        if else_clause then
+          node.conditions << else_clause.compile
+        end
+        
+        return node
+      end
+    }
+  end
+  
+  rule else_if_clause
+    sn? 'ELSE' s 'IF' s expression s 'THEN' sn statements:(statements)? {
+      def compile
+        if statements then
+          return [expression.compile, statements.compile]          
+        else
+          return [expression.compile, nil]
+        end
+      end
+    } 
   end
   
   rule else_clause
-    sn? 'ELSE' sn statements?
+    sn? 'ELSE' sn statements:(statements)? {
+      def compile
+        if statements then
+          return [nil, statements.compile]
+        else
+          return [nil, nil]
+        end
+      end
+    }
   end
 
   rule for
-    'FOR' s 'EACH' in_clause 'DO' sn statements? s? ('END' / ('UNTIL' s statement))
+    'FOR' s 'EACH' in_clause 'DO' sn statements:(statements)? s? 'END' {
+      def compile
+        node = ::Dog::Nodes::For.new
+        
+        clause = in_clause.compile
+        
+        node.variable = clause.first
+        node.collection = clause.last
+        
+        if statements then
+          node.statements = statements.compile
+        end
+        
+        return node
+      end
+    }
   end
   
   rule while
-    'WHILE' s expression s 'DO' sn statements? s? 'END'
+    'WHILE' s expression s 'DO' sn statements:(statements)? s? 'END' {
+      def compile
+        node = ::Dog::Nodes::While.new
+        node.condition = expression.compile
+        
+        if statements then
+          node.statements = statements.compile  
+        end
+        
+        return node
+      end
+    }
   end
   
   rule break
-    'BREAK'
+    'BREAK' {
+      def compile
+        return ::Dog::Nodes::Break.new
+      end
+    }
   end
   
   rule return
-    'RETURN' return_expression?
+    'RETURN' expression:(s expression)? {
+      def compile
+        node = ::Dog::Nodes::Return.new
+        
+        if (self.expression) then
+          node.expression = self.expression.expression.compile
+        end
+        
+        return node
+      end
+    }
   end
   
-  rule return_expression 
-    s expression
-  end
   
   
   
@@ -542,7 +650,7 @@ grammar Dog
   # ==================
   
   rule using_clause
-	(s 'USING' s (identifier s? '=' s? expression (s? ',' s? identifier s? '=' s? expression)*) )
+  (s 'USING' s (identifier s? '=' s? expression (s? ',' s? identifier s? '=' s? expression)*) )
   end
   
   rule using_clause_content
@@ -550,9 +658,9 @@ grammar Dog
   end
   
   rule on_clause
-	(s 'ON' s (expression (s? ',' s? expression)*) )
-	/
-	(s 'ON' s (identifier s? '=' s? expression ( s? ',' s? identifier s? '=' s? expression)*) )
+  (s 'ON' s (expression (s? ',' s? expression)*) )
+  /
+  (s 'ON' s (identifier s? '=' s? expression ( s? ',' s? identifier s? '=' s? expression)*) )
   end
   
   rule via_clause 
@@ -560,11 +668,15 @@ grammar Dog
   end
   
   rule in_clause
-    s identifier in_clause_expression? s
-  end
-  
-  rule in_clause_expression
-    s 'IN' s expression
+    s identifier in_clause_expression:(s 'IN' s expression)? s {
+      def compile
+        if in_clause_expression then
+          return [identifier.text_value, in_clause_expression.expression.compile]
+        else
+          return [identifier.text_value, nil]
+        end
+      end
+    }
   end
   
   
@@ -622,7 +734,7 @@ grammar Dog
   # ================
   
   rule literal
-    number / string / bool / structure
+    number / string / bool / null / structure
   end
   
   # TODO - I am keep this for the future if I choose to include this syntactic sugar
@@ -639,13 +751,62 @@ grammar Dog
   #end
   
   rule structure
-	'{' sn? (association (((sn? "," sn?)+ / "\n")  association)* )? (sn? ','* sn?) '}'
-	#'{' s? association*  s? '}'
+    # TODO - Make this identifier a package identifier
+    type:(identifier sn?)? '{' sn? associations:(first:association rest:(((sn? "," sn?)+ / "\n")  association)* )? (sn? ','* sn?) '}' {
+      def compile
+        literal = ::Dog::Nodes::StructureLiteral.new
+        literal.value = []
+        
+        identifier = self.type.identifier rescue nil
+        
+        if identifier then
+          literal.type = identifier.text_value
+        end
+        
+        if self.associations then
+          literal.value << self.associations.first.compile
+          
+          if self.associations.rest then
+            for a in self.associations.rest.elements do
+              literal.value << a.association.compile
+            end
+          end
+        end
+        
+        return literal
+      end
+    }
+    #'{' s? association*  s? '}'
   end
-	
+
   rule association
-    sn? (identifier / string / number) s? '=' s? expression s?
-	#sn? (identifier / string / number) s? '=' s? expression s? ( "," &association / '' !association)
+    sn? association_key s? '=' s? expression s? {
+      def compile
+        return [association_key.compile, expression.compile]
+      end
+    }
+    #sn? (identifier / string / number) s? '=' s? expression s? ( "," &association / '' !association)
+  end
+  
+  # TODO - Consider making the the key an expression instead of identifier / string / number
+  rule association_key
+    identifier {
+      def compile
+        return self.text_value
+      end
+    }
+    / 
+    string {
+      def compile
+        return Shellwords::shellwords(self.text_value).first
+      end
+    }
+    / 
+    number {
+      def compile
+        return self.text_value.to_f
+      end
+    }
   end
   
   rule string
@@ -653,7 +814,13 @@ grammar Dog
     '"' ('\"' / !'"' .)* '"'
     /
     '\'' ('\\\'' / !'\'' .)* '\''
-    )
+    ) {
+      def compile
+        literal = ::Dog::Nodes::StringLiteral.new
+        literal.value = Shellwords::shellwords(self.text_value).first
+        return literal
+      end
+    }
   end
   
   rule number
@@ -661,11 +828,23 @@ grammar Dog
   end
   
   rule integer 
-    ('-' s?)? digit+
+    ('-' s?)? digit+ {
+    def compile
+      literal = ::Dog::Nodes::NumberLiteral.new 
+      literal.value = self.text_value.to_f
+      return literal
+    end
+    }
   end
   
   rule float
-    ('-' s?)? digit+ '.' digit*
+    ('-' s?)? digit+ '.' digit* {
+      def compile
+        literal = ::Dog::Nodes::NumberLiteral.new 
+        literal.value = self.text_value.to_f
+        return literal
+      end
+    }
   end
 
   rule bool
@@ -673,12 +852,29 @@ grammar Dog
   end
 
   rule true
-    ('TRUE' / 'true')
+    ('TRUE' / 'true') {
+      def compile
+      return ::Dog::Nodes::TrueLiteral.new  
+    end
+    }
   end
 
   rule false
-    ('FALSE' / 'false') 
+    ('FALSE' / 'false') {
+    def compile
+      return ::Dog::Nodes::FalseLiteral.new
+    end
+  }
   end
+  
+  rule null
+    ('NULL' / 'null') {
+    def compile
+      return ::Dog::Nodes::NullLiteral.new
+    end
+  }
+  end
+  
   
   
   
