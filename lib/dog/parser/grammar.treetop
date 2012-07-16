@@ -207,7 +207,6 @@ grammar Dog
   # Mostly I am keep it around so that I can remember:
   #    reply
   #    config
-  #
   
   
   # ==============
@@ -682,43 +681,161 @@ grammar Dog
   # ===============
   
   rule function_definition
-    'DEFINE' s identifier function_for? function_on? function_using? s 'DO' sn statements? s? 'END'
+    'DEFINE' s identifier function_for:(function_for)? function_on:(function_on)? function_using:(function_using)? s 'DO' sn statements:(statements)? s? 'END' {
+      def compile
+        node = ::Dog::Nodes::FunctionDefinition.new
+        
+        node.name = identifier.text_value
+        node.target = function_for.compile unless function_for.empty?
+        node.mandatory_arguments = function_on.compile unless function_on.empty?
+        node.optional_arguments = function_using.compile unless function_using.empty?
+        node.body = statements.compile unless statements.empty?
+        
+        return node
+      end
+    }
   end
   
   rule function_for
-    s 'FOR' s identifier
+    s 'FOR' s identifier {
+      def compile
+        return identifier.text_value
+      end
+    }
   end
   
   rule function_on
-    s 'ON' s identifier_list
+    s 'ON' s first:identifier rest:(s? ',' s? identifier)* {
+      def compile
+        args = []
+        
+        args << first.text_value
+        
+        for r in rest.elements do
+          args << r.identifier.text_value
+        end
+        
+        return args
+      end
+    }
   end
   
   rule function_using
-    s 'USING' s function_optional_parameters
+    s 'USING' s function_using_parameter rest:(s? ',' s? function_using_parameter)* {
+      def compile
+        args = {}
+        
+        parameter = function_using_parameter.compile
+        args[parameter.first] = parameter.last
+        
+        for r in rest.elements do
+          parameter = r.function_using_parameter.compile
+          args[parameter.first] = parameter.last
+        end
+        
+        return args
+      end
+    }
   end
   
-  rule function_optional_parameters
-    function_optional_parameter+
-  end
-  
-  rule function_optional_parameter
-    s? identifier s? '=' s? expression (s? ',' &function_optional_parameter / '' !function_optional_parameter)
+  rule function_using_parameter
+    identifier s? '=' s? expression {
+      def compile
+        return [identifier.text_value, expression.compile]
+      end
+    }
   end
   
   rule structure_definition
-    'DEFINE' s identifier sn? '{' sn? structure_property* sn? '}'
+    'DEFINE' s identifier sn? structure_properties {
+      def compile
+        node = ::Dog::Nodes::StructureDefinition.new
+        
+        node.name = identifier.text_value
+        node.properties = structure_properties.compile
+        
+        return node
+      end
+    }
+  end
+  
+  rule structure_properties 
+    '{' sn? properties:(first:structure_property rest:(((sn? "," sn?)+ / "\n") structure_property)* )? sn? '}' {
+      def compile
+        props = []
+        
+        if !properties.empty? then
+          props = []
+          props << properties.first.compile
+          
+          for r in properties.rest.elements do
+            props << r.structure_property.compile
+          end
+        end
+        
+        return props
+      end
+    }
   end
   
   rule structure_property
-    sn? (identifier s)? (identifier / string / number) (s? '=' s? expression)? s? ((',' / "\n") &structure_property / '' !structure_property)
+    sn? type:(identifier s)? structure_property_key value:(s? '=' s? expression)? s? {
+      def compile
+        property = ::Dog::Nodes::StructureDefinitionProperty.new
+        
+        property.type = type.identifier.text_value unless type.empty?
+        property.name = structure_property_key.compile
+        property.default = value.expression.compile unless value.empty?
+        
+        return property
+      end
+    }
+  end
+  
+  rule structure_property_key
+    identifier {
+      def compile
+        return self.text_value
+      end
+    }
+    / 
+    string {
+      def compile
+        return Shellwords::shellwords(self.text_value).first
+      end
+    }
+    / 
+    number {
+      def compile
+        return self.text_value.to_f
+      end
+    }
   end
   
   rule collection_definition
-    'DEFINE' s identifier s 'OF' identifier
+    'DEFINE' s name:identifier s 'OF' structure_name:identifier {
+      def compile
+        node = ::Dog::Nodes::CollectionDefinition.new
+        
+        node.name = name.text_value
+        node.structure_name = structure_name.text_value
+        
+        return node
+      end
+    }
   end
   
   rule community_definition
-    'DEFINE' s 'COMMUNITY' s identifier sn? '{' sn? structure_property* sn? '}'
+    'DEFINE' s 'COMMUNITY' s identifier sn? structure_properties {
+      def compile
+        node = ::Dog::Nodes::CommunityDefinition.new
+        
+        node.name = identifier.text_value
+        node.properties = structure_properties.compile
+        
+        return node
+      end
+    }
   end
   
   

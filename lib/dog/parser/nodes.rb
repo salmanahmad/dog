@@ -50,7 +50,11 @@ module Dog::Nodes
   end
   
   class FunctionDefinition < Node
-    
+    attr_accessor :name
+    attr_accessor :target
+    attr_accessor :mandatory_arguments
+    attr_accessor :optional_arguments
+    attr_accessor :body
   end
   
   class OperatorInfixCall < Node
@@ -72,16 +76,31 @@ module Dog::Nodes
   
   class FunctionAsyncCall < Node
     attr_accessor :target
-    
     attr_accessor :function_name
     attr_accessor :mandatory_arguments
     attr_accessor :optional_arguments
-    
     attr_accessor :via
   end
   
   class StructureDefinition < Node
-    
+    attr_accessor :name
+    attr_accessor :properties
+  end
+  
+  class StructureDefinitionProperty < Node
+    attr_accessor :type
+    attr_accessor :name
+    attr_accessor :default
+  end
+  
+  class CollectionDefinition < Node
+    attr_accessor :name
+    attr_accessor :structure_name
+  end
+  
+  class CommunityDefinition < Node
+    attr_accessor :name
+    attr_accessor :properties
   end
   
   class Listen < Node
