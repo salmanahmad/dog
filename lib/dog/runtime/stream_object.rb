@@ -7,6 +7,8 @@
 # above copyright notice is included.
 #
 
+require File.join(File.dirname(__FILE__), '../helper.rb')
+
 module Dog
   class StreamObject < DatabaseObject
     include Routability
@@ -78,6 +80,12 @@ module Dog
       else
         raise 'helllp: ' + self.type.name
       end
+      # FIXME HACK -- remove this once the name is pluralized properly on backend
+      if hash["type"] == 'listen'
+        hash["name"] = Helper::pluralize hash["name"]
+      end
+      # FIXME HACK -- compatibility with future API
+      hash["name"] = [ hash["name"] ]
       return hash
     end
     
