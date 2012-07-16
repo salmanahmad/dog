@@ -188,6 +188,8 @@ grammar Dog
     /
     collection_definition
     /
+    community_definition
+    /
     control_structure
     /
     import
@@ -203,14 +205,9 @@ grammar Dog
   
   # TODO - Remove this. I am keeping it around for documentaiton purposes
   # Mostly I am keep it around so that I can remember:
-  #    on
-  #    import
-  #    user
-  #    community
+  #    reply
+  #    config
   #
-  #rule command
-  #   community / event / task / message / listen / allow / ask / notify / reply / compute / on / user / definition / control_structure / config / import / print / inspect
-  #end
   
   
   # ==============
@@ -457,7 +454,23 @@ grammar Dog
   # ===================
   
   rule compute
-    'COMPUTE' s identifier on_clause? using_clause?
+    'COMPUTE' s identifier on_clause:(on_clause)? using_clause:(using_clause)? {
+      def compile
+        node = ::Dog::Nodes::FunctionCall.new
+        
+        node.function_name = identifier.text_value
+        
+        unless on_clause.empty? then
+          node.mandatory_arguments = on_clause.compile
+        end
+        
+        unless using_clause.empty? then
+          node.optional_arguments = using_clause.compile
+        end
+        
+        return node
+      end
+    }
   end
   
   
@@ -637,6 +650,10 @@ grammar Dog
     'DEFINE' s identifier s 'OF' identifier
   end
   
+  rule community_definition
+    'DEFINE' s 'COMMUNITY' s identifier sn? '{' sn? structure_property* sn? '}'
+  end
+  
   
   
   
@@ -792,21 +809,57 @@ grammar Dog
   # ==================
   
   rule using_clause
-  (s 'USING' s (identifier s? '=' s? expression (s? ',' s? identifier s? '=' s? expression)*) )
-  end
-  
-  rule using_clause_content
-    identifier_associations / access
+    s 'USING' s first:(identifier s? '=' s? expression) rest:(s? ',' s? identifier s? '=' s? expression)* {
+      def compile
+        args = {}
+        
+        args[first.identifier.text_value] = first.expression.compile
+        
+        for r in rest.elements do
+          args[r.identifier.text_value] = r.expression.compile
+        end
+        
+        return args
+      end
+    }
   end
   
   rule on_clause
-  (s 'ON' s (expression (s? ',' s? expression)*) )
+  s 'ON' s first:expression rest:(s? ',' s? expression)* {
+    def compile
+      args = []
+      
+      args << first.compile
+      
+      for r in rest.elements do
+        args << r.expression.compile
+      end
+      
+      return args
+    end
+  }
   /
-  (s 'ON' s (identifier s? '=' s? expression ( s? ',' s? identifier s? '=' s? expression)*) )
+  s 'ON' s first:(identifier s? '=' s? expression) rest:(s? ',' s? identifier s? '=' s? expression)* {
+    def compile
+      args = {}
+      
+      args[first.identifier.text_value] = first.expression.compile
+      
+      for r in rest.elements do
+        args[r.identifier.text_value] = r.expression.compile
+      end
+      
+      return args
+    end
+  }
   end
   
   rule via_clause 
-    s 'VIA' s identifier
+    s 'VIA' s identifier {
+      def compile
+        return identifier.text_value
+      end
+    }
   end
   
   rule in_clause
@@ -835,16 +888,6 @@ grammar Dog
     identifier ('.' &key_path / '' !key_path)
   end
   
-  # TODO - Add newlines? -- perhaps combine with associations below?
-  
-  rule identifier_associations
-    identifier_association+
-  end
-
-  rule identifier_association
-    sn? identifier s? ':' s? expression (s? ',' &identifier_association / '' !identifier_association)
-  end
-  
   rule identifier_list
     identifier_list_item+
   end
@@ -852,22 +895,6 @@ grammar Dog
   rule identifier_list_item
     s? identifier (s? ',' &identifier_list_item / '' !identifier_list_item)
   end
-  
-  # TODO - combine with items -- perhaps renamed to expresion_list -- add newlines?
-  
-  rule argument_list
-    argument_list_item+
-  end
-  
-  # TODO - To get this to work, I had to move the 's?' into the parenthesis with
-  # &argument_list_item. if I try to do that with association i get test errors.
-  # is this correct? I also did the same thing with identifier_list and 
-  # identifier_association will that break in the future also?
-  
-  rule argument_list_item
-    s? expression (s? ',' &argument_list_item / '' !argument_list_item)
-  end
-  
   
   
   
