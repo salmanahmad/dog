@@ -21,121 +21,272 @@ module Dog::Nodes
   end
   
   class Node
+    def self.attr_accessor(*vars)
+      super(*vars)
+    end
+  
+    def self.attribute(*vars)
+      @attributes ||= []
+      @attributes.concat vars
+      self.attr_accessor(*vars)
+    end
+
+    def self.attributes
+      (superclass.attributes || [] rescue []) | (@attributes || [])
+    end
+
+    def attributes
+      self.class.attributes
+    end
+    
+    # This is a volitile property that will point up to the parent node. It will be
+    # lazily set when de-serializing the AST.
+    attr_accessor :parent
+    
+    def path
+      # Gets the absolute path of the node relative to the package. 
+      # This requires that parent is already set.
+      if parent.nil? then
+        raise "You cannot get the path of a node without the parent."
+      else
+        # TODO...
+      end
+    end
     
     def visit(track)
-      
+      # This is used by the runtime to implement the execution.
     end
     
-    def nodes
+    def to_hash_for_array(array)
+      array.map! do |item|
+        if item.kind_of? Array
+          item = to_hash_for_array(item)
+        elsif item.kind_of? Hash
+          item = {
+            "type" => "Hash",
+            "value" => to_hash_for_hash(item)
+          }
+        elsif item.kind_of? Node
+          item = {
+            "type" => "Node",
+            "value" => item.to_hash
+          }
+        end
+        
+        item
+      end
       
+      return array
     end
     
+    def to_hash_for_hash(hash)
+      for key, value in hash do
+        if value.kind_of? Array then
+          hash[key] = to_hash_for_array(value)
+        elsif value.kind_of? Hash then
+          hash[key] = {
+            "type" => "Hash",
+            "value" => to_hash_for_hash(value)
+          }
+        elsif value.kind_of? Node then
+          hash[key] = {
+            "type" => "Node",
+            "value" => value.to_hash
+          }
+        end
+      end
+      
+      return hash
+    end
+    
+    def to_hash
+      # This method is used to produced a serialized version of the AST. It will be called
+      # inconjunction with to_json to produce to persist the bite code to disk.
+      hash = {
+        "class" => self.class.name
+      }
+      
+      for attribute in self.attributes do
+        # I am boxing all of the values so I can easily de-deserialize them
+        value = self.send(attribute.intern)
+        
+        if value.kind_of? Array
+          value = to_hash_for_array(value)
+        elsif value.kind_of? Hash
+          value = {
+            "type" => "Hash",
+            "value" => to_hash_for_hash(value)
+          }          
+        elsif value.kind_of? Node
+          value = {
+            "type" => "Node",
+            "value" => value.to_hash
+          }
+        end
+        
+        hash[attribute.to_s] = value
+      end
+      
+      return hash
+    end
+    
+    def self.from_hash_for_array(array)
+      array.map! do |item|
+        if item.kind_of? Array
+          item = self.from_hash_for_array(item)
+        elsif item.kind_of? Hash
+          if item["type"] == "Node"
+            item = Node.from_hash(item["value"])
+          else
+            item = self.from_hash_for_hash(item["value"])
+          end
+        end
+        
+        item
+      end
+      
+      return array
+    end
+    
+    def self.from_hash_for_hash(hash)
+      for key, value in hash do
+        if value.kind_of? Array
+          hash[key] = self.from_hash_for_array(value)
+        elsif value.kind_of? Hash
+          if value["type"] == "Node" then
+            hash[key] = Node.from_hash(value["value"])
+          else
+            hash[key] = self.from_hash_for_hash(value["value"])
+          end
+        end
+      end
+      
+      return hash
+    end
+    
+    def self.from_hash(hash)
+      klass = hash["class"] || self.class.name
+      klass = Kernel::qualified_const_get(klass)
+      
+      node = klass.new
+      for key, value in hash to
+        if self.attributes.include? key.intern then
+          if value.kind_of? Array
+            value = self.from_hash_for_array(value)
+          elsif value.kind_of? Hash
+            if value["type"] == "Node"
+              value = Node.from_hash(value["value"])
+            else
+              value = self.from_hash_for_hash(value["value"])
+            end
+          end
+            
+          node.send("#{key.to_s}=".intern, value)
+        end
+      end
+    end
   end
   
   class Nodes < Node
-    attr_accessor :nodes
-    
-    def initialize
-      self.nodes = []
-    end
+    attribute :nodes
   end
   
   class Access < Node
-    attr_accessor :sequence
+    attribute :sequence
   end
   
   class Assignment < Node
-    attr_accessor :expression
-    attr_accessor :sequence
+    attribute :expression
+    attribute :sequence
   end
   
   class FunctionDefinition < Node
-    attr_accessor :name
-    attr_accessor :target
-    attr_accessor :mandatory_arguments
-    attr_accessor :optional_arguments
-    attr_accessor :body
+    attribute :name
+    attribute :target
+    attribute :mandatory_arguments
+    attribute :optional_arguments
+    attribute :body
   end
   
   class OnEachDefinition < Node
-    attr_accessor :name
-    attr_accessor :variable
-    attr_accessor :collection
-    attr_accessor :body
+    attribute :name
+    attribute :variable
+    attribute :collection
+    attribute :body
   end
   
   class OperatorInfixCall < Node
-    attr_accessor :operator
-    attr_accessor :arg1
-    attr_accessor :arg2
+    attribute :operator
+    attribute :arg1
+    attribute :arg2
   end
   
   class OperatorPrefixCall < Node
-    attr_accessor :operator
-    attr_accessor :arg
+    attribute :operator
+    attribute :arg
   end
   
   class FunctionCall < Node
-    attr_accessor :function_name
-    attr_accessor :mandatory_arguments
-    attr_accessor :optional_arguments
+    attribute :function_name
+    attribute :mandatory_arguments
+    attribute :optional_arguments
   end
   
   class FunctionAsyncCall < Node
-    attr_accessor :target
-    attr_accessor :function_name
-    attr_accessor :mandatory_arguments
-    attr_accessor :optional_arguments
-    attr_accessor :via
+    attribute :target
+    attribute :function_name
+    attribute :mandatory_arguments
+    attribute :optional_arguments
+    attribute :via
   end
   
   class StructureDefinition < Node
-    attr_accessor :name
-    attr_accessor :properties
+    attribute :name
+    attribute :properties
   end
   
   class StructureDefinitionProperty < Node
-    attr_accessor :type
-    attr_accessor :name
-    attr_accessor :default
+    attribute :type
+    attribute :name
+    attribute :default
   end
   
   class CollectionDefinition < Node
-    attr_accessor :name
-    attr_accessor :structure_name
+    attribute :name
+    attribute :structure_name
   end
   
   class CommunityDefinition < Node
-    attr_accessor :name
-    attr_accessor :properties
+    attribute :name
+    attribute :properties
   end
   
   class Listen < Node
-    attr_accessor :target
-    attr_accessor :variable
-    attr_accessor :variable_type
-    attr_accessor :via
+    attribute :target
+    attribute :variable
+    attribute :variable_type
+    attribute :via
   end
   
   class Notify < Node
-    attr_accessor :target
-    attr_accessor :message
-    attr_accessor :via
+    attribute :target
+    attribute :message
+    attribute :via
   end
   
   class If < Node
-    attr_accessor :conditions
+    attribute :conditions
   end
   
   class While < Node
-    attr_accessor :condition
-    attr_accessor :statements
+    attribute :condition
+    attribute :statements
   end
   
   class For < Node
-    attr_accessor :variable
-    attr_accessor :collection
-    attr_accessor :statements
+    attribute :variable
+    attribute :collection
+    attribute :statements
   end
   
   class Perform < Node
@@ -147,33 +298,24 @@ module Dog::Nodes
   end
   
   class Return < Node
-    attr_accessor :expression
+    attribute :expression
   end
   
   class Print < Node
-    attr_accessor :expression
+    attribute :expression
   end
   
   class Inspect < Node
-    attr_accessor :expression
+    attribute :expression
   end
   
   
-  class LiteralNode
-    attr_accessor :value
+  class LiteralNode < Node
+    attribute :value
   end
   
   class StructureLiteral < LiteralNode
-    attr_accessor :type
-    
-    def initialize
-      self.type = nil
-    end
-    
-    def visit(track)
-      
-    end
-    
+    attribute :type
   end
   
   class StringLiteral < LiteralNode
