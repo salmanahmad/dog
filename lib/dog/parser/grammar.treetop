@@ -1072,13 +1072,6 @@ grammar Dog
     identifier ('.' &key_path / '' !key_path)
   end
   
-  rule identifier_list
-    identifier_list_item+
-  end
-  
-  rule identifier_list_item
-    s? identifier (s? ',' &identifier_list_item / '' !identifier_list_item)
-  end
   
   
   
