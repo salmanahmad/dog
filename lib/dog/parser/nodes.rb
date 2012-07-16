@@ -24,7 +24,7 @@ module Dog::Nodes
     def self.attr_accessor(*vars)
       super(*vars)
     end
-  
+    
     def self.attribute(*vars)
       @attributes ||= []
       @attributes.concat vars
@@ -39,17 +39,51 @@ module Dog::Nodes
       self.class.attributes
     end
     
-    # This is a volitile property that will point up to the parent node. It will be
-    # lazily set when de-serializing the AST.
-    attr_accessor :parent
+    attr_accessor :path
     
-    def path
-      # Gets the absolute path of the node relative to the package. 
-      # This requires that parent is already set.
-      if parent.nil? then
-        raise "You cannot get the path of a node without the parent."
-      else
-        # TODO...
+    def compute_paths_of_descendants_for_array(array, current = [])
+      array.each_index do |key|
+        value = array[key]
+        current_path = current.clone.push(key)
+        
+        if value.kind_of? Array then
+          compute_paths_of_descendants_for_array(value, current_path)
+        elsif value.kind_of? Hash then
+          compute_paths_of_descendants_for_hash(value, current_path)
+        elsif value.kind_of? Node then
+          value.compute_paths_of_descendants(current_path)
+        end
+      end
+    end
+    
+    def compute_paths_of_descendants_for_hash(hash, current = [])
+      for key, value in hash do
+        current_path = current.clone.push(key)
+        
+        if value.kind_of? Array then
+          compute_paths_of_descendants_for_array(value, current_path)
+        elsif value.kind_of? Hash then
+          compute_paths_of_descendants_for_hash(value, current_path)
+        elsif value.kind_of? Node then
+          value.compute_paths_of_descendants(current_path)
+        end
+      end
+    end
+    
+    def compute_paths_of_descendants(current = [])
+      self.path = current
+      
+      for attribute in self.attributes do
+        value = self.send(attribute.intern)
+        current_path = current.clone.push(attribute.to_s)
+        
+        if value.kind_of? Array then
+          compute_paths_of_descendants_for_array(value, current_path)
+        elsif value.kind_of? Hash then
+          compute_paths_of_descendants_for_hash(value, current_path)
+        elsif value.kind_of? Node then
+          value.compute_paths_of_descendants(current_path)
+        end
       end
     end
     
@@ -103,7 +137,8 @@ module Dog::Nodes
       # This method is used to produced a serialized version of the AST. It will be called
       # inconjunction with to_json to produce to persist the bite code to disk.
       hash = {
-        "class" => self.class.name
+        "class" => self.class.name,
+        "path" => self.path
       }
       
       for attribute in self.attributes do
@@ -169,6 +204,8 @@ module Dog::Nodes
       klass = Kernel::qualified_const_get(klass)
       
       node = klass.new
+      node.path = hash["path"]
+      
       for key, value in hash to
         if self.attributes.include? key.intern then
           if value.kind_of? Array
