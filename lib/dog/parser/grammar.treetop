@@ -662,17 +662,33 @@ grammar Dog
   # ==============
   
   rule on
-    'ON' on_each? in_clause 'DO' sn statements? s? 'END'
+    'ON' on_each in_clause 'DO' sn statements:(statements)? s? 'END' {
+      def compile
+        node = ::Dog::Nodes::OnEachDefinition.new
+        
+        clause = in_clause.compile
+        
+        node.name = "@each:#{clause[0]}"
+        node.variable = clause[0]
+        node.collection = clause[1]
+        node.body = statements.compile unless statements.empty?
+        
+        return node
+      end
+    }
   end
   
   rule on_each
-    s 'EACH' on_each_count?
+    s 'EACH' on_each_count:(s integer)? {
+      def compile
+        if !on_each_count.empty? then
+          return on_each_count.integer.to_f
+        else
+          return 1
+        end
+      end
+    }
   end
-  
-  rule on_each_count
-    s integer
-  end
-  
   
   
   

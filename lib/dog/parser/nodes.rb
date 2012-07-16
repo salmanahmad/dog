@@ -57,6 +57,13 @@ module Dog::Nodes
     attr_accessor :body
   end
   
+  class OnEachDefinition < Node
+    attr_accessor :name
+    attr_accessor :variable
+    attr_accessor :collection
+    attr_accessor :body
+  end
+  
   class OperatorInfixCall < Node
     attr_accessor :operator
     attr_accessor :arg1
