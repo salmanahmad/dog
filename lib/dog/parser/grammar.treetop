@@ -480,14 +480,14 @@ grammar Dog
   # ===============
   
   rule ask
-    'ASK' sn ask_count? (user / access) via_clause ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
+    'ASK' sn ask_count? expression via_clause ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
       def compile
         node = ::Dog::Nodes::FunctionAsyncCall.new
         
+        node.target = expression.compile
         node.function_name = ask_to_clause.compile
         node.mandatory_arguments = on_clause.compile unless on_clause.empty?
         node.optional_arguments = using_clause.compile unless using_clause.empty?
-        
         node.via = via_clause.compile
         
         return node
@@ -495,6 +495,7 @@ grammar Dog
     }
   end
   
+  # TODO - Actually use this information
   rule ask_count
     integer sn {
       def compile
@@ -518,21 +519,50 @@ grammar Dog
   # ==================
   # = Listen Command = 
   # ==================
-
+  
   rule listen
-    'LISTEN' listen_to_clause via_clause listen_for_clause
+    'LISTEN' listen_to_clause via_clause listen_for_clause {
+      def compile
+        node = ::Dog::Nodes::Listen.new
+        
+        for_clause = listen_for_clause.compile
+        
+        node.target = listen_to_clause.compile
+        node.variable = for_clause.first
+        node.variable_type = for_clause.last
+        node.via = via_clause.compile
+        
+        return node
+      end
+    }
   end
 
   rule listen_to_clause
-    s 'TO' s (user / access)
+    s 'TO' s expression {
+      def compile
+        return expression.compile
+      end
+    }
   end
   
   rule listen_for_clause
-    s 'FOR' s identifier listen_of_clause?
+    s 'FOR' s identifier listen_of_clause:(listen_of_clause)? {
+      def compile
+        if !listen_of_clause.empty?
+          return [identifier.text_value, listen_of_clause.compile]
+        else
+          return [identifier.text_value, nil]
+        end
+      end
+    }
   end
   
   rule listen_of_clause
-    s 'OF' s identifier
+    s 'OF' s expression {
+      def compile
+        return expression.compile
+      end
+    }
   end
   
   
@@ -542,11 +572,25 @@ grammar Dog
   # ==========
   
   rule notify
-    'NOTIFY' s (user / access) via_clause notify_of_clause
+    'NOTIFY' s expression via_clause notify_of_clause {
+      def method_name
+        node = ::Dog::Nodes::Notify.new
+        
+        node.target = expression.compile
+        node.message = notify_of_clause.compile
+        node.via = via_clause.compile
+        
+        return node
+      end
+    }
   end
 
   rule notify_of_clause
-    s 'OF' s expression
+    s 'OF' s expression {
+      def compile
+        return expression.compile
+      end
+    }
   end
   
   

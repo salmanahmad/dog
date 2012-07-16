@@ -71,9 +71,12 @@ module Dog::Nodes
   end
   
   class FunctionAsyncCall < Node
+    attr_accessor :target
+    
     attr_accessor :function_name
     attr_accessor :mandatory_arguments
     attr_accessor :optional_arguments
+    
     attr_accessor :via
   end
   
@@ -81,8 +84,17 @@ module Dog::Nodes
     
   end
   
-  class StructureInstantiation < Node
-    
+  class Listen < Node
+    attr_accessor :target
+    attr_accessor :variable
+    attr_accessor :variable_type
+    attr_accessor :via
+  end
+  
+  class Notify < Node
+    attr_accessor :target
+    attr_accessor :message
+    attr_accessor :via
   end
   
   class If < Node
