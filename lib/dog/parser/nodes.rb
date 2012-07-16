@@ -71,7 +71,10 @@ module Dog::Nodes
   end
   
   class FunctionAsyncCall < Node
-    
+    attr_accessor :function_name
+    attr_accessor :mandatory_arguments
+    attr_accessor :optional_arguments
+    attr_accessor :via
   end
   
   class StructureDefinition < Node

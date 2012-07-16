@@ -480,17 +480,37 @@ grammar Dog
   # ===============
   
   rule ask
-    'ASK' sn ask_count? (user / access) via_clause ask_to_clause on_clause? using_clause?
+    'ASK' sn ask_count? (user / access) via_clause ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
+      def compile
+        node = ::Dog::Nodes::FunctionAsyncCall.new
+        
+        node.function_name = ask_to_clause.compile
+        node.mandatory_arguments = on_clause.compile unless on_clause.empty?
+        node.optional_arguments = using_clause.compile unless using_clause.empty?
+        
+        node.via = via_clause.compile
+        
+        return node
+      end
+    }
   end
   
   rule ask_count
-    integer sn
+    integer sn {
+      def compile
+        return integer.text_value.to_f
+      end
+    }
   end
   
+  # TODO - Bring back - also for compute
+  #s 'TO' s (string / access)
   rule ask_to_clause
-    # TODO - Bring this back
-    #s 'TO' s (string / access)
-    s 'TO' s identifier
+    s 'TO' s identifier {
+      def compile
+        return identifier.text_value
+      end
+    }
   end
   
   
@@ -527,24 +547,6 @@ grammar Dog
 
   rule notify_of_clause
     s 'OF' s expression
-  end
-  
-  
-  
-  # ==============
-  # = On Command =
-  # ==============
-  
-  rule on
-    'ON' on_each? in_clause 'DO' sn statements? s? 'END'
-  end
-  
-  rule on_each
-    s 'EACH' on_each_count?
-  end
-  
-  rule on_each_count
-    s integer
   end
   
   
@@ -607,6 +609,27 @@ grammar Dog
   rule predicate_conditional
     key_paths s? relational_operator s? access
   end
+  
+  
+  
+  
+  
+  # ==============
+  # = On Command =
+  # ==============
+  
+  rule on
+    'ON' on_each? in_clause 'DO' sn statements? s? 'END'
+  end
+  
+  rule on_each
+    s 'EACH' on_each_count?
+  end
+  
+  rule on_each_count
+    s integer
+  end
+  
   
   
   
