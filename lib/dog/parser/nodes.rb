@@ -40,49 +40,71 @@ module Dog::Nodes
     end
     
     attr_accessor :path
+    attr_accessor :parent
     
-    def compute_paths_of_descendants_for_array(array, current = [])
+    # TODO - I have to consider the impact to path with packages
+    
+    def compute_paths_of_descendants_for_array(array, current = [], parent)
       array.each_index do |key|
         value = array[key]
         current_path = current.clone.push(key)
         
         if value.kind_of? Array then
-          compute_paths_of_descendants_for_array(value, current_path)
+          compute_paths_of_descendants_for_array(value, current_path, parent)
         elsif value.kind_of? Hash then
-          compute_paths_of_descendants_for_hash(value, current_path)
+          compute_paths_of_descendants_for_hash(value, current_path, parent)
         elsif value.kind_of? Node then
-          value.compute_paths_of_descendants(current_path)
+          value.compute_paths_of_descendants(current_path, parent)
         end
       end
     end
     
-    def compute_paths_of_descendants_for_hash(hash, current = [])
+    def compute_paths_of_descendants_for_hash(hash, current = [], parent)
       for key, value in hash do
         current_path = current.clone.push(key)
         
         if value.kind_of? Array then
-          compute_paths_of_descendants_for_array(value, current_path)
+          compute_paths_of_descendants_for_array(value, current_path, parent)
         elsif value.kind_of? Hash then
-          compute_paths_of_descendants_for_hash(value, current_path)
+          compute_paths_of_descendants_for_hash(value, current_path, parent)
         elsif value.kind_of? Node then
-          value.compute_paths_of_descendants(current_path)
+          value.compute_paths_of_descendants(current_path, parent)
         end
       end
     end
     
-    def compute_paths_of_descendants(current = [])
+    def compute_paths_of_descendants(current = [], parent = nil)
       self.path = current
+      self.parent = parent
       
       for attribute in self.attributes do
         value = self.send(attribute.intern)
         current_path = current.clone.push(attribute.to_s)
         
         if value.kind_of? Array then
-          compute_paths_of_descendants_for_array(value, current_path)
+          compute_paths_of_descendants_for_array(value, current_path, self)
         elsif value.kind_of? Hash then
-          compute_paths_of_descendants_for_hash(value, current_path)
+          compute_paths_of_descendants_for_hash(value, current_path, self)
         elsif value.kind_of? Node then
-          value.compute_paths_of_descendants(current_path)
+          value.compute_paths_of_descendants(current_path, self)
+        end
+      end
+    end
+    
+    def self.each_descendant(node, &block)
+      if node.kind_of? Array then
+        for item in node do
+          each_descendant(item, &block)
+        end
+      elsif node.kind_of? Hash then
+        for key, value in node do
+          each_descendant(value, &block)
+        end
+      elsif node.kind_of? Node then
+        yield node
+        
+        for attribute in node.attributes do
+          each_descendant(node.send(attribute.intern), &block)
         end
       end
     end

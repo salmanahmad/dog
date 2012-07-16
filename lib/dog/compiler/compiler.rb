@@ -19,7 +19,6 @@ module Dog
     attr_accessor :errors
     attr_accessor :current_filename
     
-    
     def self.compile(bark, filename = "")
       compiler = self.new(filename)
       compiler.compile(bark)
@@ -48,43 +47,36 @@ module Dog
       end
     end
     
-    def compile(bark)
-      rule = Rules::Rule.new(self)
-      rule.apply(bark)
-      
-      elements = bark.elements || []
-      elements.each do |node|
-        compile(node)
+    def compile(node)
+      node.compute_paths_of_descendants
+      ::Dog::Nodes::Node.each_descendant(node) do |d|
+        rule = Rules::Rule.new(self)
+        rule.apply(d)
       end
       
-      unless bark.parent
+      bite["code"][self.current_filename] = node.to_hash
+      
+      unless errors.empty?
+        compilation_error = nil
         
-        bite["code"][self.current_filename] = bark.to_hash
-        
-        unless errors.empty?
-          compilation_error = nil
-          
-          if errors.size == 1 then 
-            failure_reason = "Compilation Error: There was #{errors.size} error that took place.\n\n#{errors.join("\n\n")}\n"
-            compilation_error = CompilationError.new(failure_reason)
-          else 
-            failure_reason = "Compilation Error: There was #{errors.size} error that took place.\n\n#{errors.join("\n\n")}\n"
-            compilation_error = CompilationError.new("Compilation Error: There were #{errors.size} errors that took place.\n\n#{errors.join("\n\n")}\n")
-          end
-          
-          compilation_error.errors = errors
-          raise compilation_error
+        if errors.size == 1 then 
+          failure_reason = "Compilation Error: There was #{errors.size} error that took place.\n\n#{errors.join("\n\n")}\n"
+          compilation_error = CompilationError.new(failure_reason)
+        else 
+          failure_reason = "Compilation Error: There was #{errors.size} error that took place.\n\n#{errors.join("\n\n")}\n"
+          compilation_error = CompilationError.new("Compilation Error: There were #{errors.size} errors that took place.\n\n#{errors.join("\n\n")}\n")
         end
-        
-        if(self.current_filename == bite["main_filename"]) then
-          bite["symbols"]["root"] = [bite["main_filename"]]
-          bite["signature"] = Digest::SHA1.hexdigest(JSON.dump(bite))
-        end
-        
-        return bite
-      else
-        return bark
+          
+        compilation_error.errors = errors
+        raise compilation_error
       end
+        
+      if(self.current_filename == bite["main_filename"]) then
+        bite["symbols"]["root"] = [bite["main_filename"]]
+        bite["signature"] = Digest::SHA1.hexdigest(JSON.dump(bite))
+      end
+      
+      return bite
     end
     
   end
