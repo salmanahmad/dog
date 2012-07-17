@@ -75,6 +75,20 @@ module Dog
         
         return true
       end
+
+      def fetch_stream_items_for_track(track = ::Dog::Track.root)
+        # L 335
+        stream_items = []
+        # fetch StreamObjects
+        items = ::Dog::StreamObject.find({"track_id" => track.id})
+        items.each do |item|
+          item = ::Dog::StreamObject.from_hash(item)
+          stream_items << item.to_hash_for_stream
+        end
+        # TODO fetch oneachs
+        return stream_items
+      end
+
     end
     
     def self.get_or_post(path, opts={}, &block)
@@ -318,6 +332,7 @@ module Dog
 
         # GET root stream
         get prefix + '/stream' do
+          # L 80
 
           depth = (params["depth"] || 0).to_i
           limit = (params["limit"] || 0).to_i
@@ -326,14 +341,7 @@ module Dog
 
           stream = {}
           stream["self"] = {}
-          stream["items"] = []
-
-          root = ::Dog::Track.root
-          items = ::Dog::StreamObject.find({"track_id" => root.id})
-          items.each do |item|
-            item = ::Dog::StreamObject.from_hash(item)
-            stream["items"] << item.to_hash_for_stream
-          end
+          stream["items"] = fetch_stream_items_for_track
 
           content_type 'application/json'
           return stream.to_json
@@ -356,26 +364,21 @@ module Dog
             track = ::Dog::Track.find_by_id(id.match(/^handler:(.*)/)[1])
 
             stream["self"] = track.to_hash_for_stream
-
-            items = ::Dog::StreamObject.find({"track_id" => track.id})
-            items.each do |item|
-              item = ::Dog::StreamObject.from_hash(item)
-              stream["items"] << item.to_hash_for_stream
-            end
+            stream["items"] = fetch_stream_items_for_track( track )
 
           else
             object = ::Dog::StreamObject.find_by_id(id)
             stream["self"] = object.to_hash_for_stream
 
             if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
+              # fetch track instances for a particular oneach
               handler = object.handler
               argument = object.handler_argument
 
               if handler then
                 items = ::Dog::Track.find({"function_name" => handler})
-                for item in items do
-                  item = ::Dog::Track.from_hash(item).to_hash_for_stream
-                  stream["items"] << item
+                items.each do |track|
+                  stream["items"] << track.to_hash_for_stream
                 end
               end
             end

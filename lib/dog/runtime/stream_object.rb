@@ -52,7 +52,8 @@ module Dog
       return {
         "track_id" => self.track_id,
         "type" => self.type.name,
-        "name" => self.name,
+        # FIXME HACK -- compatibility with future API
+        "name" => [ self.name ],
         "properties" => ((self.properties || []).map { |property|
           property.to_hash
         }),
@@ -75,17 +76,13 @@ module Dog
         'notify'
       when 'Dog::RoutedTask'
         'ask'
-      when 'Dog::Track'
-        'track'
       else
-        raise 'helllp: ' + self.type.name
+        raise 'Invalid StreamObject type: ' + self.type.name
       end
       # FIXME HACK -- remove this once the name is pluralized properly on backend
       if hash["type"] == 'listen'
         hash["name"] = Helper::pluralize hash["name"]
       end
-      # FIXME HACK -- compatibility with future API
-      hash["name"] = [ hash["name"] ]
       return hash
     end
     

@@ -116,8 +116,9 @@ module Dog
 
     def to_hash_for_stream
       return {
-        "id" => "handler:" + self._id.to_s,
-        "name" => self.function_name
+        "id" => "handler:#{self._id}",
+        "name" => [ self.function_name ],
+        "type" => "track"
       }
     end
 
