@@ -9,6 +9,7 @@
 
 
 require 'digest/sha1'
+require 'set'
 
 require 'thin'
 require 'eventmachine'
@@ -37,6 +38,7 @@ require File.join(File.dirname(__FILE__), 'runtime/property.rb')
 require File.join(File.dirname(__FILE__), 'runtime/server.rb')
 require File.join(File.dirname(__FILE__), 'runtime/task.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track.rb')
+require File.join(File.dirname(__FILE__), 'runtime/value.rb')
 require File.join(File.dirname(__FILE__), 'runtime/variable.rb')
 require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
 
@@ -52,12 +54,14 @@ module Dog
     
       attr_accessor :bite_code
       attr_accessor :bite_code_filename
+      attr_accessor :save_set
     
       def run_file(bite_code_filename, options = {})
-        self.run(File.open(bite_code_filename).read, bite_code_filename, options)
+        run(File.open(bite_code_filename).read, bite_code_filename, options)
       end
       
       def run(bite_code, bite_code_filename, options = {})
+        self.save_set = Set.new
         
         options = {
           "config_file" => nil,
@@ -75,6 +79,7 @@ module Dog
         for filename, ast in bite_code["code"]
           # I need the second call here so that I can initialize the parent pointers in the tree. 
           # I may want to incorporate this into from_hash at some point.
+        
           ast = Nodes::Node.from_hash(ast)
           ast.compute_paths_of_descendants
         
@@ -94,7 +99,7 @@ module Dog
         
         for track in tracks do
           track = Track.from_hash(track)
-          run(track)
+          run_track(track)
         end
         
         tracks = Track.find({"state" => { 
@@ -107,7 +112,7 @@ module Dog
         end
       end
       
-      def run(track)
+      def run_track(track)
         # TODO - check for state first
         # TODO - Right now I have poor support for tail recursion. I may run out of stack space before too long
         # TODO - When do I queue up the tracks that I should save?
@@ -119,35 +124,41 @@ module Dog
           node = Runtime.node_at_path_for_filename(track.current_node_path, track.function_filename)
           next_track = node.visit(track)
           
-          if track.state == STATE::FINISHED || self.state == STATE::LISTENING then
+          self.save_set.add(track)
+          
+          if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
             parent_track = Track.find_by_id(track.control_ancestors.last)
         
             if parent_track then
               parent_current_node = Runtime.node_at_path_for_filename(parent_track.current_node_path, parent_track.function_filename)
               parent_track.write_stack(parent_current_node, track.return_value)
-        
-              parent_track.current_node_path = parent_current_node.parent.path
-              parent_track.state = STATE::RUNNING
               
-              run(parent_track)
+              parent_track.current_node_path = parent_current_node.parent.path
+              parent_track.state = Track::STATE::RUNNING
+              
+              run_track(parent_track)
+            else
+              break
             end
           end
           
-          if next_track then
-            run(next_track)
+          if next_track && next_track.class == Track then
+            run_track(next_track)
           end
+        end
+        
+        for t in self.save_set do
+          t.save
         end
         
       end
       
       def node_at_path_for_filename(path, file)
-        return nil if path.nil?
-        
         # TODO - I need to raise an error if the node is not found.
         node = self.bite_code["code"][file]
         
         for index in path do
-          node = node.elements[index]
+          node = node[index]
         end
         
         return node

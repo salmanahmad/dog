@@ -42,6 +42,12 @@ module Dog::Nodes
       self.class.attributes
     end
     
+    def [](key)
+      if self.attributes.include? key.intern then
+        self.send(key.intern)
+      end
+    end
+    
     attr_accessor :line
     attr_accessor :filename
     
@@ -238,8 +244,9 @@ module Dog::Nodes
       node.line = hash["line"]
       node.filename = hash["filename"]
       
-      for key, value in hash to
-        if self.attributes.include? key.intern then
+      for key, value in hash do
+        
+        if node.attributes.include? key.intern then
           if value.kind_of? Array
             value = self.from_hash_for_array(value)
           elsif value.kind_of? Hash
@@ -253,15 +260,84 @@ module Dog::Nodes
           node.send("#{key.to_s}=".intern, value)
         end
       end
+      
+      return node
     end
   end
   
   class Nodes < Node
     attribute :nodes
+    
+    def visit(track)
+      
+      for node in self.nodes do
+        unless track.has_visited?(node) then
+          track.should_visit(node)
+          return
+        end
+      end
+      
+      if self.nodes && self.nodes.last then
+        value = track.read_stack(self.nodes.last.path)
+        track.write_stack(self.path, value)
+      end
+      
+      track.should_visit(self.parent)
+    end
   end
   
   class Access < Node
     attribute :sequence
+    
+    def visit(track)
+      if self.sequence then
+        for item in self.sequence do
+          if item.kind_of? Node then
+            unless track.has_visited? item then
+              track.should_visit(item)
+              return
+            end
+          end
+        end
+        
+        access_path = []
+        for item in self.sequence do
+          if item.kind_of? Node then
+            result = track.read_stack(item.path)
+            access_path << result
+          else
+            access_path << item
+          end
+        end
+        
+        first = true
+        value = nil
+        
+        for item in access_path do
+          if first then
+            first = false
+            
+            if item.kind_of? ::Dog::Value then
+              value = item
+            else
+              value = track.variables[item]
+            end            
+          else
+            if item.kind_of? ::Dog::Value then
+              
+            else
+              
+            end
+          end  
+        end
+        
+        track.write_stack(self.path, value)
+        track.should_visit(self.parent)
+      else
+        track.write_stack(self.path, ::Dog::Value.null_value)
+        track.should_visit(self.parent)
+      end
+    end
   end
   
   class Assignment < Node
@@ -288,6 +364,27 @@ module Dog::Nodes
     attribute :operator
     attribute :arg1
     attribute :arg2
+    
+    def visit(track)
+      
+      unless track.has_visited?(self.arg1) then
+        track.should_visit(self.arg1)
+        return
+      end
+      
+      unless track.has_visited?(self.arg2) then
+        track.should_visit(self.arg2)
+        return
+      end
+      
+      arg1_value = track.read_stack(self.arg1.path).value
+      arg2_value = track.read_stack(self.arg2.path).value
+      
+      result = arg1_value.send(self.operator.intern, arg2_value)
+      
+      track.write_stack(self.path, ::Dog::Value.new("number", result))
+      track.should_visit(self.parent)
+    end
   end
   
   class OperatorPrefixCall < Node
@@ -376,10 +473,46 @@ module Dog::Nodes
   
   class Print < Node
     attribute :expression
+    
+    def visit(track)
+      value = ""
+      
+      if self.expression then
+        if track.has_visited?(self.expression) then
+          value = track.read_stack(self.expression.path).value
+        else
+          track.should_visit(self.expression)
+          return
+        end
+      end
+      
+      puts value
+      
+      track.write_stack(self.path, ::Dog::Value.null_value)
+      track.should_visit(self.parent)
+    end
   end
   
   class Inspect < Node
     attribute :expression
+    
+    def visit(track)
+      value = ""
+      
+      if self.expression then
+        if track.has_visited?(self.expression) then
+          value = track.read_stack(self.expression.path).value
+        else
+          track.should_visit(self.expression)
+          return
+        end
+      end
+      
+      puts value.inspect
+      
+      track.write_stack(self.path, ::Dog::Value.null_value)
+      track.should_visit(self.parent)
+    end
   end
   
   
@@ -392,22 +525,40 @@ module Dog::Nodes
   end
   
   class StringLiteral < LiteralNode
-    
+    def visit(track)
+      track.write_stack(self.path, ::Dog::Value.string_value(value))
+      track.should_visit(self.parent)
+    end
   end
   
   class NumberLiteral < LiteralNode
-    
+    def visit(track)
+      track.write_stack(self.path, ::Dog::Value.number_value(value))
+      track.should_visit(self.parent)
+    end
   end
   
   class TrueLiteral < LiteralNode
+    def visit(track)
+      track.write_stack(self.path, ::Dog::Value.true_value)
+      track.should_visit(self.parent)
+    end
     
   end
   
   class FalseLiteral < LiteralNode
+    def visit(track)
+      track.write_stack(self.path, ::Dog::Value.false_value)
+      track.should_visit(self.parent)
+    end
     
   end
   
   class NullLiteral < LiteralNode
+    def visit(track)
+      track.write_stack(self.path, ::Dog::Value.null_value)
+      track.should_visit(self.parent)
+    end
     
   end
   

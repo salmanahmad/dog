@@ -67,11 +67,23 @@ module Dog
       self.error_value = nil
     end
     
+    def has_visited?(node)
+      result = has_stack_path(node.path)
+      return result
+    end
+    
+    def should_visit(node)
+      if node then
+        self.current_node_path = node.path
+      else
+        finish
+      end
+    end
+    
     def has_stack_path(path)
       pointer = self.stack
       
       for item in path do
-        item = item.to_s
         
         if pointer.respond_to?(:has_key?) && pointer.has_key?(item) then
           pointer = pointer[item]
@@ -84,6 +96,16 @@ module Dog
     end
     
     def write_stack(path, value)
+      # TODO - The leafs of the stack must always be a Value. And a Value
+      # must not appear anywhere but the leafs. I need to ensure that this
+      # is always the case.
+      
+      if value.class != ::Dog::Value then
+        raise "You cannot write a non-Value object to the Dog stack."
+      end
+      
+      value = value.to_hash
+      
       path = path.clone
       last = path.pop
       stack = self.stack
@@ -106,7 +128,8 @@ module Dog
         for index in path do
           stack = stack[index]
         end
-        return stack
+        
+        return ::Dog::Value.from_hash(stack)
       rescue
         return nil
       end

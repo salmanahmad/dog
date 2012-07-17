@@ -1,13 +1,4 @@
 
-
-DEFINE event video {
-  title
-  description
-}
-
-LISTEN TO public VIA http FOR videos
-
-ON EACH video DO
-  PRINT "Got a request!"
-  PRINT video.title
-END
+PRINT 5 + 5 / 2
+PRINT 5 / 2 + 5
+PRINT (5 + 5) / 2
