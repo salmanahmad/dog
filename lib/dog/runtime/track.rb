@@ -84,6 +84,7 @@ module Dog
       pointer = self.stack
       
       for item in path do
+        item = item.to_s
         
         if pointer.respond_to?(:has_key?) && pointer.has_key?(item) then
           pointer = pointer[item]
@@ -113,11 +114,12 @@ module Dog
       return if last.nil?
       
       for index in path do
+        index = index.to_s
         stack[index] ||= {}
         stack = stack[index]
       end
       
-      stack[last] = value
+      stack[last.to_s] = value
     end
     
     def read_stack(path)
@@ -126,6 +128,7 @@ module Dog
       
       begin
         for index in path do
+          index = index.to_s
           stack = stack[index]
         end
         

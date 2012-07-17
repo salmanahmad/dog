@@ -19,6 +19,7 @@ class ParserTests::AccessTest < Test::Unit::TestCase
   def test_simple
     @parser.parse("foo['bar' + 6]")
     @parser.parse("foo['bar' + 6]['foo']['bar']")
+    @parser.parse("foo[6]")
   end
   
   

@@ -324,7 +324,7 @@ module Dog::Nodes
             end            
           else
             if item.kind_of? ::Dog::Value then
-              
+              # TODO - I should box string and numeric keys...right?
             else
               
             end
