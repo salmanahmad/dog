@@ -358,6 +358,10 @@ module Dog::Nodes
     attribute :statements
   end
   
+  class Import < Node
+    attribute :path
+  end
+  
   class Perform < Node
     
   end

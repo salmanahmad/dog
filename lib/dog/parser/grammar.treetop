@@ -890,7 +890,14 @@ grammar Dog
   
   # TODO
   rule import
-    'IMPORT'
+    'IMPORT' s string {
+      def compile
+        node = ::Dog::Nodes::Import.new
+        node.line = self.line
+        node.path = Shellwords::shellwords(string.text_value).first
+        return node
+      end
+    }
   end
   
   rule print
