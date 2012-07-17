@@ -44,10 +44,6 @@ module Dog
     attr_accessor :has_listen
     attr_accessor :listen_argument
     
-    # TODO - Think about adding back references when we
-    # decide on the object model for the language
-    #attr_accessor :references
-    
     def initialize(name = nil)
       
       if name then
@@ -86,6 +82,36 @@ module Dog
       
       return true
     end
+    
+    def write_stack(path, value)
+      path = path.clone
+      last = path.pop
+      stack = self.stack
+      
+      return if last.nil?
+      
+      for index in path do
+        stack[index] ||= {}
+        stack = stack[index]
+      end
+      
+      stack[last] = value
+    end
+    
+    def read_stack(path)
+      path = path.clone
+      stack = self.stack
+      
+      begin
+        for index in path do
+          stack = stack[index]
+        end
+        return stack
+      rescue
+        return nil
+      end
+    end
+    
     
     def finish
       if self.has_listen then
@@ -170,47 +196,6 @@ module Dog
       end
       
       return root
-    end
-    
-    def continue
-      # TODO - check for state first
-      
-      called_track = nil
-      
-      while self.current_node_path do
-         node = Runtime.node_at_path_for_filename(self.current_node_path, self.function_filename)
-         
-         # TODO - Really consider fixing this... it is gross
-         
-         node_path = node.visit(self)
-         
-         if node_path.class == Track then
-           called_track = node_path
-           break
-         else
-          self.current_node_path = node_path
-         end
-      end
-      
-      self.save
-      
-      if self.state == STATE::FINISHED || self.state == STATE::LISTENING
-        # I'm done!...
-        parent_track = Track.find_by_id(self.control_ancestors.last)
-        
-        if parent_track then
-          parent_current_node = Runtime.node_at_path_for_filename(parent_track.current_node_path, parent_track.function_filename)
-          parent_current_node.write_stack(parent_track, self.return_value)
-        
-          parent_track.current_node_path = parent_current_node.parent.path
-          parent_track.state = STATE::RUNNING
-          parent_track.continue
-        end
-      end
-      
-      if called_track then
-        called_track.continue 
-      end
     end
     
   end
