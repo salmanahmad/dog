@@ -1,8 +1,18 @@
 
-PRINT 5 + 5 / 2
-PRINT 5 / 2 + 5
-PRINT (5 + 5) / 2
+hash = {
+  a = 7
+  
+  
+  
+  
+  
+  
+  0.0001 = "Hello, World!"
+}
 
-i = 7
-
-PRINT i
+PRINT hash
+INSPECT hash.a
+INSPECT hash["a"]
+INSPECT hash[0]
+INSPECT hash[0.0001]
+INSPECT hash[0.0001000]

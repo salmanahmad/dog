@@ -337,7 +337,7 @@ module Dog::Nodes
                   raise
                 end
               else
-                value = value.value["s:#{item.value}"]
+                value = value.value["s:#{item}"]
               end
             rescue
               raise "I could not find attribute #{item} inside of the value #{value} on line #{self.line}."
@@ -345,6 +345,9 @@ module Dog::Nodes
             
           end  
         end
+        
+        # This is an edge case in case the value was not found at all
+        value = ::Dog::Value.null_value if value.nil? 
         
         track.write_stack(self.path, value)
         track.should_visit(self.parent)
@@ -421,7 +424,7 @@ module Dog::Nodes
                 raise
               end
             else
-              value = value.value["s:#{item.value}"]
+              value = value.value["s:#{item}"]
             end
           rescue
             raise "I could not perform the assignment on line: #{self.line}"
@@ -617,6 +620,36 @@ module Dog::Nodes
   
   class StructureLiteral < LiteralNode
     attribute :type
+    
+    def visit(track)
+      
+      for item in value do
+        unless track.has_visited? item.last then
+          track.should_visit(item.last)
+          return
+        end
+      end
+      
+      # TODO - Handle structure types
+      
+      dog_value = ::Dog::Value.new("structure", {})
+      
+      for item in value do
+        k = item.first
+        v = item.last
+        
+        if k.kind_of? Numeric then
+          k = "n:#{k}"
+        else
+          k = "s:#{k}"
+        end
+        
+        dog_value.value[k] = track.read_stack(v.path)
+      end
+      
+      track.write_stack(self.path, dog_value)
+      track.should_visit(self.parent)
+    end
   end
   
   class StringLiteral < LiteralNode

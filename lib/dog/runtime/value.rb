@@ -18,17 +18,44 @@ module Dog
       self.value = value
     end
     
+    def self.primitive_types
+      ["string", "number", "boolean", "null"]
+    end
+    
     def to_hash
-      return {
-        "type" => self.type,
-        "value" => self.value
-      }
+      if Value.primitive_types.include? self.type then
+        return {
+          "type" => self.type,
+          "value" => self.value
+        }
+      else
+        processed_value = {}
+        for k, v in self.value do
+          processed_value[k] = v.to_hash
+        end
+        
+        return {
+          "type" => self.type,
+          "value" => processed_value
+        }
+      end
     end
     
     def self.from_hash(hash)
       value = Value.new
       value.type = hash["type"]
       value.value = hash["value"]
+      
+      unless Value.primitive_types.include? value.type then
+        real_value = {}
+        
+        for k, v in value.value do
+          real_value[k] = Value.from_hash(v)
+        end
+        
+        value.value = real_value
+      end
+      
       return value
     end
     
