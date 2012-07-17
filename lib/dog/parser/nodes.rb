@@ -16,7 +16,10 @@ module Dog::Nodes
       else
         return nil
       end
-      
+    end
+    
+    def line
+      1 + self.input.slice(0, self.interval.begin).count("\n")
     end
   end
   
@@ -30,14 +33,17 @@ module Dog::Nodes
       @attributes.concat vars
       self.attr_accessor(*vars)
     end
-
+    
     def self.attributes
       (superclass.attributes || [] rescue []) | (@attributes || [])
     end
-
+    
     def attributes
       self.class.attributes
     end
+    
+    attr_accessor :line
+    attr_accessor :filename
     
     attr_accessor :path
     attr_accessor :parent
@@ -160,7 +166,9 @@ module Dog::Nodes
       # inconjunction with to_json to produce to persist the bite code to disk.
       hash = {
         "class" => self.class.name,
-        "path" => self.path
+        "path" => self.path,
+        "line" => self.line,
+        "filename" => self.filename
       }
       
       for attribute in self.attributes do
@@ -227,6 +235,8 @@ module Dog::Nodes
       
       node = klass.new
       node.path = hash["path"]
+      node.line = hash["line"]
+      node.filename = hash["filename"]
       
       for key, value in hash to
         if self.attributes.include? key.intern then

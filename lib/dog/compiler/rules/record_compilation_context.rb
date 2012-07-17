@@ -19,7 +19,6 @@ module Dog::Rules
     
     def apply(node)
       node.filename = self.compiler.current_filename
-      node.line = 1 + node.input.slice(0, node.interval.begin).count("\n")
     end
     
   end 
