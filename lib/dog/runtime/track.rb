@@ -80,6 +80,25 @@ module Dog
       end
     end
     
+    def read_variable(name)
+      value = self.variables[name]
+      if value.nil? then
+        return ::Dog::Value.null_value
+      else
+        return ::Dog::Value.from_hash(value)
+      end
+    end
+    
+    def write_variable(name, value)
+      if value.class != ::Dog::Value then
+        raise "You cannot save a non-Value object to a local variable"
+      end
+      
+      value = value.to_hash
+      self.variables[name] = value
+    end
+    
+    
     def has_stack_path(path)
       pointer = self.stack
       

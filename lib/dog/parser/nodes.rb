@@ -320,14 +320,29 @@ module Dog::Nodes
             if item.kind_of? ::Dog::Value then
               value = item
             else
-              value = track.variables[item]
+              value = track.read_variable(item)
             end            
           else
-            if item.kind_of? ::Dog::Value then
-              # TODO - I should box string and numeric keys...right?
-            else
-              
+            if value.nil? || value.type == "null" then
+              raise "Null pointer excep --- Just kidding. I just couldn't resolve the attribute #{item} on line #{self.line}."
             end
+            
+            begin
+              if item.kind_of? ::Dog::Value then
+                if item.type == "number" then
+                  value = value.value["n:#{item.value}"]
+                elsif item.type == "string" then
+                  value = value.value["s:#{item.value}"]
+                else
+                  raise
+                end
+              else
+                value = value.value["s:#{item.value}"]
+              end
+            rescue
+              raise "I could not find attribute #{item} inside of the value #{value} on line #{self.line}."
+            end
+            
           end  
         end
         
@@ -343,6 +358,86 @@ module Dog::Nodes
   class Assignment < Node
     attribute :expression
     attribute :sequence
+    
+    def visit(track)
+      
+      expression_value = ::Dog::Value.null_value
+      sequence_value = []
+      
+      if self.expression then
+        unless track.has_visited?(self.expression) then
+          track.should_visit(self.expression)
+          return
+        end
+        
+        expression_value = track.read_stack(self.expression.path)
+      end
+      
+      if self.sequence then
+        for item in self.sequence do
+          if item.kind_of? Node then
+            unless track.has_visited? item then
+              track.should_visit(item)
+              return
+            end
+          end
+        end
+        
+        sequence_value = []
+        for item in self.sequence do
+          if item.kind_of? Node then
+            result = track.read_stack(item.path)
+            sequence_value << result
+          else
+            sequence_value << item
+          end
+        end
+      end
+      
+      first = true
+      pointer = nil
+      variable = nil
+      
+      for item in sequence_value do
+        if first then
+          first = false
+          
+          if item.kind_of? ::Dog::Value then
+            raise "Void assignment expression"
+          else
+            variable = track.read_variable(item)
+            pointer = variable
+          end
+          
+        else
+          
+          begin
+            if item.kind_of? ::Dog::Value then
+              if item.type == "number" then
+                value = value.value["n:#{item.value}"]
+              elsif item.type == "string" then
+                value = value.value["s:#{item.value}"]
+              else
+                raise
+              end
+            else
+              value = value.value["s:#{item.value}"]
+            end
+          rescue
+            raise "I could not perform the assignment on line: #{self.line}"
+          end
+          
+        end
+      end
+      
+      pointer.type = expression_value.type
+      pointer.value = expression_value.value
+      
+      track.write_variable(sequence_value.first, variable)
+      
+      track.write_stack(self.path, expression_value)
+      track.should_visit(self.parent)
+    end
   end
   
   class FunctionDefinition < Node
