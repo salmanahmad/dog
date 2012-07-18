@@ -540,6 +540,11 @@ module Dog::Nodes
     attribute :variable
     attribute :collection
     attribute :body
+    
+    def visit(track)
+      
+    end
+    
   end
   
   class FunctionCall < Node
@@ -786,6 +791,23 @@ module Dog::Nodes
   
   class Return < Node
     attribute :expression
+    
+    def visit(track)
+      return_value = ::Dog::Value.null_value
+      
+      if self.expression then
+        unless track.has_visited?(self.expression) then
+          track.should_visit(self.expression)
+          return
+        end
+        
+        return_value = track.read_stack(self.expression.path)
+      end
+      
+      track.write_return_value(return_value)
+      track.finish
+      return
+    end
   end
   
   class Print < Node

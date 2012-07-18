@@ -38,12 +38,10 @@
 #COMPUTE foo
 
 
-i = 0
-x = 0
-
-WHILE i < 1000 DO
-  x = x + 1
-  i = i + 1
+DEFINE foo DO
+  RETURN 5 + 5
 END
+
+x = COMPUTE foo
 
 PRINT x

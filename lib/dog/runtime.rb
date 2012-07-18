@@ -7,7 +7,6 @@
 # above copyright notice is included.
 #
 
-
 require 'digest/sha1'
 require 'set'
 
