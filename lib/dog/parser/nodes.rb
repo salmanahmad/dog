@@ -509,6 +509,30 @@ module Dog::Nodes
     attribute :mandatory_arguments
     attribute :optional_arguments
     attribute :body
+    
+    def visit(track)
+      if track.function_name != self.name then
+        track.write_stack(self.path, ::Dog::Value.null_value)
+        track.should_visit(self.parent)
+        return
+      else
+        if self.body.nil? then
+          track.finish
+          track.write_return_value(::Dog::Value.null_value)
+          return
+        end
+        
+        if track.has_visited? self.body then
+          track.finish
+          track.write_return_value(track.read_stack(self.body.path))
+          return
+        else
+          track.should_visit(self.body)
+          return
+        end
+      end
+    end
+    
   end
   
   class OnEachDefinition < Node
@@ -522,6 +546,21 @@ module Dog::Nodes
     attribute :function_name
     attribute :mandatory_arguments
     attribute :optional_arguments
+    
+    def visit(track)
+      # TODO - I need to save here so that I can get the track.id. I may want to
+      # optimize this in the future so that I can reduce the overhead of a function
+      # call
+      
+      track.save
+      
+      function = ::Dog::Track.new(self.function_name)
+      function.control_ancestors = track.control_ancestors.clone
+      function.control_ancestors.push(track.id)
+      
+      track.state = ::Dog::Track::STATE::CALLING
+      return function
+    end
   end
   
   class FunctionAsyncCall < Node

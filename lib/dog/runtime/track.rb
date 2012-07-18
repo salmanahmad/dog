@@ -28,9 +28,6 @@ module Dog
     attr_accessor :function_filename
     attr_accessor :current_node_path
     
-    attr_accessor :mandatory_arguments
-    attr_accessor :optional_arguments
-    
     attr_accessor :access_ancestors
     attr_accessor :control_ancestors
     
@@ -78,6 +75,25 @@ module Dog
       else
         finish
       end
+    end
+    
+    def read_return_value
+      value = self.return_value
+      
+      if value.nil? then
+        return ::Dog::Value.null_value
+      else
+        return ::Dog::Value.from_hash(value)
+      end
+    end
+    
+    def write_return_value(value)
+      if value.class != ::Dog::Value then
+        raise "You cannot save a non-Value object to a local variable"
+      end
+      
+      value = value.to_hash
+      self.return_value = value
     end
     
     def read_variable(name)
@@ -186,8 +202,6 @@ module Dog
         "function_name" => self.function_name,
         "function_filename" => self.function_filename,
         "current_node_path" => self.current_node_path,
-        "mandatory_arguments" => self.mandatory_arguments,
-        "optional_arguments" => self.optional_arguments,
         "access_ancestors" => self.access_ancestors,
         "control_ancestors" => self.control_ancestors,
         "state" => self.state,

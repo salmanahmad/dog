@@ -96,7 +96,7 @@ module Dog
         Track.initialize_root("root", bite_code["main_filename"])
         
         tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
-                
+        
         for track in tracks do
           track = Track.from_hash(track)
           run_track(track)
@@ -120,6 +120,8 @@ module Dog
         
         next_track = nil
         
+        return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
+        
         loop do
           node = Runtime.node_at_path_for_filename(track.current_node_path, track.function_filename)
           next_track = node.visit(track)
@@ -128,15 +130,17 @@ module Dog
           
           if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
             parent_track = Track.find_by_id(track.control_ancestors.last)
-        
-            if parent_track then
+            
+            if parent_track && !(parent_track.state == Track::STATE::FINISHED || parent_track.state == Track::STATE::LISTENING) then
+              
               parent_current_node = Runtime.node_at_path_for_filename(parent_track.current_node_path, parent_track.function_filename)
-              parent_track.write_stack(parent_current_node, track.return_value)
+              parent_track.write_stack(parent_current_node.path, track.read_return_value)
               
               parent_track.current_node_path = parent_current_node.parent.path
               parent_track.state = Track::STATE::RUNNING
               
               run_track(parent_track)
+              return
             else
               break
             end
@@ -144,8 +148,9 @@ module Dog
           
           if next_track && next_track.class == Track then
             run_track(next_track)
+            return
           end
-        end
+        end        
         
         for t in self.save_set do
           t.save

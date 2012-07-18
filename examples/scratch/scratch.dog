@@ -1,31 +1,49 @@
 
 
-hash = {
-  a = 7
-  b = 5
-  c = 8
-}
+#hash = {
+#  a = 7
+#  b = 5
+#  c = 8
+#}
+#
+#hash["foobars"] = "Monkies!"
+#
+#hash.dudes = "Hula!"
+#
+#i = "hi"
+#
+#IF i != "hi" THEN
+#  #PRINT "Hiyo!!!"
+#ELSE
+#  #PRINT "MOnkies"
+#END
+#
+#FOR EACH i IN hash DO
+#  IF i == 7 THEN
+#    #PRINT "Hello?"
+#    BREAK
+#   # PRINT "Break?"
+#  END
+#  #PRINT i
+#END
+#
+#
+##PRINT "Here!"
 
-hash["foobars"] = "Monkies!"
 
-hash.dudes = "Hula!"
+#DEFINE foo DO
+#  PRINT "Hello From Foo!"
+#END
+#
+#COMPUTE foo
 
-i = "hi"
 
-IF i != "hi" THEN
-  PRINT "Hiyo!!!"
-ELSE
-  PRINT "MOnkies"
+i = 0
+x = 0
+
+WHILE i < 1000 DO
+  x = x + 1
+  i = i + 1
 END
 
-FOR EACH i IN hash DO
-  IF i == 7 THEN
-    PRINT "Hello?"
-    BREAK
-    PRINT "Break?"
-  END
-  PRINT i
-END
-
-
-PRINT "Here!"
+PRINT x
