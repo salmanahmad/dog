@@ -361,8 +361,8 @@ module Dog
 
           if id.match(/^handler:(.*)/) then
 
-            track = ::Dog::Track.find_by_id(id.match(/^handler:(.*)/)[1])
-
+            parsed_id = id.match(/^handler:(.*)/)[1]
+            track = ::Dog::Track.find_by_id(parsed_id)
             stream["self"] = track.to_hash_for_stream
             stream["items"] = fetch_stream_items_for_track( track )
 
@@ -377,8 +377,8 @@ module Dog
 
               if handler then
                 items = ::Dog::Track.find({"function_name" => handler})
-                items.each do |track|
-                  stream["items"] << track.to_hash_for_stream
+                items.each do |item|
+                  stream["items"] << Track.from_hash(item).to_hash_for_stream
                 end
               end
             end

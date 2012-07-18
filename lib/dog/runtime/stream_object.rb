@@ -52,8 +52,7 @@ module Dog
       return {
         "track_id" => self.track_id,
         "type" => self.type.name,
-        # FIXME HACK -- compatibility with future API
-        "name" => [ self.name ],
+        "name" => self.name,
         "properties" => ((self.properties || []).map { |property|
           property.to_hash
         }),
@@ -80,8 +79,9 @@ module Dog
         raise 'Invalid StreamObject type: ' + self.type.name
       end
       # FIXME HACK -- remove this once the name is pluralized properly on backend
+      hash["name"] = [ hash["name"] ]
       if hash["type"] == 'listen'
-        hash["name"] = Helper::pluralize hash["name"]
+        hash["name"][-1] = Helper::pluralize( hash["name"][-1] )
       end
       return hash
     end
