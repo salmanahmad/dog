@@ -726,7 +726,23 @@ module Dog::Nodes
   end
   
   class Break < Node
-    
+    def visit(track)
+      
+      pointer = self
+      
+      while pointer = pointer.parent do
+        if pointer.class == While || pointer.class == For then
+          track.write_stack(self.path, ::Dog::Value.null_value)
+          track.should_visit(pointer.parent)
+          return
+        end
+      end
+      
+      # Ignore the break statement
+      track.write_stack(self.path, ::Dog::Value.null_value)
+      track.should_visit(self.parent)
+      return
+    end
   end
   
   class Return < Node

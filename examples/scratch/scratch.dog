@@ -10,6 +10,22 @@ hash["foobars"] = "Monkies!"
 
 hash.dudes = "Hula!"
 
+i = "hi"
+
+IF i != "hi" THEN
+  PRINT "Hiyo!!!"
+ELSE
+  PRINT "MOnkies"
+END
+
 FOR EACH i IN hash DO
+  IF i == 7 THEN
+    PRINT "Hello?"
+    BREAK
+    PRINT "Break?"
+  END
   PRINT i
 END
+
+
+PRINT "Here!"
