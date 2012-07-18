@@ -443,21 +443,6 @@ module Dog::Nodes
     end
   end
   
-  class FunctionDefinition < Node
-    attribute :name
-    attribute :target
-    attribute :mandatory_arguments
-    attribute :optional_arguments
-    attribute :body
-  end
-  
-  class OnEachDefinition < Node
-    attribute :name
-    attribute :variable
-    attribute :collection
-    attribute :body
-  end
-  
   class OperatorInfixCall < Node
     attribute :operator
     attribute :arg1
@@ -507,6 +492,21 @@ module Dog::Nodes
   class OperatorPrefixCall < Node
     attribute :operator
     attribute :arg
+  end
+  
+  class FunctionDefinition < Node
+    attribute :name
+    attribute :target
+    attribute :mandatory_arguments
+    attribute :optional_arguments
+    attribute :body
+  end
+  
+  class OnEachDefinition < Node
+    attribute :name
+    attribute :variable
+    attribute :collection
+    attribute :body
   end
   
   class FunctionCall < Node
