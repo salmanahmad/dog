@@ -1,47 +1,51 @@
 
 
-#hash = {
-#  a = 7
-#  b = 5
-#  c = 8
-#}
-#
-#hash["foobars"] = "Monkies!"
-#
-#hash.dudes = "Hula!"
-#
-#i = "hi"
-#
-#IF i != "hi" THEN
-#  #PRINT "Hiyo!!!"
-#ELSE
-#  #PRINT "MOnkies"
-#END
-#
-#FOR EACH i IN hash DO
-#  IF i == 7 THEN
-#    #PRINT "Hello?"
-#    BREAK
-#   # PRINT "Break?"
-#  END
-#  #PRINT i
-#END
-#
-#
-##PRINT "Here!"
+hash = {
+  a = 7
+  b = 5
+  c = 8
+}
+
+hash["foobars"] = "Monkies!"
+
+hash.dudes = "Hula!"
+
+PRINT hash.dudes
+
+i = "hi"
+
+IF i != "hi" THEN
+  #PRINT "Hiyo!!!"
+ELSE
+  #PRINT "MOnkies"
+END
+
+FOR EACH i IN hash DO
+  IF i == 7 THEN
+    #PRINT "Hello?"
+    BREAK
+   # PRINT "Break?"
+  END
+  #PRINT i
+END
 
 
-#DEFINE foo DO
-#  PRINT "Hello From Foo!"
-#END
-#
-#COMPUTE foo
+#PRINT "Here!"
 
 
 DEFINE foo DO
+  PRINT "Hello From Foo!"
+END
+
+COMPUTE foo
+
+
+DEFINE bars ON arg USING ops = "Hi" DO
+  PRINT arg
+  PRINT ops
   RETURN 5 + 5
 END
 
-x = COMPUTE foo
+x = COMPUTE bars ON "Hello, World!" USING ops = "monkiesdafasdfa"
 
 PRINT x

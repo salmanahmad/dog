@@ -527,6 +527,66 @@ module Dog::Nodes
           track.write_return_value(track.read_stack(self.body.path))
           return
         else
+          
+          state = track.read_stack(self.path.clone << "@state")
+          
+          if state.nil? then
+            if self.mandatory_arguments then
+              self.mandatory_arguments.each_index do |index|
+                arg = mandatory_arguments[index]
+                value = nil
+              
+                if track.mandatory_arguments.kind_of? Array then
+                  value = track.mandatory_arguments[index]
+                else
+                  value = track.mandatory_arguments[arg]
+                end
+              
+                if value.nil? then
+                  raise "Error: Did not recieve a mandatory argument on line: #{self.line}"
+                end
+                
+                value = ::Dog::Value.from_hash(value)
+                track.write_variable(arg, value);
+              end
+            end
+            
+            state = ::Dog::Value.string_value("mandatory_arguments")
+            track.write_stack(self.path.clone << "@state", state)
+          end
+          
+          if state.value == "mandatory_arguments" then
+            if self.optional_arguments then
+              for key, value in track.optional_arguments do
+                if self.optional_arguments.include? key then
+                  value = ::Dog::Value.from_hash(value)
+                  track.write_variable(key, value);
+                end
+              end
+            end
+            
+            state = ::Dog::Value.string_value("used_passed_optional_arguments")
+            track.write_stack(self.path.clone << "@state", state)
+          end
+          
+          if state.value == "used_passed_optional_arguments" then
+            if self.optional_arguments then
+              for key, value in self.optional_arguments do
+                if track.variables[key].nil? then
+                  unless track.has_visited? value then
+                    track.should_visit(value)
+                    return
+                  else
+                    track.write_variable(key, track.read_stack(value.path))
+                  end
+                end
+              end
+            end
+            
+            state = ::Dog::Value.string_value("done")
+            track.write_stack(self.path.clone << "@state", state)
+          end
+          
           track.should_visit(self.body)
           return
         end
@@ -553,15 +613,59 @@ module Dog::Nodes
     attribute :optional_arguments
     
     def visit(track)
-      # TODO - I need to save here so that I can get the track.id. I may want to
-      # optimize this in the future so that I can reduce the overhead of a function
-      # call
       
+      passed_mandatory_arguments = {}
+      
+      if self.mandatory_arguments then
+        
+        if self.mandatory_arguments.kind_of? Array then
+          passed_mandatory_arguments = []
+          
+          for arg in self.mandatory_arguments do
+            unless track.has_visited? arg then
+              track.should_visit(arg)
+              return
+            end
+            
+            passed_mandatory_arguments << track.read_stack(arg.path).to_hash
+          end
+        else
+          passed_mandatory_arguments = {}
+          
+          for key, arg in self.mandatory_arguments do
+            unless track.has_visited? arg then
+              track.should_visit(arg)
+              return
+            end
+            
+            passed_mandatory_arguments[key] = track.read_stack(arg.path).to_hash
+          end
+        end
+      end
+      
+      passed_optional_arguments = {}
+      
+      if self.optional_arguments then
+        for key, arg in self.optional_arguments do
+          unless track.has_visited? arg then
+            track.should_visit(arg)
+            return
+          end
+          
+          passed_optional_arguments[key] = track.read_stack(arg.path).to_hash
+        end
+      end
+      
+      # TODO - I need to save here so that I can get the track.id. I may want to
+      # optimize this in the future so that I can reduce the overhead of a function call
       track.save
       
       function = ::Dog::Track.new(self.function_name)
       function.control_ancestors = track.control_ancestors.clone
       function.control_ancestors.push(track.id)
+      
+      function.mandatory_arguments = passed_mandatory_arguments
+      function.optional_arguments = passed_optional_arguments
       
       track.state = ::Dog::Track::STATE::CALLING
       return function
