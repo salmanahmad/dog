@@ -1,28 +1,15 @@
 
 
-a = "Hi"
-b = a + " " + "World!" + " Monkies"
+hash = {
+  a = 7
+  b = 5
+  c = 8
+}
 
-PRINT b
+hash["foobars"] = "Monkies!"
 
-b = a == "Hi"
+hash.dudes = "Hula!"
 
-PRINT b
-
-b = false
-
-IF 12 == 14 THEN
-  PRINT "HERE"
-ELSE
-  PRINT "NO HERE"
+FOR EACH i IN hash DO
+  PRINT i
 END
-
-i = 0
-z = WHILE i < 5 DO
-  PRINT "Loop"
-  i = i + 1
-  i + 10
-END
-
-PRINT z
-

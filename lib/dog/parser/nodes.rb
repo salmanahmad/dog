@@ -413,20 +413,29 @@ module Dog::Nodes
           end
           
         else
-          
+                    
           begin
+            path = ""
+            
             if item.kind_of? ::Dog::Value then
               if item.type == "number" then
-                value = value.value["n:#{item.value}"]
+                path = "n:#{item.value}"
               elsif item.type == "string" then
-                value = value.value["s:#{item.value}"]
+                path = "s:#{item.value}"
               else
                 raise
               end
             else
-              value = value.value["s:#{item}"]
+              path = "s:#{item}"
             end
-          rescue
+            
+            unless pointer.primitive?
+              pointer.value[path] ||= ::Dog::Value.null_value
+            end
+              
+            pointer = pointer.value[path]
+          rescue Exception => e
+            raise e
             raise "I could not perform the assignment on line: #{self.line}"
           end
           
@@ -667,6 +676,45 @@ module Dog::Nodes
     attribute :variable
     attribute :collection
     attribute :statements
+    
+    def visit(track)
+      # TODO - The for loop should pass the key as well as the value to the block.
+      # This will involve us de-serializing the "n:..." and "s:..." syntax.
+      
+      unless track.has_visited? self.collection then
+        track.should_visit(self.collection)
+        return
+      end
+      
+      collection = track.read_stack(self.collection.path)
+      
+      if collection.primitive? then
+        raise "You cannot iterate over a non-collection. Line: #{self.line}"
+      end
+      
+      index = track.read_stack(self.path.clone << "@index")
+      index = ::Dog::Value.number_value(0) if index == nil
+      
+      keys = collection.value.keys
+      
+      if index.value == keys.length then
+        track.write_stack(self.path, track.read_stack(self.statements.path))
+        track.should_visit(self.parent)
+        return
+      else
+        key = keys[index.value]
+        value = collection.value[key]
+        
+        index.value += 1
+        track.write_stack(self.path.clone << "@index", index)
+        
+        track.write_variable(self.variable, value)
+        track.clear_stack(self.statements.path)
+        track.should_visit(self.statements)
+      end
+      
+    end
+    
   end
   
   class Import < Node
