@@ -141,6 +141,22 @@ module Dog
       stack[last.to_s] = value
     end
     
+    def clear_stack(path)
+      path = path.clone
+      last = path.pop
+      stack = self.stack
+      
+      return if last.nil?
+      
+      for index in path do
+        index = index.to_s
+        stack[index] ||= {}
+        stack = stack[index]
+      end
+      
+      stack[last.to_s] = nil
+    end
+    
     def read_stack(path)
       path = path.clone
       stack = self.stack
@@ -156,7 +172,6 @@ module Dog
         return nil
       end
     end
-    
     
     def finish
       if self.has_listen then

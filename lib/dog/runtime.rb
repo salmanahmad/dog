@@ -96,12 +96,12 @@ module Dog
         Track.initialize_root("root", bite_code["main_filename"])
         
         tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
-        
+                
         for track in tracks do
           track = Track.from_hash(track)
           run_track(track)
         end
-        
+                
         tracks = Track.find({"state" => { 
           "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING]
           }

@@ -59,6 +59,10 @@ module Dog
       return value
     end
     
+    def primitive?
+      Value.primitive_types.include? self.type
+    end
+    
     def self.string_value(string)
       value = Value.new
       value.type = "string"

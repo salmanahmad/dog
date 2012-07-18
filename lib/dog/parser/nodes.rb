@@ -461,7 +461,7 @@ module Dog::Nodes
   class OperatorInfixCall < Node
     attribute :operator
     attribute :arg1
-    attribute :arg2
+    attribute :arg2  
     
     def visit(track)
       
@@ -475,12 +475,31 @@ module Dog::Nodes
         return
       end
       
-      arg1_value = track.read_stack(self.arg1.path).value
-      arg2_value = track.read_stack(self.arg2.path).value
+      arg1_value = track.read_stack(self.arg1.path)
+      arg2_value = track.read_stack(self.arg2.path)
       
-      result = arg1_value.send(self.operator.intern, arg2_value)
+      result = nil
       
-      track.write_stack(self.path, ::Dog::Value.new("number", result))
+      if arg1_value.primitive? && arg2_value.primitive? then
+        begin
+          result = arg1_value.value.send(self.operator.intern, arg2_value.value)
+          if result.kind_of? String then
+            result = ::Dog::Value.string_value(result)
+          elsif result.kind_of? Numeric then
+            result = ::Dog::Value.number_value(result)
+          elsif result.kind_of? TrueClass
+            result = ::Dog::Value.true_value
+          elsif result.kind_of? FalseClass then
+            result = ::Dog::Value.false_value
+          else
+            result = ::Dog::Value.null_value
+          end
+        rescue
+          result = ::Dog::Value.null_value
+        end
+      end
+      
+      track.write_stack(self.path, result)
       track.should_visit(self.parent)
     end
   end
@@ -540,11 +559,108 @@ module Dog::Nodes
   
   class If < Node
     attribute :conditions
+    
+    def visit(track)
+      for condition in self.conditions do
+        if condition.first then
+          # if or else if
+          if track.has_visited?(condition.first) then
+            value = track.read_stack(condition.first.path)
+            
+            unless value.type == "null" || (value.type == "boolean" && value.value == false) then
+              if condition.last then
+                if track.has_visited?(condition.last) then
+                  value = track.read_stack(condition.last.path)
+                  track.write_stack(self.path, value)
+                  track.should_visit(self.parent)
+                  return
+                else
+                  track.should_visit(condition.last)
+                  return
+                end
+              else
+                track.write_stack(self.path, ::Dog::Value.null_value)
+                track.should_visit(self.parent)
+                return
+              end
+            end
+          else
+            track.should_visit(condition.first)
+            return            
+          end
+        else
+          # else statement
+          if condition.last then
+            if track.has_visited?(condition.last) then
+              value = track.read_stack(condition.last.path)
+              track.write_stack(self.path, value)
+              track.should_visit(self.parent)
+              return
+            else
+              track.should_visit(condition.last)
+              return
+            end
+          else
+            track.write_stack(self.path, ::Dog::Value.null_value)
+            track.should_visit(self.parent)
+            return
+          end
+        end
+      end
+    end
   end
   
   class While < Node
     attribute :condition
     attribute :statements
+    
+    def visit(track)
+      
+      
+      state = track.read_stack(self.path.clone << "@state")
+            
+      if state == nil then
+        # Never visited here before. Going to evaluate the condition
+        track.write_stack(self.path.clone << "@state", ::Dog::Value.string_value("condition"))
+        
+        track.should_visit(self.condition)
+        return
+      elsif state.value == "condition"
+        value = track.read_stack(self.condition.path)
+        
+        unless value.type == "null" || (value.type == "boolean" && value.value == false) then
+          track.write_stack(self.path.clone << "@state", ::Dog::Value.string_value("statements"))
+
+          track.should_visit(self.statements)
+          return
+        else
+          track.write_stack(self.path, ::Dog::Value.null_value)
+          track.should_visit(self.parent)
+          return
+        end
+      elsif state.value == "statements"
+        track.write_stack(self.path.clone << "@state", ::Dog::Value.string_value("condition2"))
+        
+        track.clear_stack(self.condition.path)
+        track.should_visit(self.condition)
+        return
+      elsif state.value == "condition2"
+        value = track.read_stack(self.condition.path)
+        
+        unless value.type == "null" || (value.type == "boolean" && value.value == false) then
+          track.write_stack(self.path.clone << "@state", ::Dog::Value.string_value("statements"))
+          
+          track.clear_stack(self.statements.path)
+          track.should_visit(self.statements)
+          return
+        else
+          track.write_stack(self.path, track.read_stack(self.statements.path))
+          track.should_visit(self.parent)
+          return
+        end
+      end
+      
+    end
   end
   
   class For < Node

@@ -1,18 +1,28 @@
 
-hash = {
-  a = 7
-  
-  
-  
-  
-  
-  
-  0.0001 = "Hello, World!"
-}
 
-PRINT hash
-INSPECT hash.a
-INSPECT hash["a"]
-INSPECT hash[0]
-INSPECT hash[0.0001]
-INSPECT hash[0.0001000]
+a = "Hi"
+b = a + " " + "World!" + " Monkies"
+
+PRINT b
+
+b = a == "Hi"
+
+PRINT b
+
+b = false
+
+IF 12 == 14 THEN
+  PRINT "HERE"
+ELSE
+  PRINT "NO HERE"
+END
+
+i = 0
+z = WHILE i < 5 DO
+  PRINT "Loop"
+  i = i + 1
+  i + 10
+END
+
+PRINT z
+
