@@ -34,6 +34,11 @@ END
 
 
 DEFINE foo DO
+  DEFINE bar DO
+    DEFINE baz DO
+  
+    END
+  END
   PRINT "Hello From Foo!"
 END
 

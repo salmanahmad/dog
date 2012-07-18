@@ -157,6 +157,50 @@ module Dog
         
       end
       
+      def symbol_exists?(name = [])
+        name = name.join(".")
+        
+        if name == "" then
+          return true
+        else
+          return self.bite_code["symbols"].include? name
+        end
+      end
+      
+      def symbol_descendants(name = [], depth = 1)
+        descendants = []
+        name = name.join(".")
+        
+        for symbol, path in self.bite_code["symbols"] do
+          if symbol.start_with?(name) then
+            level = symbol[name.length, symbol.length].count(".")
+            
+            if depth == -1 || level <= depth then
+              node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
+              
+              type = nil
+              
+              if node.class == ::Dog::Nodes::FunctionDefinition then
+                type = "function"
+              elsif node.class == ::Dog::Nodes::OnEachDefinition then
+                type = "on_each"
+              elsif node.class == ::Dog::Nodes::StructureDefinition then
+                type = "structure"
+              end
+              
+              if type then
+                descendants << { 
+                  "symbol" => symbol,
+                  "type" => type
+                }
+              end
+            end
+          end
+        end
+        
+        return descendants
+      end
+      
       def node_at_path_for_filename(path, file)
         # TODO - I need to raise an error if the node is not found.
         node = self.bite_code["code"][file]
