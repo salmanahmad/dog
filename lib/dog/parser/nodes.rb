@@ -501,6 +501,24 @@ module Dog::Nodes
   class OperatorPrefixCall < Node
     attribute :operator
     attribute :arg
+    
+    def visit(track)
+      if track.has_visited? self.arg then
+        if self.operator == "NOT" then
+          value = track.read_stack(self.arg.path)
+          if value.type == "null" || (value.type == "boolean" && value.value == false) then
+            track.write_stack(self.path, ::Dog::Value.true_value)
+          else
+            track.write_stack(self.path, ::Dog::Value.false_value)
+          end
+        else
+          raise "Unknown unary operator on line: #{self.line}"
+        end
+      else
+        track.should_visit(self.arg)
+        return
+      end
+    end
   end
   
   class FunctionDefinition < Node
