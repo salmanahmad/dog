@@ -2,6 +2,7 @@ Next steps:
 	Implement unary operator
 	Implement NOTIFY
 	Implement LISTEN
+	Set the filenames properly when calling functions
 
 
 

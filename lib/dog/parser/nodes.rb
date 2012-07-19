@@ -269,7 +269,6 @@ module Dog::Nodes
     attribute :nodes
     
     def visit(track)
-      
       for node in self.nodes do
         unless track.has_visited?(node) then
           track.should_visit(node)
@@ -801,6 +800,58 @@ module Dog::Nodes
     
     def visit(track)
       
+      if self.target then
+        unless track.has_visited?(self.target) then
+          track.should_visit(self.target)
+          return
+        end
+      end
+      
+      structure_type = self.variable_type
+      properties = []
+      
+      if structure_type.nil? then
+        # TODO - Validate this..
+        structure_type = self.variable.chop
+        
+        # TODO - Do I deal with defaults before or after? I guess that I
+        # really should do it after
+        
+        # TOOD - I have to handle the nested and fully qualified names
+        path = ::Dog::Runtime.bite_code["symbols"][structure_type]
+        if path then
+          
+          path = path.clone
+          path.shift
+          
+          node = ::Dog::Runtime.node_at_path_for_filename(path, ::Dog::Runtime.bite_code["main_filename"])
+          for p in node.properties do
+            p2 = ::Dog::Property.new
+            p2.identifier = p.name
+            p2.direction = "input"
+            properties << p2
+          end
+        end
+      end
+      
+      
+      
+      event = ::Dog::RoutedEvent.new
+      event.name = structure_type
+      event.properties = properties
+      event.track_id = track.id
+      event.routing = nil # TODO
+      event.created_at = Time.now.utc
+      event.save
+      
+      track.has_listen = true
+      track.should_visit(self.parent)
+      track.write_stack(self.path, ::Dog::Value.null_value)
+      track.write_variable(self.variable, ::Dog::Value.new("event", {
+        "s:id" => ::Dog::Value.string_value(event.id.to_s)
+      }));
+      
+      return
     end
   end
   

@@ -207,6 +207,7 @@ module Dog
         
         for index in path do
           node = node[index]
+          
         end
         
         return node
