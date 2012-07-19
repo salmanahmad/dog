@@ -13,7 +13,7 @@ class ParserTests::FunctionTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :definition
+    @parser.parser.root = :function_definition
   end
   
   def test_simple
@@ -28,9 +28,31 @@ EOD
     
   end
   
+  
+  
+  def test_nested
+    program = <<-EOD
+DEFINE foo DO 
+  DEFINE bar DO
+    DEFINE bubble DO
+  
+    END
+  END
+  
+  DEFINE baz DO
+  
+  END
+END
+EOD
+    
+    program.strip!
+    @parser.parse(program)
+    
+  end
+  
+  
   def test_on_and_using
     
-    @parser.should_clean_tree = true
     
     program = <<-EOD
 DEFINE function ON input DO 
@@ -57,5 +79,12 @@ EOD
     @parser.parse(program)
     
   end
+  
+  
+  
+  
+  
+  
+  
   
 end

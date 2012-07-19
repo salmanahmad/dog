@@ -44,14 +44,15 @@ module Dog
     attr_accessor :has_listen
     attr_accessor :listen_argument
     
-    # TODO - Think about adding back references when we
-    # decide on the object model for the language
-    #attr_accessor :references
-    
     def initialize(name = nil)
       
       if name then
         path = Runtime.bite_code["symbols"][name]
+        
+        if path.nil? then
+          raise "I could not find a symbol named: #{name}"
+        end
+        
         path = path.clone
         filename = path.shift
         
@@ -71,6 +72,57 @@ module Dog
       self.error_value = nil
     end
     
+    def has_visited?(node)
+      result = has_stack_path(node.path)
+      return result
+    end
+    
+    def should_visit(node)
+      if node then
+        self.current_node_path = node.path
+      else
+        finish
+      end
+    end
+    
+    def read_return_value
+      value = self.return_value
+      
+      if value.nil? then
+        return ::Dog::Value.null_value
+      else
+        return ::Dog::Value.from_hash(value)
+      end
+    end
+    
+    def write_return_value(value)
+      if value.class != ::Dog::Value then
+        raise "You cannot save a non-Value object to a local variable"
+      end
+      
+      value = value.to_hash
+      self.return_value = value
+    end
+    
+    def read_variable(name)
+      value = self.variables[name]
+      if value.nil? then
+        return ::Dog::Value.null_value
+      else
+        return ::Dog::Value.from_hash(value)
+      end
+    end
+    
+    def write_variable(name, value)
+      if value.class != ::Dog::Value then
+        raise "You cannot save a non-Value object to a local variable"
+      end
+      
+      value = value.to_hash
+      self.variables[name] = value
+    end
+    
+    
     def has_stack_path(path)
       pointer = self.stack
       
@@ -85,6 +137,64 @@ module Dog
       end
       
       return true
+    end
+    
+    def write_stack(path, value)
+      # TODO - The leafs of the stack must always be a Value. And a Value
+      # must not appear anywhere but the leafs. I need to ensure that this
+      # is always the case.
+      
+      if value.class != ::Dog::Value then
+        raise "You cannot write a non-Value object to the Dog stack."
+      end
+      
+      value = value.to_hash
+      
+      path = path.clone
+      last = path.pop
+      stack = self.stack
+      
+      return if last.nil?
+      
+      for index in path do
+        index = index.to_s
+        stack[index] ||= {}
+        stack = stack[index]
+      end
+      
+      stack[last.to_s] = value
+    end
+    
+    def clear_stack(path)
+      path = path.clone
+      last = path.pop
+      stack = self.stack
+      
+      return if last.nil?
+      
+      for index in path do
+        index = index.to_s
+        stack[index] ||= {}
+        stack = stack[index]
+      end
+      
+      stack[last.to_s] = nil
+    end
+    
+    def read_stack(path)
+      path = path.clone
+      stack = self.stack
+      
+      begin
+        for index in path do
+          index = index.to_s
+          stack = stack[index]
+        end
+        
+        return ::Dog::Value.from_hash(stack)
+      rescue
+        return nil
+      end
     end
     
     def finish
@@ -179,47 +289,6 @@ module Dog
       end
       
       return root
-    end
-    
-    def continue
-      # TODO - check for state first
-      
-      called_track = nil
-      
-      while self.current_node_path do
-         node = Runtime.node_at_path_for_filename(self.current_node_path, self.function_filename)
-         
-         # TODO - Really consider fixing this... it is gross
-         
-         node_path = node.visit(self)
-         
-         if node_path.class == Track then
-           called_track = node_path
-           break
-         else
-          self.current_node_path = node_path
-         end
-      end
-      
-      self.save
-      
-      if self.state == STATE::FINISHED || self.state == STATE::LISTENING
-        # I'm done!...
-        parent_track = Track.find_by_id(self.control_ancestors.last)
-        
-        if parent_track then
-          parent_current_node = Runtime.node_at_path_for_filename(parent_track.current_node_path, parent_track.function_filename)
-          parent_current_node.write_stack(parent_track, self.return_value)
-        
-          parent_track.current_node_path = parent_current_node.parent.path
-          parent_track.state = STATE::RUNNING
-          parent_track.continue
-        end
-      end
-      
-      if called_track then
-        called_track.continue 
-      end
     end
     
   end

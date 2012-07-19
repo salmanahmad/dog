@@ -34,7 +34,7 @@ class ParserTests::CommentTest < Test::Unit::TestCase
     #comment
     
     i = { 
-      'key':'value' #comment
+      'key'='value' #comment
     }
     i
     EOD

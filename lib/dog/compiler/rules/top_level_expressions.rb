@@ -15,7 +15,7 @@ module Dog::Rules
     
     def applicable_nodes
       [
-        ::Dog::Nodes::Reply,
+        ::Dog::Nodes::Perform,
         ::Dog::Nodes::Return
       ]
     end
@@ -23,7 +23,7 @@ module Dog::Rules
     def apply(node)
       parent = node
       while parent = parent.parent do
-        if [::Dog::Nodes::On, ::Dog::Nodes::DefineFunction].include? parent.class then
+        if [::Dog::Nodes::OnEachDefinition, ::Dog::Nodes::FunctionDefinition].include? parent.class then
           return
         end
       end

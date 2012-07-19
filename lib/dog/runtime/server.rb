@@ -554,30 +554,13 @@ module Dog
           end
         end
         
-        
-        
         # This is very important. Do not remove this or testing will not work
         return self
       end
       
       def run
         Server.initialize
-        
-        tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
-        
-        for track in tracks do
-          track = Track.from_hash(track)
-          track.continue
-        end
-        
-        tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING]
-          }
-        }, :sort => ["created_at", Mongo::DESCENDING])
-        
-        if tracks.count != 0 then
-          Thin::Server.start '0.0.0.0', Config.get('port'), Server
-        end
+        Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
       
     end
