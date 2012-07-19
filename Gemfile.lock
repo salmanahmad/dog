@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dog (0.0.1)
+    dog (0.0.2)
       async_sinatra
       blather
       bson_ext

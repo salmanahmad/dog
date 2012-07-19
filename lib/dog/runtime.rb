@@ -7,8 +7,8 @@
 # above copyright notice is included.
 #
 
-
 require 'digest/sha1'
+require 'set'
 
 require 'thin'
 require 'eventmachine'
@@ -37,21 +37,30 @@ require File.join(File.dirname(__FILE__), 'runtime/property.rb')
 require File.join(File.dirname(__FILE__), 'runtime/server.rb')
 require File.join(File.dirname(__FILE__), 'runtime/task.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track.rb')
+require File.join(File.dirname(__FILE__), 'runtime/value.rb')
 require File.join(File.dirname(__FILE__), 'runtime/variable.rb')
 require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
 
 module Dog
   
+  # TODO - Right now the runtime is modeled as a singleton object.
+  # I may want to move the runtime into an instance-model so that
+  # there can be multiple runtimes per process. I am avoiding that
+  # for the time being because it would require changes to sinatra.
+  
   class Runtime
     class << self
+    
       attr_accessor :bite_code
       attr_accessor :bite_code_filename
-      
+      attr_accessor :save_set
+    
       def run_file(bite_code_filename, options = {})
-        self.run(File.open(bite_code_filename).read, bite_code_filename, options)
+        run(File.open(bite_code_filename).read, bite_code_filename, options)
       end
       
       def run(bite_code, bite_code_filename, options = {})
+        self.save_set = Set.new
         
         options = {
           "config_file" => nil,
@@ -60,14 +69,20 @@ module Dog
         }.merge!(options)
         
         bite_code = JSON.load(bite_code)
-        
+      
         if bite_code["version"] != VERSION::STRING then
           raise "This program was compiled using a different version of Dog. It was compiled with #{bite_code["version"]}. I am Dog version #{VERSION::STRING}."
         end
         
         code = {}
         for filename, ast in bite_code["code"]
-          code[filename] = Nodes::Node.from_hash(ast)
+          # I need the second call here so that I can initialize the parent pointers in the tree. 
+          # I may want to incorporate this into from_hash at some point.
+        
+          ast = Nodes::Node.from_hash(ast)
+          ast.compute_paths_of_descendants
+        
+          code[filename] = ast
         end
         
         bite_code["code"] = code
@@ -78,20 +93,126 @@ module Dog
         Config.initialize(options["config_file"], options["config"])
         Database.initialize(options["database"])
         Track.initialize_root("root", bite_code["main_filename"])
-        Server.run
+        
+        tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
+        
+        for track in tracks do
+          track = Track.from_hash(track)
+          run_track(track)
+        end
+                
+        tracks = Track.find({"state" => { 
+          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING]
+          }
+        }, :sort => ["created_at", Mongo::DESCENDING])
+        
+        if tracks.count != 0 then
+          Server.run
+        end
+      end
+      
+      def run_track(track)
+        # TODO - check for state first
+        # TODO - Right now I have poor support for tail recursion. I may run out of stack space before too long
+        # TODO - When do I queue up the tracks that I should save?
+        # TODO - When do I delete old tracks?
+        
+        next_track = nil
+        
+        return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
+        
+        loop do
+          node = Runtime.node_at_path_for_filename(track.current_node_path, track.function_filename)
+          next_track = node.visit(track)
+          
+          self.save_set.add(track)
+          
+          if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
+            parent_track = Track.find_by_id(track.control_ancestors.last)
+            
+            if parent_track && !(parent_track.state == Track::STATE::FINISHED || parent_track.state == Track::STATE::LISTENING) then
+              
+              parent_current_node = Runtime.node_at_path_for_filename(parent_track.current_node_path, parent_track.function_filename)
+              parent_track.write_stack(parent_current_node.path, track.read_return_value)
+              
+              parent_track.current_node_path = parent_current_node.parent.path
+              parent_track.state = Track::STATE::RUNNING
+              
+              run_track(parent_track)
+              return
+            else
+              break
+            end
+          end
+          
+          if next_track && next_track.class == Track then
+            run_track(next_track)
+            return
+          end
+        end        
+        
+        for t in self.save_set do
+          t.save
+        end
+        
+      end
+      
+      def symbol_exists?(name = [])
+        name = name.join(".")
+        
+        if name == "" then
+          return true
+        else
+          return self.bite_code["symbols"].include? name
+        end
+      end
+      
+      def symbol_descendants(name = [], depth = 1)
+        descendants = []
+        name = name.join(".")
+        
+        for symbol, path in self.bite_code["symbols"] do
+          if symbol.start_with?(name) then
+            level = symbol[name.length, symbol.length].count(".")
+            
+            if depth == -1 || level <= depth then
+              node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
+              
+              type = nil
+              
+              if node.class == ::Dog::Nodes::FunctionDefinition then
+                type = "function"
+              elsif node.class == ::Dog::Nodes::OnEachDefinition then
+                type = "on_each"
+              elsif node.class == ::Dog::Nodes::StructureDefinition then
+                type = "structure"
+              end
+              
+              if type then
+                descendants << { 
+                  "symbol" => symbol,
+                  "type" => type
+                }
+              end
+            end
+          end
+        end
+        
+        return descendants
       end
       
       def node_at_path_for_filename(path, file)
+        # TODO - I need to raise an error if the node is not found.
         node = self.bite_code["code"][file]
         
         for index in path do
-          node = node.elements[index]
+          node = node[index]
+          
         end
         
         return node
       end
-      
-    end
+    end    
   end
   
 end

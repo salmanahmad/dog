@@ -75,6 +75,20 @@ module Dog
         
         return true
       end
+
+      def fetch_stream_items_for_track(track = ::Dog::Track.root)
+        # L 335
+        stream_items = []
+        # fetch StreamObjects
+        items = ::Dog::StreamObject.find({"track_id" => track.id})
+        items.each do |item|
+          item = ::Dog::StreamObject.from_hash(item)
+          stream_items << item.to_hash_for_stream
+        end
+        # TODO fetch oneachs
+        return stream_items
+      end
+
     end
     
     def self.get_or_post(path, opts={}, &block)
@@ -315,93 +329,90 @@ module Dog
           
           @output.to_json
         end
-        
-        get prefix + '/stream.json' do
-          id = params["id"]
+
+        # GET root stream
+        get prefix + '/stream' do
+          # L 80
+
           depth = (params["depth"] || 0).to_i
           limit = (params["limit"] || 0).to_i
           offset = (params["offset"] || 0).to_i
           after = (params["after"])
-          
+
+          stream = {}
+          stream["self"] = {}
+          stream["items"] = fetch_stream_items_for_track
+
+          content_type 'application/json'
+          return stream.to_json
+        end
+
+        # GET /stream/id for specific StreamObjects or handlers
+        get prefix + '/stream/:id' do | id |
+
+          depth = (params["depth"] || 0).to_i
+          limit = (params["limit"] || 0).to_i
+          offset = (params["offset"] || 0).to_i
+          after = (params["after"])
+
           stream = {}
           stream["self"] = {}
           stream["items"] = []
-          
-          if id then
-            if id.match(/^handler:(.*)/) then
-              
-              track = ::Dog::Track.find_by_id(id.match(/^handler:(.*)/)[1])
-              
-              stream["self"] = track.variables[track.listen_argument]
-              
-              items = ::Dog::StreamObject.find({"track_id" => track.id})
-              items.each do |item|
-                item = ::Dog::StreamObject.from_hash(item)
-                stream["items"] << item.to_hash_for_stream
-              end
-              
-            else
-              object = ::Dog::StreamObject.find_by_id(id)
-              stream["self"] = object.to_hash_for_stream
-              
-              if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
-                handler = object.handler
-                argument = object.handler_argument
-                
-                if handler then
-                  items = ::Dog::Track.find({"function_name" => handler})
-                  for item in items do
-                    item = ::Dog::Track.from_hash(item)
-                    if argument then
-                      stream_item = item.variables[argument]
-                      stream_item["id"] = "handler:#{item.id}"
-                    
-                      stream["items"] << stream_item
-                    end
-                  end
+
+          if id.match(/^handler:(.*)/) then
+
+            parsed_id = id.match(/^handler:(.*)/)[1]
+            track = ::Dog::Track.find_by_id(parsed_id)
+            stream["self"] = track.to_hash_for_stream
+            stream["items"] = fetch_stream_items_for_track( track )
+
+          else
+            object = ::Dog::StreamObject.find_by_id(id)
+            stream["self"] = object.to_hash_for_stream
+
+            if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
+              # fetch track instances for a particular oneach
+              handler = object.handler
+              argument = object.handler_argument
+
+              if handler then
+                items = ::Dog::Track.find({"function_name" => handler})
+                items.each do |item|
+                  stream["items"] << Track.from_hash(item).to_hash_for_stream
                 end
               end
             end
-          else
-            root = ::Dog::Track.root
-            items = ::Dog::StreamObject.find({"track_id" => root.id})
-            items.each do |item|
-              item = ::Dog::StreamObject.from_hash(item)
-              stream["items"] << item.to_hash_for_stream
-            end
           end
-          
-          stream["success"] = true
+          content_type 'application/json'
           return stream.to_json
         end
-        
-        post prefix + '/stream.json' do
-          id = params["id"]
-          
+
+        post prefix + '/stream/:id' do | id |
           puts params.inspect
-          
+
           object = ::Dog::StreamObject.find_by_id(id)
           track = ::Dog::Track.new(object.handler)
-          
+
           argument = {}
-          
+
           for property in object.properties do
             argument[property.identifier] = params[property.identifier]
-            
+
             if property.required && argument[property.identifier].nil? then
               return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
             end
           end
-          
+
           if object.handler_argument then
             track.variables[object.handler_argument] = argument
           end
-          
+
           track.listen_argument = object.handler_argument
-          
+
           track.save
           track.continue
-          
+
+          content_type 'application/json'
           return {
             "success" => true
           }.to_json
@@ -543,30 +554,13 @@ module Dog
           end
         end
         
-        
-        
         # This is very important. Do not remove this or testing will not work
         return self
       end
       
       def run
         Server.initialize
-        
-        tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
-        
-        for track in tracks do
-          track = Track.from_hash(track)
-          track.continue
-        end
-        
-        tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING]
-          }
-        }, :sort => ["created_at", Mongo::DESCENDING])
-        
-        if tracks.count != 0 then
-          Thin::Server.start '0.0.0.0', Config.get('port'), Server
-        end
+        Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
       
     end

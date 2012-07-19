@@ -21,16 +21,17 @@ class ParserTests::ComputeTest < Test::Unit::TestCase
     @parser.parse("COMPUTE average ON data")
     @parser.parse("COMPUTE average ON a, b")
     @parser.parse("COMPUTE average ON a,b")
-    @parser.parse("COMPUTE average ON a,b USING c : 5")
-    @parser.parse("COMPUTE average ON data USING c : 5")
+    @parser.parse("COMPUTE average ON a,b USING c = 5")
+    @parser.parse("COMPUTE average ON data USING c = 5")
+    @parser.parse("COMPUTE average ON data USING c=5")
     
     
-    @parser.parse("COMPUTE average ON a,b USING c : 5, d : 'hello, world'")
+    @parser.parse("COMPUTE average ON a,b USING c = 5, d = 'hello, world'")
   end
   
   def test_you_cannot_mix_named_and_indexed_parameters
     assert_raises Dog::ParseError do
-      @parser.parse("COMPUTE average ON data USING c, k : 7")
+      @parser.parse("COMPUTE average ON data USING c, k = 7")
     end
   end
   

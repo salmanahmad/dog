@@ -15,22 +15,21 @@ module Dog::Rules
     
     def applicable_nodes
       [
-        ::Dog::Nodes::DefineFunction,
-        ::Dog::Nodes::On,
-        ::Dog::Nodes::Community,
-        ::Dog::Nodes::Event,
-        ::Dog::Nodes::Task,
-        ::Dog::Nodes::Message
+        ::Dog::Nodes::FunctionDefinition,
+        ::Dog::Nodes::OnEachDefinition,
+        ::Dog::Nodes::StructureDefinition,
+        ::Dog::Nodes::CollectionDefinition,
+        ::Dog::Nodes::CommunityDefinition
       ]
     end
     
     def apply(node)
-      path = node.path.unshift(self.compiler.current_filename)
+      path = node.path.clone.unshift(self.compiler.current_filename)
       name = [node.name]
       
       parent = node
       while parent = parent.parent do
-        if parent.class == ::Dog::Nodes::DefineFunction then
+        if parent.class == ::Dog::Nodes::FunctionDefinition || parent.class == ::Dog::Nodes::OnEachDefinition then
           name.unshift parent.name
         end
       end
