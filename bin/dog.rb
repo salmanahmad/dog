@@ -213,6 +213,7 @@ class Run < Command
     begin
       Dog::Runtime.run_file(args.first, parse_options(args))
     rescue Exception => e
+      raise e
       puts e
     end
   end

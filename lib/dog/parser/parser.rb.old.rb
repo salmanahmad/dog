@@ -27,6 +27,7 @@ module Dog
     end
     
     attr_accessor :parser
+    attr_accessor :should_clean_tree
     
     def initialize
       unless Parser.grammar_loaded then
@@ -35,7 +36,7 @@ module Dog
       end
       
       @parser = DogParser.new
-      @should_clean_tree = false
+      @should_clean_tree = true
     end
     
     def parse(program, filename = "")
@@ -54,9 +55,25 @@ module Dog
         raise error
       end
       
-      return tree.compile
+      clean_tree(tree) if should_clean_tree
+      
+      return tree
     end
     
+    private
+    
+      def clean_tree(root_node)
+        return if(root_node.elements.nil?)
+        
+        root_node.elements.delete_if do |node| 
+          node.class == Treetop::Runtime::SyntaxNode
+        end
+        
+        root_node.elements.each do |node| 
+          clean_tree(node) 
+        end
+      end
+      
   end
   
 end

@@ -15,11 +15,9 @@ class ParserTests::ProgramTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.should_clean_tree = false
   end
   
   def test_config
-    @parser.parse("CONFIG server = 'localhost:3000'")
     @parser.parse("foo; bar; baz;")
     @parser.parse("foo;bar;baz;")
     @parser.parse("foo;bar;baz")

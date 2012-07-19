@@ -1,5 +1,18 @@
+Next steps:
+	Implement unary operator
+	Implement NOTIFY
+	Implement LISTEN
+	Set the filenames properly when calling functions
 
-Ensure the proper ASTs
+
+
+Add unit parser tests for: 
+	import
+	community
+	config
+	reply
+
+
 
 Handle TODOs
 
@@ -45,28 +58,6 @@ Organize the symbol table hierarchically
 
 
 Dog restart instead of Dog debug
-
-
-
-
-		I need to add a VALUE class to hold all of the primitive stuff...
-
-
-
-
-Improve the space efficiency of the bite code generation
-
-
-
-
-Serialize the stack
-
-Runtime tree traversal... (updating the "program counter")
-
-What do things like "AccessHead" return and place on the stack?
-
-What about non-primative stack placements like people? Do we need a language wide "json" serialization architecture...
-
 
 
 

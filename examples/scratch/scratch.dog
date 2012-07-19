@@ -1,13 +1,88 @@
 
-
-DEFINE event video {
+DEFINE video {
   title
-  description
+  body
 }
 
-LISTEN TO public VIA http FOR videos
+LISTEN TO PUBLIC VIA stream FOR videos
 
 ON EACH video DO
-  PRINT "Got a request!"
-  PRINT video.title
+  PRINT "Hello!"
 END
+
+NOTIFY PUBLIC VIA stream OF "Hello, World!"
+
+#
+#
+#hash = {
+#  a = 7
+#  b = 5
+#  c = 8
+#}
+#
+#DEFINE car {
+#  model = "Honda"
+#}
+#
+#
+#civic = car {}
+#
+#PRINT civic
+#
+#hash["foobars"] = "Monkies!"
+#
+#hash.dudes = "Hula!"
+#
+#PRINT hash.dudes
+#
+#i = "hi"
+#
+#IF i != "hi" THEN
+#  #PRINT "Hiyo!!!"
+#ELSE
+#  #PRINT "MOnkies"
+#END
+#
+#FOR EACH i IN hash DO
+#  IF i == 7 THEN
+#    #PRINT "Hello?"
+#    BREAK
+#   # PRINT "Break?"
+#  END
+#  #PRINT i
+#END
+#
+#
+##PRINT "Here!"
+#
+#
+#DEFINE foo DO
+#  DEFINE bar DO
+#    DEFINE baz DO
+#  
+#    END
+#  END
+#  PRINT "Hello From Foo!"
+#END
+#
+#COMPUTE foo
+#
+#
+#DEFINE bars ON arg USING ops = "Hi" DO
+#  PRINT arg
+#  PRINT ops
+#  RETURN 5 + 5
+#END
+#
+#x = COMPUTE bars ON "Hello, World!" USING ops = "monkiesdafasdfa"
+#
+#PRINT x
+#
+#
+#
+#i = 0
+#
+#WHILE i < 1000 DO
+#  i = i + 1
+#END
+#

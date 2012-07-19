@@ -7,19 +7,18 @@
 # above copyright notice is included.
 #
 
-module Dog::Rules
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
+
+class ParserTests::PrintTest < Test::Unit::TestCase
   
-  class RecordCompilationContext < Rule
-    
-    Rule.register(self)
-    
-    def applicable_nodes
-      [::Dog::Nodes::Node]
-    end
-    
-    def apply(node)
-      node.filename = self.compiler.current_filename
-    end
-    
-  end 
+  def setup
+    @parser = Dog::Parser.new
+  end
+  
+  def test_simple
+    @parser.parse("PRINT 5+5")
+  end
+  
+  
+  
 end

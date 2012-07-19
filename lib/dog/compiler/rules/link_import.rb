@@ -7,6 +7,8 @@
 # above copyright notice is included.
 #
 
+# TODO - Reconsider this when you implement the package system
+
 module Dog::Rules
   
   class LinkImport < Rule
