@@ -620,6 +620,30 @@ module Dog::Nodes
     
     def visit(track)
       if track.function_name != self.name then
+        
+        the_collection = self.collection
+        
+        if the_collection.nil? then
+          # TODO - Pluralize
+          the_collection = self.variable.to_s + "s"
+        end
+        
+        
+        
+        value = track.read_variable(the_collection)
+        
+        unless value then
+          raise "I could not find a variable named: #{the_collection} on line: #{self.line}"
+          return
+        end
+        
+        stream_object_id = value.value["s:id"].value
+        
+        stream_object = ::Dog::StreamObject.find_by_id(stream_object_id)
+        stream_object.handler = self.name
+        stream_object.handler_argument = self.variable
+        stream_object.save
+        
         track.write_stack(self.path, ::Dog::Value.null_value)
         track.should_visit(self.parent)
         return

@@ -6,6 +6,10 @@ DEFINE video {
 
 LISTEN TO PUBLIC VIA stream FOR videos
 
+ON EACH video DO
+  PRINT "Hello!"
+END
+
 NOTIFY PUBLIC VIA stream OF "Hello, World!"
 
 #

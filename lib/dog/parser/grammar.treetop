@@ -689,7 +689,8 @@ grammar Dog
         node.line = self.line
         
         clause = in_clause.compile
-        
+        # TODO - Create a name rule to update these names to their fully qualified names
+		# On the other hand - can't I just use the symbol table? Hmm...
         node.name = "@each:#{clause[0]}"
         node.variable = clause[0]
         node.collection = clause[1]
