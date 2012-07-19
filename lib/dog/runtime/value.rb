@@ -59,6 +59,43 @@ module Dog
       return value
     end
     
+    # TODO - I need to add type safety here
+    def self.from_ruby_value(ruby_value, type = nil)
+      
+      if ruby_value.kind_of? Hash then
+        value = Value.new
+        value.type ||= "structure"
+        value.value = {}
+        
+        for k, v in hash do
+          # TODO - I should abstract this key aliasing at some point
+          if k.kind_of? Numeric then
+            k = "s:#{k}"
+          else
+            k = "n:#{k}"
+          end
+          
+          value.value[k] = self.from_ruby_value(v)
+        end
+        
+        return value
+      elsif ruby_value.kind_of? Array then
+        # TODO
+      else
+        if ruby_value.kind_of? String then
+          return self.string_value(value)
+        elsif ruby_value.kind_of? Numeric then
+          return self.number_value(value)
+        elsif ruby_value.kind_of? NilClass then
+          return self.null_value
+        elsif ruby_value.kind_of? FalseClass then
+          return self.false_value
+        elsif ruby_value.kind_of? TrueClass then
+          return self.true_value
+        end
+      end
+    end
+    
     def ruby_value
       
       if self.primitive? then
