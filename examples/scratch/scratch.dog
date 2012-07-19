@@ -6,6 +6,8 @@ DEFINE video {
 
 LISTEN TO PUBLIC VIA stream FOR videos
 
+NOTIFY PUBLIC VIA stream OF "Hello, World!"
+
 #
 #
 #hash = {

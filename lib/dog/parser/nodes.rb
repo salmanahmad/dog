@@ -859,6 +859,50 @@ module Dog::Nodes
     attribute :target
     attribute :message
     attribute :via
+    
+    def visit(track)
+      unless track.has_visited? self.message then
+        track.should_visit(self.message)
+        return
+      else
+        value = track.read_stack(self.message.path)
+        value = value.ruby_value
+        
+        message = ::Dog::RoutedMessage.new
+        properties = []
+        
+        if value.kind_of? Hash then
+          message.name = value.type
+          
+          for k, v in value do
+            p = ::Dog::Property.new
+            p.direction = "output"
+            p.identifier = k
+            p.value = v
+            properties << p            
+          end
+        else
+          message.name = "primitive"
+          
+          p = ::Dog::Property.new
+          p.direction = "output"
+          p.identifier = "value"
+          p.value = value
+          properties << p
+        end
+        
+        
+        message.track_id = track.id
+        message.routing = nil # TODO
+        message.created_at = Time.now.utc
+        message.properties = properties
+        message.save
+        
+        track.write_stack(self.path, ::Dog::Value.null_value)
+        track.should_visit(self.parent)
+        return
+      end
+    end
   end
   
   class If < Node

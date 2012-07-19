@@ -59,6 +59,20 @@ module Dog
       return value
     end
     
+    def ruby_value
+      
+      if self.primitive? then
+        return self.value
+      else
+        h = {}
+        for k, v in self.value do
+          h[k[1,k.length]] = v.ruby_value
+        end
+        
+        return h
+      end
+    end
+    
     def primitive?
       Value.primitive_types.include? self.type
     end
