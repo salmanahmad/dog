@@ -35,7 +35,7 @@ module Dog::Nodes
     end
     
     def self.attributes
-      (superclass.attributes || [] rescue []) | (@attributes || [])
+      @attributes_cache ||= (superclass.attributes || [] rescue []) | (@attributes || [])
     end
     
     def attributes
@@ -602,7 +602,26 @@ module Dog::Nodes
     attribute :body
     
     def visit(track)
-      
+      if track.function_name != self.name then
+        track.write_stack(self.path, ::Dog::Value.null_value)
+        track.should_visit(self.parent)
+        return
+      else
+        if self.body.nil? then
+          track.finish
+          track.write_return_value(::Dog::Value.null_value)
+          return
+        end
+        
+        if track.has_visited? self.body then
+          track.finish
+          track.write_return_value(track.read_stack(self.body.path))
+          return
+        else
+          track.should_visit(self.body)
+          return
+        end  
+      end
     end
     
   end
@@ -680,15 +699,70 @@ module Dog::Nodes
     attribute :via
   end
   
+  # TODO - I need to handle type safety with structures and functions
+  
   class StructureDefinition < Node
     attribute :name
     attribute :properties
+    
+    def visit(track)
+      if track.function_name != self.name then
+        track.write_stack(self.path, ::Dog::Value.null_value)
+        track.should_visit(self.parent)
+        return
+      else
+        structure = ::Dog::Value.new(self.name, {})
+        
+        if self.properties then
+          for property in self.properties do
+            unless track.has_visited? property then
+              track.should_visit(property)
+              return
+            end
+          end
+          
+          for property in self.properties do
+            default = track.read_stack(property.path)
+            key = property.name
+            
+            if key.kind_of? Numeric then
+              key = "n:#{key}"
+            else
+              key = "s:#{key}"
+            end
+            
+            structure.value[key] = default
+          end
+        end
+        
+        track.finish
+        track.write_return_value(structure)
+        return
+      end
+    end
   end
   
   class StructureDefinitionProperty < Node
     attribute :type
     attribute :name
     attribute :default
+    
+    def visit(track)
+      if self.default then
+        if track.has_visited? self.default then
+          track.write_stack(self.path, track.read_stack(self.default.path))
+          track.should_visit(self.parent)
+          return                    
+        else
+          track.should_visit(self.default)
+          return
+        end
+      else
+        track.write_stack(self.path, ::Dog::Value.null_value)
+        track.should_visit(self.parent)
+        return
+      end
+    end
   end
   
   class CollectionDefinition < Node
@@ -706,6 +780,10 @@ module Dog::Nodes
     attribute :variable
     attribute :variable_type
     attribute :via
+    
+    def visit(track)
+      
+    end
   end
   
   class Notify < Node
@@ -975,9 +1053,16 @@ module Dog::Nodes
         end
       end
       
-      # TODO - Handle structure types
-      
-      dog_value = ::Dog::Value.new("structure", {})
+      if self.type then
+        if track.has_visited? self.type then
+          dog_value = track.read_stack(self.type.path)
+        else
+          track.should_visit(self.type)
+          return
+        end
+      else
+        dog_value = ::Dog::Value.new("structure", {})
+      end
       
       for item in value do
         k = item.first
@@ -994,6 +1079,27 @@ module Dog::Nodes
       
       track.write_stack(self.path, dog_value)
       track.should_visit(self.parent)
+    end
+  end
+  
+  class StructureInstantiation < Node
+    attribute :type
+    
+    def visit(track)
+      track.save
+      # TODO - For both function calls and structure instantiations
+      # I should consider check the type to ensture that I am doing 
+      # the right thing...
+      
+      # TODO - Also for types in both computes as well as literals, I need
+      # to handle relative paths as well... hopefully, maybe?
+      
+      function = ::Dog::Track.new(self.type)
+      function.control_ancestors = track.control_ancestors.clone
+      function.control_ancestors.push(track.id)
+      
+      track.state = ::Dog::Track::STATE::CALLING
+      return function
     end
   end
   

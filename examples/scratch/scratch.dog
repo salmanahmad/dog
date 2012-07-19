@@ -6,6 +6,15 @@ hash = {
   c = 8
 }
 
+DEFINE car {
+  model = "Honda"
+}
+
+
+civic = car {}
+
+PRINT civic
+
 hash["foobars"] = "Monkies!"
 
 hash.dudes = "Hula!"
@@ -54,3 +63,11 @@ END
 x = COMPUTE bars ON "Hello, World!" USING ops = "monkiesdafasdfa"
 
 PRINT x
+
+
+
+i = 0
+
+WHILE i < 1000 DO
+  i = i + 1
+END

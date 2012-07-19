@@ -48,6 +48,11 @@ module Dog
       
       if name then
         path = Runtime.bite_code["symbols"][name]
+        
+        if path.nil? then
+          raise "I could not find a symbol named: #{name}"
+        end
+        
         path = path.clone
         filename = path.shift
         

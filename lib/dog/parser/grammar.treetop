@@ -821,7 +821,7 @@ grammar Dog
   end
   
   rule structure_property
-    sn? type:(identifier s)? structure_property_key value:(s? '=' s? expression)? s? {
+    sn? type:(identifier s) structure_property_key value:(s? '=' s? expression)? s? {
       def compile
         property = ::Dog::Nodes::StructureDefinitionProperty.new
         property.line = self.line
@@ -832,6 +832,19 @@ grammar Dog
         
         return property
       end
+    }
+    /
+    sn? structure_property_key value:(s? '=' s? expression)? s? {
+      def compile
+        property = ::Dog::Nodes::StructureDefinitionProperty.new
+        property.line = self.line
+        
+        property.name = structure_property_key.compile
+        property.default = value.expression.compile unless value.empty?
+        
+        return property
+      end
+      
     }
   end
   
@@ -1170,7 +1183,9 @@ grammar Dog
         literal.value = []
         
         if !type.empty? then
-          literal.type = self.type.identifier.text_value
+          structure_type = ::Dog::Nodes::StructureInstantiation.new
+          structure_type.type = self.type.identifier.text_value
+          literal.type = structure_type
         end
         
         if !associations.empty? then

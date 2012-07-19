@@ -16,6 +16,30 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     @parser.parser.root = :structure
   end
   
+  def test_definition
+    struct = <<-EOD
+      car {}
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+
+
+
+    @parser.parser.root = :structure_definition
+    
+    struct = <<-EOD
+      DEFINE car {
+      
+        model = "hi"
+      }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    
+  end
+  
   def test_empty
     struct = <<-EOD
       {}
