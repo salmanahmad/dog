@@ -890,20 +890,20 @@ module Dog::Nodes
         return
       else
         value = track.read_stack(self.message.path)
-        value = value.ruby_value
+        ruby_value = value.ruby_value
         
         message = ::Dog::RoutedMessage.new
         properties = []
         
-        if value.kind_of? Hash then
+        if ruby_value.kind_of? Hash then
           message.name = value.type
           
-          for k, v in value do
+          for k, v in ruby_value do
             p = ::Dog::Property.new
             p.direction = "output"
             p.identifier = k
             p.value = v
-            properties << p            
+            properties << p
           end
         else
           message.name = "primitive"

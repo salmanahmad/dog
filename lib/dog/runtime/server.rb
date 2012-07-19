@@ -374,12 +374,9 @@ module Dog
           stream["success"] = true
           return stream.to_json
         end
-        
-        post prefix + '/stream.json' do
-          id = params["id"]
-          
-          puts params.inspect
-          
+
+        post prefix + '/stream/:id' do | id |
+
           object = ::Dog::StreamObject.find_by_id(id)
           track = ::Dog::Track.new(object.handler)
           
@@ -394,14 +391,16 @@ module Dog
           end
           
           if object.handler_argument then
-            track.variables[object.handler_argument] = argument
+            dog_value = ::Dog::Value.from_ruby_value(argument)
+            track.write_variable(object.handler_argument, dog_value)
           end
           
           track.listen_argument = object.handler_argument
           
           track.save
-          track.continue
-          
+          ::Dog::Runtime.run_track(track)
+
+          content_type 'application/json'
           return {
             "success" => true
           }.to_json

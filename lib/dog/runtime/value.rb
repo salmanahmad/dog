@@ -67,12 +67,12 @@ module Dog
         value.type ||= "structure"
         value.value = {}
         
-        for k, v in hash do
+        for k, v in ruby_value do
           # TODO - I should abstract this key aliasing at some point
           if k.kind_of? Numeric then
-            k = "s:#{k}"
-          else
             k = "n:#{k}"
+          else
+            k = "s:#{k}"
           end
           
           value.value[k] = self.from_ruby_value(v)
@@ -83,9 +83,9 @@ module Dog
         # TODO
       else
         if ruby_value.kind_of? String then
-          return self.string_value(value)
+          return self.string_value(ruby_value)
         elsif ruby_value.kind_of? Numeric then
-          return self.number_value(value)
+          return self.number_value(ruby_value)
         elsif ruby_value.kind_of? NilClass then
           return self.null_value
         elsif ruby_value.kind_of? FalseClass then
