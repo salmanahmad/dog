@@ -171,7 +171,7 @@ module Dog
         path.shift
 
         node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-        type = typeof_node(node)
+        type = self.typeof_node(node)
 
         if type then
           return {
@@ -199,7 +199,7 @@ module Dog
               path.shift
 
               node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-              type = typeof_node(node)
+              type = self.typeof_node(node)
 
               if type then
                 descendants << { 
@@ -224,19 +224,20 @@ module Dog
 
         return node
       end
-    end
 
-    def typeof_node(node)
-      return case node.class
-      when ::Dog::Nodes::FunctionDefinition
-        "function"
-      when ::Dog::Nodes::OnEachDefinition
-        "oneach"
-      when ::Dog::Nodes::StructureDefinition
-        "structure"
-      else
-        nil
+      def typeof_node(node)
+        return case
+        when node.class == ::Dog::Nodes::FunctionDefinition
+          "function"
+        when node.class == ::Dog::Nodes::OnEachDefinition
+          "oneach"
+        when node.class == ::Dog::Nodes::StructureDefinition
+          "structure"
+        else
+          nil
+        end
       end
+
     end
 
   end
