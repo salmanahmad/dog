@@ -156,10 +156,9 @@ module Dog
         end
         
       end
-      
+
       def symbol_exists?(name = [])
         name = name.join(".")
-        
         if name == "" then
           return true
         else
@@ -172,14 +171,7 @@ module Dog
         path.shift
 
         node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-
-        if node.class == ::Dog::Nodes::FunctionDefinition then
-          type = "function"
-        elsif node.class == ::Dog::Nodes::OnEachDefinition then
-          type = "on_each"
-        elsif node.class == ::Dog::Nodes::StructureDefinition then
-          type = "structure"
-        end
+        type = typeof_node(node)
 
         if type then
           return {
@@ -207,16 +199,7 @@ module Dog
               path.shift
 
               node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-
-              type = nil
-
-              if node.class == ::Dog::Nodes::FunctionDefinition then
-                type = "function"
-              elsif node.class == ::Dog::Nodes::OnEachDefinition then
-                type = "on_each"
-              elsif node.class == ::Dog::Nodes::StructureDefinition then
-                type = "structure"
-              end
+              type = typeof_node(node)
 
               if type then
                 descendants << { 
@@ -230,19 +213,32 @@ module Dog
 
         return descendants
       end
-      
+
       def node_at_path_for_filename(path, file)
         # TODO - I need to raise an error if the node is not found.
         node = self.bite_code["code"][file]
-        
+
         for index in path do
           node = node[index]
-          
         end
-        
+
         return node
       end
-    end    
+    end
+
+    def typeof_node(node)
+      return case node.class
+      when ::Dog::Nodes::FunctionDefinition
+        "function"
+      when ::Dog::Nodes::OnEachDefinition
+        "oneach"
+      when ::Dog::Nodes::StructureDefinition
+        "structure"
+      else
+        nil
+      end
+    end
+
   end
-  
+
 end

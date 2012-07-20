@@ -628,8 +628,6 @@ module Dog::Nodes
           the_collection = self.variable.to_s + "s"
         end
         
-        
-        
         value = track.read_variable(the_collection)
 
         unless value then
