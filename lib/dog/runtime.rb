@@ -199,7 +199,9 @@ module Dog
             level = symbol[name.length, symbol.length].count(".")
             
             if depth == -1 || level <= depth then
-              puts "#{symbol} => #{path}" # FIXME debug output
+              path = path.clone
+              path.shift
+
               node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
               
               type = nil
