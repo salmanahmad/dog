@@ -176,6 +176,7 @@ module Dog
         if type then
           return {
             "id" => name.join("."),
+            "name" => name,
             "type" => type
           }
         else
@@ -205,6 +206,7 @@ module Dog
               if type then
                 descendants << { 
                   "id" => symbol,
+                  "name" => symbol.split('.'),
                   "type" => type
                 }
               end

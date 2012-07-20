@@ -230,7 +230,7 @@ module Dog
       return {
         "id" => "handler:#{self._id}",
         # FIXME HACK -- remove this once the name is pluralized properly on backend
-        "name" => [ self.function_name ],
+        "name" => self.function_name.split('.'),
         "type" => "track"
       }
     end

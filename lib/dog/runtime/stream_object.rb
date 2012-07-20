@@ -68,6 +68,7 @@ module Dog
       hash.delete("_id")
       hash["id"] = self.id.to_s
       hash["track_id"] = self.track_id.to_s
+      hash["name"] = hash["name"].split('.')
       hash["type"] = case self.type.name
       when 'Dog::RoutedEvent'
         'listen'
@@ -79,7 +80,6 @@ module Dog
         raise 'Invalid StreamObject type: ' + self.type.name
       end
       # FIXME HACK -- remove this once the name is pluralized properly on backend
-      hash["name"] = [ hash["name"] ]
       if hash["type"] == 'listen'
         hash["name"][-1] = Helper::pluralize( hash["name"][-1] )
       end
