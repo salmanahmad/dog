@@ -1144,9 +1144,7 @@ module Dog::Nodes
           return
         end
       end
-      
-      puts value
-      
+
       track.write_stack(self.path, ::Dog::Value.null_value)
       track.should_visit(self.parent)
     end
@@ -1166,8 +1164,6 @@ module Dog::Nodes
           return
         end
       end
-      
-      puts value.inspect
       
       track.write_stack(self.path, ::Dog::Value.null_value)
       track.should_visit(self.parent)

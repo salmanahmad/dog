@@ -190,12 +190,16 @@ module Dog
       def symbol_descendants(name = [], depth = 1)
         descendants = []
         name = name.join(".")
-        
+
+        # special case root
+        name = '' if name == 'root'
+
         for symbol, path in self.bite_code["symbols"] do
           if symbol.start_with?(name) then
             level = symbol[name.length, symbol.length].count(".")
             
             if depth == -1 || level <= depth then
+              puts "#{symbol} => #{path}" # FIXME debug output
               node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
               
               type = nil

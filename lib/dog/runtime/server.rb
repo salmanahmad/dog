@@ -245,24 +245,7 @@ module Dog
 
 
         get prefix + '/stream' do
-          # L 80
-          stream = {}
-          stream["self"] = {}
-          stream["lexical"] = []
-          stream["runtime"] = []
-
-          depth = (params["depth"] || 1).to_i
-          limit = (params["limit"] || 0).to_i
-          offset = (params["offset"] || 0).to_i
-          after = (params["after"])
-
-          track = ::Dog::Track.root
-          stream["self"] = track.to_hash_for_stream
-          stream["runtime"] = fetch_stream_items_for_track
-          stream["lexical"] = ::Dog::Runtime.symbol_descendants(track.function_name, depth)
-
-          content_type 'application/json'
-          return stream.to_json
+          return redirect prefix + '/stream/runtime/root'
         end
 
         get prefix + '/stream/lexical/:id' do |id|
@@ -279,7 +262,7 @@ module Dog
           symbol = id.split(".")
 
           runtime = []
-          tracks = ::Dog::Track.find({"function_name" => handler})
+          tracks = ::Dog::Track.find({"function_name" => handler}) # FIXME wtf handler?
           for track in tracks do
             runtime << {
               "id" => track["_id"],
@@ -306,10 +289,18 @@ module Dog
           offset = (params["offset"] || 0).to_i
           after = (params["after"])
 
-          track = ::Dog::Track.find_by_id(id)
+          track = case id
+          when 'root'
+            ::Dog::Track.root
+          else
+            ::Dog::Track.find_by_id(id)
+          end
+          if track.nil?
+            return [400, {"success" => false, "errors" => ["The runtime id '#{id}' does not correspond to a valid runtime item."] }.to_json]
+          end
           stream["self"] = track.to_hash_for_stream
           stream["runtime"] = fetch_stream_items_for_track(track)
-          stream["lexical"] = ::Dog::Runtime.symbol_descendants(track.function_name, depth)
+          stream["lexical"] = ::Dog::Runtime.symbol_descendants(track.function_name.split('.'), depth)
 
           content_type 'application/json'
           return stream.to_json
