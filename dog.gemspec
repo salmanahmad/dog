@@ -32,7 +32,8 @@ spec = Gem::Specification.new do |s|
   s.add_dependency 'tilt'
   s.add_dependency 'uuid'
   s.add_dependency 'rack-test'
-  
+  s.add_dependency 'readline'
+
   s.add_dependency 'blather'
   
   s.add_development_dependency 'httparty'

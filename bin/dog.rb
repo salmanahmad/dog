@@ -10,7 +10,7 @@
 
 
 #
-# General Compilation Pipeline: 
+# General Compilation Pipeline:
 #
 # Parse the dog code into an AST (called a bark)
 # => bark = Dog::Parser.parse(dog_code)
@@ -26,6 +26,7 @@
 #ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
 
 require 'rubygems'
+require 'readline'
 #require 'bundler/setup'
 require File.join(File.dirname(__FILE__), '../lib/dog/version.rb')
 
@@ -263,22 +264,98 @@ end
 
 class Shell < Command
   Command.register(self)
-  
+
   def description
     "Start a shell session with a running Dog application"
   end
-  
+
   def usage
     super
     puts
-    puts "Usage: dog shell [URL]"
+    puts "Usage: dog shell [options] [statement]"
     puts
-    puts "  WARNING: This command is not yet implemented."
+    puts "  Starts a Dog shell with a current application. You can optionally pass in a statement to"
+    puts "  execute.  If you pass in a statement it will execute the statement and then immediately"
+    puts "  return."
+    puts
+    puts "Options include: "
+    puts "  -u url           # Specify the url of the Dog application to connect to with the shell"
+    puts "  -d database      # Specify the database on the local machine to use. This overwrites -u."
+    puts "  -t track_id      # Specify the track to use. Default: a new track will be created and returned"
     puts
   end
-  
+
   def run(args)
-    usage
+    args ||= []
+    
+    url = nil
+    database = nil
+    track = nil
+    statement = nil
+    
+    index = 0
+    while index < args.length do
+      arg = args[index]
+      
+      if arg == "-u" then
+        index += 1
+        database = nil
+        url = args[index]
+      elsif arg == "-d" then
+        index += 1
+        database = args[index]
+        url = nil
+      elsif arg == "-t" then
+        index += 1
+        track = args[index]
+      else
+        statement = arg
+      end
+      
+      index += 1
+    end
+
+    if statement.nil? then
+      puts "Hello? Yes, this is #{dog_version_string}. CTRL+C to quit."
+      
+      Signal.trap("INT") do
+        puts
+        puts "Bye!"
+        exit()
+      end
+      
+      loop do
+        line = Readline::readline("> ")
+        Readline::HISTORY.push(line)
+        puts "=> #{line}"
+        #value = interpreter.eval(line)
+        #puts "=> #{value.ruby_value.inspect}"
+      end
+      
+    else
+      bite_code_file = File.basename(args.first, '.dog') + '.bite'
+
+      compile_command = Compile.new
+      unless compile_command.run(args) then
+        exit
+      end
+
+      run_command = Run.new
+      options = run_command.parse_options(args)
+      options["database"] = {
+        "reset" => true
+      }
+
+      begin
+        Dog::Runtime.run_file(bite_code_file, options)
+      rescue Exception => e
+        puts e
+        raise e
+      end
+
+    end
+    
+    
   end
 end
 
@@ -339,11 +416,11 @@ class Version < Command
   
   def usage
     super
-    puts 
+    puts
     puts "Usage: dog version"
     puts
     puts "  #{description}"
-    puts    
+    puts
   end
   
   def run(args)
