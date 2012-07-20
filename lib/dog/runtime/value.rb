@@ -142,6 +142,10 @@ module Dog
       return value
     end
     
+    def is_null?
+      self.type == "null"
+    end
+    
     def self.null_value
       value = Value.new
       value.type = "null"

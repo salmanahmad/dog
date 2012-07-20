@@ -631,12 +631,17 @@ module Dog::Nodes
         
         
         value = track.read_variable(the_collection)
-        
+
         unless value then
           raise "I could not find a variable named: #{the_collection} on line: #{self.line}"
           return
         end
-        
+
+        if value.is_null? then
+          raise "I could not a variable named: #{the_collection} on line: #{self.line}. Are you sure you have a listen?"
+          return
+        end
+
         stream_object_id = value.value["s:id"].value
         
         stream_object = ::Dog::StreamObject.find_by_id(stream_object_id)

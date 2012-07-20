@@ -166,10 +166,12 @@ module Dog
           return self.bite_code["symbols"].include? name
         end
       end
-      
+
       def symbol_info(name = [])
-        name = name.join(".")
-        node = self.node_at_path_for_filename(name, self.bite_code["main_filename"])
+        path = self.bite_code["symbols"][name.join(".")].clone
+        path.shift
+
+        node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
 
         if node.class == ::Dog::Nodes::FunctionDefinition then
           type = "function"
@@ -180,10 +182,12 @@ module Dog
         end
 
         if type then
-          descendants << {
-            "symbol" => name,
+          return {
+            "id" => name.join("."),
             "type" => type
           }
+        else
+          return nil
         end
       end
 
@@ -197,15 +201,15 @@ module Dog
         for symbol, path in self.bite_code["symbols"] do
           if symbol.start_with?(name) then
             level = symbol[name.length, symbol.length].count(".")
-            
-            if depth == -1 || level <= depth then
+
+            if level > 0 && (depth == -1 || level <= depth)  then
               path = path.clone
               path.shift
 
               node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-              
+
               type = nil
-              
+
               if node.class == ::Dog::Nodes::FunctionDefinition then
                 type = "function"
               elsif node.class == ::Dog::Nodes::OnEachDefinition then
@@ -213,17 +217,17 @@ module Dog
               elsif node.class == ::Dog::Nodes::StructureDefinition then
                 type = "structure"
               end
-              
+
               if type then
                 descendants << { 
-                  "symbol" => symbol,
+                  "id" => symbol,
                   "type" => type
                 }
               end
             end
           end
         end
-        
+
         return descendants
       end
       

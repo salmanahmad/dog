@@ -262,10 +262,10 @@ module Dog
           symbol = id.split(".")
 
           runtime = []
-          tracks = ::Dog::Track.find({"function_name" => handler}) # FIXME wtf handler?
+          tracks = ::Dog::Track.find({"function_name" => id})
           for track in tracks do
             runtime << {
-              "id" => track["_id"],
+              "id" => track["_id"].to_s,
               "name" => track["function_name"]
             }
           end
@@ -350,7 +350,7 @@ module Dog
           return {
             "success" => true
           }.to_json
-          
+
         end
 
 
