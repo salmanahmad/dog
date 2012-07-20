@@ -242,8 +242,6 @@ module Dog
           @output.to_json
         end
 
-
-
         get prefix + '/stream' do
           return redirect prefix + '/stream/runtime/root'
         end

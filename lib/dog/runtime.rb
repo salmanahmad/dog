@@ -193,8 +193,9 @@ module Dog
         for symbol, path in self.bite_code["symbols"] do
           if symbol.start_with?(name) then
             level = symbol[name.length, symbol.length].count(".")
+            level += 1 if name == '' # implied root. in every name
 
-            if level > 0 && (depth == -1 || level <= depth)  then
+            if level > 0 && (depth == -1 || level <= depth) then
               path = path.clone
               path.shift
 
