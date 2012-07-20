@@ -314,7 +314,7 @@ class Shell < Command
       
       index += 1
     end
-
+    
     if statement.nil? then
       puts "Hello? Yes, this is #{dog_version_string}. CTRL+C to quit."
       
@@ -323,13 +323,38 @@ class Shell < Command
         puts "Bye!"
         exit()
       end
-      
+
+      track = nil
+
       loop do
         line = Readline::readline("> ")
         Readline::HISTORY.push(line)
-        puts "=> #{line}"
-        #value = interpreter.eval(line)
-        #puts "=> #{value.ruby_value.inspect}"
+
+        begin
+          bark = Dog::Parser.parse(line, "dog_shell")
+          bite = Dog::Compiler.compile(bark, "dog_shell")
+          Dog::Runtime.initialize(bite, "dog_shell", {
+            "config" => {
+              "database" => "dog_shell"
+            }
+          })
+
+          track ||= ::Dog::Track.new("root")
+          track.stack = {}
+          track.function_name = "root"
+          track.current_node_path = []
+          track.state = ::Dog::Track::STATE::RUNNING
+          track.save
+
+          Dog::Runtime.run_track(track)
+
+          track.reload
+
+          puts "=> " + track.read_stack(["nodes", 0]).ruby_value.inspect
+        
+        rescue Exception => e
+          puts "Error: #{e.to_s}"
+        end
       end
       
     else
