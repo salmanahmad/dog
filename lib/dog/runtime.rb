@@ -167,6 +167,26 @@ module Dog
         end
       end
       
+      def symbol_info(name = [])
+        name = name.join(".")
+        node = self.node_at_path_for_filename(name, self.bite_code["main_filename"])
+
+        if node.class == ::Dog::Nodes::FunctionDefinition then
+          type = "function"
+        elsif node.class == ::Dog::Nodes::OnEachDefinition then
+          type = "on_each"
+        elsif node.class == ::Dog::Nodes::StructureDefinition then
+          type = "structure"
+        end
+
+        if type then
+          descendants << {
+            "symbol" => name,
+            "type" => type
+          }
+        end
+      end
+
       def symbol_descendants(name = [], depth = 1)
         descendants = []
         name = name.join(".")

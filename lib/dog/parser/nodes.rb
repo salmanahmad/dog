@@ -911,7 +911,7 @@ module Dog::Nodes
           p = ::Dog::Property.new
           p.direction = "output"
           p.identifier = "value"
-          p.value = value
+          p.value = ruby_value
           properties << p
         end
         
@@ -920,6 +920,7 @@ module Dog::Nodes
         message.routing = nil # TODO
         message.created_at = Time.now.utc
         message.properties = properties
+        
         message.save
         
         track.write_stack(self.path, ::Dog::Value.null_value)

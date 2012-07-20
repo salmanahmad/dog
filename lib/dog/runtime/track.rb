@@ -42,6 +42,8 @@ module Dog
     attr_accessor :error_value
     
     attr_accessor :has_listen
+    
+    # TODO - I don't think that listen_argument is used at all anymore
     attr_accessor :listen_argument
     
     def initialize(name = nil)
