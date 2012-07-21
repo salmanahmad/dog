@@ -324,8 +324,6 @@ class Shell < Command
         exit()
       end
 
-      track = nil
-
       loop do
         line = Readline::readline("> ")
         Readline::HISTORY.push(line)
@@ -338,8 +336,13 @@ class Shell < Command
               "database" => "dog_shell"
             }
           })
+          
+          if track.nil? then
+            track = ::Dog::Track.new("root")
+          elsif track.kind_of? String
+            track = ::Dog::Track.find_by_id(track)
+          end
 
-          track ||= ::Dog::Track.new("root")
           track.stack = {}
           track.function_name = "root"
           track.current_node_path = []
@@ -358,26 +361,44 @@ class Shell < Command
       end
       
     else
-      bite_code_file = File.basename(args.first, '.dog') + '.bite'
-
-      compile_command = Compile.new
-      unless compile_command.run(args) then
-        exit
-      end
-
-      run_command = Run.new
-      options = run_command.parse_options(args)
-      options["database"] = {
-        "reset" => true
-      }
-
+      
+      output = {}
+      output["statement"] = statement
+      
       begin
-        Dog::Runtime.run_file(bite_code_file, options)
-      rescue Exception => e
-        puts e
-        raise e
-      end
+        bark = Dog::Parser.parse(statement, "dog_shell")
+        bite = Dog::Compiler.compile(bark, "dog_shell")
+        Dog::Runtime.initialize(bite, "dog_shell", {
+          "config" => {
+            "database" => "dog_shell"
+          }
+        })
+          
+        if track.nil? then
+          track = ::Dog::Track.new("root")
+        elsif track.kind_of? String
+          track = ::Dog::Track.find_by_id(track)
+        end
+        
+        track.stack = {}
+        track.function_name = "root"
+        track.current_node_path = []
+        track.state = ::Dog::Track::STATE::RUNNING
+        track.save
+        
+        Dog::Runtime.run_track(track)
 
+        track.reload
+        
+        output["value"] = track.read_stack(["nodes",0]).ruby_value.inspect
+      rescue Exception => e
+        output["error"] = e.to_s
+        output.delete("value")
+      end
+      
+      output["track"] = track.id.to_s rescue nil
+      puts JSON.pretty_generate(output)
+      
     end
     
     
