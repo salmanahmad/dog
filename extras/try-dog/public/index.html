@@ -51,7 +51,9 @@
       font-family:"Monaco", monospace;
       color: #55D839;
       padding:10px;
-      overflow:auto;
+      overflow-x:none;
+      overflow-y:auto;
+      display:none;
     }
     
     #terminal p {
@@ -67,15 +69,19 @@
       border:none;
       margin:0px;
       margin-left:10px;
-      width:680px;
+      width:660px;
       padding:0px;
       outline: none;
       
     }
     
+    .active.line {
+      margin-right:0px;
+    }
+    
     .line .statement, .line .value, .line .error {
       margin-bottom:0px;
-      width:670px;
+      width:660px;
     }
     
     .prompt {
@@ -86,13 +92,37 @@
     .line {
       position:relative;
       margin-top:15px;
+      width:660px;
     }
     
     </style>
-    
+    <script src="handlebars.js" type="text/javascript" charset="utf-8"></script>
     <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+    <script src="json2.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
+
     $(function() {
+      
+      $.get("/version", function(data) {
+        $("#dog-version").html(data)
+        $("#terminal").show()
+      })
+      
+      var track = null;
+      var template = Handlebars.compile($("#line-template").html());
+      var cursor = 0;
+      
+      function selectLineAtCursor(cursor) {
+        var lines = $("#lines .line").get().reverse()
+        
+        var line = lines[cursor]
+        var statement = $(line).find(".statement").html();
+        
+        statement = statement.substring(5)
+        
+        $("#command").val(statement)
+      }
+      
       $("#terminal").click(function() {
         $("#command").focus();
       })
@@ -100,13 +130,56 @@
       $("#command").keyup(function(event) {
         if(event.which == 13) {
           // Enter
+          cursor = 0;
+          
+          var statement = $("#command").val();
+          var data = {
+            statement: statement
+          }
+          
+          if(track != null) {
+            data["track"] = track
+          }
+          
+          console.log(data)
+          
+          $.get("/evaluate", data, function(data) {
+            var line = JSON.parse(data);
+            track = line["track"]
+            
+            console.log(track)
+            
+            line = template(line)
+            
+            $("#lines").append(line)
+          
+            $("#command").val("")
+          
+            $('#terminal')[0].scrollTop = 9999999
+            
+          });
+          
+          
+       
+          
+ 
           
         } else if (event.which == 38) {
           // Up arrow
+          cursor = cursor + 1;
+          if (cursor >= $("#lines .line").size()) {
+            cursor = $("#lines .line").size() - 1;
+          }
           
+          selectLineAtCursor(cursor)
         } else if (event.which == 40) {
           // Down arrow
+          cursor = cursor - 1;
+          if(cursor < 0) {
+            cursor = 0;
+          }
           
+          selectLineAtCursor(cursor)
         }
       })
     })
@@ -116,14 +189,14 @@
     
     <div id="top"></div>
     
-    <div id="template"></div>
+    <script id="line-template" type="text/x-handlebars-template">
     <div class="line">
-      <div class="statement"></div>
-      <div class="value"></div>
-      <div class="error"></div>
+      <div class="statement">> {{statement}}</div>
+      <div class="value">=> {{value}}</div>
+      <div class="error">{{error}}</div>
     </div>
-    
-    
+    </script>
+
     <div id="page">
       <h1>Try Dog in your Browser</h1>  
       <div id="terminal">
@@ -132,13 +205,8 @@
         <p>type "help" for help</p>
         <p>type "tutorial" to start a brief tutorial</p>
         
-        <div id="lines">
-          
-          
-          
-          
-          
-        </div>
+        <div id="lines"></div>
+        
         <div class="active line">
           <span class="prompt">></span>
           <input type="text" name="command" value="" id="command">
