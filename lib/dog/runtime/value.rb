@@ -63,8 +63,10 @@ module Dog
     def self.from_ruby_value(ruby_value, type = nil)
       
       if ruby_value.kind_of? Hash then
+        type ||= "structure"
+        
         value = Value.new
-        value.type ||= "structure"
+        value.type = type
         value.value = {}
         
         for k, v in ruby_value do

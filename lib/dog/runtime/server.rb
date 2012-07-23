@@ -335,7 +335,7 @@ module Dog
           end
 
           if object.handler_argument then
-            dog_value = ::Dog::Value.from_ruby_value(argument)
+            dog_value = ::Dog::Value.from_ruby_value(argument, object.name)
             track.write_variable(object.handler_argument, dog_value)
           end
 
