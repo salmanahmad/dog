@@ -174,11 +174,7 @@ module Dog
         type = self.typeof_node(node)
 
         if type then
-          return {
-            "id" => name.join("."),
-            "name" => name,
-            "type" => type
-          }
+          return self.to_hash_for_stream(name, type)
         else
           return nil
         end
@@ -204,11 +200,7 @@ module Dog
               type = self.typeof_node(node)
 
               if type then
-                descendants << { 
-                  "id" => symbol,
-                  "name" => symbol.split('.'),
-                  "type" => type
-                }
+                descendants << self.to_hash_for_stream(symbol.split('.'), type)
               end
             end
           end
@@ -239,6 +231,19 @@ module Dog
         else
           nil
         end
+      end
+
+      def to_hash_for_stream(name, type)
+        bag = {
+          "id" => name.join("."),
+          "name" => name,
+          "type" => type
+        }
+        # FIXME hack to get name right
+        # if type == 'oneach'
+        #   bag["name"] = bag["name"]["@each:".length, bag["name"].length]
+        # end
+        return bag
       end
 
     end
