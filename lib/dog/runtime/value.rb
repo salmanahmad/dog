@@ -105,7 +105,7 @@ module Dog
       else
         h = {}
         for k, v in self.value do
-          h[k[1,k.length]] = v.ruby_value
+          h[k[2,k.length]] = v.ruby_value
         end
         
         return h
