@@ -228,8 +228,7 @@ module Dog
 
     def to_hash_for_stream
       return {
-        "id" => "handler:#{self._id}",
-        # FIXME HACK -- remove this once the name is pluralized properly on backend
+        "id" => self._id.to_s,
         "name" => self.function_name.split('.'),
         "type" => "track"
       }

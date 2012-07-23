@@ -262,10 +262,7 @@ module Dog
           runtime = []
           tracks = ::Dog::Track.find({"function_name" => id})
           for track in tracks do
-            runtime << {
-              "id" => track["_id"].to_s,
-              "name" => track["function_name"]
-            }
+            runtime << Track.from_hash(track).to_hash_for_stream
           end
 
           stream["self"] = ::Dog::Runtime.symbol_info(symbol)
