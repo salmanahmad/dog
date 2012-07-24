@@ -102,7 +102,7 @@ module Dog
         end
                 
         tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING]
+          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
           }
         }, :sort => ["created_at", Mongo::DESCENDING])
         
@@ -127,6 +127,10 @@ module Dog
           
           self.save_set.add(track)
           
+          if track.state == Track::STATE::ASKING then
+            break
+          end
+          
           if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
             parent_track = Track.find_by_id(track.control_ancestors.last)
             
@@ -149,7 +153,7 @@ module Dog
             run_track(next_track)
             return
           end
-        end        
+        end
         
         for t in self.save_set do
           t.save

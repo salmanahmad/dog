@@ -1,17 +1,33 @@
 
-DEFINE video {
-  title
-  body
-}
 
-LISTEN TO PUBLIC VIA stream FOR videos
-
-ON EACH video DO
-  PRINT "Hello!"
+DEFINE label_images FOR person ON data DO
+  PERFORM "what is this image?"
+  RETURN label
 END
 
-NOTIFY PUBLIC VIA stream OF "Hello, World!"
+images = ASK PUBLIC VIA stream TO label_images ON "hi"
 
+PRINT images.label
+
+PRINT "hi!"
+
+ON EACH image DO
+  PRINT "hello!"
+END
+
+#DEFINE video {
+#  title
+#  body
+#}
+#
+#LISTEN TO PUBLIC VIA stream FOR videos
+#
+#ON EACH video DO
+#  PRINT "Hello!"
+#END
+#
+#NOTIFY PUBLIC VIA stream OF "Hello, World!"
+#
 #
 #
 #hash = {

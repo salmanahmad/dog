@@ -321,26 +321,53 @@ module Dog
 
         post prefix + '/stream/object/:id' do |id|
           object = ::Dog::StreamObject.find_by_id(id)
-          track = ::Dog::Track.new(object.handler)
-
-          argument = {}
-          for property in object.properties do
-            argument[property.identifier] = params[property.identifier]
-            if property.required && argument[property.identifier].nil? then
-              return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
+          
+          if object.class == ::Dog::RoutedTask then
+            task = object
+            response = {}
+            
+            for property in task.properties do
+              if property.direction == "input" then
+                response[property.identifier] = params[property.identifier]
+                if property.required && response[property.identifier].nil? then
+                  return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
+                end
+              end
             end
+            
+            task.responses << response
+            task.save
+            
+            if task.completed? then
+              track = ::Dog::Track.find_by_id(task.track_id)
+              if track.asking_id == task.id.to_s then
+                track.state = ::Dog::Track::STATE::RUNNING
+                ::Dog::Runtime.run_track(track)
+              end
+            end
+            
+          elsif object.class == ::Dog::RoutedEvent then
+            track = ::Dog::Track.new(object.handler)
+            
+            argument = {}
+            for property in object.properties do
+              argument[property.identifier] = params[property.identifier]
+              if property.required && argument[property.identifier].nil? then
+                return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
+              end
+            end
+
+            if object.handler_argument then
+              dog_value = ::Dog::Value.from_ruby_value(argument, object.name)
+              track.write_variable(object.handler_argument, dog_value)
+            end
+
+            track.listen_argument = object.handler_argument
+            track.save
+
+            ::Dog::Runtime.run_track(track)
           end
-
-          if object.handler_argument then
-            dog_value = ::Dog::Value.from_ruby_value(argument, object.name)
-            track.write_variable(object.handler_argument, dog_value)
-          end
-
-          track.listen_argument = object.handler_argument
-          track.save
-
-          ::Dog::Runtime.run_track(track)
-
+          
           content_type 'application/json'
           return {
             "success" => true

@@ -15,6 +15,7 @@ module Dog
     module STATE
       RUNNING = "running"
       CALLING = "calling"
+      ASKING = "asking"
       WAITING = "waiting"
       LISTENING = "listening"
       FINISHED = "finished" 
@@ -42,6 +43,7 @@ module Dog
     attr_accessor :error_value
     
     attr_accessor :has_listen
+    attr_accessor :asking_id
     
     # TODO - I don't think that listen_argument is used at all anymore
     attr_accessor :listen_argument
@@ -222,6 +224,7 @@ module Dog
         "return_value" => self.return_value,
         "error_value" => self.error_value,
         "has_listen" => self.has_listen,
+        "asking_id" => self.asking_id,
         "listen_argument" => self.listen_argument
       }
     end

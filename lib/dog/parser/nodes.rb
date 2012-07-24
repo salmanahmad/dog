@@ -342,11 +342,33 @@ module Dog::Nodes
               raise "I could not find attribute #{item} inside of the value #{value} on line #{self.line}."
             end
             
-          end  
+          end
+          
+          if value.type == "task" then
+            
+            if value.value["d:completed"].is_false? then
+              id = value.value["s:id"].ruby_value
+              task = ::Dog::StreamObject.find_by_id(id)
+              
+              # TODO - Convert this to handle more than a single response
+              
+              if task.completed? then
+                for k, v in task.responses.first do
+                  value.value["s:#{k}"] = ::Dog::Value.from_ruby_value(v)
+                end
+                value.value["d:completed"] = ::Dog::Value.true_value
+              else
+                track.state = ::Dog::Track::STATE::ASKING
+                track.asking_id = id
+                return
+              end
+            end
+          end
+          
         end
         
         # This is an edge case in case the value was not found at all
-        value = ::Dog::Value.null_value if value.nil? 
+        value = ::Dog::Value.null_value if value.nil?
         
         track.write_stack(self.path, value)
         track.should_visit(self.parent)
@@ -533,6 +555,7 @@ module Dog::Nodes
         track.should_visit(self.parent)
         return
       else
+        
         if self.body.nil? then
           track.finish
           track.write_return_value(::Dog::Value.null_value)
@@ -602,6 +625,60 @@ module Dog::Nodes
             
             state = ::Dog::Value.string_value("done")
             track.write_stack(self.path.clone << "@state", state)
+          end
+          
+          
+          if self.target == "person" then
+            
+            properties = []
+            
+            for name, value in track.variables do
+              p = ::Dog::Property.new
+              p.identifier = name
+              p.value = ::Dog::Value.from_hash(value).ruby_value
+              p.required = true
+              p.direction = "output"
+              properties << p
+            end
+            
+            for node in self.body.nodes do
+              if node.class == Return then
+                for e in node.expressions do
+                  raise "Tasks must return identifiers" unless e.class == Access
+                  
+                  p = ::Dog::Property.new
+                  p.identifier = e.sequence.first
+                  p.required = true
+                  p.direction = "input"
+                  properties << p
+                end
+                
+                break
+              end
+            end
+            
+            # TODO - I need to set the instructions from perform as well...
+            
+            task = ::Dog::RoutedTask.new
+            task.name = self.name
+            task.replication = 1
+            task.duplication = 1
+            task.properties = properties
+            task.track_id = track.control_ancestors.last
+            
+            # TODO - Perhaps insert an artificial node to create an instance - just like with structure
+            # instantitations
+            task.routing = nil
+            task.created_at = Time.now.utc
+            task.save
+            
+            track.finish
+            track.write_return_value(::Dog::Value.new("task", {
+              "s:id" => ::Dog::Value.string_value(task.id.to_s),
+              "d:completed" => ::Dog::Value.false_value
+            }))
+            
+            return
           end
           
           track.should_visit(self.body)
@@ -741,6 +818,83 @@ module Dog::Nodes
     attribute :mandatory_arguments
     attribute :optional_arguments
     attribute :via
+    
+    def visit(track)
+      
+      
+      path = ::Dog::Runtime.bite_code["symbols"][self.function_name].clone
+      path.shift
+      
+      node = ::Dog::Runtime.node_at_path_for_filename(path, ::Dog::Runtime.bite_code["main_filename"])
+      
+      if node then
+        if node.target != "person" then
+          raise "Attempting to ASK a normal function on line: #{self.line}"
+        end
+      else
+        raise "Could not find task for ASK on line: #{self.line}"
+      end
+      
+      
+      passed_mandatory_arguments = {}
+      
+      if self.mandatory_arguments then
+        
+        if self.mandatory_arguments.kind_of? Array then
+          passed_mandatory_arguments = []
+          
+          for arg in self.mandatory_arguments do
+            unless track.has_visited? arg then
+              track.should_visit(arg)
+              return
+            end
+            
+            passed_mandatory_arguments << track.read_stack(arg.path).to_hash
+          end
+        else
+          passed_mandatory_arguments = {}
+          
+          for key, arg in self.mandatory_arguments do
+            unless track.has_visited? arg then
+              track.should_visit(arg)
+              return
+            end
+            
+            passed_mandatory_arguments[key] = track.read_stack(arg.path).to_hash
+          end
+        end
+      end
+      
+      passed_optional_arguments = {}
+      
+      if self.optional_arguments then
+        for key, arg in self.optional_arguments do
+          unless track.has_visited? arg then
+            track.should_visit(arg)
+            return
+          end
+          
+          passed_optional_arguments[key] = track.read_stack(arg.path).to_hash
+        end
+      end
+      
+      # TODO - See this same TODO in the normal FunctionCall about when to save
+      # the track.
+      
+      # TODO - Another thing that I need to handle is to process async calls by sending
+      # an RPC over to the target. Right now, I am not actually using target for anything...
+      track.save
+      
+      function = ::Dog::Track.new(self.function_name)
+      function.control_ancestors = track.control_ancestors.clone
+      function.control_ancestors.push(track.id)
+      
+      function.mandatory_arguments = passed_mandatory_arguments
+      function.optional_arguments = passed_optional_arguments
+      
+      track.state = ::Dog::Track::STATE::CALLING
+      return function
+    end
   end
   
   # TODO - I need to handle type safety with structures and functions
@@ -1176,7 +1330,9 @@ module Dog::Nodes
           return
         end
       end
-
+      
+      puts value
+      
       track.write_stack(self.path, ::Dog::Value.null_value)
       track.should_visit(self.parent)
     end
@@ -1196,6 +1352,8 @@ module Dog::Nodes
           return
         end
       end
+      
+      puts value.inspect
       
       track.write_stack(self.path, ::Dog::Value.null_value)
       track.should_visit(self.parent)

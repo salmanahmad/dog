@@ -148,6 +148,10 @@ module Dog
       self.type == "null"
     end
     
+    def is_false?
+      self.type == "boolean" && self.value == false
+    end
+    
     def self.null_value
       value = Value.new
       value.type = "null"
