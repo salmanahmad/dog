@@ -259,6 +259,10 @@ module Dog
 
           symbol = id.split(".")
 
+          unless ::Dog::Runtime.symbol_exists?(symbol)
+            return [404, {}, "The lexical symbol you are looking up does not exist."]
+          end
+
           runtime = []
           tracks = ::Dog::Track.find({"function_name" => id})
           for track in tracks do
