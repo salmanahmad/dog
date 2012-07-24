@@ -352,6 +352,7 @@ module Dog
             
           elsif object.class == ::Dog::RoutedEvent then
             track = ::Dog::Track.new(object.handler)
+            track.control_ancestors = [::Dog::Track.root.id]
             
             argument = {}
             for property in object.properties do
