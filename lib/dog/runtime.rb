@@ -100,15 +100,8 @@ module Dog
           track = Track.from_hash(track)
           run_track(track)
         end
-                
-        tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
-          }
-        }, :sort => ["created_at", Mongo::DESCENDING])
         
-        if tracks.count != 0 then
-          Server.run
-        end
+        start_stop_server
       end
       
       def run_track(track)
@@ -159,8 +152,27 @@ module Dog
           t.save
         end
         
+        if track.is_root? && track.state == Track::STATE::FINISHED then
+          start_stop_server
+        end
+        
       end
-
+      
+      
+      def start_stop_server
+        tracks = Track.find({"state" => { 
+          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
+          }
+        }, :sort => ["created_at", Mongo::DESCENDING])
+        
+        if tracks.count != 0 then
+          Server.run
+        else
+          # TODO - Is there a better way to make this re-entrant?
+          exit
+        end
+      end
+      
       def symbol_exists?(name = [])
         name = name.join(".")
         if name == "" then

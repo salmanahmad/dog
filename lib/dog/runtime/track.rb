@@ -284,6 +284,10 @@ module Dog
       end
     end
     
+    def is_root?
+      self.control_ancestors.empty?
+    end
+    
     def self.initialize_root(name, filename)
       root = self.root
       
