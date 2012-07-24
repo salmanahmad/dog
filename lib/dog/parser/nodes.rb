@@ -12,7 +12,7 @@ module Dog::Nodes
   class Treetop::Runtime::SyntaxNode
     def compile
       if elements && elements.first then
-        return self.elements.first.compile  
+        return self.elements.first.compile
       else
         return nil
       end
@@ -1085,17 +1085,27 @@ module Dog::Nodes
     
   end
   
+  class Perform < Node
+    attribute :instructions
+    
+    def visit(track)
+      if track.has_visited? self.instructions then
+        track.write_stack(self.path, track.read_stack(self.instructions.path))
+        track.should_visit(self.parent)
+        return
+      else
+        track.should_visit(self.instructions)
+        return
+      end
+    end
+  end
+  
   class Import < Node
     attribute :path
   end
   
-  class Perform < Node
-    
-  end
-  
   class Break < Node
     def visit(track)
-      
       pointer = self
       
       while pointer = pointer.parent do
@@ -1112,20 +1122,38 @@ module Dog::Nodes
       return
     end
   end
-  
+
   class Return < Node
-    attribute :expression
-    
+    attribute :expressions
+
     def visit(track)
+
       return_value = ::Dog::Value.null_value
-      
-      if self.expression then
-        unless track.has_visited?(self.expression) then
-          track.should_visit(self.expression)
-          return
+
+      if self.expressions then
+        if self.expressions.length == 1 then
+          unless track.has_visited?(self.expressions.first) then
+            track.should_visit(self.expressions.first)
+            return
+          else
+            return_value = track.read_stack(self.expressions.first.path)
+          end
+        else
+          
+          struct = {}
+          self.expressions.each_index do |index|
+            e = self.expressions[index]
+            
+            if track.has_visited? e then
+              struct[index] = track.read_stack(e.path)
+            else
+              track.should_visit(e)
+              return
+            end
+          end
+          
+          return_value = ::Dog::Value.from_ruby_value(struct)
         end
-        
-        return_value = track.read_stack(self.expression.path)
       end
       
       track.write_return_value(return_value)
@@ -1133,13 +1161,13 @@ module Dog::Nodes
       return
     end
   end
-  
+
   class Print < Node
     attribute :expression
-    
+
     def visit(track)
       value = ""
-      
+
       if self.expression then
         if track.has_visited?(self.expression) then
           value = track.read_stack(self.expression.path).value
@@ -1153,7 +1181,7 @@ module Dog::Nodes
       track.should_visit(self.parent)
     end
   end
-  
+
   class Inspect < Node
     attribute :expression
     
