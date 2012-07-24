@@ -168,8 +168,9 @@ module Dog
         if tracks.count != 0 then
           Server.run
         else
-          # TODO - Is there a better way to make this re-entrant?
-          exit
+          EM.next_tick do
+            Process.kill('INT', Process.pid)
+          end
         end
       end
       
