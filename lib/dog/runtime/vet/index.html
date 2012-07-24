@@ -1,0 +1,321 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script type="text/javascript" src="jquery.js"></script>
+
+	<style type="text/css">
+
+	body {
+		font-family:Helvetica, Arial, sans-serif;
+		font-size:12px;
+		margin:50px;
+		background-color:rgb(200,210,225);
+	}
+
+	.columns {
+		position:relative;
+		clear:both;
+	}
+
+	#wrapper {
+		margin:auto;
+		width:1000px;
+		background:white;
+		box-shadow: 0px 5px 25px #555;
+	}
+	
+	#vet-space {
+		color:white;
+		padding:10px 0px 10px 0px;
+		background-image: -webkit-linear-gradient(rgb(236,110,225), rgb(175,73,161));
+		text-indent: 5px;
+		font-weight:bold;
+		text-shadow:0px 1px 1px #000;
+		font-size:15px;
+		border-right:1px solid rgb(180,180,180);
+	}
+	
+	.vet-space {
+		position:absolute;
+		bottom:0px;
+		left:-1px;
+		height:100%;
+		width:250px;
+	}
+
+	#sidebar {
+		width:25%;
+		float:left;
+		background-color:transparent;
+		position:relative;
+		z-index:1;
+	}
+
+	#sidebar li {
+		cursor:pointer;
+		padding:2px;
+		font-size:12px;
+		padding:14px 0px 14px 5px;
+		border-bottom:1px solid rgb(180,180,180);
+	}
+	
+	#sidebar li.selected {
+		cursor:pointer;
+		font-size:12px;
+		padding:14px 0px 14px 6px;
+		margin:0px 0px 0px 0px;
+		border-bottom:1px solid rgb(180,180,180);
+		color:white;
+		font-weight:bold;
+		text-transform:uppercase;
+	}
+	
+	#sidebar li:last-child {
+		border-bottom:0px;
+	}
+
+	#sidebar ul {
+		padding:0px;
+		margin:0px;
+		list-style-type:none;
+		z-index:3;
+	}
+
+	.sidebar {
+		position:absolute;
+		height:100%;
+		width:249px;
+		background-image: -webkit-linear-gradient(rgb(250,250,250), rgb(230,230,230));
+		border-right: 1px solid rgb(180,180,180);
+		z-index:0;
+	}
+	
+	#selected-button {
+		position:absolute;
+		z-index:-1;
+	}
+
+	#content {
+		width:750px;
+		height:100%;
+		float:left;
+		background:white;
+		position:relative;
+		z-index:0;
+	}
+
+	h3 {
+		margin:0px;
+		margin-top:8px;
+		margin-left:5px;
+		padding-bottom:20px;
+		font-weight:bold;
+		text-transform: uppercase;
+		text-shadow: 0px -1px 0px #fff;
+	}
+
+	.clear {
+		clear:both;
+	}
+	#footer {
+		position:fixed;
+		bottom:0px;
+		left:0px;
+		right:0px;
+		padding: 10px 10px 5px 10px;
+		height:20px;
+		color:#444;
+		text-shadow:-1px 1px 0px #fff;;
+		background-image: -webkit-linear-gradient(rgb(230,230,235), rgb(200,200,205));
+		z-index:10;
+		border-top:1px solid #999;
+	}
+	
+	#footer-left {
+		float:left;
+		position:relative;
+		width:50%;
+	}
+	
+	#footer-right {
+		float:left;
+		position:relative;
+		width:50%;
+		text-align:right;
+	}
+	
+	#footer-right li {
+		height:100%;
+		cursor:pointer;
+		padding:2px;
+		font-size:12px;
+		padding:11px 5px 11px 5px;
+		display:inline;
+	}
+	
+	#footer-right li:hover {
+		background-image:-webkit-linear-gradient(rgb(200,200,205), rgb(230,230,235));
+	}
+	
+	#footer-right li.selected {
+		cursor:pointer;
+		font-size:12px;
+		padding:14px 0px 14px 6px;
+		margin:0px 0px 0px 0px;
+		font-weight:bold;
+	}
+
+	#footer-right ul {
+		padding:0px;
+		margin:0px;
+		list-style-type:none;
+	}
+	
+	#help-box {
+		padding:20px;
+		background-image:-webkit-linear-gradient(rgb(230,230,235), rgb(190,190,195));
+		width:150px;
+		height:250px;
+		position:fixed;
+		bottom:35px;
+		right:0px;
+		border-left:1px solid #888;
+		border-right:1px solid #888;
+		border-top:1px solid #888;
+		z-index:11;
+	}
+	
+	#account-box {
+		padding:20px;
+		background-image:-webkit-linear-gradient(rgb(220,220,225), rgb(200,200,205));
+		width:150px;
+		height:250px;
+		position:fixed;
+		bottom:35px;
+		right:0px;
+		border-left:1px solid #888;
+		border-right:1px solid #888;
+		border-top:1px solid #888;
+		z-index:11;
+	}
+	
+
+	</style>
+
+	<script type="text/javascript">
+	
+	$(document).ready(function() {
+		$("#content").load("config.html")
+		$("#selected-button").offset({top:87})
+		$("#help-box").css("display", "none")
+		$("#account-box").css("display", "none")
+		
+		$(".nav-button").mouseenter(function() {
+			if(!$(this).hasClass("selected")) {
+				$(this).css("background-image", "-webkit-linear-gradient(#F6F6F6, #DFDFDF)")
+				$(this).css("border-right", "1px solid rgb(180,180,180)")
+			}
+		})
+		
+		$(".nav-button").mouseleave(function() {
+			$(this).css("background-image", "")
+		})
+		
+		$(".nav-button").click(function() {
+			var topOffset = 87+(43 * ($("li").index($(this))*1))
+			$("#selected-button").offset({top:topOffset})
+			$(".selected").removeClass("selected")
+			$("#content").load(this.id + ".html")
+			$(this).addClass("selected")
+			$(this).css("background-image", "")
+			$(this).css("border-right", "")
+		})
+		
+		$("#help").click(function(e) {
+			e.stopPropagation()
+			if($("#help-box").css("display") == "none") {
+				$("#help-box").css("display", "block")
+				$("#account-box").css("display", "none")
+			}
+			else {
+				$("#help-box").css("display", "none")
+			}
+		})
+		
+		$("#account").click(function(e) {
+			e.stopPropagation()
+			if($("#account-box").css("display") == "none") {
+				$("#account-box").css("display", "block")
+				$("#help-box").css("display", "none")
+			}
+			else {
+				$("#account-box").css("display", "none")
+			}
+		})
+		
+		$("html").click(function() {
+			if($("#account-box").css("display") == "block") {
+				$("#account-box").css("display", "none")
+			}
+			if($("#help-box").css("display") == "block") {
+				$("#help-box").css("display", "none")
+			}
+		})
+		
+		
+	})
+	
+	</script>
+</head>
+<body>
+	<div id="wrapper">
+			<div id="column-body" class="columns">
+				<div id="sidebar">
+					<div id="vet-space">
+						Vet
+					</div>
+					<ul>
+						<div id="selected-button">
+							<img src="Selected Button.png" width="265" height="42" ></img>
+						</div>
+						<li id="config" class="nav-button selected">Configuration</li>
+						<li id="shell" class="nav-button">Shell</li>
+						<li id="userman" class="nav-button">User Manager</li>
+						<li id="commman" class="nav-button">Community Manager</li>
+						<li id="objbrowser" class="nav-button">Object Browser</li>
+						<li id="migrator" class="nav-button">Migrator</li>
+						<li id="garbcoll" class="nav-button">Garbage Collector</li>
+						<li id="cligen" class="nav-button">Client Generators</li>
+						<li id="analytics" class="nav-button">Analytics</li>
+					</ul>
+				</div>
+				<div class="sidebar">
+					&nbsp;
+				</div>
+				<div id="content">
+					
+				</div>
+				<div class="clear"></div>
+			</div>
+	</div>
+	<div id="help-box">
+		Get help at...
+	</div>
+	<div id="account-box">
+		Account Settings<br />
+		Logout
+	</div>
+	<div id="footer">
+		<div id="footer-left">
+			System health: Great!
+		</div>
+		<div id="footer-right">
+			<ul>
+				<li id="help" class="footer-button">Need Help?</li>
+				<li id="account" class="footer-button">Account</li>
+			</ul>
+		</div>
+		<div class="clear"></div>
+	</div>
+</body>
+</html>

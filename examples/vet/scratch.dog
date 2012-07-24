@@ -1,0 +1,11 @@
+
+
+DEFINE tweet {
+	status
+}
+
+LISTEN TO public VIA http FOR tweets
+
+ON EACH tweet DO
+	PRINT tweet.status
+END
