@@ -55,11 +55,7 @@ module Dog
       attr_accessor :bite_code_filename
       attr_accessor :save_set
     
-      def run_file(bite_code_filename, options = {})
-        run(File.open(bite_code_filename).read, bite_code_filename, options)
-      end
-      
-      def run(bite_code, bite_code_filename, options = {})
+      def initialize(bite_code, bite_code_filename, options = {})
         self.save_set = Set.new
         
         options = {
@@ -68,15 +64,15 @@ module Dog
           "database" => {}
         }.merge!(options)
         
-        bite_code = JSON.load(bite_code)
-      
+        bite_code = JSON.load(bite_code) unless bite_code.kind_of? Hash
+        
         if bite_code["version"] != VERSION::STRING then
           raise "This program was compiled using a different version of Dog. It was compiled with #{bite_code["version"]}. I am Dog version #{VERSION::STRING}."
         end
         
         code = {}
         for filename, ast in bite_code["code"]
-          # I need the second call here so that I can initialize the parent pointers in the tree. 
+          # I need the second call here so that I can initialize the parent pointers in the tree.
           # I may want to incorporate this into from_hash at some point.
         
           ast = Nodes::Node.from_hash(ast)
@@ -93,6 +89,14 @@ module Dog
         Config.initialize(options["config_file"], options["config"])
         Database.initialize(options["database"])
         Track.initialize_root("root", bite_code["main_filename"])
+      end
+    
+      def run_file(bite_code_filename, options = {})
+        run(File.open(bite_code_filename).read, bite_code_filename, options)
+      end
+      
+      def run(bite_code, bite_code_filename, options = {})
+        self.initialize(bite_code, bite_code_filename, options)
         
         tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
         
