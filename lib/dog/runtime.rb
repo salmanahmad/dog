@@ -100,15 +100,8 @@ module Dog
           track = Track.from_hash(track)
           run_track(track)
         end
-                
-        tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING]
-          }
-        }, :sort => ["created_at", Mongo::DESCENDING])
         
-        if tracks.count != 0 then
-          Server.run
-        end
+        start_stop_server
       end
       
       def run_track(track)
@@ -126,6 +119,10 @@ module Dog
           next_track = node.visit(track)
           
           self.save_set.add(track)
+          
+          if track.state == Track::STATE::ASKING then
+            break
+          end
           
           if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
             parent_track = Track.find_by_id(track.control_ancestors.last)
@@ -149,70 +146,125 @@ module Dog
             run_track(next_track)
             return
           end
-        end        
+        end
         
         for t in self.save_set do
           t.save
         end
         
+        if track.is_root? && track.state == Track::STATE::FINISHED then
+          start_stop_server
+        end
+        
+      end
+      
+      
+      def start_stop_server
+        tracks = Track.find({"state" => { 
+          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
+          }
+        }, :sort => ["created_at", Mongo::DESCENDING])
+        
+        if tracks.count != 0 then
+          Server.run
+        else
+          EM.next_tick do
+            Process.kill('INT', Process.pid)
+          end
+        end
       end
       
       def symbol_exists?(name = [])
         name = name.join(".")
-        
         if name == "" then
           return true
         else
           return self.bite_code["symbols"].include? name
         end
       end
-      
+
+      def symbol_info(name = [])
+        path = self.bite_code["symbols"][name.join(".")].clone
+        path.shift
+
+        node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
+        type = self.typeof_node(node)
+
+        if type then
+          return self.to_hash_for_stream(name, type)
+        else
+          return nil
+        end
+      end
+
       def symbol_descendants(name = [], depth = 1)
         descendants = []
         name = name.join(".")
-        
+
+        # special case root
+        name = '' if name == 'root'
+
         for symbol, path in self.bite_code["symbols"] do
           if symbol.start_with?(name) then
             level = symbol[name.length, symbol.length].count(".")
-            
-            if depth == -1 || level <= depth then
+            level += 1 if name == '' # implied root. in every name
+
+            if level > 0 && (depth == -1 || level <= depth) then
+              path = path.clone
+              path.shift
+
               node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-              
-              type = nil
-              
-              if node.class == ::Dog::Nodes::FunctionDefinition then
-                type = "function"
-              elsif node.class == ::Dog::Nodes::OnEachDefinition then
-                type = "on_each"
-              elsif node.class == ::Dog::Nodes::StructureDefinition then
-                type = "structure"
-              end
-              
+              type = self.typeof_node(node)
+
               if type then
-                descendants << { 
-                  "symbol" => symbol,
-                  "type" => type
-                }
+                descendants << self.to_hash_for_stream(symbol.split('.'), type)
               end
             end
           end
         end
-        
+
         return descendants
       end
-      
+
       def node_at_path_for_filename(path, file)
         # TODO - I need to raise an error if the node is not found.
         node = self.bite_code["code"][file]
-        
+
         for index in path do
           node = node[index]
-          
         end
-        
+
         return node
       end
-    end    
+
+      def typeof_node(node)
+        return case
+        when node.class == ::Dog::Nodes::FunctionDefinition
+          "function"
+        when node.class == ::Dog::Nodes::OnEachDefinition
+          "oneach"
+        when node.class == ::Dog::Nodes::StructureDefinition
+          "structure"
+        else
+          nil
+        end
+      end
+
+      def to_hash_for_stream(name, type)
+        bag = {
+          "id" => name.join("."),
+          "name" => name,
+          "type" => type
+        }
+        # FIXME hack to get name right
+        # if type == 'oneach'
+        #   bag["name"] = bag["name"]["@each:".length, bag["name"].length]
+        # end
+        return bag
+      end
+
+    end
+
   end
-  
+
 end

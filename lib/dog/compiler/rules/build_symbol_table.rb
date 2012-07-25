@@ -35,6 +35,7 @@ module Dog::Rules
       end
       
       name = name.join(".")
+      node.name = name
       
       if self.compiler.bite["symbols"].include? name then
         report_error_for_node(node, "The symbol named #{name} has been used twice. Symbols used to identify functions, events, task, and messages must be unique throughout the entire system.")

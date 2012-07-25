@@ -12,7 +12,7 @@ module Dog::Nodes
   class Treetop::Runtime::SyntaxNode
     def compile
       if elements && elements.first then
-        return self.elements.first.compile  
+        return self.elements.first.compile
       else
         return nil
       end
@@ -342,11 +342,33 @@ module Dog::Nodes
               raise "I could not find attribute #{item} inside of the value #{value} on line #{self.line}."
             end
             
-          end  
+          end
+          
+          if value.type == "task" then
+            
+            if value.value["d:completed"].is_false? then
+              id = value.value["s:id"].ruby_value
+              task = ::Dog::StreamObject.find_by_id(id)
+              
+              # TODO - Convert this to handle more than a single response
+              
+              if task.completed? then
+                for k, v in task.responses.first do
+                  value.value["s:#{k}"] = ::Dog::Value.from_ruby_value(v)
+                end
+                value.value["d:completed"] = ::Dog::Value.true_value
+              else
+                track.state = ::Dog::Track::STATE::ASKING
+                track.asking_id = id
+                return
+              end
+            end
+          end
+          
         end
         
         # This is an edge case in case the value was not found at all
-        value = ::Dog::Value.null_value if value.nil? 
+        value = ::Dog::Value.null_value if value.nil?
         
         track.write_stack(self.path, value)
         track.should_visit(self.parent)
@@ -533,6 +555,7 @@ module Dog::Nodes
         track.should_visit(self.parent)
         return
       else
+        
         if self.body.nil? then
           track.finish
           track.write_return_value(::Dog::Value.null_value)
@@ -604,6 +627,60 @@ module Dog::Nodes
             track.write_stack(self.path.clone << "@state", state)
           end
           
+          
+          if self.target == "person" then
+            
+            properties = []
+            
+            for name, value in track.variables do
+              p = ::Dog::Property.new
+              p.identifier = name
+              p.value = ::Dog::Value.from_hash(value).ruby_value
+              p.required = true
+              p.direction = "output"
+              properties << p
+            end
+            
+            for node in self.body.nodes do
+              if node.class == Return then
+                for e in node.expressions do
+                  raise "Tasks must return identifiers" unless e.class == Access
+                  
+                  p = ::Dog::Property.new
+                  p.identifier = e.sequence.first
+                  p.required = true
+                  p.direction = "input"
+                  properties << p
+                end
+                
+                break
+              end
+            end
+            
+            # TODO - I need to set the instructions from perform as well...
+            
+            task = ::Dog::RoutedTask.new
+            task.name = self.name
+            task.replication = 1
+            task.duplication = 1
+            task.properties = properties
+            task.track_id = track.control_ancestors.last
+            
+            # TODO - Perhaps insert an artificial node to create an instance - just like with structure
+            # instantitations
+            task.routing = nil
+            task.created_at = Time.now.utc
+            task.save
+            
+            track.finish
+            track.write_return_value(::Dog::Value.new("task", {
+              "s:id" => ::Dog::Value.string_value(task.id.to_s),
+              "d:completed" => ::Dog::Value.false_value
+            }))
+            
+            return
+          end
+          
           track.should_visit(self.body)
           return
         end
@@ -628,15 +705,18 @@ module Dog::Nodes
           the_collection = self.variable.to_s + "s"
         end
         
-        
-        
         value = track.read_variable(the_collection)
-        
+
         unless value then
           raise "I could not find a variable named: #{the_collection} on line: #{self.line}"
           return
         end
-        
+
+        if value.is_null? then
+          raise "I could not a variable named: #{the_collection} on line: #{self.line}. Are you sure you have a listen?"
+          return
+        end
+
         stream_object_id = value.value["s:id"].value
         
         stream_object = ::Dog::StreamObject.find_by_id(stream_object_id)
@@ -738,6 +818,83 @@ module Dog::Nodes
     attribute :mandatory_arguments
     attribute :optional_arguments
     attribute :via
+    
+    def visit(track)
+      
+      
+      path = ::Dog::Runtime.bite_code["symbols"][self.function_name].clone
+      path.shift
+      
+      node = ::Dog::Runtime.node_at_path_for_filename(path, ::Dog::Runtime.bite_code["main_filename"])
+      
+      if node then
+        if node.target != "person" then
+          raise "Attempting to ASK a normal function on line: #{self.line}"
+        end
+      else
+        raise "Could not find task for ASK on line: #{self.line}"
+      end
+      
+      
+      passed_mandatory_arguments = {}
+      
+      if self.mandatory_arguments then
+        
+        if self.mandatory_arguments.kind_of? Array then
+          passed_mandatory_arguments = []
+          
+          for arg in self.mandatory_arguments do
+            unless track.has_visited? arg then
+              track.should_visit(arg)
+              return
+            end
+            
+            passed_mandatory_arguments << track.read_stack(arg.path).to_hash
+          end
+        else
+          passed_mandatory_arguments = {}
+          
+          for key, arg in self.mandatory_arguments do
+            unless track.has_visited? arg then
+              track.should_visit(arg)
+              return
+            end
+            
+            passed_mandatory_arguments[key] = track.read_stack(arg.path).to_hash
+          end
+        end
+      end
+      
+      passed_optional_arguments = {}
+      
+      if self.optional_arguments then
+        for key, arg in self.optional_arguments do
+          unless track.has_visited? arg then
+            track.should_visit(arg)
+            return
+          end
+          
+          passed_optional_arguments[key] = track.read_stack(arg.path).to_hash
+        end
+      end
+      
+      # TODO - See this same TODO in the normal FunctionCall about when to save
+      # the track.
+      
+      # TODO - Another thing that I need to handle is to process async calls by sending
+      # an RPC over to the target. Right now, I am not actually using target for anything...
+      track.save
+      
+      function = ::Dog::Track.new(self.function_name)
+      function.control_ancestors = track.control_ancestors.clone
+      function.control_ancestors.push(track.id)
+      
+      function.mandatory_arguments = passed_mandatory_arguments
+      function.optional_arguments = passed_optional_arguments
+      
+      track.state = ::Dog::Track::STATE::CALLING
+      return function
+    end
   end
   
   # TODO - I need to handle type safety with structures and functions
@@ -837,28 +994,29 @@ module Dog::Nodes
       if structure_type.nil? then
         # TODO - Validate this..
         structure_type = self.variable.chop
-        
-        # TODO - Do I deal with defaults before or after? I guess that I
-        # really should do it after
-        
-        # TOOD - I have to handle the nested and fully qualified names
-        path = ::Dog::Runtime.bite_code["symbols"][structure_type]
-        if path then
-          
-          path = path.clone
-          path.shift
-          
-          node = ::Dog::Runtime.node_at_path_for_filename(path, ::Dog::Runtime.bite_code["main_filename"])
-          for p in node.properties do
-            p2 = ::Dog::Property.new
-            p2.identifier = p.name
-            p2.direction = "input"
-            properties << p2
-          end
-        end
       end
       
+      # TODO - Do I deal with defaults before or after? I guess that I
+      # really should do it after
       
+      # TODO - I should add the ability to fall back to a string
+      
+      # TODO - I have to handle the nested and fully qualified names
+      
+      path = ::Dog::Runtime.bite_code["symbols"][structure_type]
+      if path then
+          
+        path = path.clone
+        path.shift
+          
+        node = ::Dog::Runtime.node_at_path_for_filename(path, ::Dog::Runtime.bite_code["main_filename"])
+        for p in node.properties do
+          p2 = ::Dog::Property.new
+          p2.identifier = p.name
+          p2.direction = "input"
+          properties << p2
+        end
+      end
       
       event = ::Dog::RoutedEvent.new
       event.name = structure_type
@@ -911,7 +1069,7 @@ module Dog::Nodes
           p = ::Dog::Property.new
           p.direction = "output"
           p.identifier = "value"
-          p.value = value
+          p.value = ruby_value
           properties << p
         end
         
@@ -920,6 +1078,7 @@ module Dog::Nodes
         message.routing = nil # TODO
         message.created_at = Time.now.utc
         message.properties = properties
+        
         message.save
         
         track.write_stack(self.path, ::Dog::Value.null_value)
@@ -1080,17 +1239,27 @@ module Dog::Nodes
     
   end
   
+  class Perform < Node
+    attribute :instructions
+    
+    def visit(track)
+      if track.has_visited? self.instructions then
+        track.write_stack(self.path, track.read_stack(self.instructions.path))
+        track.should_visit(self.parent)
+        return
+      else
+        track.should_visit(self.instructions)
+        return
+      end
+    end
+  end
+  
   class Import < Node
     attribute :path
   end
   
-  class Perform < Node
-    
-  end
-  
   class Break < Node
     def visit(track)
-      
       pointer = self
       
       while pointer = pointer.parent do
@@ -1107,20 +1276,38 @@ module Dog::Nodes
       return
     end
   end
-  
+
   class Return < Node
-    attribute :expression
-    
+    attribute :expressions
+
     def visit(track)
+
       return_value = ::Dog::Value.null_value
-      
-      if self.expression then
-        unless track.has_visited?(self.expression) then
-          track.should_visit(self.expression)
-          return
+
+      if self.expressions then
+        if self.expressions.length == 1 then
+          unless track.has_visited?(self.expressions.first) then
+            track.should_visit(self.expressions.first)
+            return
+          else
+            return_value = track.read_stack(self.expressions.first.path)
+          end
+        else
+          
+          struct = {}
+          self.expressions.each_index do |index|
+            e = self.expressions[index]
+            
+            if track.has_visited? e then
+              struct[index] = track.read_stack(e.path)
+            else
+              track.should_visit(e)
+              return
+            end
+          end
+          
+          return_value = ::Dog::Value.from_ruby_value(struct)
         end
-        
-        return_value = track.read_stack(self.expression.path)
       end
       
       track.write_return_value(return_value)
@@ -1128,13 +1315,13 @@ module Dog::Nodes
       return
     end
   end
-  
+
   class Print < Node
     attribute :expression
-    
+
     def visit(track)
       value = ""
-      
+
       if self.expression then
         if track.has_visited?(self.expression) then
           value = track.read_stack(self.expression.path).value
@@ -1150,7 +1337,7 @@ module Dog::Nodes
       track.should_visit(self.parent)
     end
   end
-  
+
   class Inspect < Node
     attribute :expression
     
