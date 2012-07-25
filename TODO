@@ -1,25 +1,46 @@
-Next steps:
-	Implement unary operator
-	Implement NOTIFY
-	Implement LISTEN
-	Set the filenames properly when calling functions
+Things left to implement:
+
+Import
+
+Organiation of the bite code and symbol table (filenames)
+
+System libraries (The ability to implement dog functions in Ruby)
+
+Scopes when calling functions
+	
+Collections API
+	
+People
+
+Communities
+
+Predicates
+	
+External functions
+
+Implement unary operator
+
+Dog error reporting
+
+Dog unit test cases
+
+using @state instead of track.has_visited?
+
+Evaluator / Interpretter (related to bite code)
 
 
 
-Add unit parser tests for: 
+
+
+
+Add unit parser tests for:
 	import
-	community
 	config
-	reply
-
-
-
-Handle TODOs
-
-Check status on http_response
-
+	
 dog compile and dog run
 	Extensions are optional..
+
+Dog restart instead of Dog debug
 
 Error codes
 	Integration with a discussion page
@@ -35,7 +56,6 @@ Configuration file should be called:
 	
 	Also consider including a read only CONFIG command to give access from within Dog
 	
-
 Line numbers should be formatted as:
 	"In line {number} of {file}" rather than "file:number"
 
@@ -57,34 +77,15 @@ Organize the symbol table hierarchically
 
 
 
-Dog restart instead of Dog debug
 
 
 
 
-ON EACH variable and LISTEN / ASK collections...
 
-	We have two conflicting goals: search and variable scoping
-	
-	title
-	
-	ON EACH video DO
-		# does 'title' refer to the global variable or the video
-	END
-	
-	vs
-	
-	LISTEN FOR videos
-	
-	videos[title == "hello"]
-	
-	videos[video.title == "hello"]
-	
-	vs
-	
-	@each:videos[video.title == "Hello"]
-	
-	
+
+
+
+
 
 
 
@@ -96,12 +97,7 @@ Ruby API (similar to the C api for ruby)
 
 How do you "require" a C module in ruby and what woudl that look like for Dog???
 	Do these do what we expect: "require 'hello'" vs "require 'hello.so'" vs "require 'hello.rb'"
-	Should we have the similar approach??? 
-
-
-
-
-
+	Should we have the similar approach???
 
 functional languages
 	Everything in the language is immutable
