@@ -63,8 +63,10 @@ module Dog
     def self.from_ruby_value(ruby_value, type = nil)
       
       if ruby_value.kind_of? Hash then
+        type ||= "structure"
+        
         value = Value.new
-        value.type ||= "structure"
+        value.type = type
         value.value = {}
         
         for k, v in ruby_value do
@@ -103,7 +105,7 @@ module Dog
       else
         h = {}
         for k, v in self.value do
-          h[k[1,k.length]] = v.ruby_value
+          h[k[2,k.length]] = v.ruby_value
         end
         
         return h
@@ -140,6 +142,14 @@ module Dog
       value.type = "boolean"
       value.value = false
       return value
+    end
+    
+    def is_null?
+      self.type == "null"
+    end
+    
+    def is_false?
+      self.type == "boolean" && self.value == false
     end
     
     def self.null_value

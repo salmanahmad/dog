@@ -60,7 +60,7 @@ module Dog
           return false
         end
         
-        return true        
+        return true
       end
       
       def verify_not_current_user(message = "You cannot be logged in when performing this operation.")
@@ -75,6 +75,20 @@ module Dog
         
         return true
       end
+
+      def fetch_stream_items_for_track(track = ::Dog::Track.root)
+        # L 335
+        stream_items = []
+        # fetch StreamObjects
+        items = ::Dog::StreamObject.find({"track_id" => track.id})
+        items.each do |item|
+          item = ::Dog::StreamObject.from_hash(item)
+          stream_items << item.to_hash_for_stream
+        end
+
+        return stream_items
+      end
+
     end
     
     def self.get_or_post(path, opts={}, &block)
@@ -136,24 +150,24 @@ module Dog
       
       body output.to_json
     end
-    
+
     class << self
-      
+
       def initialize
         return if @initialized
         @initialized = true
-        
+
         prefix = Config.get('dog_prefix')
-        
+
         # TODO - I have to figure this out for production
         set :static, false
         set :public_folder, Proc.new { File.join(File.dirname(Runtime.bite_code_filename), "views") }
-        
+
         self.initialize_vet
-        
+
         get prefix + '/account/status' do
           @output = {}
-          
+
           if session[:current_user]
             @output["success"] = true
             @output["logged_in"] = true
@@ -161,13 +175,14 @@ module Dog
             @output["success"] = true
             @output["logged_in"] = false
           end
-          
+
+          content_type 'application/json'
           @output.to_json
         end
-        
+
         get prefix + '/account/login' do
           @output = {}
-          
+
           person = Person.find_by_email(params["email"])
           if person && person.password == Digest::SHA1.hexdigest(params["password"])
             @output["success"] = true
@@ -177,29 +192,30 @@ module Dog
             @output["errors"] ||= []
             @output["errors"] << "Wrong Username/Email and password combination."
           end
-          
+
+          content_type 'application/json'
           @output.to_json
         end
 
         get prefix + '/account/logout' do
-          @output = {}
-          
           session.clear
-          @output["success"] = true
-          
-          @output.to_json
+
+          content_type 'application/json'
+          return {
+            "success" => true
+          }.to_json
         end
-        
+
         post prefix + '/account/create' do
           return unless verify_not_current_user("You cannot be logged in when creating a new account.")
-          
+
           @output = {}
-          
+
           params["password"] ||= ""
           params["confirm"] ||= ""
-          
+
           person = Person.find_by_email(params["email"])
-          
+
           if person then
             @output["success"] = false
             @output["errors"] ||= []
@@ -211,316 +227,166 @@ module Dog
               @output["errors"] << "Password and Confirmation does not match."
             else
               @output.success = true
-              
+
               person = Person.new
               person.email = params["email"]
               person.password = Digest::SHA1.hexdigest params["password"]
               person.join_community_named(Config.get("default_community"))
               person.save
-                
+
               session[:current_user] = person.id
             end
           end
-          
+
+          content_type 'application/json'
           @output.to_json
         end
-        
-        get prefix + '/profile/view' do
-          return unless verify_current_user("You have to be logged in to view your profile.")
-          
-          @output = {}
-          
-          person = Person.find_by_id(session[:current_user])
-          @output["value"] = person.to_hash_for_event
-          @output["success"] = true
-          
-          @output.to_json
+
+        get prefix + '/stream' do
+          return redirect prefix + '/stream/runtime/root'
         end
-        
-        post prefix + '/profile/write' do
-          return unless verify_current_user("You have to be logged in to write to your profile.")
-          
-          @output = {}
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.write_profile(params["value"])
-          person.save if success
-          @output["success"] = success
-          
-          @output.to_json
-        end
-        
-        post prefix + '/profile/update' do          
-          return unless verify_current_user("You have to be logged in to update your profile.")
-          
-          @output = {}
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.update_profile(params["value"])
-          person.save if success
-          @output["success"] = success
-          
-          @output.to_json
-        end
-        
-        
-        # TODO - Privacy considerations need to go here...
-        
-        
-        get prefix + '/people/search' do
-          @output = {}
-          
-          @output["results"] = Person.search(params["query"])
-          @output["success"] = true
-          
-          @output.to_json
-        end
-        
-        get prefix + '/people/:id' do
-          @output = {}
-          
-          person = Person.find_by_id(params["id"])
-          if person then
-            @output["person"] = person.to_hash_for_event
-            @output["success"] = true
-          else
-            @output["success"] = false
-            @output["errors"] ||= []
-            @output["errors"] << "Could not find the user with that identifier."
-          end
-          
-          @output.to_json
-        end
-        
-        post prefix + '/community/:name/join' do
-          return unless verify_current_user("You have to be logged in to join a community.")          
-          
-          @output = {}
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.join_community_named(params["name"])
-          @output["success"] = success
-          
-          @output.to_json
-        end
-        
-        post prefix + '/community/:name/leave' do
-          return unless verify_current_user("You have to be logged in to leave a community.")
-          
-          @output = {}
-          
-          person = Person.find_by_id(session[:current_user])
-          success = person.leave_community_named(params["name"])
-          @output["success"] = success
-          
-          @output.to_json
-        end
-        
-        get prefix + '/stream.json' do
-          id = params["id"]
-          depth = (params["depth"] || 0).to_i
+
+        get prefix + '/stream/lexical/:id' do |id|
+          stream = {}
+          stream["self"] = {}
+          stream["lexical"] = []
+          stream["runtime"] = []
+
+          depth = (params["depth"] || 1).to_i
           limit = (params["limit"] || 0).to_i
           offset = (params["offset"] || 0).to_i
           after = (params["after"])
-          
-          stream = {}
-          stream["self"] = {}
-          stream["items"] = []
-          
-          if id then
-            if id.match(/^handler:(.*)/) then
-              
-              track = ::Dog::Track.find_by_id(id.match(/^handler:(.*)/)[1])
-              
-              stream["self"] = track.variables[track.listen_argument]
-              
-              items = ::Dog::StreamObject.find({"track_id" => track.id})
-              items.each do |item|
-                item = ::Dog::StreamObject.from_hash(item)
-                stream["items"] << item.to_hash_for_stream
-              end
-              
-            else
-              object = ::Dog::StreamObject.find_by_id(id)
-              stream["self"] = object.to_hash_for_stream
-              
-              if [::Dog::RoutedEvent, ::Dog::RoutedTask].include? object.type then
-                handler = object.handler
-                argument = object.handler_argument
-                
-                if handler then
-                  items = ::Dog::Track.find({"function_name" => handler})
-                  for item in items do
-                    item = ::Dog::Track.from_hash(item)
-                    if argument then
-                      stream_item = item.variables[argument]
-                      stream_item["id"] = "handler:#{item.id}"
-                    
-                      stream["items"] << stream_item
-                    end
-                  end
-                end
-              end
-            end
-          else
-            root = ::Dog::Track.root
-            items = ::Dog::StreamObject.find({"track_id" => root.id})
-            items.each do |item|
-              item = ::Dog::StreamObject.from_hash(item)
-              stream["items"] << item.to_hash_for_stream
-            end
+
+          symbol = id.split(".")
+
+          unless ::Dog::Runtime.symbol_exists?(symbol)
+            return [404, {}, "The lexical symbol you are looking up does not exist."]
           end
-          
-          stream["success"] = true
+
+          runtime = []
+          tracks = ::Dog::Track.find({"function_name" => id})
+          for track in tracks do
+            runtime << Track.from_hash(track).to_hash_for_stream
+          end
+
+          stream["self"] = ::Dog::Runtime.symbol_info(symbol)
+          stream["lexical"] = ::Dog::Runtime.symbol_descendants(symbol, depth)
+          stream["runtime"] = runtime
+
+          content_type "application/json"
           return stream.to_json
         end
 
-        post prefix + '/stream/:id' do | id |
+        get prefix + '/stream/runtime/:id' do |id|
+          stream = {}
+          stream["self"] = {}
+          stream["lexical"] = []
+          stream["runtime"] = []
+
+          depth = (params["depth"] || 1).to_i
+          limit = (params["limit"] || 0).to_i
+          offset = (params["offset"] || 0).to_i
+          after = (params["after"])
+
+          track = case id
+          when 'root'
+            ::Dog::Track.root
+          else
+            ::Dog::Track.find_by_id(id)
+          end
+          if track.nil?
+            return [400, {"success" => false, "errors" => ["The runtime id '#{id}' does not correspond to a valid runtime item."] }.to_json]
+          end
+          stream["self"] = track.to_hash_for_stream
+          stream["runtime"] = fetch_stream_items_for_track(track)
+          stream["lexical"] = ::Dog::Runtime.symbol_descendants(track.function_name.split('.'), depth)
+
+          content_type 'application/json'
+          return stream.to_json
+        end
+
+        get prefix + '/stream/object/:id' do |id|
+          stream = {}
+          stream["self"] = {}
+          stream["lexical"] = []
+          stream["runtime"] = []
+
+          depth = (params["depth"] || 1).to_i
+          limit = (params["limit"] || 0).to_i
+          offset = (params["offset"] || 0).to_i
+          after = (params["after"])
 
           object = ::Dog::StreamObject.find_by_id(id)
-          track = ::Dog::Track.new(object.handler)
-          
-          argument = {}
-          
-          for property in object.properties do
-            argument[property.identifier] = params[property.identifier]
-            
-            if property.required && argument[property.identifier].nil? then
-              return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
-            end
-          end
-          
-          if object.handler_argument then
-            dog_value = ::Dog::Value.from_ruby_value(argument)
-            track.write_variable(object.handler_argument, dog_value)
-          end
-          
-          track.listen_argument = object.handler_argument
-          
-          track.save
-          ::Dog::Runtime.run_track(track)
+          stream["self"] = object.to_hash_for_stream
 
+          content_type 'application/json'
+          return stream.to_json
+        end
+
+        post prefix + '/stream/object/:id' do |id|
+          object = ::Dog::StreamObject.find_by_id(id)
+          
+          if object.class == ::Dog::RoutedTask then
+            task = object
+            response = {}
+            
+            for property in task.properties do
+              if property.direction == "input" then
+                response[property.identifier] = params[property.identifier]
+                if property.required && response[property.identifier].nil? then
+                  return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
+                end
+              end
+            end
+            
+            task.responses << response
+            task.save
+            
+            if task.completed? then
+              track = ::Dog::Track.find_by_id(task.track_id)
+              if track.asking_id == task.id.to_s then
+                track.state = ::Dog::Track::STATE::RUNNING
+                ::Dog::Runtime.run_track(track)
+              end
+            end
+            
+          elsif object.class == ::Dog::RoutedEvent then
+            track = ::Dog::Track.new(object.handler)
+            track.control_ancestors = [::Dog::Track.root.id]
+            
+            argument = {}
+            for property in object.properties do
+              argument[property.identifier] = params[property.identifier]
+              if property.required && argument[property.identifier].nil? then
+                return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
+              end
+            end
+
+            if object.handler_argument then
+              dog_value = ::Dog::Value.from_ruby_value(argument, object.name)
+              track.write_variable(object.handler_argument, dog_value)
+            end
+
+            track.listen_argument = object.handler_argument
+            track.save
+
+            ::Dog::Runtime.run_track(track)
+          end
+          
           content_type 'application/json'
           return {
             "success" => true
           }.to_json
+
         end
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        get prefix + '/stream/tasks' do
-          return unless verify_current_user("You have to be logged in to view tasks.")
-          
-          @output = {}
-          
-          # TODO Task options
-          current_user = Person.find_by_id(session[:current_user])
-          @output["tasks"] = RoutedTask.for_person(current_user, {:completed => params["completed"], :type => params["type"]})
-          @output["success"] = true
-          
-          @output.to_json
-        end
-        
-        get prefix + '/stream/tasks/:id' do
-          return unless verify_current_user("You have to be logged in to view tasks.")
-          
-          @output = {}
-          
-          current_user = Person.find_by_id(session[:current_user])
-          task = RoutedTask.find_by_id(params["id"])
-          
-          if task.route_to_person? current_user then
-            @output["success"] = true
-            @output["task"] = task.to_hash_for_event
-          else
-            @output["success"] = false
-            @output["errors"] ||= []
-            @output["errors"] << "You are not eligible for this task."
-          end
-          
-          @output.to_json
-        end
-        
-        post prefix + '/stream/tasks/:id' do
-          return unless verify_current_user("You have to be logged in to respond to tasks.")
-          
-          @output = {}
-          
-          current_user = Person.find_by_id(session[:current_user])
-          current_task = RoutedTask.find_by_id(params["id"])
-          
-          if current_task.route_to_person?(current_user) then
-            current_task.process_response(params["response"], current_user)
-            current_task.save
-            Variable.notify_handlers_for_task(current_task)
-            @output["success"] = true
-          else
-            @output["success"] = false
-            @output["errors"] ||= []
-            @output["errors"] << "You are not eligible for this task"
-            return
-          end          
-          
-          @output.to_json
-        end
-        
-        
-        
-        
-        get prefix + '/stream/messages' do
-          return unless verify_current_user("You have to be logged in to view messages.")
-          
-          @output = {}
-          
-          current_user = Person.find_by_id(session[:current_user])
-          @output["messages"] = RoutedMessage.for_person(current_user)
-          @output["success"] = true
-          
-          @output.to_json
-        end
-        
-        get prefix + '/stream/messages/:id' do
-          return unless verify_current_user("You have to be logged in to view messages.")
-          
-          @output = {}
-          
-          current_user = Person.find_by_id(session[:current_user])
-          message = RoutedMessage.find_by_id(params["id"])
-          
-          if message.route_to_person? current_user then
-            @output["success"] = true
-            @output["message"] = message.to_hash_for_event
-          else
-            @output["success"] = false
-            @output["errors"] ||= []
-            @output["errors"] << "You are not eligible for this message."
-          end
-          
-          @output.to_json
-        end
-        
-        
-        
-        
+
+
+
         get '*' do
           path = params[:splat].first
           path = "/index.html" if path == "/"
           path = settings.public_folder + path
-          
+
           if File.exists? path then
             if File.extname(path) == ".html" then
               line = File.open(path, &:readline)
@@ -541,18 +407,126 @@ module Dog
             404
           end
         end
-        
+
+
+
+
+
+        # TODO - I am keep these around in case we want to enable these through a configuration flag
+        # Obviously there are pretty big privacy concerns that can take part here.
+        # We also may want to consider and explore the idea of "mounting" packages. So we move all of
+        # these API end points into a Dog package that are provided by the Dog standard libraries. If
+        # the developer wants to, they can add in the packages to their configuration file, much like
+        # include Rack or Java middleware.
+
+        unless ::Dog::Config.get("profile_editting") == true then
+          get prefix + '/profile/view' do
+            return unless verify_current_user("You have to be logged in to view your profile.")
+
+            @output = {}
+
+            person = Person.find_by_id(session[:current_user])
+            @output["value"] = person.to_hash_for_event
+            @output["success"] = true
+
+            @output.to_json
+          end
+
+          post prefix + '/profile/write' do
+            return unless verify_current_user("You have to be logged in to write to your profile.")
+
+            @output = {}
+
+            person = Person.find_by_id(session[:current_user])
+            success = person.write_profile(params["value"])
+            person.save if success
+            @output["success"] = success
+
+            @output.to_json
+          end
+
+          post prefix + '/profile/update' do
+            return unless verify_current_user("You have to be logged in to update your profile.")
+
+            @output = {}
+
+            person = Person.find_by_id(session[:current_user])
+            success = person.update_profile(params["value"])
+            person.save if success
+            @output["success"] = success
+
+            @output.to_json
+          end
+        end
+
+        unless ::Dog::Config.get("people_search") == true then
+          get prefix + '/people/search' do
+            @output = {}
+
+            @output["results"] = Person.search(params["query"])
+            @output["success"] = true
+
+            @output.to_json
+          end
+
+          get prefix + '/people/:id' do
+            @output = {}
+
+            person = Person.find_by_id(params["id"])
+            if person then
+              @output["person"] = person.to_hash_for_event
+              @output["success"] = true
+            else
+              @output["success"] = false
+              @output["errors"] ||= []
+              @output["errors"] << "Could not find the user with that identifier."
+            end
+
+            @output.to_json
+          end
+        end
+
+        unless ::Dog::Config.get("community_joining") == true then
+          post prefix + '/community/:name/join' do
+            return unless verify_current_user("You have to be logged in to join a community.")
+
+            @output = {}
+
+            person = Person.find_by_id(session[:current_user])
+            success = person.join_community_named(params["name"])
+            @output["success"] = success
+
+            @output.to_json
+          end
+
+          post prefix + '/community/:name/leave' do
+            return unless verify_current_user("You have to be logged in to leave a community.")
+
+            @output = {}
+
+            person = Person.find_by_id(session[:current_user])
+            success = person.leave_community_named(params["name"])
+            @output["success"] = success
+
+            @output.to_json
+          end
+        end
+
+
+
+
+
         # This is very important. Do not remove this or testing will not work
         return self
       end
-      
+
       def run
         Server.initialize
         Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
-      
+
     end
- 
+
   end
-  
+
 end

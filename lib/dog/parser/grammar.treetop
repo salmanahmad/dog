@@ -206,6 +206,8 @@ grammar Dog
     /
     control_structure
     /
+	perform
+	/
     import
     /
     print
@@ -726,7 +728,7 @@ grammar Dog
       def compile
         node = ::Dog::Nodes::FunctionDefinition.new
         node.line = self.line
-        
+ 
         node.name = identifier.text_value
         node.target = function_for.compile unless function_for.empty?
         node.mandatory_arguments = function_on.compile unless function_on.empty?
@@ -904,6 +906,16 @@ grammar Dog
   # = Others Commands =
   # ===================
   
+  rule perform 
+    'PERFORM' s string {
+      def compile
+        node = ::Dog::Nodes::Perform.new
+        node.instructions = string.compile
+        return node
+      end
+    }
+  end
+  
   # TODO
   rule import
     'IMPORT' s string {
@@ -1049,13 +1061,21 @@ grammar Dog
   end
   
   rule return
-    'RETURN' expression:(s expression)? {
+    'RETURN' expressions:(s first:expression rest:(s? ',' s? expression)*)? {
       def compile
         node = ::Dog::Nodes::Return.new
         node.line = self.line
         
-        if !expression.empty? then
-          node.expression = self.expression.expression.compile
+        if !self.expressions.empty? then
+          
+          es = []
+          es << self.expressions.first.compile
+          
+          for r in self.expressions.rest.elements do
+            es << r.expression.compile
+          end
+          
+          node.expressions = es
         end
         
         return node
