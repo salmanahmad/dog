@@ -60,7 +60,7 @@ module Dog
         hash = JSON.load(json)
         bundle = Bundle.from_hash(hash)
         
-        self.run(bundle, options)
+        self.run(bundle, bundle_filename, options)
       end
       
       def run(bundle, bundle_filename = nil, options = {})

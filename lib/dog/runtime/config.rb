@@ -18,7 +18,7 @@ module Dog
         @initialized = true
         
         database_default = Runtime.bundle.startup_package
-        database_default = File.basename(Runtime.bundle_filename) if database_default == "" rescue ""
+        database_default = File.basename(Runtime.bundle_filename, ".bundle") if database_default == "" rescue ""
         database_default = UUID.new.generate if database_default == ""
         
         @config ||= {
