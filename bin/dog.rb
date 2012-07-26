@@ -121,6 +121,7 @@ class Compile < Command
   def run(args)
     source_filename = args.first
     source_code = ""
+    source_filename += ".dog"
     
     begin
       source_code = File.open(source_filename).read
@@ -130,14 +131,16 @@ class Compile < Command
     end
     
     begin
+      # TODO - Update this to handle multiple files
+      
       bark = Dog::Parser.parse(source_code, source_filename)
-      bite = Dog::Compiler.compile(bark, source_filename)
+      bundle = Dog::Compiler.compile([[bark, source_filename]])
       
-      bite_code_filename = File.basename(source_filename, ".dog") + ".bite"
-      bite_code_file = File.open(bite_code_filename, "w")
+      bundle_filename = File.basename(source_filename, ".dog") + ".bundle"
+      bundle_file = File.open(bundle_filename, "w")
       
-      bite_code_file.write(JSON.dump(bite))
-      bite_code_file.close
+      bundle_file.write(JSON.dump(bundle.to_hash))
+      bundle_file.close
       
       return true
     rescue Dog::CompilationError => error

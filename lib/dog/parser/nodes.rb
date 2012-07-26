@@ -285,6 +285,10 @@ module Dog::Nodes
     end
   end
   
+  class Package < Node
+    attribute :name
+  end
+  
   class Access < Node
     attribute :sequence
     

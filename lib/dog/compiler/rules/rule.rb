@@ -46,10 +46,6 @@ module Dog::Rules
       end
     end
     
-    def report_error_for_node(node, description)
-      self.compiler.errors << "(#{self.compiler.current_filename}:#{node.line}) - #{description}"
-    end
-    
   end
   
 end
