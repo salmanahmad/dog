@@ -17,9 +17,12 @@ module Dog
     attr_accessor :time
     attr_accessor :signature
     
+    attr_accessor :startup_package
     attr_accessor :packages
     
     def initialize
+      # TODO - This default is important. It corresponds to the default package name (empty)
+      self.startup_package = ""
       self.packages = {}
     end
     
@@ -48,6 +51,7 @@ module Dog
         "dog_version_codename" => self.dog_version_codename,
         "time" => self.time,
         "signature" => self.signature,
+        "startup_package" => self.startup_package,
         "packages" => {}
       }
       

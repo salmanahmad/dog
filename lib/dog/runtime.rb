@@ -52,6 +52,9 @@ module Dog
       attr_accessor :bite_code
       attr_accessor :bite_code_filename
       attr_accessor :save_set
+      
+      
+      attr_accessor :bundle
     
       def run_file(bite_code_filename, options = {})
         run(File.open(bite_code_filename).read, bite_code_filename, options)

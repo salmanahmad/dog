@@ -79,6 +79,10 @@ module Dog
           rule = Rules::Rule.new(self)
           rule.apply(d)
         end
+        
+        unless self.bundle.contains_symbol_in_package?("@root", package) then
+          self.bundle.add_symbol_to_package("@root", [], package)
+        end
       end
       
       unless errors.empty?
