@@ -56,6 +56,7 @@ module Dog
         root.nodes = []
             
         self.bundle.packages[package] = {
+          "name" => package,
           "symbols" => {},
           "code" => root
         }

@@ -26,7 +26,7 @@ module Dog
     attr_accessor :_id
     
     attr_accessor :function_name
-    attr_accessor :function_filename
+    attr_accessor :function_package
     attr_accessor :current_node_path
     
     attr_accessor :mandatory_arguments
@@ -48,20 +48,20 @@ module Dog
     # TODO - I don't think that listen_argument is used at all anymore
     attr_accessor :listen_argument
     
-    def initialize(name = nil)
+    def initialize(name = nil, package = nil)
       
       if name then
-        path = Runtime.bite_code["symbols"][name]
+        package ||= Runtime.bundle.startup_package
+        path = Runtime.bundle.path_for_symbol(name, package)
         
         if path.nil? then
           raise "I could not find a symbol named: #{name}"
         end
         
         path = path.clone
-        filename = path.shift
         
         self.function_name = name
-        self.function_filename = filename
+        self.function_package = package
         self.current_node_path = path
       end
       
@@ -212,7 +212,7 @@ module Dog
     def to_hash
       return {
         "function_name" => self.function_name,
-        "function_filename" => self.function_filename,
+        "function_package" => self.function_package,
         "current_node_path" => self.current_node_path,
         "mandatory_arguments" => self.mandatory_arguments,
         "optional_arguments" => self.optional_arguments,
@@ -286,17 +286,6 @@ module Dog
     
     def is_root?
       self.control_ancestors.empty?
-    end
-    
-    def self.initialize_root(name, filename)
-      root = self.root
-      
-      unless root
-        root = Track.new("root")
-        root.save
-      end
-      
-      return root
     end
     
   end

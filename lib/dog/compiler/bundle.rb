@@ -45,6 +45,31 @@ module Dog
       self.packages[package]["symbols"][symbol] = path
     end
     
+    def path_for_symbol(symbol, package = nil)
+      package ||= Runtime.bundle.startup_package
+      return self.packages[package]["symbols"][symbol].clone
+    end
+    
+    def node_at_path(path, package = nil)
+      package ||= Runtime.bundle.startup_package
+
+      node = self.packages[package]["code"]
+
+      for index in path do
+        node = node[index]
+      end
+
+      return node
+    end
+    
+    def node_for_symbol(symbol, package = nil)
+      path = path_for_symbol(symbol, package)
+      node = node_at_path(path, package)
+      return node
+    end
+    
+
+    
     def to_hash
       hash = {
         "dog_version" => self.dog_version,
@@ -63,8 +88,28 @@ module Dog
       return hash
     end
     
-    def from_hash
+    def self.from_hash(hash)
+      bundle = self.new
+      bundle.dog_version = hash["dog_version"]
+      bundle.dog_version_codename = hash["dog_version_codename"]
+      bundle.time = hash["time"]
+      bundle.signature = hash["signature"]
+      bundle.startup_package = hash["startup_package"]
+      bundle.packages = hash["packages"]
       
+      packages = bundle.packages
+      for name, package in packages do
+        # I need the second call here so that I can initialize the parent pointers in the tree.
+        # I may want to incorporate this into from_hash at some point.
+
+        ast = package["code"]
+        ast = Nodes::Node.from_hash(ast)
+        ast.compute_paths_of_descendants
+        
+        package["code"] = ast
+      end
+      
+      return bundle
     end
     
   end

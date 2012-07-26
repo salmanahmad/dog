@@ -17,13 +17,17 @@ module Dog
         return if @initialized
         @initialized = true
         
+        database_default = Runtime.bundle.startup_package
+        database_default = File.basename(Runtime.bundle_filename) if database_default == "" rescue ""
+        database_default = UUID.new.generate if database_default == ""
+        
         @config ||= {
           'port' => 4242, 
           'dog_prefix' => '/dog',
-          'database' => File.basename(Runtime.bite_code_filename, File.extname(Runtime.bite_code_filename))
+          'database' => database_default
         }
         
-        config_file ||= File.join(File.dirname(Runtime.bite_code_filename), "config.json")
+        config_file ||= File.join(Runtime.bundle_directory, "config.json")
         
         @config.merge!(JSON.parse(File.open(config_file).read)) rescue nil
         @config.merge!(config)

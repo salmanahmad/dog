@@ -161,7 +161,7 @@ module Dog
 
         # TODO - I have to figure this out for production
         set :static, false
-        set :public_folder, Proc.new { File.join(File.dirname(Runtime.bite_code_filename), "views") }
+        set :public_folder, Proc.new { File.join(Runtime.bundle_directory, "views") }
 
         self.initialize_vet
 

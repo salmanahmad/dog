@@ -214,7 +214,8 @@ class Run < Command
   
   def run(args)
     begin
-      Dog::Runtime.run_file(args.first, parse_options(args))
+      bundle_filename = args.first + ".bundle"
+      Dog::Runtime.run_file(bundle_filename, parse_options(args))
     rescue Exception => e
       raise e
       puts e
@@ -241,7 +242,7 @@ class Debug < Command
   end
   
   def run(args)
-    bite_code_file = File.basename(args.first, '.dog') + '.bite'
+    bundle_filename = args.first + ".bundle"
     
     compile_command = Compile.new
     unless compile_command.run(args) then
@@ -255,7 +256,7 @@ class Debug < Command
     }
     
     begin
-      Dog::Runtime.run_file(bite_code_file, options)
+      Dog::Runtime.run_file(bundle_filename, options)
     rescue Exception => e
       puts e
       raise e
@@ -342,11 +343,11 @@ class Version < Command
   
   def usage
     super
-    puts 
+    puts
     puts "Usage: dog version"
     puts
     puts "  #{description}"
-    puts    
+    puts
   end
   
   def run(args)

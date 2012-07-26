@@ -48,20 +48,31 @@ module Dog
   
   class Runtime
     class << self
-    
-      attr_accessor :bite_code
-      attr_accessor :bite_code_filename
+      
       attr_accessor :save_set
       
-      
       attr_accessor :bundle
-    
-      def run_file(bite_code_filename, options = {})
-        run(File.open(bite_code_filename).read, bite_code_filename, options)
+      attr_accessor :bundle_filename
+      attr_accessor :bundle_directory
+      
+      def run_file(bundle_filename, options = {})
+        json = File.open(bundle_filename).read
+        hash = JSON.load(json)
+        bundle = Bundle.from_hash(hash)
+        
+        self.run(bundle, options)
       end
       
-      def run(bite_code, bite_code_filename, options = {})
+      def run(bundle, bundle_filename = nil, options = {})
+        if bundle.dog_version != VERSION::STRING then
+          raise "This program was compiled using a different version of Dog. It was compiled with #{bundle.dog_version}. I am Dog version #{VERSION::STRING}."
+        end
+        
         self.save_set = Set.new
+        
+        self.bundle = bundle
+        self.bundle_filename = File.expand_path(bundle_filename) rescue nil
+        self.bundle_directory = File.dirname(File.expand_path(bundle_filename)) rescue Dir.pwd
         
         options = {
           "config_file" => nil,
@@ -69,31 +80,13 @@ module Dog
           "database" => {}
         }.merge!(options)
         
-        bite_code = JSON.load(bite_code)
-      
-        if bite_code["version"] != VERSION::STRING then
-          raise "This program was compiled using a different version of Dog. It was compiled with #{bite_code["version"]}. I am Dog version #{VERSION::STRING}."
-        end
-        
-        code = {}
-        for filename, ast in bite_code["code"]
-          # I need the second call here so that I can initialize the parent pointers in the tree. 
-          # I may want to incorporate this into from_hash at some point.
-        
-          ast = Nodes::Node.from_hash(ast)
-          ast.compute_paths_of_descendants
-        
-          code[filename] = ast
-        end
-        
-        bite_code["code"] = code
-        
-        self.bite_code = bite_code
-        self.bite_code_filename = bite_code_filename
-        
         Config.initialize(options["config_file"], options["config"])
         Database.initialize(options["database"])
-        Track.initialize_root("root", bite_code["main_filename"])
+              
+        unless Track.root then
+          root = Track.new("@root", bundle.startup_package)
+          root.save
+        end
         
         tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
         
@@ -116,7 +109,7 @@ module Dog
         return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
         
         loop do
-          node = Runtime.node_at_path_for_filename(track.current_node_path, track.function_filename)
+          node = Runtime.bundle.node_at_path(track.current_node_path, track.function_package)
           next_track = node.visit(track)
           
           self.save_set.add(track)
@@ -130,7 +123,7 @@ module Dog
             
             if parent_track && !(parent_track.state == Track::STATE::FINISHED || parent_track.state == Track::STATE::LISTENING) then
               
-              parent_current_node = Runtime.node_at_path_for_filename(parent_track.current_node_path, parent_track.function_filename)
+              parent_current_node = Runtime.bundle.node_at_path(parent_track.current_node_path, parent_track.function_package)
               parent_track.write_stack(parent_current_node.path, track.read_return_value)
               
               parent_track.current_node_path = parent_current_node.parent.path

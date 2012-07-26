@@ -1,5 +1,11 @@
 
+i = 5 + 5
+x = i
+
+
 PRINT 5 + 5
+
+PRINT i + x
 
 #
 #DEFINE label_images FOR person ON data DO

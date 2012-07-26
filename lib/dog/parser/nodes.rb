@@ -804,6 +804,7 @@ module Dog::Nodes
       # optimize this in the future so that I can reduce the overhead of a function call
       track.save
       
+      # TODO - Handle packages here...
       function = ::Dog::Track.new(self.function_name)
       function.control_ancestors = track.control_ancestors.clone
       function.control_ancestors.push(track.id)
@@ -826,10 +827,8 @@ module Dog::Nodes
     def visit(track)
       
       
-      path = ::Dog::Runtime.bite_code["symbols"][self.function_name].clone
-      path.shift
-      
-      node = ::Dog::Runtime.node_at_path_for_filename(path, ::Dog::Runtime.bite_code["main_filename"])
+      # TODO - Handle packages here
+      node = ::Dog::Runtime.bundle.node_for_symbol(self.function_name, nil)
       
       if node then
         if node.target != "person" then
@@ -1007,13 +1006,9 @@ module Dog::Nodes
       
       # TODO - I have to handle the nested and fully qualified names
       
-      path = ::Dog::Runtime.bite_code["symbols"][structure_type]
-      if path then
-          
-        path = path.clone
-        path.shift
-          
-        node = ::Dog::Runtime.node_at_path_for_filename(path, ::Dog::Runtime.bite_code["main_filename"])
+      # TODO - Handle packages here...
+      node = ::Dog::Runtime.bundle.node_for_symbol(structure_type)
+      if node then
         for p in node.properties do
           p2 = ::Dog::Property.new
           p2.identifier = p.name
