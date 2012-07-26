@@ -39,7 +39,8 @@ module Dog
     end
     
     def compile(node, filename = "")
-      package = "@default"
+      # TODO - The default package is blank. Is that okay?
+      package = ""
       
       ::Dog::Nodes::Node.each_descendant(node) do |d|
         d.filename = filename
