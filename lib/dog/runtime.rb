@@ -30,6 +30,7 @@ require File.join(File.dirname(__FILE__), 'runtime/config.rb')
 require File.join(File.dirname(__FILE__), 'runtime/database.rb')
 require File.join(File.dirname(__FILE__), 'runtime/event.rb')
 require File.join(File.dirname(__FILE__), 'runtime/kernel_ext.rb')
+require File.join(File.dirname(__FILE__), 'runtime/library.rb')
 require File.join(File.dirname(__FILE__), 'runtime/message.rb')
 require File.join(File.dirname(__FILE__), 'runtime/person.rb')
 require File.join(File.dirname(__FILE__), 'runtime/property.rb')
@@ -38,6 +39,8 @@ require File.join(File.dirname(__FILE__), 'runtime/task.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track.rb')
 require File.join(File.dirname(__FILE__), 'runtime/value.rb')
 require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
+
+Dir[File.join(File.dirname(__FILE__), "runtime/library", "*.rb")].each { |file| require file }
 
 module Dog
   
