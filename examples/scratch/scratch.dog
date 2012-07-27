@@ -1,4 +1,11 @@
 
+
+DEFINE foo DO
+  PRINT 7 + 11
+END
+
+COMPUTE foo
+
 i = 5 + 5
 x = i
 

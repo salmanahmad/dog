@@ -1099,7 +1099,7 @@ grammar Dog
   # ==================
   
   rule packaged_identifier
-    package:(identifier '.') symbol:identifier {
+    package:(identifier '.')? symbol:identifier {
       def compile
         if !self.package.empty? then
           return [package.identifier.text_value, symbol.text_value]

@@ -265,6 +265,41 @@ class Debug < Command
   
 end
 
+class Reset < Command
+  Command.register(self)
+  
+  def description
+    "Clears the database associated with the dog application."
+  end
+  
+  def usage
+    super
+    puts
+    puts "Usage: dog reset [FILE] [options]"
+    puts
+    puts "  Clears the database associated with the dog application. Takes the same options as 'run'."
+    puts
+  end
+
+  def run(args)
+    bundle_filename = args.first + ".bundle"
+    json = File.open(bundle_filename).read
+    hash = JSON.load(json)
+    bundle = ::Dog::Bundle.from_hash(hash)
+    
+    
+    run_command = Run.new
+    
+    options = run_command.parse_options(args)
+    options["database"] = {
+      "reset" => true
+    }
+    
+    ::Dog::Runtime.initialize(bundle, bundle_filename, options)
+  end
+
+end
+
 class Shell < Command
   Command.register(self)
   

@@ -55,21 +55,8 @@ module Dog
       attr_accessor :bundle_filename
       attr_accessor :bundle_directory
       
-      def run_file(bundle_filename, options = {})
-        json = File.open(bundle_filename).read
-        hash = JSON.load(json)
-        bundle = Bundle.from_hash(hash)
-        
-        self.run(bundle, bundle_filename, options)
-      end
-      
-      def run(bundle, bundle_filename = nil, options = {})
-        if bundle.dog_version != VERSION::STRING then
-          raise "This program was compiled using a different version of Dog. It was compiled with #{bundle.dog_version}. I am Dog version #{VERSION::STRING}."
-        end
-        
+      def initialize(bundle, bundle_filename = nil, options = {})
         self.save_set = Set.new
-        
         self.bundle = bundle
         self.bundle_filename = File.expand_path(bundle_filename) rescue nil
         self.bundle_directory = File.dirname(File.expand_path(bundle_filename)) rescue Dir.pwd
@@ -82,7 +69,24 @@ module Dog
         
         Config.initialize(options["config_file"], options["config"])
         Database.initialize(options["database"])
-              
+        
+      end
+      
+      def run_file(bundle_filename, options = {})
+        json = File.open(bundle_filename).read
+        hash = JSON.load(json)
+        bundle = Bundle.from_hash(hash)
+        
+        self.run(bundle, bundle_filename, options)
+      end
+      
+      def run(bundle, bundle_filename = nil, options = {})
+        self.initialize(bundle, bundle_filename, options)
+        
+        if bundle.dog_version != VERSION::STRING then
+          raise "This program was compiled using a different version of Dog. It was compiled with #{bundle.dog_version}. I am Dog version #{VERSION::STRING}."
+        end
+        
         unless Track.root then
           root = Track.new("@root", bundle.startup_package)
           root.save
