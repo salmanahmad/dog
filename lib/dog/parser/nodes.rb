@@ -752,6 +752,7 @@ module Dog::Nodes
   end
   
   class FunctionCall < Node
+    attribute :package_name
     attribute :function_name
     attribute :mandatory_arguments
     attribute :optional_arguments
@@ -819,6 +820,7 @@ module Dog::Nodes
   
   class FunctionAsyncCall < Node
     attribute :target
+    attribute :package_name
     attribute :function_name
     attribute :mandatory_arguments
     attribute :optional_arguments
@@ -969,6 +971,7 @@ module Dog::Nodes
   class CollectionDefinition < Node
     attribute :name
     attribute :structure_name
+    attribute :structure_package_name
   end
   
   class CommunityDefinition < Node
@@ -980,6 +983,7 @@ module Dog::Nodes
     attribute :target
     attribute :variable
     attribute :variable_type
+    attribute :variable_type_package
     attribute :via
     
     def visit(track)
@@ -1407,6 +1411,7 @@ module Dog::Nodes
   
   class StructureInstantiation < Node
     attribute :type
+    attribute :package_name
     
     def visit(track)
       track.save

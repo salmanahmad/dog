@@ -472,12 +472,15 @@ grammar Dog
   # ===================
   
   rule compute
-    'COMPUTE' s identifier on_clause:(on_clause)? using_clause:(using_clause)? {
+    'COMPUTE' s packaged_identifier on_clause:(on_clause)? using_clause:(using_clause)? {
       def compile
         node = ::Dog::Nodes::FunctionCall.new
         node.line = self.line
         
-        node.function_name = identifier.text_value
+        pi = packaged_identifier.compile
+        
+        node.package_name = pi[0]
+        node.function_name = pi[1]
         
         unless on_clause.empty? then
           node.mandatory_arguments = on_clause.compile
@@ -505,7 +508,8 @@ grammar Dog
         node.line = self.line
         
         node.target = expression.compile
-        node.function_name = ask_to_clause.compile
+        node.package_name = ask_to_clause.compile[0]
+        node.function_name = ask_to_clause.compile[1]
         node.mandatory_arguments = on_clause.compile unless on_clause.empty?
         node.optional_arguments = using_clause.compile unless using_clause.empty?
         node.via = via_clause.compile
@@ -527,9 +531,9 @@ grammar Dog
   # TODO - Bring back - also for compute
   #s 'TO' s (string / access)
   rule ask_to_clause
-    s 'TO' s identifier {
+    s 'TO' s packaged_identifier {
       def compile
-        return identifier.text_value
+        return packaged_identifier.compile
       end
     }
   end
@@ -550,7 +554,8 @@ grammar Dog
         
         node.target = listen_to_clause.compile
         node.variable = for_clause.first
-        node.variable_type = for_clause.last
+        node.variable_type = for_clause.last.last
+        node.variable_type_package = for_clause.last.first
         node.via = via_clause.compile
         
         return node
@@ -572,16 +577,16 @@ grammar Dog
         if !listen_of_clause.empty?
           return [identifier.text_value, listen_of_clause.compile]
         else
-          return [identifier.text_value, nil]
+          return [identifier.text_value, [nil, nil]]
         end
       end
     }
   end
   
   rule listen_of_clause
-    s 'OF' s expression {
+    s 'OF' s packaged_identifier {
       def compile
-        return expression.compile
+        return packaged_identifier.compile
       end
     }
   end
@@ -872,13 +877,16 @@ grammar Dog
   end
   
   rule collection_definition
-    'DEFINE' s name:identifier s 'OF' structure_name:identifier {
+    'DEFINE' s name:identifier s 'OF' structure_name:packaged_identifier {
       def compile
+        pi = structure_name.compile
+        
         node = ::Dog::Nodes::CollectionDefinition.new
         node.line = self.line
         
         node.name = name.text_value
-        node.structure_name = structure_name.text_value
+        node.structure_package_name = pi.first
+        node.structure_name = pi.last
         
         return node
       end
@@ -1042,7 +1050,7 @@ grammar Dog
         node.condition = expression.compile
         
         if !statements.empty? then
-          node.statements = statements.compile  
+          node.statements = statements.compile
         end
         
         return node
@@ -1089,6 +1097,18 @@ grammar Dog
   # ==================
   # = Shared Clauses =
   # ==================
+  
+  rule packaged_identifier
+    package:(identifier '.') symbol:identifier {
+      def compile
+        if !self.package.empty? then
+          return [package.identifier.text_value, symbol.text_value]
+        else
+          return [nil, symbol.text_value]
+        end
+      end
+    }
+  end
   
   rule using_clause
     s 'USING' s first:(identifier s? '=' s? expression) rest:(s? ',' s? identifier s? '=' s? expression)* {
@@ -1196,7 +1216,7 @@ grammar Dog
   
   rule structure
     # TODO - Make this identifier a package identifier
-    type:(identifier sn?)? '{' sn? associations:(first:association rest:(((sn? "," sn?)+ / "\n")  association)* )? (sn? ','* sn?) '}' {
+    type:(packaged_identifier sn?)? '{' sn? associations:(first:association rest:(((sn? "," sn?)+ / "\n")  association)* )? (sn? ','* sn?) '}' {
       def compile
         literal = ::Dog::Nodes::StructureLiteral.new
         literal.line = self.line
@@ -1204,8 +1224,10 @@ grammar Dog
         literal.value = []
         
         if !type.empty? then
+          pi = self.type.packaged_identifier.compile
           structure_type = ::Dog::Nodes::StructureInstantiation.new
-          structure_type.type = self.type.identifier.text_value
+          structure_type.package_name = pi.first
+          structure_type.type = pi.last
           literal.type = structure_type
         end
         

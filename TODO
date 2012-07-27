@@ -1,52 +1,60 @@
 
 
 
-Pending structures --- are they able to be shared? How do you pass in a channel to another function for call backs?
+Pending structures
+	- Are they able to be shared? How do you pass in a channel to another function for call backs?
+	- Investigate the API with Go channels (especially timers)
+	- Investigate the API with Python yield
 
 
-Plan:
+I need to update the following for packages:
+	
+		COMPUTE
 
+		ASK
 
+		LISTEN
 
-Remove main_filename --> it should be package based not file based
+		Collections
 
-You have to run a particular package or it will use default
-
-
-
-
+		Structure instances
 
 
 Things left to implement:
 
-Import
+	Import
 
-Organiation of the bite code and symbol table (filenames)
+	System libraries (The ability to implement dog functions in Ruby)
 
-System libraries (The ability to implement dog functions in Ruby)
+	Scopes when calling functions
 
-Scopes when calling functions
+	Collections API
+
+	People
+
+	Communities
+
+	Predicates
+
+	External functions
+
+	Implement unary operator
+
+	Dog error reporting
+
+	Dog unit test cases
+
+	using @state instead of track.has_visited?
+
+	Evaluator / Interpretter (related to bite code)
 	
-Collections API
-	
-People
+	Add a "type", "definition" or "symbol" structure to refer to definitions and box it as a value. I should then update COMPUTE, ASK, LISTEN, etc to take a "type" rather than identifier
 
-Communities
+	Decide on anonymous functions vs blocks vs channels
 
-Predicates
-	
-External functions
+Done:
 
-Implement unary operator
-
-Dog error reporting
-
-Dog unit test cases
-
-using @state instead of track.has_visited?
-
-Evaluator / Interpretter (related to bite code)
-
+	Organiation of the bite code and symbol table (filenames)
 
 
 
