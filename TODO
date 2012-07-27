@@ -24,7 +24,9 @@ Things left to implement:
 
 	Import
 
-	System libraries (The ability to implement dog functions in Ruby)
+	Scopes when calling functions
+	
+	Add a "type", "definition" or "symbol" structure to refer to definitions and box it as a value. I should then update COMPUTE, ASK, LISTEN, etc to take a "type" rather than identifier
 
 	Collections API
 
@@ -33,8 +35,6 @@ Things left to implement:
 	Communities
 
 	Predicates
-
-	Scopes when calling functions
 
 	External functions
 
@@ -47,8 +47,6 @@ Things left to implement:
 	using @state instead of track.has_visited?
 
 	Evaluator / Interpretter (related to bite code)
-	
-	Add a "type", "definition" or "symbol" structure to refer to definitions and box it as a value. I should then update COMPUTE, ASK, LISTEN, etc to take a "type" rather than identifier
 
 	Decide on anonymous functions vs blocks vs channels
 
@@ -56,6 +54,7 @@ Done:
 
 	Organiation of the bite code and symbol table (filenames)
 
+	System libraries (The ability to implement dog functions in Ruby)
 
 
 
