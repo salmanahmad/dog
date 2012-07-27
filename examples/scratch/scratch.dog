@@ -14,6 +14,10 @@ PRINT 5 + 5
 
 PRINT i + x
 
+
+PRINT "Ruby Method:"
+PRINT COMPUTE system.add ON 5, 5 USING k = "Hi!"
+
 #
 #DEFINE label_images FOR person ON data DO
 #  PERFORM "what is this image?"

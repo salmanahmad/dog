@@ -9,8 +9,26 @@
 
 module Dog::Library
   module System
-    def self.add(args, options = {})
+    
+    def self.name
+      "system"
+    end
+    
+    def self.symbols
+      [
+        ["add", "add"]
+      ]
+    end
+    
+    def self.add(args = nil, optionals = nil)
       
+      value = 0
+      
+      for arg in args do
+        value += arg.ruby_value
+      end
+      
+      return ::Dog::Value::number_value(value)
     end
   end
 end

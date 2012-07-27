@@ -64,6 +64,8 @@ module Dog
         self.bundle_filename = File.expand_path(bundle_filename) rescue nil
         self.bundle_directory = File.dirname(File.expand_path(bundle_filename)) rescue Dir.pwd
         
+        self.bundle.link(::Dog::Library::System)
+        
         options = {
           "config_file" => nil,
           "config" => {},
@@ -126,6 +128,8 @@ module Dog
           end
           
           if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
+            # TODO - Strongly consider moving this logic into track.finish and just return the parent node to be
+            # executed through next_track. This will simplify this logic here and keep it cleaner...
             parent_track = Track.find_by_id(track.control_ancestors.last)
             
             if parent_track && !(parent_track.state == Track::STATE::FINISHED || parent_track.state == Track::STATE::LISTENING) then

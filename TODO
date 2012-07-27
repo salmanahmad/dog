@@ -26,8 +26,6 @@ Things left to implement:
 
 	System libraries (The ability to implement dog functions in Ruby)
 
-	Scopes when calling functions
-
 	Collections API
 
 	People
@@ -35,6 +33,8 @@ Things left to implement:
 	Communities
 
 	Predicates
+
+	Scopes when calling functions
 
 	External functions
 

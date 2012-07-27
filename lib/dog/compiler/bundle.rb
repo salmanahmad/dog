@@ -35,41 +35,68 @@ module Dog
       # TODO - Compute signature
     end
     
+    def link(package)
+      # TODO - Figure out what the difference is between Bundle#link and Compiler#link
+      # Perhaps this is a dynamic link and compiler is static?
+      if package.class == Module then
+        if package.respond_to?(:symbols) && package.respond_to?(:name) then
+          symbols = package.symbols
+          name = package.name
+          
+          for symbol in symbols do
+            self.add_symbol_to_package(symbol[0], symbol[1], name)
+          end
+          
+          self.packages[name]["name"] = name
+          self.packages[name]["native_code"] = package
+        end
+      else
+        # TODO - Add a package type just like Bundle
+      end
+      
+    end
+
     def contains_symbol_in_package?(symbol, package)
       self.packages[package]["symbols"].include?(symbol) rescue false
     end
-    
+
     def add_symbol_to_package(symbol, path, package)
       self.packages[package] ||= {}
       self.packages[package]["symbols"] ||= {}
       self.packages[package]["symbols"][symbol] = path
     end
-    
+
     def path_for_symbol(symbol, package = nil)
       package ||= Runtime.bundle.startup_package
       return self.packages[package]["symbols"][symbol].clone
     end
-    
+
     def node_at_path(path, package = nil)
       package ||= Runtime.bundle.startup_package
 
-      node = self.packages[package]["code"]
+      if path.kind_of? String
+        # If the path is a string and not an array, it means that it is a native code call
+        node = ::Dog::Nodes::NativeCode.new
+        node.module = self.packages[package]["native_code"]
+        node.method = path
+        return node
+      else
+        node = self.packages[package]["code"]
 
-      for index in path do
-        node = node[index]
+        for index in path do
+          node = node[index]
+        end
+
+        return node
       end
-
-      return node
     end
-    
+
     def node_for_symbol(symbol, package = nil)
       path = path_for_symbol(symbol, package)
       node = node_at_path(path, package)
       return node
     end
-    
 
-    
     def to_hash
       hash = {
         "dog_version" => self.dog_version,

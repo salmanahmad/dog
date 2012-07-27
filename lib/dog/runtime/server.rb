@@ -351,6 +351,8 @@ module Dog
             end
             
           elsif object.class == ::Dog::RoutedEvent then
+            
+            # TODO - Handle the package here
             track = ::Dog::Track.new(object.handler)
             track.control_ancestors = [::Dog::Track.root.id]
             

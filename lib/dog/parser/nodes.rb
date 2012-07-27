@@ -285,6 +285,41 @@ module Dog::Nodes
     end
   end
   
+  class NativeCode < Node
+    attribute :module
+    attribute :method
+    
+    def visit(track)
+      # TODO
+      
+      args = nil
+      optionals = {}
+      
+      if track.mandatory_arguments.kind_of? Array then
+        args = []
+        for v in track.mandatory_arguments do
+          args << ::Dog::Value.from_hash(v)
+        end
+      else
+        args = {}
+        for k, v in track.mandatory_arguments do
+          args[k] = ::Dog::Value.from_hash(v)
+        end
+      end
+      
+      for k, v in track.optional_arguments do
+        optionals[k] = ::Dog::Value.from_hash(v)
+      end
+      
+      return_value = self.module.send(self.method, args, optionals)
+      return_value ||= ::Dog::Value.null_value
+      
+      track.write_return_value(return_value)
+      track.finish
+      return nil
+    end
+  end
+  
   class Package < Node
     attribute :name
   end
@@ -648,6 +683,7 @@ module Dog::Nodes
             for node in self.body.nodes do
               if node.class == Return then
                 for e in node.expressions do
+                  # TODO - Handle this as a rule in the compiler
                   raise "Tasks must return identifiers" unless e.class == Access
                   
                   p = ::Dog::Property.new
@@ -804,15 +840,16 @@ module Dog::Nodes
       # TODO - I need to save here so that I can get the track.id. I may want to
       # optimize this in the future so that I can reduce the overhead of a function call
       track.save
-      
+        
       # TODO - Handle packages here...
-      function = ::Dog::Track.new(self.function_name)
+      
+      function = ::Dog::Track.new(self.function_name, self.package_name || track.function_package)
       function.control_ancestors = track.control_ancestors.clone
       function.control_ancestors.push(track.id)
-      
+        
       function.mandatory_arguments = passed_mandatory_arguments
       function.optional_arguments = passed_optional_arguments
-      
+        
       track.state = ::Dog::Track::STATE::CALLING
       return function
     end
@@ -890,7 +927,7 @@ module Dog::Nodes
       # an RPC over to the target. Right now, I am not actually using target for anything...
       track.save
       
-      function = ::Dog::Track.new(self.function_name)
+      function = ::Dog::Track.new(self.function_name, self.package_name || track.function_package)
       function.control_ancestors = track.control_ancestors.clone
       function.control_ancestors.push(track.id)
       
@@ -1297,19 +1334,19 @@ module Dog::Nodes
           end
         else
           
-          struct = {}
+          struct = ::Dog::Value.new("structure", {})
           self.expressions.each_index do |index|
             e = self.expressions[index]
             
             if track.has_visited? e then
-              struct[index] = track.read_stack(e.path)
+              struct.value["n:#{index}"] = track.read_stack(e.path)
             else
               track.should_visit(e)
               return
             end
           end
           
-          return_value = ::Dog::Value.from_ruby_value(struct)
+          return_value = struct
         end
       end
       
@@ -1416,13 +1453,13 @@ module Dog::Nodes
     def visit(track)
       track.save
       # TODO - For both function calls and structure instantiations
-      # I should consider check the type to ensture that I am doing 
+      # I should consider check the type to ensture that I am doing
       # the right thing...
       
       # TODO - Also for types in both computes as well as literals, I need
       # to handle relative paths as well... hopefully, maybe?
       
-      function = ::Dog::Track.new(self.type)
+      function = ::Dog::Track.new(self.type, self.package_name || track.function_package)
       function.control_ancestors = track.control_ancestors.clone
       function.control_ancestors.push(track.id)
       
