@@ -10,6 +10,7 @@
 module Dog
   
   class Value
+    # TODO - The type in a value should be scoped to the package as well. Otherwise, we could have two 'people' structs
     attr_accessor :type
     attr_accessor :value
     

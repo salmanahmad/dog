@@ -19,9 +19,18 @@ class ParserTests::AccessTest < Test::Unit::TestCase
   def test_simple
     @parser.parse("foo['bar' + 6]")
     @parser.parse("foo['bar' + 6]['foo']['bar']")
+    
     @parser.parse("foo[6]")
+    
+    @parser.parse("local")
+    @parser.parse("internal")
+    @parser.parse("external")
+    
+    @parser.parse("local foo[6]")
+    @parser.parse("external foo[6]")
+    @parser.parse("internal foo[6]")
+    
+    @parser.parse("internal internal")
+    @parser.parse("external external")
   end
-  
-  
-  
 end

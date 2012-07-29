@@ -51,9 +51,25 @@ module Dog
           self.packages[name]["native_code"] = package
         end
       else
-        # TODO - Add a package type just like Bundle
+        # TODO - Perhaps add a package type just like Bundle
       end
       
+    end
+
+    def read_package(package)
+      name = package
+      package = self.packages[package]
+      
+      return ::Dog::Value.null_value unless package
+      
+      value = ::Dog::Value.new("package", {})
+      
+      for symbol, path in package["symbols"] do
+        node = node_at_path(path, name)
+        value.value["s:#{symbol}"] = node.read_definition rescue ::Dog::Value.null_value
+      end
+      
+      return value
     end
 
     def contains_symbol_in_package?(symbol, package)
@@ -68,7 +84,13 @@ module Dog
 
     def path_for_symbol(symbol, package = nil)
       package ||= Runtime.bundle.startup_package
-      return self.packages[package]["symbols"][symbol].clone
+      symbol = self.packages[package]["symbols"][symbol]
+      
+      if symbol then
+        return symbol.clone
+      else
+        return nil
+      end
     end
 
     def node_at_path(path, package = nil)

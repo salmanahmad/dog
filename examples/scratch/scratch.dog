@@ -6,6 +6,12 @@ END
 
 COMPUTE foo
 
+DEFINE bar DO
+  foo = "this is bar"
+  PRINT foo
+  PRINT internal foo
+END
+
 i = 5 + 5
 x = i
 
@@ -17,6 +23,12 @@ PRINT i + x
 
 PRINT "Ruby Method:"
 PRINT COMPUTE system.add ON 5, 5 USING k = "Hi!"
+COMPUTE bar
+
+symbol =  external system.add
+PRINT symbol
+#PRINT COMPUTE type ON external system.add
+PRINT COMPUTE system.type ON symbol
 
 #
 #DEFINE label_images FOR person ON data DO

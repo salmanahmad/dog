@@ -289,9 +289,16 @@ module Dog::Nodes
     attribute :module
     attribute :method
     
-    def visit(track)
-      # TODO
+    def read_definition
+      # TODO - Is this done?
+      value = ::Dog::Value.new("native_code", {
+        "s:name" => ::Dog::Value.string_value(self.method.to_s)
+      })
       
+      return value
+    end
+    
+    def visit(track)
       args = nil
       optionals = {}
       
@@ -326,6 +333,7 @@ module Dog::Nodes
   
   class Access < Node
     attribute :sequence
+    attribute :scope
     
     def visit(track)
       if self.sequence then
@@ -358,11 +366,22 @@ module Dog::Nodes
             if item.kind_of? ::Dog::Value then
               value = item
             else
-              value = track.read_variable(item)
-            end            
+              case scope
+              when "local"
+                value = track.read_variable(item)
+              when "internal"
+                value = ::Dog::Runtime.bundle.read_package(track.function_package)
+                value = value.value["s:#{item}"]
+              when "external"
+                value = ::Dog::Runtime.bundle.read_package(item)
+              else
+                value = track.read_variable(item)
+                # TODO - Walk up the scope tree. This includes nested scopes as well.
+              end
+            end
           else
-            if value.nil? || value.type == "null" then
-              raise "Null pointer excep --- Just kidding. I just couldn't resolve the attribute #{item} on line #{self.line}."
+            if value.nil? || value.is_null? then
+              raise "Null pointer excep --- Just kidding. I just couldn't resolve the symbol #{item} on line #{self.line}."
             end
             
             begin
@@ -384,7 +403,7 @@ module Dog::Nodes
           end
           
           if value.type == "task" then
-            
+            # TOOD - Refactor this to support pending structures
             if value.value["d:completed"].is_false? then
               id = value.value["s:id"].ruby_value
               task = ::Dog::StreamObject.find_by_id(id)
@@ -421,6 +440,7 @@ module Dog::Nodes
   class Assignment < Node
     attribute :expression
     attribute :sequence
+    attribute :scope
     
     def visit(track)
       
@@ -465,15 +485,23 @@ module Dog::Nodes
         if first then
           first = false
           
-          if item.kind_of? ::Dog::Value then
-            raise "Void assignment expression"
+          case scope
+          when "internal"
+            # You cannot have external assignments in Dog
+          when "external"
+            # You cannot have external assignments in Dog
           else
-            variable = track.read_variable(item)
-            pointer = variable
+            # The default for assignment is "local". NOT cascade like access.
+            if item.kind_of? ::Dog::Value then
+              raise "Void assignment expression"
+            else
+              variable = track.read_variable(item)
+              pointer = variable
+            end
           end
           
         else
-                    
+          
           begin
             path = ""
             
@@ -587,6 +615,15 @@ module Dog::Nodes
     attribute :mandatory_arguments
     attribute :optional_arguments
     attribute :body
+    
+    def read_definition
+      # TODO - Finish this an all of the rest of the read_definitions
+      value = ::Dog::Value.new("function", {
+        "s:name" => ::Dog::Value.string_value(self.name.to_s)
+      })
+      
+      return value
+    end
     
     def visit(track)
       if track.function_name != self.name then
@@ -734,6 +771,15 @@ module Dog::Nodes
     attribute :variable
     attribute :collection
     attribute :body
+    
+    def read_definition
+      # TODO - Finish this an all of the rest of the read_definitions
+      value = ::Dog::Value.new("callback", {
+        "s:name" => ::Dog::Value.string_value(self.name.to_s)
+      })
+      
+      return value
+    end
     
     def visit(track)
       if track.function_name != self.name then
@@ -945,6 +991,15 @@ module Dog::Nodes
     attribute :name
     attribute :properties
     
+    def read_definition
+      # TODO - Finish this an all of the rest of the read_definitions
+      value = ::Dog::Value.new("structure_definition", {
+        "s:name" => ::Dog::Value.string_value(self.name.to_s)
+      })
+      
+      return value
+    end
+    
     def visit(track)
       if track.function_name != self.name then
         track.write_stack(self.path, ::Dog::Value.null_value)
@@ -1009,11 +1064,31 @@ module Dog::Nodes
     attribute :name
     attribute :structure_name
     attribute :structure_package_name
+    
+    def read_definition
+      # TODO - Finish this an all of the rest of the read_definitions
+      value = ::Dog::Value.new("collection", {
+        "s:name" => ::Dog::Value.string_value(self.name.to_s)
+      })
+      
+      return value
+    end
+    
   end
   
   class CommunityDefinition < Node
     attribute :name
     attribute :properties
+    
+    def read_definition
+      # TODO - Finish this an all of the rest of the read_definitions
+      value = ::Dog::Value.new("function", {
+        "s:name" => ::Dog::Value.string_value(self.name.to_s)
+      })
+      
+      return value
+    end
+    
   end
   
   class Listen < Node

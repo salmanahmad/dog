@@ -74,10 +74,6 @@ grammar Dog
     assignment_expression
   end
   
-  rule expression_no_assignment
-    or_expression
-  end
-  
   rule assignment_expression
     assignment
     /
@@ -206,8 +202,8 @@ grammar Dog
     /
     control_structure
     /
-	perform
-	/
+    perform
+    /
     import
     /
     print
@@ -230,10 +226,14 @@ grammar Dog
   # ==============
   
   rule assignment
-    assignment_access s? assignment_operator s? expression {
+    scope:(scope:('external' / 'internal' / 'local') s)? assignment_access s? assignment_operator s? expression {
       def compile
         node = ::Dog::Nodes::Assignment.new
         node.line = self.line
+        
+        if !self.scope.empty? then
+          node.scope = self.scope.scope.text_value
+        end
         
         node.expression = expression.compile
         node.sequence = assignment_access.compile
@@ -255,10 +255,14 @@ grammar Dog
   end
   
   rule access
-    access_head access_tail:(access_tail)? {
+    scope:(scope:('external' / 'internal' / 'local') s)? access_head access_tail:(access_tail)? {
       def compile
         node = ::Dog::Nodes::Access.new
         node.line = self.line
+        
+        if !self.scope.empty? then
+          node.scope = self.scope.scope.text_value
+        end
         
         if !access_tail.empty? then
           node.sequence = access_tail.compile.clone.unshift(access_head.compile)

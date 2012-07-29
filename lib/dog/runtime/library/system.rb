@@ -16,8 +16,14 @@ module Dog::Library
     
     def self.symbols
       [
-        ["add", "add"]
+        ["add", "add"],
+        ["type", "type"]
       ]
+    end
+    
+    def self.type(args = nil, optionals = nil)
+      value = args.first.type
+      return ::Dog::Value.string_value(value)
     end
     
     def self.add(args = nil, optionals = nil)
