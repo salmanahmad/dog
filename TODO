@@ -1,9 +1,15 @@
 
-
 Virtual Properties
 
 Macros
 	Do I feel okay about macros and side-effects?
+
+Criticisms of Dog:
+	It is a new language (security issues, performance problems, lack of stability)
+	The syntax is not the easiest or most conducive for building large applications - and do we have the property suitable abstraction capabilities?
+	The lack of library support
+	It is a special purpose language - however, it that purpose too broad or too constrained? What if I wanted to build something off the trodden path --- can I? Do I have low level enough support to do things like implement a bookmarklet or a TCP handling mechanism?
+	Semantics --- are they useful? How hard will the client-side javascript be?
 
 Pending structures
 	- Are they able to be shared? How do you pass in a channel to another function for call backs?
