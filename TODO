@@ -17,19 +17,6 @@ Pending structures
 	- Investigate the API with Python yield
 
 
-I need to update the following for packages:
-	
-		COMPUTE
-
-		ASK
-
-		LISTEN
-
-		Collections
-
-		Structure instances
-
-
 Things left to implement:
 
 	Import
