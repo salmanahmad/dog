@@ -1,12 +1,11 @@
 <head>
 	<style type="text/css">
-	
+
 	#content-body {
-		padding-top:15px;
-		padding-left:15px;
+		margin:25px;
 	}
-	
-	#content-toolbar {
+
+	.content-toolbar {
 		color:white;
 		padding:10px 0px 10px 0px;
 		padding-left:15px;
@@ -17,12 +16,38 @@
 		font-size:15px;
 	}
 	
+	#toolbar-left {
+		float:left;
+		position:relative;
+		width:48%;
+	}
+	
+	#toolbar-right {
+		float:left;
+		padding:7px 15px 8px 0px;
+		position:relative;
+		width:48%;
+		text-align:right;
+	}
+	
+	#shell-area {
+		height:500px;
+		width:700px;
+	}
+
 	</style>
 </head>
 <body>
-	<div id="content-toolbar">
-		Shell
+	<div class="columns">
+		<div id="toolbar-left" class="content-toolbar">
+			Shell
+		</div>
+		<div id="toolbar-right" class="content-toolbar">
+			<button type="button">Clear shell</button>
+		</div>
 	</div>
+	<div class="clear"></div>
 	<div id="content-body">
+		<textarea id="shell-area">Insert shell here</textarea>
 	</div>
 </body>

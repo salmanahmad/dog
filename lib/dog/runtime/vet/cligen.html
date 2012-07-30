@@ -2,8 +2,7 @@
 	<style type="text/css">
 	
 	#content-body {
-		padding-top:15px;
-		padding-left:15px;
+		padding:15px;
 	}
 	
 	#content-toolbar {
@@ -17,12 +16,53 @@
 		font-size:15px;
 	}
 	
+	
+	#floater ul {
+		padding:0px;
+		margin:0px;
+		list-style-type:none;
+		text-align:center;
+	}
+	
+	#floater li {
+		display:inline-block;
+		text-align:center;
+	}
+	
 	</style>
+	
+	<script type="text/javascript">
+	
+		$(document).ready(function() {
+			
+		})
+		
+	</script>
 </head>
 <body>
 	<div id="content-toolbar">
 		Client Generator
 	</div>
 	<div id="content-body">
+		<div id="floater">
+			<ul>
+				<li id="dogjs">
+					<img src="zipicon.icns" width="128" height="128"></img>
+					<div class="caption">dogjs</div>
+				</li>
+				<li id="dogpy">
+					<img src="zipicon.icns" width="128" height="128"></img>
+					<div class="caption">dogpy</div>
+				</li>
+				<li id="dogrb">
+					<img src="zipicon.icns" width="128" height="128"></img>
+					<div class="caption">dogrb</div>
+				</li>
+				<li id="dogcocoa">
+					<img src="zipicon.icns" width="128" height="128"></img>
+					<div class="caption">dogcocoa</div>
+				</li>
+			</ul>
+		</div>
 	</div>
 </body>

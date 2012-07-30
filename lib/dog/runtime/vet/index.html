@@ -69,10 +69,6 @@
 		font-weight:bold;
 		text-transform:uppercase;
 	}
-	
-	#sidebar li:last-child {
-		border-bottom:0px;
-	}
 
 	#sidebar ul {
 		padding:0px;
@@ -160,9 +156,8 @@
 	#footer-right li.selected {
 		cursor:pointer;
 		font-size:12px;
-		padding:14px 0px 14px 6px;
-		margin:0px 0px 0px 0px;
 		font-weight:bold;
+		background-image:-webkit-linear-gradient(rgb(200,200,205), rgb(230,230,235));
 	}
 
 	#footer-right ul {
@@ -173,7 +168,9 @@
 	
 	#help-box {
 		padding:20px;
-		background-image:-webkit-linear-gradient(rgb(230,230,235), rgb(190,190,195));
+		margin-right:10px;
+		margin-left:10px;
+		background-image:-webkit-linear-gradient(rgb(230,230,235), rgb(200,200,205));
 		width:150px;
 		height:250px;
 		position:fixed;
@@ -187,7 +184,7 @@
 	
 	#account-box {
 		padding:20px;
-		background-image:-webkit-linear-gradient(rgb(220,220,225), rgb(200,200,205));
+		background-image:-webkit-linear-gradient(rgb(230,230,235), rgb(200,200,105));
 		width:150px;
 		height:250px;
 		position:fixed;
@@ -236,10 +233,13 @@
 			if($("#help-box").css("display") == "none") {
 				$("#help-box").css("display", "block")
 				$("#account-box").css("display", "none")
+				$("#help").addClass("selected")
 			}
 			else {
 				$("#help-box").css("display", "none")
+				$("#help").removeClass("selected")
 			}
+			$("#account").removeClass("selected")
 		})
 		
 		$("#account").click(function(e) {
@@ -247,11 +247,14 @@
 			if($("#account-box").css("display") == "none") {
 				$("#account-box").css("display", "block")
 				$("#help-box").css("display", "none")
+				$("#account").addClass("selected")
 			}
 			else {
 				$("#account-box").css("display", "none")
+				$("#account").removeClass("selected")
 			}
-		})
+			$("#help").removeClass("selected")
+		})		
 		
 		$("html").click(function() {
 			if($("#account-box").css("display") == "block") {
@@ -260,6 +263,8 @@
 			if($("#help-box").css("display") == "block") {
 				$("#help-box").css("display", "none")
 			}
+			$("#account").removeClass("selected")
+			$("#help").removeClass("selected")
 		})
 		
 		
@@ -307,7 +312,7 @@
 	</div>
 	<div id="footer">
 		<div id="footer-left">
-			System health: Great!
+			System health: <img src="Green dot.png" width="12" height="12"></img> Great!
 		</div>
 		<div id="footer-right">
 			<ul>
