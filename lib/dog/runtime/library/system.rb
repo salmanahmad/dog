@@ -16,7 +16,6 @@ module Dog::Library
     
     def self.symbols
       [
-        ["add", "add"],
         ["type", "type"]
       ]
     end
@@ -26,15 +25,5 @@ module Dog::Library
       return ::Dog::Value.string_value(value)
     end
     
-    def self.add(args = nil, optionals = nil)
-      
-      value = 0
-      
-      for arg in args do
-        value += arg.ruby_value
-      end
-      
-      return ::Dog::Value::number_value(value)
-    end
   end
 end

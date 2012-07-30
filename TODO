@@ -21,7 +21,7 @@ Things left to implement:
 
 	Import
 
-	Collections API
+	Null Pointer references for symbol look ups. Don't seem to be handled too well. Try to use system.add and it will not work.
 
 	People
 
@@ -37,7 +37,7 @@ Things left to implement:
 
 	Dog unit test cases
 
-	Add support for nested collections and nested functions inside of "ACCESS" - this would be the so called "cascasing" scope modifier
+	Add support for nested collections and nested functions inside of "ACCESS" - this would be the so called "cascasing" scope modifier.
 
 	Update COMPUTE, ASK, LISTEN, etc to take an expression rather than just an identifier. Note: This does mean augmenting defintions with package information
 
@@ -56,6 +56,8 @@ Done:
 	Scopes when ACCESSing
 
 	Add a "type", "definition" or "symbol" structure to refer to definitions and box it as a value.
+
+	Collections API
 
 
 

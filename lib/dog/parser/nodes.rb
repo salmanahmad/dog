@@ -530,6 +530,7 @@ module Dog::Nodes
         end
       end
       
+      pointer._id = expression_value._id
       pointer.type = expression_value.type
       pointer.value = expression_value.value
       
@@ -1074,6 +1075,11 @@ module Dog::Nodes
       return value
     end
     
+    def visit(track)
+      track.write_stack(self.path, ::Dog::Value.null_value)
+      track.should_visit(self.parent)
+    end
+    
   end
   
   class CommunityDefinition < Node
@@ -1515,6 +1521,9 @@ module Dog::Nodes
         
         dog_value.value[k] = track.read_stack(v.path)
       end
+      
+      dog_value._id = UUID.new.generate
+      dog_value.value["s:id"] = ::Dog::Value.string_value(dog_value._id)
       
       track.write_stack(self.path, dog_value)
       track.should_visit(self.parent)

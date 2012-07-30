@@ -11,8 +11,10 @@ module Dog
   
   class Value
     # TODO - The type in a value should be scoped to the package as well. Otherwise, we could have two 'people' structs
+    attr_accessor :_id
     attr_accessor :type
     attr_accessor :value
+    
     
     def initialize(type = nil, value = nil)
       self.type = type
@@ -36,6 +38,7 @@ module Dog
         end
         
         return {
+          "_id" => self._id,
           "type" => self.type,
           "value" => processed_value
         }
@@ -44,6 +47,7 @@ module Dog
     
     def self.from_hash(hash)
       value = Value.new
+      value._id = hash["_id"]
       value.type = hash["type"]
       value.value = hash["value"]
       

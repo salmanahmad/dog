@@ -881,7 +881,7 @@ grammar Dog
   end
   
   rule collection_definition
-    'DEFINE' s name:identifier s 'OF' structure_name:packaged_identifier {
+    'DEFINE' s name:identifier s 'OF' s structure_name:packaged_identifier {
       def compile
         pi = structure_name.compile
         

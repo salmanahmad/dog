@@ -1,5 +1,25 @@
 
 
+DEFINE car {
+  title
+  body
+}
+
+DEFINE cars OF car
+
+honda = car {
+  title = "Hi"
+  body = "Moknkies"
+}
+
+COMPUTE collection.save ON honda, internal cars
+COMPUTE collection.delete ON honda, internal cars
+
+PRINT honda.title
+
+PRINT honda
+
+
 DEFINE foo DO
   PRINT 7 + 11
 END
@@ -21,11 +41,10 @@ PRINT 5 + 5
 PRINT i + x
 
 
-PRINT "Ruby Method:"
-PRINT COMPUTE system.add ON 5, 5 USING k = "Hi!"
+
 COMPUTE bar
 
-symbol =  external system.add
+symbol =  external system.type
 PRINT symbol
 #PRINT COMPUTE type ON external system.add
 PRINT COMPUTE system.type ON symbol

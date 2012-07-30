@@ -65,6 +65,7 @@ module Dog
         self.bundle_directory = File.dirname(File.expand_path(bundle_filename)) rescue Dir.pwd
         
         self.bundle.link(::Dog::Library::System)
+        self.bundle.link(::Dog::Library::Collection)
         
         options = {
           "config_file" => nil,
