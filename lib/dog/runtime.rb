@@ -183,21 +183,26 @@ module Dog
       end
       
       def symbol_exists?(name = [])
-        name = name.join(".")
-        if name == "" then
-          return true
-        else
-          return self.bite_code["symbols"].include? name
-        end
+        # TODO - Fix this later.
+        #name = name.join(".")
+        #if name == "" then
+        #  return true
+        #else
+        #  return self.bite_code["symbols"].include? name
+        #end
+        
+        self.bundle.contains_symbol_in_package?(name.join("."), self.bundle.startup_package)
       end
 
       def symbol_info(name = [])
-        path = self.bite_code["symbols"][name.join(".")].clone
-        path.shift
-
-        node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
+        #path = self.bite_code["symbols"][name.join(".")].clone
+        #path.shift
+        #
+        #node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
+        
+        node = self.bundle.node_for_symbol(name.join("."), self.bundle.startup_package)
         type = self.typeof_node(node)
-
+        
         if type then
           return self.to_hash_for_stream(name, type)
         else
@@ -212,7 +217,9 @@ module Dog
         # special case root
         name = '' if name == 'root'
 
-        for symbol, path in self.bite_code["symbols"] do
+        symbols = self.bundle.packages[self.bundle.startup_package]["symbols"]
+
+        for symbol, path in symbols do
           if symbol.start_with?(name) then
             level = symbol[name.length, symbol.length].count(".")
             level += 1 if name == '' # implied root. in every name
@@ -221,7 +228,8 @@ module Dog
               path = path.clone
               path.shift
 
-              node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
+              #node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
+              node = self.bundle.node_for_symbol(symbol, self.bundle.startup_package)
               type = self.typeof_node(node)
 
               if type then
@@ -233,17 +241,18 @@ module Dog
 
         return descendants
       end
-
-      def node_at_path_for_filename(path, file)
-        # TODO - I need to raise an error if the node is not found.
-        node = self.bite_code["code"][file]
-
-        for index in path do
-          node = node[index]
-        end
-
-        return node
-      end
+      
+      # TODO - Remove this
+      #def node_at_path_for_filename(path, file)
+      #  # TODO - I need to raise an error if the node is not found.
+      #  node = self.bite_code["code"][file]
+      #  
+      #  for index in path do
+      #    node = node[index]
+      #  end
+      #  
+      #  return node
+      #end
 
       def typeof_node(node)
         return case
