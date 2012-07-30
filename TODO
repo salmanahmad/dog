@@ -21,8 +21,6 @@ Things left to implement:
 
 	Import
 
-	Null Pointer references for symbol look ups. Don't seem to be handled too well. Try to use system.add and it will not work.
-
 	Communities
 
 	Predicates
@@ -58,6 +56,8 @@ Done:
 	Collections API
 
 	People
+
+	Null Pointer references for symbol look ups. Don't seem to be handled too well. Try to use system.add and it will not work.
 
 
 

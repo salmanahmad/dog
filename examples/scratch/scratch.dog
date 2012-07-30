@@ -10,6 +10,7 @@ PRINT salman
 
 COMPUTE people.save ON salman
 
+COMPUTE foobar.save ON salman
 
 
 

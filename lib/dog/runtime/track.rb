@@ -55,7 +55,7 @@ module Dog
         path = Runtime.bundle.path_for_symbol(name, package)
         
         if path.nil? then
-          raise "I could not find a symbol named: #{name}"
+          raise "I could not find a symbol named: #{name} in package: #{package}"
         end
         
         path = path.clone

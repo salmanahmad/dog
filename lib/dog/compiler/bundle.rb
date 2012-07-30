@@ -86,7 +86,7 @@ module Dog
 
     def path_for_symbol(symbol, package = nil)
       package ||= Runtime.bundle.startup_package
-      symbol = self.packages[package]["symbols"][symbol]
+      symbol = self.packages[package]["symbols"][symbol] rescue nil
       
       if symbol then
         return symbol.clone
