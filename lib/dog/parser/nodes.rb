@@ -285,48 +285,6 @@ module Dog::Nodes
     end
   end
   
-  class NativeCode < Node
-    attribute :module
-    attribute :method
-    
-    def read_definition
-      # TODO - Is this done?
-      value = ::Dog::Value.new("native_code", {
-        "s:name" => ::Dog::Value.string_value(self.method.to_s)
-      })
-      
-      return value
-    end
-    
-    def visit(track)
-      args = nil
-      optionals = {}
-      
-      if track.mandatory_arguments.kind_of? Array then
-        args = []
-        for v in track.mandatory_arguments do
-          args << ::Dog::Value.from_hash(v)
-        end
-      else
-        args = {}
-        for k, v in track.mandatory_arguments do
-          args[k] = ::Dog::Value.from_hash(v)
-        end
-      end
-      
-      for k, v in track.optional_arguments do
-        optionals[k] = ::Dog::Value.from_hash(v)
-      end
-      
-      return_value = self.module.send(self.method, args, optionals)
-      return_value ||= ::Dog::Value.null_value
-      
-      track.write_return_value(return_value)
-      track.finish
-      return nil
-    end
-  end
-  
   class Package < Node
     attribute :name
   end

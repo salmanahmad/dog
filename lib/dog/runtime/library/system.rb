@@ -15,14 +15,16 @@ module Dog::Library
     end
     
     def self.symbols
-      [
-        ["type", "type"]
-      ]
+      return {
+        "type" => Type.new
+      }
     end
     
-    def self.type(args = nil, optionals = nil)
-      value = args.first.type
-      return ::Dog::Value.string_value(value)
+    class Type < ::Dog::NativeFunction
+      def run(args = nil, optionals = nil)
+        value = args.first.type
+        return ::Dog::Value.string_value(value) 
+      end
     end
     
   end

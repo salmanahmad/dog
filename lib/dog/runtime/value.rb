@@ -121,6 +121,13 @@ module Dog
       Value.primitive_types.include? self.type
     end
     
+    def self.empty_structure
+      value = Value.new
+      value.type = "structure"
+      value.value = {}
+      return value
+    end
+    
     def self.string_value(string)
       value = Value.new
       value.type = "string"

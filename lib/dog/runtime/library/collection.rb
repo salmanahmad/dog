@@ -21,30 +21,34 @@ module Dog::Library
     end
     
     def self.symbols
-      [
-        ["save", "save"],
-        ["delete", "delete"]
-      ]
+      return {
+        "save" => Save.new,
+        "delete" => Delete.new
+      }
     end
     
-    def self.save(args = nil, optionals = nil)
-      struct = args[0]
-      collection = args[1]
+    class Save < ::Dog::NativeFunction
+      def run(args = nil, optionals = nil)
+        struct = args[0]
+        collection = args[1]
       
-      collection = collection.ruby_value["name"]
-      ::Dog.database[collection].save(struct.to_hash)
+        collection = collection.ruby_value["name"]
+        ::Dog.database[collection].save(struct.to_hash)
       
-      return ::Dog::Value.true_value
+        return ::Dog::Value.true_value
+      end
     end
     
-    def self.delete(args = nil, optionals = nil)
-      struct = args[0]
-      collection = args[1]
+    class Delete < ::Dog::NativeFunction
+      def run(args = nil, optionals = nil)
+        struct = args[0]
+        collection = args[1]
       
-      collection = collection.ruby_value["name"]
-      ::Dog.database[collection].remove({"_id" => struct._id})
+        collection = collection.ruby_value["name"]
+        ::Dog.database[collection].remove({"_id" => struct._id})
       
-      return ::Dog::Value.true_value
+        return ::Dog::Value.true_value
+      end
     end
     
   end

@@ -43,8 +43,10 @@ module Dog
           symbols = package.symbols
           name = package.name
           
-          for symbol in symbols do
-            self.add_symbol_to_package(symbol[0], symbol[1], name)
+          for symbol, node in symbols do
+            self.add_symbol_to_package(symbol, [symbol], name)
+            self.packages[name]["code"] ||= {}
+            self.packages[name]["code"][symbol] = node
           end
           
           self.packages[name]["name"] = name
@@ -95,22 +97,14 @@ module Dog
 
     def node_at_path(path, package = nil)
       package ||= Runtime.bundle.startup_package
+      
+      node = self.packages[package]["code"]
 
-      if path.kind_of? String
-        # If the path is a string and not an array, it means that it is a native code call
-        node = ::Dog::Nodes::NativeCode.new
-        node.module = self.packages[package]["native_code"]
-        node.method = path
-        return node
-      else
-        node = self.packages[package]["code"]
-
-        for index in path do
-          node = node[index]
-        end
-
-        return node
+      for index in path do
+        node = node[index]
       end
+
+      return node
     end
 
     def node_for_symbol(symbol, package = nil)
