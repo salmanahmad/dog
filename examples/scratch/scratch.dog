@@ -5,8 +5,10 @@ salman = people.person {
 }
 
 PRINT salman.first_name
-
+salman.last_name = "Hi!"
 PRINT salman
+
+COMPUTE people.save ON salman
 
 
 

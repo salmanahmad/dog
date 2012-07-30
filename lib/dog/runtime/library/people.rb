@@ -16,7 +16,8 @@ module Dog::Library
     
     def self.symbols
       return {
-        "person" => Person.new
+        "person" => Person.new,
+        "save" => Save.new
       }
     end
     
@@ -43,6 +44,17 @@ module Dog::Library
         }
         
         return value
+      end
+    end
+    
+    class Save < ::Dog::NativeFunction
+      def run(args = nil, optionals = nil)
+        person = args.first
+        
+        ::Dog.database["people"].save(person.to_hash)
+        
+        return person
+        
       end
     end
     
