@@ -23,8 +23,6 @@ Things left to implement:
 
 	Null Pointer references for symbol look ups. Don't seem to be handled too well. Try to use system.add and it will not work.
 
-	People
-
 	Communities
 
 	Predicates
@@ -58,6 +56,8 @@ Done:
 	Add a "type", "definition" or "symbol" structure to refer to definitions and box it as a value.
 
 	Collections API
+
+	People
 
 
 
