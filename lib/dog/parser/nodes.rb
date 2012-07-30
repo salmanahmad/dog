@@ -1403,14 +1403,14 @@ module Dog::Nodes
 
       if self.expression then
         if track.has_visited?(self.expression) then
-          value = track.read_stack(self.expression.path).value
+          value = track.read_stack(self.expression.path)
         else
           track.should_visit(self.expression)
           return
         end
       end
       
-      puts value
+      puts value.ruby_value
       
       track.write_stack(self.path, ::Dog::Value.null_value)
       track.should_visit(self.parent)

@@ -27,7 +27,22 @@ module Dog::Library
       end
       
       def create
+        value = ::Dog::Value.new("person", {})
+        value._id = UUID.new.generate
+        value.value = {
+          "s:id" => ::Dog::Value.string_value(value._id),
+          "s:first_name" => ::Dog::Value.null_value,
+          "s:last_name" => ::Dog::Value.null_value,
+          "s:handle" => ::Dog::Value.null_value,
+          "s:email" => ::Dog::Value.null_value,
+          "s:facebook" => ::Dog::Value.null_value,
+          "s:twitter" => ::Dog::Value.null_value,
+          "s:google" => ::Dog::Value.null_value,
+          "s:communities" => ::Dog::Value.null_value,
+          "s:profile" => ::Dog::Value.null_value
+        }
         
+        return value
       end
     end
     

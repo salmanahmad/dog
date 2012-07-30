@@ -67,6 +67,7 @@ module Dog
         
         self.bundle.link(::Dog::Library::System)
         self.bundle.link(::Dog::Library::Collection)
+        self.bundle.link(::Dog::Library::People)
         
         options = {
           "config_file" => nil,

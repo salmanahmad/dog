@@ -1,5 +1,16 @@
 
 
+salman = people.person {
+  first_name = "Salman"
+}
+
+PRINT salman.first_name
+
+PRINT salman
+
+
+
+
 DEFINE car {
   title
   body
@@ -31,6 +42,9 @@ DEFINE bar DO
   PRINT foo
   PRINT internal foo
 END
+
+
+
 
 i = 5 + 5
 x = i
