@@ -27,7 +27,12 @@
 	#vet-space {
 		color:white;
 		padding:10px 0px 10px 0px;
-		background-image: -webkit-linear-gradient(rgb(236,110,225), rgb(175,73,161));
+		background-color:rgb(236,110,225);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(236,110,225)), to(rgb(175,73,161)));
+		background-image:-webkit-linear-gradient(top, rgb(236,110,225), rgb(175,73,161));
+		background-image:-moz-linear-gradient(top, rgb(236,110,225), rgb(175,73,161));
+		background-image:-o-linear-gradient(top, rgb(236,110,225), rgb(175,73,161));
+		background-image:linear-gradient(to bottom, rgb(236,110,225), rgb(175,73,161));
 		text-indent: 5px;
 		font-weight:bold;
 		text-shadow:0px 1px 1px #000;
@@ -48,7 +53,7 @@
 		float:left;
 		background-color:transparent;
 		position:relative;
-		z-index:1;
+		z-index:2;
 	}
 
 	#sidebar li {
@@ -69,19 +74,24 @@
 		font-weight:bold;
 		text-transform:uppercase;
 	}
-
+	
 	#sidebar ul {
 		padding:0px;
 		margin:0px;
 		list-style-type:none;
 		z-index:3;
 	}
-
+	
 	.sidebar {
 		position:absolute;
 		height:100%;
 		width:249px;
-		background-image: -webkit-linear-gradient(rgb(250,250,250), rgb(230,230,230));
+		background-color:rgb(250,250,250);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(250,250,250)), to(rgb(230,230,230)));
+		background-image:-webkit-linear-gradient(top, rgb(250,250,250), rgb(230,230,230));
+		background-image:-moz-linear-gradient(top, rgb(250,250,250), rgb(230,230,230));
+		background-image:-o-linear-gradient(top, rgb(250,250,250), rgb(230,230,230));
+		background-image:linear-gradient(to bottom, rgb(250,250,250), rgb(230,230,230));
 		border-right: 1px solid rgb(180,180,180);
 		z-index:0;
 	}
@@ -122,7 +132,12 @@
 		height:20px;
 		color:#444;
 		text-shadow:-1px 1px 0px #fff;;
-		background-image: -webkit-linear-gradient(rgb(230,230,235), rgb(200,200,205));
+		background-color:rgb(230,230,235);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(230,230,235)), to(rgb(200,200,205)));
+		background-image:-webkit-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:-moz-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:-o-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:linear-gradient(to bottom, rgb(230,230,235), rgb(200,200,205));
 		z-index:10;
 		border-top:1px solid #999;
 	}
@@ -150,14 +165,24 @@
 	}
 	
 	#footer-right li:hover {
-		background-image:-webkit-linear-gradient(rgb(200,200,205), rgb(230,230,235));
+		background-color:rgb(200,200,205);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(200,200,205)), to(rgb(230,230,235)));
+		background-image:-webkit-linear-gradient(top, rgb(200,200,205), rgb(230,230,235));
+		background-image:-moz-linear-gradient(top, rgb(200,200,205), rgb(230,230,235));
+		background-image:-o-linear-gradient(top, rgb(200,200,205), rgb(230,230,235));
+		background-image:linear-gradient(to bottom, rgb(200,200,205), rgb(230,230,235));
 	}
 	
 	#footer-right li.selected {
 		cursor:pointer;
 		font-size:12px;
 		font-weight:bold;
-		background-image:-webkit-linear-gradient(rgb(200,200,205), rgb(230,230,235));
+		background-color:rgb(200,200,205);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(200,200,205)), to(rgb(230,230,235)));
+		background-image:-webkit-linear-gradient(top, rgb(200,200,205), rgb(230,230,235));
+		background-image:-moz-linear-gradient(top, rgb(200,200,205), rgb(230,230,235));
+		background-image:-o-linear-gradient(top, rgb(200,200,205), rgb(230,230,235));
+		background-image:linear-gradient(to bottom, rgb(200,200,205), rgb(230,230,235));
 	}
 
 	#footer-right ul {
@@ -170,7 +195,12 @@
 		padding:20px;
 		margin-right:10px;
 		margin-left:10px;
-		background-image:-webkit-linear-gradient(rgb(230,230,235), rgb(200,200,205));
+		background-color:rgb(230,230,235);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(230,230,235)), to(rgb(200,200,205)));
+		background-image:-webkit-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:-moz-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:-o-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:linear-gradient(to bottom, rgb(230,230,235), rgb(200,200,205));
 		width:150px;
 		height:250px;
 		position:fixed;
@@ -184,7 +214,12 @@
 	
 	#account-box {
 		padding:20px;
-		background-image:-webkit-linear-gradient(rgb(230,230,235), rgb(200,200,105));
+		background-color:rgb(230,230,235);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(230,230,235)), to(rgb(200,200,205)));
+		background-image:-webkit-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:-moz-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:-o-linear-gradient(top, rgb(230,230,235), rgb(200,200,205));
+		background-image:linear-gradient(to bottom, rgb(230,230,235), rgb(200,200,205));
 		width:150px;
 		height:250px;
 		position:fixed;
@@ -194,6 +229,68 @@
 		border-right:1px solid #888;
 		border-top:1px solid #888;
 		z-index:11;
+	}
+	
+	.page-header {
+		color:#2A8DC1;
+		font-weight:bold;
+		font-size:16px;
+	}
+	
+	.content-toolbar {
+		height:;
+		color:white;
+		padding:10px 0px 10px 0px;
+		padding-left:15px;
+		background-color:rgb(236,110,225);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(236,110,225)), to(rgb(175,73,161)));
+		background-image:-webkit-linear-gradient(top, rgb(236,110,225), rgb(175,73,161));
+		background-image:-moz-linear-gradient(top, rgb(236,110,225), rgb(175,73,161));
+		background-image:-o-linear-gradient(top, rgb(236,110,225), rgb(175,73,161));
+		background-image:linear-gradient(to bottom, rgb(236,110,225), rgb(175,73,161));
+		text-indent: 5px;
+		font-weight:bold;
+		text-shadow:0px 1px 1px #000;
+		font-size:15px;
+	}
+	
+	#content-body table {
+		border:1px solid #888;
+		border-collapse:collapse;
+		width:100%;
+		
+	}
+	
+	#content-body tr {
+		background-color:rgb(239,239,239);
+		height:25px;
+	}
+	
+	#content-body tr.alt {
+		background-color:transparent;
+	}
+	
+	#content-body tr:hover {
+		background-color:rgb(230,230,230);
+	}
+	
+	#content-body th {
+		height:35px;
+		width:50%;
+		background-color:rgb(85,182,217);
+		background-image:-webkit-gradient(linear, left top, left bottom, from(rgb(85,182,217)), to(rgb(0,157,204)));
+		background-image:-webkit-linear-gradient(top, rgb(85,182,217), rgb(0,157,204));
+		background-image:-moz-linear-gradient(top, rgb(85,182,217), rgb(0,157,204));
+		background-image:-o-linear-gradient(top, rgb(85,182,217), rgb(0,157,204));
+		background-image:linear-gradient(to bottom, rgb(85,182,217), rgb(0,157,204));
+		color:white;
+		font-weight:bold;
+		font-size:15px;
+		text-shadow:0px 1px 1px #000;
+	}
+	
+	#content-body td {
+		padding-left:5px;
 	}
 	
 
@@ -209,7 +306,19 @@
 		
 		$(".nav-button").mouseenter(function() {
 			if(!$(this).hasClass("selected")) {
-				$(this).css("background-image", "-webkit-linear-gradient(#F6F6F6, #DFDFDF)")
+				if($.browser.webkit) {
+					$(this).css("background-image", "-webkit-linear-gradient(top, #F6F6F6, #DFDFDF)")
+				}
+				else if($.browser.opera) {
+					$(this).css("background-image", "-o-linear-gradient(top, #F6F6F6, #DFDFDF)")
+				}
+				else if($.browser.mozilla) {
+					$(this).css("background-image", "-moz-linear-gradient(top, #F6F6F6, #DFDFDF)")
+				}
+				else {
+					$(this).css("background-color", "#F6F6F6")
+				}
+
 				$(this).css("border-right", "1px solid rgb(180,180,180)")
 			}
 		})
@@ -283,15 +392,15 @@
 						<div id="selected-button">
 							<img src="Selected Button.png" width="265" height="42" ></img>
 						</div>
-						<li id="config" class="nav-button selected">Configuration</li>
-						<li id="shell" class="nav-button">Shell</li>
-						<li id="userman" class="nav-button">User Manager</li>
-						<li id="commman" class="nav-button">Community Manager</li>
-						<li id="objbrowser" class="nav-button">Object Browser</li>
-						<li id="migrator" class="nav-button">Migrator</li>
-						<li id="garbcoll" class="nav-button">Garbage Collector</li>
-						<li id="cligen" class="nav-button">Client Generators</li>
-						<li id="analytics" class="nav-button">Analytics</li>
+						<li id="config" class="nav-button selected"><div class="sidebar-text">Configuration</div></li>
+						<li id="shell" class="nav-button"><div class="sidebar-text">Shell</div></li></li>
+						<li id="userman" class="nav-button"><div class="sidebar-text">User Manager</div></li></li>
+						<li id="commman" class="nav-button"><div class="sidebar-text">Community Manager</div></li></li>
+						<li id="objbrowser" class="nav-button"><div class="sidebar-text">Object Browser</div></li></li>
+						<li id="migrator" class="nav-button"><div class="sidebar-text">Migrator</div></li></li>
+						<li id="garbcoll" class="nav-button"><div class="sidebar-text">Garbage Collector</div></li></li>
+						<li id="cligen" class="nav-button"><div class="sidebar-text">Client Generators</div></li></li>
+						<li id="analytics" class="nav-button"><div class="sidebar-text">Analytics</div></li></li>
 					</ul>
 				</div>
 				<div class="sidebar">

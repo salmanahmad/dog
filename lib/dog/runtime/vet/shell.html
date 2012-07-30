@@ -5,31 +5,20 @@
 		margin:25px;
 	}
 
-	.content-toolbar {
-		color:white;
-		padding:10px 0px 10px 0px;
-		padding-left:15px;
-		background-image: -webkit-linear-gradient(rgb(236,110,225), rgb(175,73,161));
-		text-indent: 5px;
-		font-weight:bold;
-		text-shadow:0px 1px 1px #000;
-		font-size:15px;
-	}
-	
 	#toolbar-left {
 		float:left;
 		position:relative;
 		width:48%;
 	}
-	
+
 	#toolbar-right {
-		float:left;
-		padding:7px 15px 8px 0px;
-		position:relative;
-		width:48%;
+		position:absolute;
+		right:5px;
+		top:7px;
+		padding:0px;
 		text-align:right;
 	}
-	
+
 	#shell-area {
 		height:500px;
 		width:700px;
@@ -39,14 +28,16 @@
 </head>
 <body>
 	<div class="columns">
-		<div id="toolbar-left" class="content-toolbar">
-			Shell
-		</div>
-		<div id="toolbar-right" class="content-toolbar">
-			<button type="button">Clear shell</button>
+		<div class="content-toolbar">
+			<div id="toolbar-left">
+				Shell
+			</div>
+			<div id="toolbar-right">
+				<button type="button">Clear shell</button>
+			</div>
+			<div class="clear"></div>
 		</div>
 	</div>
-	<div class="clear"></div>
 	<div id="content-body">
 		<textarea id="shell-area">Insert shell here</textarea>
 	</div>

@@ -5,17 +5,6 @@
 		margin:25px;
 	}
 
-	.content-toolbar {
-		color:white;
-		padding:10px 0px 10px 0px;
-		padding-left:15px;
-		background-image: -webkit-linear-gradient(rgb(236,110,225), rgb(175,73,161));
-		text-indent: 5px;
-		font-weight:bold;
-		text-shadow:0px 1px 1px #000;
-		font-size:15px;
-	}
-
 	#toolbar-left {
 		float:left;
 		position:relative;
@@ -23,65 +12,88 @@
 	}
 
 	#toolbar-right {
-		float:left;
-		padding:7px 15px 8px 0px;
-		position:relative;
-		width:48%;
+		position:absolute;
+		right:5px;
+		top:7px;
+		padding:0px;
 		text-align:right;
 	}
 
-	table {
-		border:1px solid black;
-		border-collapse:collapse;
-		width:100%;
-		
+	#content-body th {
+		width:33%;
+	}
+
+	.space {
+		margin-left:70px;
 	}
 	
-	tr {
-		background-color:#BDC7DA;
-		height:25px;
+	#obj-search-field {
+		width:575px;
+	}
+
+	#obj-search-btn {
+		position:absolute;
+		right:25px;
 	}
 	
-	tr.alt {
-		background-color:transparent;
-	}
-	
-	th {
-		height:35px;
-		width:50%;
-		background-image:-webkit-linear-gradient(#3586CC, #2D6FA9);
-		color:white;
-		font-weight:bold;
-		font-size:15px;
-		text-shadow:0px 1px 1px #000;
+	#stats-area {
+		padding-top:50px;
 	}
 
 	</style>
+	
+	<script type="text/javascript">
+	
+		$(document).ready(function() {
+			$("#obj-search-field").focus(function() {
+				$(this).val("")
+			})
+		})
+		
+	</script>
 </head>
 <body>
 	<div class="columns">
-		<div id="toolbar-left" class="content-toolbar">
-			Object Browser
-		</div>
-		<div id="toolbar-right" class="content-toolbar">
-			<button type="button">Add Object</button>
-			<button type="button">Remove Objects</button>
+		<div class="content-toolbar">
+			<div id="toolbar-left">
+				Object Browser
+			</div>
+			<div id="toolbar-right">
+				<button type="button">Add Object</button>
+				<button type="button">Remove Objects</button>
+			</div>
+			<div class="clear"></div>
 		</div>
 	</div>
-	<div class="clear"></div>
+
 	<div id="content-body">
-		<table border="1">
-			Current objects <br /> <br />
-			<th>Object</th>
-			<th>Property</th>
-			<tr>
-				<td></td>
-				<td></td>
-			</tr>
-			<tr class="alt">
-				<td></td>
-				<td></td>
-			</tr>
-		</table>
+		<div id="query-area">
+			<form id="obj-search-form">
+				<div class="page-header">Search Current Objects <br /> <br /></div>
+				<input type="text" id="obj-search-field" value="Enter Search Query..."></input>
+				<input type="submit" value="Search Objects" id="obj-search-btn"></input>
+			</form>
+		</div>
+
+		<div id="stats-area">
+			<div class="page-header">
+				Statistics
+			</div><br />
+			<table border="1">
+				<th>Communities</th>
+				<th>Object Types</th>
+				<th>Number of Objects</th>
+				<tr>
+					<td>Boston Smiths</td>
+					<td>People</td>
+					<td>37</td>
+				</tr>
+				<tr class="alt">
+					<td>Cambridge Smiths</td>
+					<td>People</td>
+					<td>24</td>
+				</tr>
+			</table>
+		</div>
 	</div>
 </body>

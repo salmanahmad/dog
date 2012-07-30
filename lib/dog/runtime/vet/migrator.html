@@ -4,18 +4,7 @@
 	#content-body {
 		margin:25px;
 	}
-
-	.content-toolbar {
-		color:white;
-		padding:10px 0px 10px 0px;
-		padding-left:15px;
-		background-image: -webkit-linear-gradient(rgb(236,110,225), rgb(175,73,161));
-		text-indent: 5px;
-		font-weight:bold;
-		text-shadow:0px 1px 1px #000;
-		font-size:15px;
-	}
-
+	
 	#toolbar-left {
 		float:left;
 		position:relative;
@@ -23,67 +12,48 @@
 	}
 
 	#toolbar-right {
-		float:left;
-		padding:7px 15px 8px 0px;
-		position:relative;
-		width:48%;
+		position:absolute;
+		right:5px;
+		top:7px;
+		padding:0px;
 		text-align:right;
 	}
-
-	table {
-		border:1px solid black;
-		border-collapse:collapse;
-		width:100%;
-		
-	}
 	
-	tr {
-		background-color:#BDC7DA;
-		height:25px;
-	}
-	
-	tr.alt {
-		background-color:transparent;
-	}
-	
-	th {
-		height:35px;
+	#content-body th {
 		width:33%;
-		background-image:-webkit-linear-gradient(#3586CC, #2D6FA9);
-		color:white;
-		font-weight:bold;
-		font-size:15px;
-		text-shadow:0px 1px 1px #000;
 	}
-
+	
 	</style>
 </head>
 <body>
 	<div class="columns">
-		<div id="toolbar-left" class="content-toolbar">
-			Migrator
+		<div class="content-toolbar">
+			<div id="toolbar-left">
+				Migrator
+			</div>
+			<div id="toolbar-right">
+				<button type="button">Add Migration</button>
+				<button type="button">Run Migrations</button>
+			</div>
+			<div class="clear"></div>
 		</div>
-		<div id="toolbar-right" class="content-toolbar">
-			<button type="button">Add Migration</button>
-			<button type="button">Run Migrations</button>
-		</div>
+
 	</div>
-	<div class="clear"></div>
 	<div id="content-body">
-		Past migrations <br /><br />
+		<div class="page-header">Previous Migrations <br /><br /></div>
 		<table border="1">
 			<th>Migration</th>
 			<th>Authorizer</th>
 			<th>Time</th>
 			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
+				<td>Add Column</td>
+				<td>John Smith</td>
+				<td>Monday 7/30/2012 9:56 PM</td>
 			</tr>
 			<tr class="alt">
-				<td></td>
-				<td></td>
-				<td></td>
+				<td>Add Join Table</td>
+				<td>Jane Smith</td>
+				<td>Friday 7/27/2012 10:42 AM</td>
 			</tr>
 		</table>
 	</div>
