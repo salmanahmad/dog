@@ -216,7 +216,7 @@ module Dog
         name = name.join(".")
 
         # special case root
-        name = '' if name == 'root'
+        name = '' if name == '@root'
 
         symbols = self.bundle.packages[self.bundle.startup_package]["symbols"]
 
