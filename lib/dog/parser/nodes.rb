@@ -663,15 +663,15 @@ module Dog::Nodes
           end
           
           
-          if self.target == "person" then
-            
+          if self.target then
             properties = []
+            instructions = ""
             
             for name, value in track.variables do
               p = ::Dog::Property.new
               p.identifier = name
               p.value = ::Dog::Value.from_hash(value).ruby_value
-              p.required = true
+              p.required = mandatory_arguments.include? name
               p.direction = "output"
               properties << p
             end
@@ -691,28 +691,86 @@ module Dog::Nodes
                 
                 break
               end
+              
+              if node.class == Perform then
+                instructions = node.instructions.value
+              end
             end
             
-            # TODO - I need to set the instructions from perform as well...
+            if self.target == "person" then
+              property = Property.new
+              property.identifier = "instructions"
+              property.direction = "output"
+              property.required = true
+              property.value = instructions
+              properties << property
+              
+              task = ::Dog::RoutedTask.new
+              task.name = self.name
+              task.replication = 1
+              task.duplication = 1
+              task.properties = properties
+              task.track_id = track.control_ancestors.last
             
-            task = ::Dog::RoutedTask.new
-            task.name = self.name
-            task.replication = 1
-            task.duplication = 1
-            task.properties = properties
-            task.track_id = track.control_ancestors.last
+              # TODO - Perhaps insert an artificial node to create an instance - just like with structure
+              # instantitations
+              task.routing = nil
+              task.created_at = Time.now.utc
+              task.save
             
-            # TODO - Perhaps insert an artificial node to create an instance - just like with structure
-            # instantitations
-            task.routing = nil
-            task.created_at = Time.now.utc
-            task.save
-            
-            track.finish
-            track.write_return_value(::Dog::Value.new("task", {
-              "s:id" => ::Dog::Value.string_value(task.id.to_s),
-              "d:completed" => ::Dog::Value.false_value
-            }))
+              track.finish
+              track.write_return_value(::Dog::Value.new("task", {
+                "s:id" => ::Dog::Value.string_value(task.id.to_s),
+                "d:completed" => ::Dog::Value.false_value
+              }))
+            elsif self.target == "shell" then
+              input = nil
+              
+              for property in properties do
+                if property.direction == "output" then
+                  # TODO - This is the most stupid naming convention ever. Input is actually output...
+                  # Seriously, fix this...
+                  
+                  input ||= {
+                    "argv" => [],
+                    "kwargs" => {},
+                    "name" => self.name
+                  }
+                  
+                  
+                  if property.required then
+                    input["argv"] << property.value
+                  else
+                    input["kwargs"][property.identifier] = property.value
+                  end
+                end
+              end
+              
+              output = {}
+              
+              Open3.popen3(instructions) { |stdin, stdout, stderr, process|
+                stdin.puts(input.to_json) if input
+                stdin.close
+                
+                exit_status = process.value
+                shell_output = stdout.read
+                
+                begin
+                  output = JSON.parse(shell_output)
+                  output = output["output"]
+                rescue
+                  output = shell_output
+                end
+                
+                stdout.close
+                stderr.close
+              }
+              
+              output = ::Dog::Value.from_ruby_value(output)
+              
+              track.finish
+              track.write_return_value(output)
+            end
             
             return
           end

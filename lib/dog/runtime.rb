@@ -9,6 +9,7 @@
 
 require 'digest/sha1'
 require 'set'
+require 'open3'
 
 require 'thin'
 require 'eventmachine'
