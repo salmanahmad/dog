@@ -1111,6 +1111,18 @@ module Dog::Nodes
       return value
     end
     
+    def visit(track)
+      # TODO - Finish this...
+      if track.function_name != self.name then
+        # TODO
+      else
+        # TODO
+      end
+      
+      track.write_stack(self.path, ::Dog::Value.null_value)
+      track.should_visit(self.parent)
+    end
+    
   end
   
   class Listen < Node
