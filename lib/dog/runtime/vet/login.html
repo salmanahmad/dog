@@ -1,0 +1,84 @@
+<head>
+	<style type="text/css">
+	
+	body {
+		font-family:Helvetica, Arial, sans-serif;
+		font-size:12px;
+		margin:50px;
+		margin-top:0px;
+		background-color:rgb(200,210,225);
+	}
+	
+	#content {
+		background-color:white;
+		margin:auto;
+		padding-top:50px;
+		padding-bottom:25px;
+		width:750px;
+		text-align:center;
+		border-bottom-right-radius:10px;
+		border-bottom-left-radius:10px;
+		box-shadow: 0px 5px 25px #555;
+	}
+	
+	#content-title {
+		font-size:24px;
+		font-weight:bold;
+		padding-bottom:5px;
+	}
+	
+	#login-area {
+		position:relative;
+		margin:auto;
+		width:300px;
+		line-height:2em;
+	}
+	
+	#login-title {
+		padding-bottom:15px;
+	}
+	
+	.text-field-label {
+		position:absolute;
+		left:0px;
+	}
+	
+	.text-field {
+		position:absolute;
+		right:0px;
+		width:200px;
+	}
+	
+	.last-row {
+		padding-bottom:10px;
+	}
+	
+	</style>
+	
+	<script type="text/javascript">
+	
+	</script>
+</head>
+<body>
+	<div id="content">
+		<div id="content-title">
+			Welcome to the Vet
+		</div>
+		<div id="login-area">
+			<div id="login-title">
+				Please provide proof of ownership below:
+			</div>
+			<form id="login-form" action="/dog/vet/login.html" method="post">
+				<div class="row">
+					<label class="text-field-label">Username:</label>
+					<input type="text" name="username-field" class="text-field"></input><br />
+				</div>
+				<div class="row last-row">
+					<label class="text-field-label">Password:</label>
+					<input type="password" name="password-field" class="text-field"></input><br />
+				</div>
+				<input type="submit" name="login-button" value="Login" style="width:100px"></input>
+			</form>
+		</div>
+	</div>
+</body>
