@@ -698,7 +698,7 @@ module Dog::Nodes
             end
             
             if self.target == "person" then
-              property = Property.new
+              property = ::Dog::Property.new
               property.identifier = "instructions"
               property.direction = "output"
               property.required = true
