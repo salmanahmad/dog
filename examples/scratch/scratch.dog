@@ -1,24 +1,42 @@
 
-DEFINE ls FOR shell DO
-  PERFORM "ls"
-  RETURN output
+
+#DEFINE fib ON a DO
+#  IF a == 1 OR a == 0 THEN
+#    RETURN a
+#  ELSE
+#    RETURN (COMPUTE fib ON a - 1) + (COMPUTE fib ON a - 2)
+#  END
+#END
+#
+#PRINT COMPUTE fib ON 10
+
+i = 0
+WHILE i < 10000 DO
+  i = i + 1
+  b - 1
 END
 
-DEFINE foobar FOR shell ON a USING c = 3 DO
-  PERFORM "python foobar.py"
-  RETURN output
-END
-
-
-
-i = COMPUTE ls
-PRINT i
-
-PRINT ""
-
-i = COMPUTE foobar ON 5 USING c = 100
-PRINT i
-
+#
+#DEFINE ls FOR shell DO
+#  PERFORM "ls"
+#  RETURN output
+#END
+#
+#DEFINE foobar FOR shell ON a USING c = 3 DO
+#  PERFORM "python foobar.py"
+#  RETURN output
+#END
+#
+#
+#
+#i = COMPUTE ls
+#PRINT i
+#
+#PRINT ""
+#
+#i = COMPUTE foobar ON 5 USING c = 100
+#PRINT i
+#
 
 
 #

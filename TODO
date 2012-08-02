@@ -1,4 +1,49 @@
 
+
+"Macro System"
+
+	Create a small but complete set of "nodes"
+		Loop (used for loops)
+		Branch (used for conditionals)
+		Jump (function calls)
+		Return
+		Break
+		Assign
+		Access
+		Literals
+		Etc
+	
+	Re-write much of the syntax in terms of these nodes instead of creating your own
+		There is no longer a While node, just a loop with a branch and break
+		There is no longer an unless, just a branch that is re-written to be negated
+		Etc.
+		
+	This it much easier to test, manage, iterate and optimize
+	
+	Issues:
+	
+		It may be hard to write the equivalent node structure for a given expression. I need some syntax to make it easier
+	
+		Can I have reused higher-level rules? For example, create a util expression by reusing a while expression instead of remaking it. I would need to expose a node to do that, right?
+	
+		How do I implement things like PRINT or LISTEN which need to do stuff. I would have to expose a node to do that, right?
+			Pair stuff with functions. The PRINT expression should be a rewrite of COMPUTE print ON "val"
+			This means that I need to make function calls VERY efficient
+			
+			Why would I want to do this?
+				It keeps the VM simple and small
+				It keeps the language core consistent without adding more
+				Separation of UI (syntax) and backend (runtime)
+		
+		Add additional nodes only if you cannot do things as a function or for performance reasons (either function call overhead or node-rewrite overhead)
+		
+		General performance with stack and has_path, etc.
+
+
+
+
+
+
 Virtual Properties
 
 Macros
