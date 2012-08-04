@@ -3,16 +3,64 @@
 "Macro System"
 
 	Create a small but complete set of "nodes"
-		Loop (used for loops)
-		Branch (used for conditionals)
-		Jump (function calls)
-		Return
-		Break
+		StructureLiteral
+		StringLiteral
+		NumberLiteral
+		TrueLiteral
+		FalseLiteral
+		NullLiteral
 		Assign
 		Access
-		Literals
-		Etc
+		Operation
+		Branch
+		Loop
+		Break
+		Call
+		Return
 	
+	Down the road create instructions:
+
+		Pop
+		Push(value=null)
+		PushString(value=null)
+		PushNumber(value=null)
+		PushTrue
+		PushFalse
+		PushNil
+		PushStructure(type=nil)
+		Access(path_size)
+		Assign(path_size)
+		ReadVariable
+		WriteVariable
+		Perform(operation)
+		Jump(offset)
+		JumpIfTrue(offset)
+		JumpIfFalse(offset)
+		Call(function, package, arg_count=0)
+		Return
+		Throw(name)
+
+
+		
+		# Pseudo instructions
+		label(name) # nop
+		seek(label, direction)
+		
+		Each node has a compile method and we call those recursively from the top.
+		Each nodes returns an array of the instructions that it (and its descendants)
+		compile down to. These are then combined by the parent, and recusively returned
+		as you would expect.
+		
+		Once the instructions for the current function is over, I then scan over it and
+		convert / replace any pseudo instructions. Right now, all this would be is seek.
+		Seek will be converted to jumps with their jump distances computed at compile time.
+		
+		TODO: Consider adding an exception table (like JVM / YARV). This will handle
+		exceptions as well as possibly provide a workaround for converting seeks.
+		That is how YARV implements retry / next / break / throw. In which case, I may
+		want to remove the "seek" command and instead implement a "throw" command
+		instead. See: http://yarvinstructions.heroku.com/notes
+		
 	Re-write much of the syntax in terms of these nodes instead of creating your own
 		There is no longer a While node, just a loop with a branch and break
 		There is no longer an unless, just a branch that is re-written to be negated
