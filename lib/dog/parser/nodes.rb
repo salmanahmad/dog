@@ -8,1614 +8,393 @@
 #
 
 module Dog::Nodes
-  
-  class Treetop::Runtime::SyntaxNode
-    def compile
-      if elements && elements.first then
-        return self.elements.first.compile
-      else
-        return nil
-      end
-    end
-    
-    def line
-      1 + self.input.slice(0, self.interval.begin).count("\n")
-    end
-  end
-  
   class Node
-    def self.attr_accessor(*vars)
-      super(*vars)
-    end
-    
-    def self.attribute(*vars)
-      @attributes ||= []
-      @attributes.concat vars
-      self.attr_accessor(*vars)
-    end
-    
-    def self.attributes
-      @attributes_cache ||= (superclass.attributes || [] rescue []) | (@attributes || [])
-    end
-    
-    def attributes
-      self.class.attributes
-    end
-    
-    def [](key)
-      if self.attributes.include? key.intern then
-        self.send(key.intern)
-      end
-    end
-    
     attr_accessor :line
-    attr_accessor :filename
-    
-    attr_accessor :path
-    attr_accessor :parent
-    
-    # TODO - I have to consider the impact to path with packages
-    
-    def compute_paths_of_descendants_for_array(array, current = [], parent)
-      array.each_index do |key|
-        value = array[key]
-        current_path = current.clone.push(key)
-        
-        if value.kind_of? Array then
-          compute_paths_of_descendants_for_array(value, current_path, parent)
-        elsif value.kind_of? Hash then
-          compute_paths_of_descendants_for_hash(value, current_path, parent)
-        elsif value.kind_of? Node then
-          value.compute_paths_of_descendants(current_path, parent)
-        end
-      end
+    attr_accessor :file
+
+    def compile(package)
+      raise "Node#compile must be overridden by a subclass."
     end
-    
-    def compute_paths_of_descendants_for_hash(hash, current = [], parent)
-      for key, value in hash do
-        current_path = current.clone.push(key)
-        
-        if value.kind_of? Array then
-          compute_paths_of_descendants_for_array(value, current_path, parent)
-        elsif value.kind_of? Hash then
-          compute_paths_of_descendants_for_hash(value, current_path, parent)
-        elsif value.kind_of? Node then
-          value.compute_paths_of_descendants(current_path, parent)
-        end
-      end
-    end
-    
-    def compute_paths_of_descendants(current = [], parent = nil)
-      self.path = current
-      self.parent = parent
-      
-      for attribute in self.attributes do
-        value = self.send(attribute.intern)
-        current_path = current.clone.push(attribute.to_s)
-        
-        if value.kind_of? Array then
-          compute_paths_of_descendants_for_array(value, current_path, self)
-        elsif value.kind_of? Hash then
-          compute_paths_of_descendants_for_hash(value, current_path, self)
-        elsif value.kind_of? Node then
-          value.compute_paths_of_descendants(current_path, self)
-        end
-      end
-    end
-    
-    def self.each_descendant(node, &block)
-      if node.kind_of? Array then
-        for item in node do
-          each_descendant(item, &block)
-        end
-      elsif node.kind_of? Hash then
-        for key, value in node do
-          each_descendant(value, &block)
-        end
-      elsif node.kind_of? Node then
-        yield node
-        
-        for attribute in node.attributes do
-          each_descendant(node.send(attribute.intern), &block)
-        end
-      end
-    end
-    
-    def visit(track)
-      # This is used by the runtime to implement the execution.
-    end
-    
-    def to_hash_for_array(array)
-      array.map! do |item|
-        if item.kind_of? Array
-          item = to_hash_for_array(item)
-        elsif item.kind_of? Hash
-          item = {
-            "type" => "Hash",
-            "value" => to_hash_for_hash(item)
-          }
-        elsif item.kind_of? Node
-          item = {
-            "type" => "Node",
-            "value" => item.to_hash
-          }
-        end
-        
-        item
-      end
-      
-      return array
-    end
-    
-    def to_hash_for_hash(hash)
-      for key, value in hash do
-        if value.kind_of? Array then
-          hash[key] = to_hash_for_array(value)
-        elsif value.kind_of? Hash then
-          hash[key] = {
-            "type" => "Hash",
-            "value" => to_hash_for_hash(value)
-          }
-        elsif value.kind_of? Node then
-          hash[key] = {
-            "type" => "Node",
-            "value" => value.to_hash
-          }
-        end
-      end
-      
-      return hash
-    end
-    
-    def to_hash
-      # This method is used to produced a serialized version of the AST. It will be called
-      # inconjunction with to_json to produce to persist the bite code to disk.
-      hash = {
-        "class" => self.class.name,
-        "path" => self.path,
-        "line" => self.line,
-        "filename" => self.filename
-      }
-      
-      for attribute in self.attributes do
-        # I am boxing all of the values so I can easily de-deserialize them
-        value = self.send(attribute.intern)
-        
-        if value.kind_of? Array
-          value = to_hash_for_array(value)
-        elsif value.kind_of? Hash
-          value = {
-            "type" => "Hash",
-            "value" => to_hash_for_hash(value)
-          }          
-        elsif value.kind_of? Node
-          value = {
-            "type" => "Node",
-            "value" => value.to_hash
-          }
-        end
-        
-        hash[attribute.to_s] = value
-      end
-      
-      return hash
-    end
-    
-    def self.from_hash_for_array(array)
-      array.map! do |item|
-        if item.kind_of? Array
-          item = self.from_hash_for_array(item)
-        elsif item.kind_of? Hash
-          if item["type"] == "Node"
-            item = Node.from_hash(item["value"])
-          else
-            item = self.from_hash_for_hash(item["value"])
-          end
-        end
-        
-        item
-      end
-      
-      return array
-    end
-    
-    def self.from_hash_for_hash(hash)
-      for key, value in hash do
-        if value.kind_of? Array
-          hash[key] = self.from_hash_for_array(value)
-        elsif value.kind_of? Hash
-          if value["type"] == "Node" then
-            hash[key] = Node.from_hash(value["value"])
-          else
-            hash[key] = self.from_hash_for_hash(value["value"])
-          end
-        end
-      end
-      
-      return hash
-    end
-    
-    def self.from_hash(hash)
-      klass = hash["class"] || self.class.name
-      klass = Kernel::qualified_const_get(klass)
-      
-      node = klass.new
-      node.path = hash["path"]
-      node.line = hash["line"]
-      node.filename = hash["filename"]
-      
-      for key, value in hash do
-        
-        if node.attributes.include? key.intern then
-          if value.kind_of? Array
-            value = self.from_hash_for_array(value)
-          elsif value.kind_of? Hash
-            if value["type"] == "Node"
-              value = Node.from_hash(value["value"])
-            else
-              value = self.from_hash_for_hash(value["value"])
-            end
-          end
-            
-          node.send("#{key.to_s}=".intern, value)
-        end
-      end
-      
-      return node
+
+    def set_instruction_context(instruction)
+      instruction.line = self.line
+      instruction.file = self.file
     end
   end
-  
+
   class Nodes < Node
-    attribute :nodes
-    
-    def visit(track)
-      for node in self.nodes do
-        unless track.has_visited?(node) then
-          track.should_visit(node)
-          return
+    attr_accessor :nodes
+
+    def initialize(nodes)
+      @nodes = nodes
+    end
+
+    def compile(package)
+      for node in nodes do
+        node.compile(package)
+        unless node == nodes.last
+          pop = Instructions::Pop.new
+          set_instruction_context(pop)
+
+          package.add_to_instructions([pop])
         end
       end
-      
-      if self.nodes && self.nodes.last then
-        value = track.read_stack(self.nodes.last.path)
-        track.write_stack(self.path, value)
-      end
-      
-      track.should_visit(self.parent)
     end
   end
-  
-  class Package < Node
-    attribute :name
+
+  class StructureLiteral < Node
+    attr_accessor :type
+    attr_accessor :value
+
+    def initialize(type, value)
+      @type = type
+      @value = value
+    end
+
+    def compile(package)
+      structure = Instructions::PushStructure.new(@type)
+      set_instruction_context(structure)
+      package.add_to_instructions([structure])
+
+      for key, property in @value do
+        if key.kind_of? String then
+          push_string = Instructions::PushString.new(key)
+          set_instruction_context(push_string)
+          package.add_to_instructions([push_string])
+        elsif key.kind_of? Numeric then
+          push_number = Instructions::PushNumber.new(key)
+          set_instruction_context(push_number)
+          package.add_to_instructions([push_number])
+        else
+          raise "Compilation error"
+        end
+
+        property.compile(package)
+
+        assign = Instructions::Assign.new(2)
+        set_instruction_context(assign)
+        package.add_to_instructions([assign])
+      end
+    end
   end
-  
+
+  class StringLiteral < Node
+    attr_accessor :value
+
+    def initialize(value)
+      @value = value
+    end
+
+    def compile(package)
+      instruction = Instructions::PushString.new(value)
+      set_instruction_context(instruction)
+
+      package.add_to_instructions([instruction])
+    end
+  end
+
+  class NumberLiteral < Node
+    attr_accessor :value
+
+    def initialize(value)
+      @value = value
+    end
+
+    def compile(package)
+      instruction = Instructions::PushNumber.new(value)
+      set_instruction_context(instruction)
+
+      package.add_to_instructions([instruction])
+    end
+  end
+
+  class TrueLiteral < Node
+    def compile(package)
+      instruction = Instructions::PushTrue.new
+      set_instruction_context(instruction)
+
+      package.add_to_instructions([instruction])
+    end
+  end
+
+  class FalseLiteral < Node
+    def compile(package)
+      instruction = Instructions::PushFalse.new
+      set_instruction_context(instruction)
+
+      package.add_to_instructions([instruction])
+    end
+  end
+
+  class NullLiteral < Node
+    def compile(package)
+      instruction = Instructions::PushNull.new
+      set_instruction_context(instruction)
+
+      package.add_to_instructions([instruction])
+    end
+  end
+
+  class Assign < Node
+    attr_accessor :path
+    attr_accessor :value
+
+    def initialize(path, value)
+      @path = path
+      @value = value
+    end
+
+    def compile(package)
+      for item in path do
+        if item == path.first then
+          read_variable = Instructions::ReadVariable.new(item)
+          set_instruction_context(read_variable)
+          package.add_to_instructions([read_variable])
+        else
+          if item.kind_of? Node then
+            item.compile(package)
+          elsif item.kind_of? String then
+            string = Instructions::PushString.new(item)
+            set_instruction_context(string)
+            package.add_to_instructions([string])
+          elsif item.kind_of? Numeric then
+            number = Instructions::PushNumber.new(item)
+            set_instruction_context(number)
+            package.add_to_instructions([number])
+          else
+            raise "Compilation error"
+          end
+        end
+      end
+
+      value.compile(package)
+
+      assign = Instructions::Assign.new(path.size)
+      set_instruction_context(assign)
+      package.add_to_instructions([assign])
+
+      write_variable = Instructions::WriteVariable.new(path.first)
+      set_instruction_context(write_variable)
+      package.add_to_instructions([write_variable])
+    end
+  end
+
   class Access < Node
-    attribute :sequence
-    attribute :scope
-    
-    def visit(track)
-      if self.sequence then
-        for item in self.sequence do
-          if item.kind_of? Node then
-            unless track.has_visited? item then
-              track.should_visit(item)
-              return
-            end
-          end
-        end
-        
-        access_path = []
-        for item in self.sequence do
-          if item.kind_of? Node then
-            result = track.read_stack(item.path)
-            access_path << result
-          else
-            access_path << item
-          end
-        end
-        
-        first = true
-        value = nil
-        
-        for item in access_path do
-          if first then
-            first = false
-            
-            if item.kind_of? ::Dog::Value then
-              value = item
-            else
-              case scope
-              when "local"
-                value = track.read_variable(item)
-              when "internal"
-                value = ::Dog::Runtime.bundle.read_package(track.function_package)
-                value = value.value["s:#{item}"]
-              when "external"
-                value = ::Dog::Runtime.bundle.read_package(item)
-              else
-                value = track.read_variable(item)
-                # TODO - Walk up the scope tree. This includes nested scopes as well.
-              end
-            end
-          else
-            if value.nil? || value.is_null? then
-              raise "Null pointer excep --- Just kidding. I just couldn't resolve the symbol #{item} on line #{self.line}."
-            end
-            
-            begin
-              if item.kind_of? ::Dog::Value then
-                if item.type == "number" then
-                  value = value.value["n:#{item.value}"]
-                elsif item.type == "string" then
-                  value = value.value["s:#{item.value}"]
-                else
-                  raise
-                end
-              else
-                value = value.value["s:#{item}"]
-              end
-            rescue
-              raise "I could not find attribute #{item} inside of the value #{value} on line #{self.line}."
-            end
-            
-          end
-          
-          if value.type == "task" then
-            # TOOD - Refactor this to support pending structures
-            if value.value["d:completed"].is_false? then
-              id = value.value["s:id"].ruby_value
-              task = ::Dog::StreamObject.find_by_id(id)
-              
-              # TODO - Convert this to handle more than a single response
-              
-              if task.completed? then
-                for k, v in task.responses.first do
-                  value.value["s:#{k}"] = ::Dog::Value.from_ruby_value(v)
-                end
-                value.value["d:completed"] = ::Dog::Value.true_value
-              else
-                track.state = ::Dog::Track::STATE::ASKING
-                track.asking_id = id
-                return
-              end
-            end
-          end
-          
-        end
-        
-        # This is an edge case in case the value was not found at all
-        value = ::Dog::Value.null_value if value.nil?
-        
-        track.write_stack(self.path, value)
-        track.should_visit(self.parent)
-      else
-        track.write_stack(self.path, ::Dog::Value.null_value)
-        track.should_visit(self.parent)
-      end
-    end
-  end
-  
-  class Assignment < Node
-    attribute :expression
-    attribute :sequence
-    attribute :scope
-    
-    def visit(track)
-      
-      expression_value = ::Dog::Value.null_value
-      sequence_value = []
-      
-      if self.expression then
-        unless track.has_visited?(self.expression) then
-          track.should_visit(self.expression)
-          return
-        end
-        
-        expression_value = track.read_stack(self.expression.path)
-      end
-      
-      if self.sequence then
-        for item in self.sequence do
-          if item.kind_of? Node then
-            unless track.has_visited? item then
-              track.should_visit(item)
-              return
-            end
-          end
-        end
-        
-        sequence_value = []
-        for item in self.sequence do
-          if item.kind_of? Node then
-            result = track.read_stack(item.path)
-            sequence_value << result
-          else
-            sequence_value << item
-          end
-        end
-      end
-      
-      first = true
-      pointer = nil
-      variable = nil
-      
-      for item in sequence_value do
-        if first then
-          first = false
-          
-          case scope
-          when "internal"
-            # You cannot have external assignments in Dog
-          when "external"
-            # You cannot have external assignments in Dog
-          else
-            # The default for assignment is "local". NOT cascade like access.
-            if item.kind_of? ::Dog::Value then
-              raise "Void assignment expression"
-            else
-              variable = track.read_variable(item)
-              pointer = variable
-            end
-          end
-          
-        else
-          
-          begin
-            path = ""
-            
-            if item.kind_of? ::Dog::Value then
-              if item.type == "number" then
-                path = "n:#{item.value}"
-              elsif item.type == "string" then
-                path = "s:#{item.value}"
-              else
-                raise
-              end
-            else
-              path = "s:#{item}"
-            end
-            
-            unless pointer.primitive?
-              pointer.value[path] ||= ::Dog::Value.null_value
-            end
-              
-            pointer = pointer.value[path]
-          rescue Exception => e
-            raise e
-            raise "I could not perform the assignment on line: #{self.line}"
-          end
-          
-        end
-      end
-      
-      pointer._id = expression_value._id
-      pointer.type = expression_value.type
-      pointer.value = expression_value.value
-      
-      track.write_variable(sequence_value.first, variable)
-      
-      track.write_stack(self.path, expression_value)
-      track.should_visit(self.parent)
-    end
-  end
-  
-  class OperatorInfixCall < Node
-    attribute :operator
-    attribute :arg1
-    attribute :arg2  
-    
-    def visit(track)
-      
-      unless track.has_visited?(self.arg1) then
-        track.should_visit(self.arg1)
-        return
-      end
-      
-      unless track.has_visited?(self.arg2) then
-        track.should_visit(self.arg2)
-        return
-      end
-      
-      arg1_value = track.read_stack(self.arg1.path)
-      arg2_value = track.read_stack(self.arg2.path)
-      
-      result = nil
-      
-      if arg1_value.primitive? && arg2_value.primitive? then
-        begin
-          result = arg1_value.value.send(self.operator.intern, arg2_value.value)
-          if result.kind_of? String then
-            result = ::Dog::Value.string_value(result)
-          elsif result.kind_of? Numeric then
-            result = ::Dog::Value.number_value(result)
-          elsif result.kind_of? TrueClass
-            result = ::Dog::Value.true_value
-          elsif result.kind_of? FalseClass then
-            result = ::Dog::Value.false_value
-          else
-            result = ::Dog::Value.null_value
-          end
-        rescue
-          result = ::Dog::Value.null_value
-        end
-      end
-      
-      track.write_stack(self.path, result)
-      track.should_visit(self.parent)
-    end
-  end
-  
-  class OperatorPrefixCall < Node
-    attribute :operator
-    attribute :arg
-    
-    def visit(track)
-      if track.has_visited? self.arg then
-        if self.operator == "NOT" then
-          value = track.read_stack(self.arg.path)
-          if value.type == "null" || (value.type == "boolean" && value.value == false) then
-            track.write_stack(self.path, ::Dog::Value.true_value)
-          else
-            track.write_stack(self.path, ::Dog::Value.false_value)
-          end
-        else
-          raise "Unknown unary operator on line: #{self.line}"
-        end
-      else
-        track.should_visit(self.arg)
-        return
-      end
-    end
-  end
-  
-  class FunctionDefinition < Node
-    attribute :name
-    attribute :target
-    attribute :mandatory_arguments
-    attribute :optional_arguments
-    attribute :body
-    
-    def read_definition
-      # TODO - Finish this an all of the rest of the read_definitions
-      value = ::Dog::Value.new("function", {
-        "s:name" => ::Dog::Value.string_value(self.name.to_s)
-      })
-      
-      return value
-    end
-    
-    def visit(track)
-      if track.function_name != self.name then
-        track.write_stack(self.path, ::Dog::Value.null_value)
-        track.should_visit(self.parent)
-        return
-      else
-        
-        if self.body.nil? then
-          track.finish
-          track.write_return_value(::Dog::Value.null_value)
-          return
-        end
-        
-        if track.has_visited? self.body then
-          track.finish
-          track.write_return_value(track.read_stack(self.body.path))
-          return
-        else
-          
-          state = track.read_stack(self.path.clone << "@state")
-          
-          if state.nil? then
-            if self.mandatory_arguments then
-              self.mandatory_arguments.each_index do |index|
-                arg = mandatory_arguments[index]
-                value = nil
-              
-                if track.mandatory_arguments.kind_of? Array then
-                  value = track.mandatory_arguments[index]
-                else
-                  value = track.mandatory_arguments[arg]
-                end
-              
-                if value.nil? then
-                  raise "Error: Did not recieve a mandatory argument on line: #{self.line}"
-                end
-                
-                value = ::Dog::Value.from_hash(value)
-                track.write_variable(arg, value);
-              end
-            end
-            
-            state = ::Dog::Value.string_value("mandatory_arguments")
-            track.write_stack(self.path.clone << "@state", state)
-          end
-          
-          if state.value == "mandatory_arguments" then
-            if self.optional_arguments then
-              for key, value in track.optional_arguments do
-                if self.optional_arguments.include? key then
-                  value = ::Dog::Value.from_hash(value)
-                  track.write_variable(key, value);
-                end
-              end
-            end
-            
-            state = ::Dog::Value.string_value("used_passed_optional_arguments")
-            track.write_stack(self.path.clone << "@state", state)
-          end
-          
-          if state.value == "used_passed_optional_arguments" then
-            if self.optional_arguments then
-              for key, value in self.optional_arguments do
-                if track.variables[key].nil? then
-                  unless track.has_visited? value then
-                    track.should_visit(value)
-                    return
-                  else
-                    track.write_variable(key, track.read_stack(value.path))
-                  end
-                end
-              end
-            end
-            
-            state = ::Dog::Value.string_value("done")
-            track.write_stack(self.path.clone << "@state", state)
-          end
-          
-          
-          if self.target then
-            properties = []
-            instructions = ""
-            
-            for name, value in track.variables do
-              p = ::Dog::Property.new
-              p.identifier = name
-              p.value = ::Dog::Value.from_hash(value).ruby_value
-              p.required = mandatory_arguments.include? name
-              p.direction = "output"
-              properties << p
-            end
-            
-            for node in self.body.nodes do
-              if node.class == Return then
-                for e in node.expressions do
-                  # TODO - Handle this as a rule in the compiler
-                  raise "Tasks must return identifiers" unless e.class == Access
-                  
-                  p = ::Dog::Property.new
-                  p.identifier = e.sequence.first
-                  p.required = true
-                  p.direction = "input"
-                  properties << p
-                end
-                
-                break
-              end
-              
-              if node.class == Perform then
-                instructions = node.instructions.value
-              end
-            end
-            
-            if self.target == "person" then
-              property = Property.new
-              property.identifier = "instructions"
-              property.direction = "output"
-              property.required = true
-              property.value = instructions
-              properties << property
-              
-              task = ::Dog::RoutedTask.new
-              task.name = self.name
-              task.replication = 1
-              task.duplication = 1
-              task.properties = properties
-              task.track_id = track.control_ancestors.last
-            
-              # TODO - Perhaps insert an artificial node to create an instance - just like with structure
-              # instantitations
-              task.routing = nil
-              task.created_at = Time.now.utc
-              task.save
-            
-              track.finish
-              track.write_return_value(::Dog::Value.new("task", {
-                "s:id" => ::Dog::Value.string_value(task.id.to_s),
-                "d:completed" => ::Dog::Value.false_value
-              }))
-            elsif self.target == "shell" then
-              input = nil
-              
-              for property in properties do
-                if property.direction == "output" then
-                  # TODO - This is the most stupid naming convention ever. Input is actually output...
-                  # Seriously, fix this...
-                  
-                  input ||= {
-                    "argv" => [],
-                    "kwargs" => {},
-                    "name" => self.name
-                  }
-                  
-                  
-                  if property.required then
-                    input["argv"] << property.value
-                  else
-                    input["kwargs"][property.identifier] = property.value
-                  end
-                end
-              end
-              
-              output = {}
-              
-              Open3.popen3(instructions) { |stdin, stdout, stderr, process|
-                stdin.puts(input.to_json) if input
-                stdin.close
-                
-                exit_status = process.value
-                shell_output = stdout.read
-                
-                begin
-                  output = JSON.parse(shell_output)
-                  output = output["output"]
-                rescue
-                  output = shell_output
-                end
-                
-                stdout.close
-                stderr.close
-              }
-              
-              output = ::Dog::Value.from_ruby_value(output)
-              
-              track.finish
-              track.write_return_value(output)
-            end
-            
-            return
-          end
-          
-          track.should_visit(self.body)
-          return
-        end
-      end
-    end
-    
-  end
-  
-  class OnEachDefinition < Node
-    attribute :name
-    attribute :variable
-    attribute :collection
-    attribute :body
-    
-    def read_definition
-      # TODO - Finish this an all of the rest of the read_definitions
-      value = ::Dog::Value.new("callback", {
-        "s:name" => ::Dog::Value.string_value(self.name.to_s)
-      })
-      
-      return value
-    end
-    
-    def visit(track)
-      if track.function_name != self.name then
-        
-        the_collection = self.collection
-        
-        if the_collection.nil? then
-          # TODO - Pluralize
-          the_collection = self.variable.to_s + "s"
-        end
-        
-        value = track.read_variable(the_collection)
+    attr_accessor :path
 
-        unless value then
-          raise "I could not find a variable named: #{the_collection} on line: #{self.line}"
-          return
-        end
+    def initialize(path)
+      @path = path
+    end
 
-        if value.is_null? then
-          raise "I could not a variable named: #{the_collection} on line: #{self.line}. Are you sure you have a listen?"
-          return
-        end
-
-        stream_object_id = value.value["s:id"].value
-        
-        stream_object = ::Dog::StreamObject.find_by_id(stream_object_id)
-        stream_object.handler = self.name
-        stream_object.handler_argument = self.variable
-        stream_object.save
-        
-        track.write_stack(self.path, ::Dog::Value.null_value)
-        track.should_visit(self.parent)
-        return
-      else
-        if self.body.nil? then
-          track.finish
-          track.write_return_value(::Dog::Value.null_value)
-          return
-        end
-        
-        if track.has_visited? self.body then
-          track.finish
-          track.write_return_value(track.read_stack(self.body.path))
-          return
+    def compile(package)
+      for item in path do
+        if item == path.first then
+          read_variable = Instructions::ReadVariable.new(item)
+          set_instruction_context(read_variable)
+          package.add_to_instructions([read_variable])
         else
-          track.should_visit(self.body)
-          return
-        end  
-      end
-    end
-    
-  end
-  
-  class FunctionCall < Node
-    attribute :package_name
-    attribute :function_name
-    attribute :mandatory_arguments
-    attribute :optional_arguments
-    
-    def visit(track)
-      
-      passed_mandatory_arguments = {}
-      
-      if self.mandatory_arguments then
-        
-        if self.mandatory_arguments.kind_of? Array then
-          passed_mandatory_arguments = []
-          
-          for arg in self.mandatory_arguments do
-            unless track.has_visited? arg then
-              track.should_visit(arg)
-              return
-            end
-            
-            passed_mandatory_arguments << track.read_stack(arg.path).to_hash
-          end
-        else
-          passed_mandatory_arguments = {}
-          
-          for key, arg in self.mandatory_arguments do
-            unless track.has_visited? arg then
-              track.should_visit(arg)
-              return
-            end
-            
-            passed_mandatory_arguments[key] = track.read_stack(arg.path).to_hash
-          end
-        end
-      end
-      
-      passed_optional_arguments = {}
-      
-      if self.optional_arguments then
-        for key, arg in self.optional_arguments do
-          unless track.has_visited? arg then
-            track.should_visit(arg)
-            return
-          end
-          
-          passed_optional_arguments[key] = track.read_stack(arg.path).to_hash
-        end
-      end
-      
-      # TODO - I need to save here so that I can get the track.id. I may want to
-      # optimize this in the future so that I can reduce the overhead of a function call
-      track.save
-        
-      # TODO - Handle packages here...
-      
-      function = ::Dog::Track.new(self.function_name, self.package_name || track.function_package)
-      function.control_ancestors = track.control_ancestors.clone
-      function.control_ancestors.push(track.id)
-        
-      function.mandatory_arguments = passed_mandatory_arguments
-      function.optional_arguments = passed_optional_arguments
-        
-      track.state = ::Dog::Track::STATE::CALLING
-      return function
-    end
-  end
-  
-  class FunctionAsyncCall < Node
-    attribute :target
-    attribute :package_name
-    attribute :function_name
-    attribute :mandatory_arguments
-    attribute :optional_arguments
-    attribute :via
-    
-    def visit(track)
-      
-      
-      # TODO - Handle packages here
-      node = ::Dog::Runtime.bundle.node_for_symbol(self.function_name, nil)
-      
-      if node then
-        if node.target != "person" then
-          raise "Attempting to ASK a normal function on line: #{self.line}"
-        end
-      else
-        raise "Could not find task for ASK on line: #{self.line}"
-      end
-      
-      
-      passed_mandatory_arguments = {}
-      
-      if self.mandatory_arguments then
-        
-        if self.mandatory_arguments.kind_of? Array then
-          passed_mandatory_arguments = []
-          
-          for arg in self.mandatory_arguments do
-            unless track.has_visited? arg then
-              track.should_visit(arg)
-              return
-            end
-            
-            passed_mandatory_arguments << track.read_stack(arg.path).to_hash
-          end
-        else
-          passed_mandatory_arguments = {}
-          
-          for key, arg in self.mandatory_arguments do
-            unless track.has_visited? arg then
-              track.should_visit(arg)
-              return
-            end
-            
-            passed_mandatory_arguments[key] = track.read_stack(arg.path).to_hash
-          end
-        end
-      end
-      
-      passed_optional_arguments = {}
-      
-      if self.optional_arguments then
-        for key, arg in self.optional_arguments do
-          unless track.has_visited? arg then
-            track.should_visit(arg)
-            return
-          end
-          
-          passed_optional_arguments[key] = track.read_stack(arg.path).to_hash
-        end
-      end
-      
-      # TODO - See this same TODO in the normal FunctionCall about when to save
-      # the track.
-      
-      # TODO - Another thing that I need to handle is to process async calls by sending
-      # an RPC over to the target. Right now, I am not actually using target for anything...
-      track.save
-      
-      function = ::Dog::Track.new(self.function_name, self.package_name || track.function_package)
-      function.control_ancestors = track.control_ancestors.clone
-      function.control_ancestors.push(track.id)
-      
-      function.mandatory_arguments = passed_mandatory_arguments
-      function.optional_arguments = passed_optional_arguments
-      
-      track.state = ::Dog::Track::STATE::CALLING
-      return function
-    end
-  end
-  
-  # TODO - I need to handle type safety with structures and functions
-  
-  class StructureDefinition < Node
-    attribute :name
-    attribute :properties
-    
-    def read_definition
-      # TODO - Finish this an all of the rest of the read_definitions
-      value = ::Dog::Value.new("structure_definition", {
-        "s:name" => ::Dog::Value.string_value(self.name.to_s)
-      })
-      
-      return value
-    end
-    
-    def visit(track)
-      if track.function_name != self.name then
-        track.write_stack(self.path, ::Dog::Value.null_value)
-        track.should_visit(self.parent)
-        return
-      else
-        structure = ::Dog::Value.new(self.name, {})
-        
-        if self.properties then
-          for property in self.properties do
-            unless track.has_visited? property then
-              track.should_visit(property)
-              return
-            end
-          end
-          
-          for property in self.properties do
-            default = track.read_stack(property.path)
-            key = property.name
-            
-            if key.kind_of? Numeric then
-              key = "n:#{key}"
-            else
-              key = "s:#{key}"
-            end
-            
-            structure.value[key] = default
-          end
-        end
-        
-        track.finish
-        track.write_return_value(structure)
-        return
-      end
-    end
-  end
-  
-  class StructureDefinitionProperty < Node
-    attribute :type
-    attribute :name
-    attribute :default
-    
-    def visit(track)
-      if self.default then
-        if track.has_visited? self.default then
-          track.write_stack(self.path, track.read_stack(self.default.path))
-          track.should_visit(self.parent)
-          return                    
-        else
-          track.should_visit(self.default)
-          return
-        end
-      else
-        track.write_stack(self.path, ::Dog::Value.null_value)
-        track.should_visit(self.parent)
-        return
-      end
-    end
-  end
-  
-  class CollectionDefinition < Node
-    attribute :name
-    attribute :structure_name
-    attribute :structure_package_name
-    
-    def read_definition
-      # TODO - Finish this an all of the rest of the read_definitions
-      value = ::Dog::Value.new("collection", {
-        "s:name" => ::Dog::Value.string_value(self.name.to_s)
-      })
-      
-      return value
-    end
-    
-    def visit(track)
-      track.write_stack(self.path, ::Dog::Value.null_value)
-      track.should_visit(self.parent)
-    end
-    
-  end
-  
-  class CommunityDefinition < Node
-    attribute :name
-    attribute :properties
-    
-    def read_definition
-      # TODO - Finish this an all of the rest of the read_definitions
-      value = ::Dog::Value.new("function", {
-        "s:name" => ::Dog::Value.string_value(self.name.to_s)
-      })
-      
-      return value
-    end
-    
-    def visit(track)
-      # TODO - Finish this...
-      if track.function_name != self.name then
-        # TODO
-      else
-        # TODO
-      end
-      
-      track.write_stack(self.path, ::Dog::Value.null_value)
-      track.should_visit(self.parent)
-    end
-    
-  end
-  
-  class Listen < Node
-    attribute :target
-    attribute :variable
-    attribute :variable_type
-    attribute :variable_type_package
-    attribute :via
-    
-    def visit(track)
-      
-      if self.target then
-        unless track.has_visited?(self.target) then
-          track.should_visit(self.target)
-          return
-        end
-      end
-      
-      structure_type = self.variable_type
-      properties = []
-      
-      if structure_type.nil? then
-        # TODO - Validate this..
-        structure_type = self.variable.chop
-      end
-      
-      # TODO - Do I deal with defaults before or after? I guess that I
-      # really should do it after
-      
-      # TODO - I should add the ability to fall back to a string
-      
-      # TODO - I have to handle the nested and fully qualified names
-      
-      # TODO - Handle packages here...
-      node = ::Dog::Runtime.bundle.node_for_symbol(structure_type)
-      if node then
-        for p in node.properties do
-          p2 = ::Dog::Property.new
-          p2.identifier = p.name
-          p2.direction = "input"
-          properties << p2
-        end
-      end
-      
-      event = ::Dog::RoutedEvent.new
-      event.name = structure_type
-      event.properties = properties
-      event.track_id = track.id
-      event.routing = nil # TODO
-      event.created_at = Time.now.utc
-      event.save
-      
-      track.has_listen = true
-      track.should_visit(self.parent)
-      track.write_stack(self.path, ::Dog::Value.null_value)
-      track.write_variable(self.variable, ::Dog::Value.new("event", {
-        "s:id" => ::Dog::Value.string_value(event.id.to_s)
-      }));
-      
-      return
-    end
-  end
-  
-  class Notify < Node
-    attribute :target
-    attribute :message
-    attribute :via
-    
-    def visit(track)
-      unless track.has_visited? self.message then
-        track.should_visit(self.message)
-        return
-      else
-        value = track.read_stack(self.message.path)
-        ruby_value = value.ruby_value
-        
-        message = ::Dog::RoutedMessage.new
-        properties = []
-        
-        if ruby_value.kind_of? Hash then
-          message.name = value.type
-          
-          for k, v in ruby_value do
-            p = ::Dog::Property.new
-            p.direction = "output"
-            p.identifier = k
-            p.value = v
-            properties << p
-          end
-        else
-          message.name = "primitive"
-          
-          p = ::Dog::Property.new
-          p.direction = "output"
-          p.identifier = "value"
-          p.value = ruby_value
-          properties << p
-        end
-        
-        
-        message.track_id = track.id
-        message.routing = nil # TODO
-        message.created_at = Time.now.utc
-        message.properties = properties
-        
-        message.save
-        
-        track.write_stack(self.path, ::Dog::Value.null_value)
-        track.should_visit(self.parent)
-        return
-      end
-    end
-  end
-  
-  class If < Node
-    attribute :conditions
-    
-    def visit(track)
-      for condition in self.conditions do
-        if condition.first then
-          # if or else if
-          if track.has_visited?(condition.first) then
-            value = track.read_stack(condition.first.path)
-            
-            unless value.type == "null" || (value.type == "boolean" && value.value == false) then
-              if condition.last then
-                if track.has_visited?(condition.last) then
-                  value = track.read_stack(condition.last.path)
-                  track.write_stack(self.path, value)
-                  track.should_visit(self.parent)
-                  return
-                else
-                  track.should_visit(condition.last)
-                  return
-                end
-              else
-                track.write_stack(self.path, ::Dog::Value.null_value)
-                track.should_visit(self.parent)
-                return
-              end
-            end
+          if item.kind_of? Node then
+            item.compile(package)
+          elsif item.kind_of? String then
+            string = Instructions::PushString.new(item)
+            set_instruction_context(string)
+            package.add_to_instructions([string])
+          elsif item.kind_of? Numeric then
+            number = Instructions::PushNumber.new(item)
+            set_instruction_context(number)
+            package.add_to_instructions([number])
           else
-            track.should_visit(condition.first)
-            return            
-          end
-        else
-          # else statement
-          if condition.last then
-            if track.has_visited?(condition.last) then
-              value = track.read_stack(condition.last.path)
-              track.write_stack(self.path, value)
-              track.should_visit(self.parent)
-              return
-            else
-              track.should_visit(condition.last)
-              return
-            end
-          else
-            track.write_stack(self.path, ::Dog::Value.null_value)
-            track.should_visit(self.parent)
-            return
+            raise "Compilation error"
           end
         end
       end
-    end
-  end
-  
-  class While < Node
-    attribute :condition
-    attribute :statements
-    
-    def visit(track)
-      
-      
-      state = track.read_stack(self.path.clone << "@state")
-            
-      if state == nil then
-        # Never visited here before. Going to evaluate the condition
-        track.write_stack(self.path.clone << "@state", ::Dog::Value.string_value("condition"))
-        
-        track.should_visit(self.condition)
-        return
-      elsif state.value == "condition"
-        value = track.read_stack(self.condition.path)
-        
-        unless value.type == "null" || (value.type == "boolean" && value.value == false) then
-          track.write_stack(self.path.clone << "@state", ::Dog::Value.string_value("statements"))
 
-          track.should_visit(self.statements)
-          return
-        else
-          track.write_stack(self.path, ::Dog::Value.null_value)
-          track.should_visit(self.parent)
-          return
-        end
-      elsif state.value == "statements"
-        track.write_stack(self.path.clone << "@state", ::Dog::Value.string_value("condition2"))
-        
-        track.clear_stack(self.condition.path)
-        track.should_visit(self.condition)
-        return
-      elsif state.value == "condition2"
-        value = track.read_stack(self.condition.path)
-        
-        unless value.type == "null" || (value.type == "boolean" && value.value == false) then
-          track.write_stack(self.path.clone << "@state", ::Dog::Value.string_value("statements"))
-          
-          track.clear_stack(self.statements.path)
-          track.should_visit(self.statements)
-          return
-        else
-          track.write_stack(self.path, track.read_stack(self.statements.path))
-          track.should_visit(self.parent)
-          return
-        end
-      end
-      
+      access = Instructions::Access.new(path.size)
+      set_instruction_context(access)
+      package.add_to_instructions([access])
     end
   end
-  
-  class For < Node
-    attribute :variable
-    attribute :collection
-    attribute :statements
-    
-    def visit(track)
-      # TODO - The for loop should pass the key as well as the value to the block.
-      # This will involve us de-serializing the "n:..." and "s:..." syntax.
-      
-      unless track.has_visited? self.collection then
-        track.should_visit(self.collection)
-        return
-      end
-      
-      collection = track.read_stack(self.collection.path)
-      
-      if collection.primitive? then
-        raise "You cannot iterate over a non-collection. Line: #{self.line}"
-      end
-      
-      index = track.read_stack(self.path.clone << "@index")
-      index = ::Dog::Value.number_value(0) if index == nil
-      
-      keys = collection.value.keys
-      
-      if index.value == keys.length then
-        track.write_stack(self.path, track.read_stack(self.statements.path))
-        track.should_visit(self.parent)
-        return
+
+  class Operation < Node
+    attr_accessor :arg1
+    attr_accessor :arg2
+    attr_accessor :operation
+
+    def initialize(arg1, arg2, operation)
+      @arg1 = arg1
+      @arg2 = arg2
+      @operation = operation
+    end
+
+    def compile(package)
+      if arg1 then
+        arg1.compile(package)
       else
-        key = keys[index.value]
-        value = collection.value[key]
-        
-        index.value += 1
-        track.write_stack(self.path.clone << "@index", index)
-        
-        track.write_variable(self.variable, value)
-        track.clear_stack(self.statements.path)
-        track.should_visit(self.statements)
+        raise "Compilation error: An operation must have at least one operand."
       end
-      
+
+      if arg2 then
+        arg2.compile(package)
+      end
+
+      perform = Instructions::Perform.new(self.operation)
+      set_instruction_context(perform)
+
+      package.add_to_instructions([perform])
     end
-    
   end
-  
-  class Perform < Node
-    attribute :instructions
-    
-    def visit(track)
-      if track.has_visited? self.instructions then
-        track.write_stack(self.path, track.read_stack(self.instructions.path))
-        track.should_visit(self.parent)
-        return
+
+  class Branch < Node
+    attr_accessor :condition
+    attr_accessor :true_nodes
+    attr_accessor :false_nodes
+
+    def initialize(condition, true_nodes, false_nodes = nil)
+      @condition = condition
+      @true_nodes = true_nodes
+      @false_nodes = false_nodes
+    end
+
+    def compile(package)
+      condition.compile(package)
+      instructions = package.instructions
+
+      if true_nodes then
+        package.instructions = []
+        true_nodes.compile(package)
+        true_nodes_instructions = package.instructions
       else
-        track.should_visit(self.instructions)
-        return
+        true_nodes_instructions = []
+      end
+
+      if false_nodes then
+        package.instructions = []
+        false_nodes.compile(package)
+        false_nodes_instructions = package.instructions
+      else
+        false_nodes_instructions = []
+      end
+
+      jump = Instructions::Jump.new(1 + false_nodes_instructions.size)
+      set_instruction_context(jump)
+      true_nodes_instructions.push(jump)
+
+      jump_if_true = Instructions::JumpIfTrue.new(2)
+      set_instruction_context(jump_if_true)
+      instructions.push(jump_if_true)
+
+      jump = Instructions::Jump.new(1 + true_nodes_instructions.size)
+      set_instruction_context(jump)
+      instructions.push(jump)
+
+      instructions.concat(true_nodes_instructions)
+      instructions.concat(false_nodes_instructions)
+
+      package.instructions = instructions
+    end
+  end
+
+  class Loop < Node
+    attr_accessor :body
+
+    def initialize(body)
+      @body = body
+    end
+
+    def compile(package)
+      if self.body then
+        instructions = package.instructions
+
+        package.instructions = []
+        body.compile(package)
+        body_instructions = package.instructions
+
+        pop = Instructions::Pop.new
+        set_instruction_context(pop)
+        body_instructions.push(pop)
+
+        jump = Instructions::Jump.new(0 - body_instructions.size)
+        set_instruction_context(jump)
+        body_instructions.push(jump)
+
+        instructions.concat(body_instructions)
+
+        package.instructions = instructions
+
+        package.add_to_catch_table(body_instructions.first, body_instructions.last, "break", 1)
       end
     end
   end
-  
-  class Import < Node
-    attribute :path
-  end
-  
+
   class Break < Node
-    def visit(track)
-      pointer = self
-      
-      while pointer = pointer.parent do
-        if pointer.class == While || pointer.class == For then
-          track.write_stack(self.path, ::Dog::Value.null_value)
-          track.should_visit(pointer.parent)
-          return
-        end
-      end
-      
-      # Ignore the break statement
-      track.write_stack(self.path, ::Dog::Value.null_value)
-      track.should_visit(self.parent)
-      return
+    attr_accessor :expression
+
+    def initialize(expression = nil)
+      @expression = expression
     end
+
+    def compile(package)
+      if expression then
+        expression.compile(package)
+      else
+        null = Instructions::PushNull.new
+        set_instruction_context(null)
+
+        package.add_to_instructions([null])
+      end
+
+      t = Instructions::Throw.new("break")
+      set_instruction_context(t)
+
+      package.add_to_instructions([t])
+    end
+  end
+
+  class Call < Node
+    # TODO
   end
 
   class Return < Node
-    attribute :expressions
+    attr_accessor :expression
 
-    def visit(track)
+    def initialize(expression = nil)
+      @expression = expression
+    end
 
-      return_value = ::Dog::Value.null_value
-
-      if self.expressions then
-        if self.expressions.length == 1 then
-          unless track.has_visited?(self.expressions.first) then
-            track.should_visit(self.expressions.first)
-            return
-          else
-            return_value = track.read_stack(self.expressions.first.path)
-          end
-        else
-          
-          struct = ::Dog::Value.new("structure", {})
-          self.expressions.each_index do |index|
-            e = self.expressions[index]
-            
-            if track.has_visited? e then
-              struct.value["n:#{index}"] = track.read_stack(e.path)
-            else
-              track.should_visit(e)
-              return
-            end
-          end
-          
-          return_value = struct
-        end
+    def compile(package)
+      if @expression then
+        @expression.compile
+      else
+        null = Instructions::PushNull.new
+        set_instruction_context(null)
+        package.add_to_instructions([null])
       end
-      
-      track.write_return_value(return_value)
-      track.finish
-      return
+
+      r = Instructions::Return.new
+      set_instruction_context(r)
+      package.add_to_instructions([r])
     end
   end
 
   class Print < Node
-    attribute :expression
+    attr_accessor :expression
 
-    def visit(track)
-      value = ""
-
-      if self.expression then
-        if track.has_visited?(self.expression) then
-          value = track.read_stack(self.expression.path)
-        else
-          track.should_visit(self.expression)
-          return
-        end
-      end
-      
-      puts value.ruby_value
-      
-      track.write_stack(self.path, ::Dog::Value.null_value)
-      track.should_visit(self.parent)
+    def initialize(expression)
+      @expression = expression
     end
-  end
 
-  class Inspect < Node
-    attribute :expression
-    
-    def visit(track)
-      value = ""
-      
-      if self.expression then
-        if track.has_visited?(self.expression) then
-          value = track.read_stack(self.expression.path).value
-        else
-          track.should_visit(self.expression)
-          return
-        end
-      end
-      
-      puts value.inspect
-      
-      track.write_stack(self.path, ::Dog::Value.null_value)
-      track.should_visit(self.parent)
-    end
-  end
-  
-  
-  class LiteralNode < Node
-    attribute :value
-  end
-  
-  class StructureLiteral < LiteralNode
-    attribute :type
-    
-    def visit(track)
-      
-      for item in value do
-        unless track.has_visited? item.last then
-          track.should_visit(item.last)
-          return
-        end
-      end
-      
-      if self.type then
-        if track.has_visited? self.type then
-          dog_value = track.read_stack(self.type.path)
-        else
-          track.should_visit(self.type)
-          return
-        end
+    def compile(package)
+      if expression then
+        expression.compile(package)
       else
-        dog_value = ::Dog::Value.new("structure", {})
+        null = Instructions::PushNull.new
+        set_instruction_context(null)
+        package.add_to_instructions([null])
       end
-      
-      for item in value do
-        k = item.first
-        v = item.last
-        
-        if k.kind_of? Numeric then
-          k = "n:#{k}"
-        else
-          k = "s:#{k}"
-        end
-        
-        dog_value.value[k] = track.read_stack(v.path)
-      end
-      
-      dog_value._id = UUID.new.generate
-      dog_value.value["s:id"] = ::Dog::Value.string_value(dog_value._id)
-      
-      track.write_stack(self.path, dog_value)
-      track.should_visit(self.parent)
+
+      print = Instructions::Print.new
+      set_instruction_context(print)
+      package.add_to_instructions([print])
     end
   end
-  
-  class StructureInstantiation < Node
-    attribute :type
-    attribute :package_name
-    
-    def visit(track)
-      track.save
-      # TODO - For both function calls and structure instantiations
-      # I should consider check the type to ensture that I am doing
-      # the right thing...
-      
-      # TODO - Also for types in both computes as well as literals, I need
-      # to handle relative paths as well... hopefully, maybe?
-      
-      function = ::Dog::Track.new(self.type, self.package_name || track.function_package)
-      function.control_ancestors = track.control_ancestors.clone
-      function.control_ancestors.push(track.id)
-      
-      track.state = ::Dog::Track::STATE::CALLING
-      return function
-    end
-  end
-  
-  class StringLiteral < LiteralNode
-    def visit(track)
-      track.write_stack(self.path, ::Dog::Value.string_value(value))
-      track.should_visit(self.parent)
-    end
-  end
-  
-  class NumberLiteral < LiteralNode
-    def visit(track)
-      track.write_stack(self.path, ::Dog::Value.number_value(value))
-      track.should_visit(self.parent)
-    end
-  end
-  
-  class TrueLiteral < LiteralNode
-    def visit(track)
-      track.write_stack(self.path, ::Dog::Value.true_value)
-      track.should_visit(self.parent)
-    end
-    
-  end
-  
-  class FalseLiteral < LiteralNode
-    def visit(track)
-      track.write_stack(self.path, ::Dog::Value.false_value)
-      track.should_visit(self.parent)
-    end
-    
-  end
-  
-  class NullLiteral < LiteralNode
-    def visit(track)
-      track.write_stack(self.path, ::Dog::Value.null_value)
-      track.should_visit(self.parent)
-    end
-    
-  end
-  
 end
