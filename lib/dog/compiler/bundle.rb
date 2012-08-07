@@ -21,7 +21,7 @@ module Dog
     attr_accessor :packages
     
     def initialize
-      # TODO - This default is important. It corresponds to the default package name (empty)
+      # This default is important. It corresponds to the default package name (empty)
       self.startup_package = ""
       self.packages = {}
     end
@@ -54,6 +54,8 @@ module Dog
         end
       else
         # TODO - Perhaps add a package type just like Bundle
+        name = package.name
+        self.packages[name] = package
       end
       
     end

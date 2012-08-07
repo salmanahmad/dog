@@ -25,180 +25,47 @@ module Dog
     
     attr_accessor :_id
     
+    attr_accessor :package_name
     attr_accessor :function_name
-    attr_accessor :function_package
-    attr_accessor :current_node_path
+    attr_accessor :implementation_name
     
-    attr_accessor :mandatory_arguments
-    attr_accessor :optional_arguments
+    attr_accessor :current_instruction
+    attr_accessor :next_instruction
+    attr_accessor :next_track
+    
+    attr_accessor :stack
+    attr_accessor :variables
+    attr_accessor :state
     
     attr_accessor :access_ancestors
     attr_accessor :control_ancestors
     
-    attr_accessor :state
-    attr_accessor :stack
-    attr_accessor :variables
-    
-    attr_accessor :return_value
-    attr_accessor :error_value
-    
+    # TODO - I don't think that any of these are used anymore
     attr_accessor :has_listen
     attr_accessor :asking_id
     
-    # TODO - I don't think that listen_argument is used at all anymore
-    attr_accessor :listen_argument
-    
-    def initialize(name = nil, package = nil)
+    def initialize(function_name = nil, package_name = "", implementation_name = 0)
+      self.package_name = package_name
+      self.function_name = function_name
+      self.implementation_name = implementation_name
       
-      if name then
-        package ||= Runtime.bundle.startup_package
-        path = Runtime.bundle.path_for_symbol(name, package)
-        
-        if path.nil? then
-          raise "I could not find a symbol named: #{name} in package: #{package}"
-        end
-        
-        path = path.clone
-        
-        self.function_name = name
-        self.function_package = package
-        self.current_node_path = path
-      end
+      self.current_instruction = 0
+      self.next_instruction = nil
+      
+      self.stack = []
+      self.variables = {}
+      self.state = STATE::RUNNING
       
       self.access_ancestors = []
       self.control_ancestors = []
-      
-      self.state = STATE::RUNNING
-      self.stack = {}
-      self.variables = {}
-      
-      self.return_value = nil
-      self.error_value = nil
     end
     
-    def has_visited?(node)
-      result = has_stack_path(node.path)
-      return result
-    end
-    
-    def should_visit(node)
-      if node then
-        self.current_node_path = node.path
-      else
-        finish
-      end
-    end
-    
-    def read_return_value
-      value = self.return_value
+    def context
+      return @context if @context
       
-      if value.nil? then
-        return ::Dog::Value.null_value
-      else
-        return ::Dog::Value.from_hash(value)
-      end
-    end
-    
-    def write_return_value(value)
-      if value.class != ::Dog::Value then
-        raise "You cannot save a non-Value object to a local variable"
-      end
-      
-      value = value.to_hash
-      self.return_value = value
-    end
-    
-    def read_variable(name)
-      value = self.variables[name]
-      if value.nil? then
-        return ::Dog::Value.null_value
-      else
-        return ::Dog::Value.from_hash(value)
-      end
-    end
-    
-    def write_variable(name, value)
-      if value.class != ::Dog::Value then
-        raise "You cannot save a non-Value object to a local variable"
-      end
-      
-      value = value.to_hash
-      self.variables[name] = value
-    end
-    
-    
-    def has_stack_path(path)
-      pointer = self.stack
-      
-      for item in path do
-        item = item.to_s
-        
-        if pointer.respond_to?(:has_key?) && pointer.has_key?(item) then
-          pointer = pointer[item]
-        else
-          return false
-        end
-      end
-      
-      return true
-    end
-    
-    def write_stack(path, value)
-      # TODO - The leafs of the stack must always be a Value. And a Value
-      # must not appear anywhere but the leafs. I need to ensure that this
-      # is always the case.
-      
-      if value.class != ::Dog::Value then
-        raise "You cannot write a non-Value object to the Dog stack."
-      end
-      
-      value = value.to_hash
-      
-      path = path.clone
-      last = path.pop
-      stack = self.stack
-      
-      return if last.nil?
-      
-      for index in path do
-        index = index.to_s
-        stack[index] ||= {}
-        stack = stack[index]
-      end
-      
-      stack[last.to_s] = value
-    end
-    
-    def clear_stack(path)
-      path = path.clone
-      last = path.pop
-      stack = self.stack
-      
-      return if last.nil?
-      
-      for index in path do
-        index = index.to_s
-        stack[index] ||= {}
-        stack = stack[index]
-      end
-      
-      stack[last.to_s] = nil
-    end
-    
-    def read_stack(path)
-      path = path.clone
-      stack = self.stack
-      
-      begin
-        for index in path do
-          index = index.to_s
-          stack = stack[index]
-        end
-        
-        return ::Dog::Value.from_hash(stack)
-      rescue
-        return nil
-      end
+      package = ::Dog::Runtime.bundle.packages[self.package_name]
+      symbol = package.symbols[self.function_name]
+      @context = symbol["implementations"][implementation_name]
     end
     
     def finish
@@ -209,23 +76,73 @@ module Dog
       end
     end
     
+    def self.from_hash(hash)
+      object = super
+      
+      stack = object.stack.map do |item|
+        ::Dog::Value.from_hash(item)
+      end
+      
+      variables = {}
+      for key, value in object.variables do
+        variables[key] = ::Dog::Value.from_hash(value)
+      end
+      
+      object.stack = stack
+      object.variables = variables
+      
+      return object
+    end
+    
     def to_hash
+      stack = self.stack.map do |item|
+        if item.kind_of? ::Dog::Value then
+          item.to_hash
+        else
+          raise "A non-value was present on the stack"
+        end
+      end
+      
+      variables = {}
+      for key, value in self.variables do
+        if value.kind_of? ::Dog::Value then
+          variables[key] = value.to_hash
+        else
+          raise "A non-value was present on the stack"
+        end
+      end
+      
+      control_ancestors = self.control_ancestors.map do |item|
+        if item.kind_of? Track then
+          item.save
+          item._id
+        elsif item.kind_of? BSON::ObjectId then
+          item
+        else
+          raise "An invalid object appeared in the control ancestors for a track"
+        end
+      end
+      
+      # TODO: I don't need this, do I?
+      access_ancestors = []
+      
       return {
+        "package_name" => self.package_name,
         "function_name" => self.function_name,
-        "function_package" => self.function_package,
-        "current_node_path" => self.current_node_path,
-        "mandatory_arguments" => self.mandatory_arguments,
-        "optional_arguments" => self.optional_arguments,
-        "access_ancestors" => self.access_ancestors,
-        "control_ancestors" => self.control_ancestors,
+        "implementation_name" => self.implementation_name,
+        
+        "current_instruction" => self.current_instruction,
+        "next_instruction" => nil,
+        
         "state" => self.state,
-        "stack" => self.stack,
-        "variables" => self.variables,
-        "return_value" => self.return_value,
-        "error_value" => self.error_value,
+        "stack" => stack,
+        "variables" => variables,
+        
+        "access_ancestors" => access_ancestors,
+        "control_ancestors" => control_ancestors,
+        
         "has_listen" => self.has_listen,
         "asking_id" => self.asking_id,
-        "listen_argument" => self.listen_argument
       }
     end
 
@@ -235,39 +152,6 @@ module Dog
         "name" => self.function_name.split('.'),
         "type" => "track"
       }
-    end
-
-    def self.create(hash)
-      parent = nil
-      
-      if hash[:parent_id] then
-        parent = Track.find_by_id(hash[:parent_id])
-      else
-        parent = Track.current
-      end
-      
-      track = Track.new
-      track.ancestors = parent.scoped_ancestors
-      track.depth = parent.depth + 1
-      track.checkpoint = 0
-      track.save
-      
-      return track
-    end
-    
-    def scoped_ancestors
-      ancestors = self.ancestors
-      ancestors ||= []
-      ancestors << self._id
-      return ancestors
-    end
-    
-    def checkpoint &block
-      # TODO
-    end
-    
-    def reset_checkpoint &block
-      # TODO
     end
     
     def self.root
@@ -287,7 +171,5 @@ module Dog
     def is_root?
       self.control_ancestors.empty?
     end
-    
   end
-  
 end

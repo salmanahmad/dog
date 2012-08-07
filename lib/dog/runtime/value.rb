@@ -45,6 +45,26 @@ module Dog
       end
     end
     
+    def [](k)
+      if k.kind_of? Numeric then
+        k = "n:#{k}"
+      else
+        k = "s:#{k}"
+      end
+      
+      self.value[k]
+    end
+    
+    def []=(k, v)
+      if k.kind_of? Numeric then
+        k = "n:#{k}"
+      else
+        k = "s:#{k}"
+      end
+      
+      self.value[k] = v
+    end
+    
     def self.from_hash(hash)
       value = Value.new
       value._id = hash["_id"]

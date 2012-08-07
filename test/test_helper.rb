@@ -25,7 +25,6 @@ module CompilerTests end
 module RuntimeTests end
 
 module IntegrationHelper
-  
   def program_for(test_path)
     directory = File.absolute_path(File.dirname(test_path))
     basename = File.basename(test_path, ".rb") + ".dog"
@@ -33,7 +32,6 @@ module IntegrationHelper
     program = File.read(path)
     return program
   end
-  
 end
 
 module RuntimeHelper
@@ -93,34 +91,50 @@ end
 
 
 class RuntimeTestCase < Test::Unit::TestCase
-  
   def setup
-    @parser = Dog::Parser.new
-    @compiler = Dog::Compiler.new
-    @runtime = Dog::Runtime.new
+    
   end
   
-  def run_code(code, root = :program)
-    Dog::Environment.reset
+  def run_source(source, include_stdout = false)
+    
+  end
+  
+  def run_nodes(nodes, include_stdout = false)
+    package = ::Dog::Package.new
+    package.push_symbol("@root")
+    package.add_implementation
+    
+    nodes = [nodes] unless nodes.kind_of? Array
+      
+    
+    for node in nodes do
+      node.compile(package)
+    end
+    
+    package.pop_symbol
+    run_package(package, include_stdout)
+  end
+  
+  def run_package(package, include_stdout = false)
+    bundle = ::Dog::Bundle.new
+    bundle.sign
+    bundle.link(package)
+    bundle.startup_package = package.name
     
     sio = StringIO.new
     old_stdout, $stdout = $stdout, sio
     
-    @parser.parser.root = root
-    collar = @parser.parse(code)
-    bark = @compiler.compile(collar)
-    output_value = bark.run
+    tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})    
     
     $stdout = old_stdout
-    output_stdout = sio.string.strip
+    stdout = sio.string.strip
     
-    if root == :program then
-      output_stdout
+    if include_stdout then
+      return tracks, stdout
     else
-      output_value
+      return tracks
     end
   end
-  
 end
 
 module UnitHelper

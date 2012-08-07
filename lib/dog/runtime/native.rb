@@ -9,8 +9,10 @@
 
 module Dog  
   class NativeCode < ::Dog::Nodes::Node
-    attribute :name
-    attribute :package
+    #attribute :name
+    #attribute :package
+    attr_accessor :name
+    attr_accessor :package
     
     def initialize(name = nil, package = nil)
       self.name = name || self.class.name.split("::").last.downcase

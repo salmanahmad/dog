@@ -9,31 +9,53 @@
 
 module Dog::Instructions
   class Instruction
-    attr_accessor :line
-    attr_accessor :file
-
-    def name
-
+    def self.attr_accessor(*vars)
+      super(*vars)
     end
 
-    def to_binary
-      # TODO
+    def self.attribute(*vars)
+      @attributes ||= []
+      @attributes.concat vars
+      self.attr_accessor(*vars)
     end
 
-    def self.from_binary
-      # TODO
+    def self.attributes
+      @attributes_cache ||= (superclass.attributes || [] rescue []) | (@attributes || [])
     end
 
-    def to_array
-
+    def attributes
+      self.class.attributes
     end
 
-    def self.from_array(array)
+    attribute :line
+    attribute :file
 
+    def to_hash
+      hash = { "class" => self.class.name }
+      
+      for attribute in self.attributes do
+        hash[attribute] = self.send(attribute.intern)
+      end
+      
+      return hash
+    end
+
+    def self.from_hash(hash)
+      klass = hash.shift
+      klass = Kernel::qualified_const_get(klass)
+      object = klass.new
+      
+      for key, value in hash do
+        if object.attributes.include? key then
+          object.send("#{key.to_s}=".intern, value)
+        end
+      end
+      
+      return object
     end
 
     def execute(track)
-
+      raise "Execute must be overridden by a subclass of instruction"
     end
   end
 
@@ -45,7 +67,14 @@ module Dog::Instructions
 
   class Push < Instruction
     attr_accessor :value
-    # TODO
+    
+    def initialize(value)
+      @value = value
+    end
+    
+    def execute(track)
+      track.stack.push(@value)
+    end
   end
 
   class PushString < Instruction
@@ -56,7 +85,7 @@ module Dog::Instructions
     end
 
     def execute(track)
-      track.stack.push(@value)
+      track.stack.push(::Dog::Value.string_value(@value))
     end
   end
 
@@ -68,41 +97,34 @@ module Dog::Instructions
     end
 
     def execute(track)
-      track.stack.push(@value)
+      track.stack.push(::Dog::Value.number_value(@value))
     end
   end
 
   class PushTrue < Instruction
     def execute(track)
-      track.stack.push(true)
+      track.stack.push(::Dog::Value.true_value)
     end
   end
 
   class PushFalse < Instruction
     def execute(track)
-      track.stack.push(false)
+      track.stack.push(::Dog::Value.false_value)
     end
   end
 
   class PushNull < Instruction
     def execute(track)
-      track.stack.push(nil)
+      track.stack.push(::Dog::Value.null_value)
     end
   end
 
   class PushStructure < Instruction
-    attr_accessor :type
-
-    def initialize(type)
-      @type = type
-    end
-
     def execute(track)
-      # TODO - Add the function call
-      track.stack.push({})
+      track.stack.push(::Dog::Value.empty_structure())
     end
   end
-
+  
   class Access < Instruction
     attr_accessor :path_size
 
@@ -179,7 +201,19 @@ module Dog::Instructions
     end
 
     def execute(track)
-      value = track.variables[@variable_name]
+      # TODO - Handle scope modifiers: internal, external, local
+      if track.variables.include? @variable_name then
+        value = track.variables[@variable_name]
+      else
+        package = track.package_name
+        symbol = ::Dog::Runtime.bundle.packages[package].symbols[@variable_name]
+        if symbol.nil? || symbol["value"].nil? then
+          value = ::Dog::Value.null_value
+        else
+          value = ::Dog::Value.from_hash(symbol["value"])
+        end
+      end
+      
       track.stack.push(value)
     end
   end
@@ -274,7 +308,7 @@ module Dog::Instructions
     def execute(track)
       value = track.stack.pop
 
-      if value then
+      unless value.is_false? || value.is_null? then
         track.next_instruction = track.current_instruction + @offset
       end
     end
@@ -290,7 +324,7 @@ module Dog::Instructions
     def execute(track)
       value = track.stack.pop
 
-      unless value then
+      if value.is_false? || value.is_null? then
         track.next_instruction = track.current_instruction + @offset
       end
     end
@@ -331,18 +365,88 @@ module Dog::Instructions
 
   class Call < Instruction
     attr_accessor :arg_count
+    attr_accessor :has_optionals
 
-    # TODO
+    def initialize(arg_count, has_optionals)
+      @arg_count = arg_count
+      @has_optionals = has_optionals
+    end
+    
+    def execute(track)
+      optionals = nil
+      optionals = track.stack.pop if has_optionals
+      
+      arguments = track.stack.pop(arg_count)
+      function = track.stack.pop
+      
+      if function.type != "function" then
+        raise "I don't know how to call a non-function"
+      end
+      
+      # TODO - Handle argument passing... and default values
+      # Perhaps the default values for optional args are handled
+      # by the runtime libraries and not the VM
+      
+      new_track = ::Dog::Track.new
+      new_track.control_ancestors = track.control_ancestors.clone
+      new_track.control_ancestors << track
+      
+      new_track.package_name = function["package"].value
+      new_track.function_name = function["name"].value
+      new_track.implementation_name = 0
+      
+      track.state = ::Dog::Track::STATE::CALLING
+      track.next_track = new_track
+    end
+  end
+
+  class RemoteCall < Instruction
+    attr_accessor :arg_count
+    attr_accessor :has_optionals
+    
+    def execute(track)
+      optionals = nil
+      optionals = track.stack.pop if has_optionals
+      
+      arguments = track.stack.pop(arg_count)
+      function = track.stack.pop
+      routing = track.stack.pop
+      
+      # TODO
+    end
+  end
+  
+  class Build < Instruction
+    def execute(track)
+      type = track.stack.pop
+      
+      if type.type != "type" then
+        raise "I don't know how to build a non-type"
+      end
+      
+      new_track = ::Dog::Track.new
+      new_track.control_ancestors = track.control_ancestors.clone
+      new_track.control_ancestors << track
+      
+      new_track.package_name = type["package"].value
+      new_track.function_name = type["name"].value
+      new_track.implementation_name = 0
+      
+      track.state = ::Dog::Track::STATE::CALLING
+      track.next_track = new_track
+    end
   end
 
   class Return < Instruction
-    # TODO
+    def execute(track)
+      track.finish
+    end
   end
 
   class Print < Instruction
     def execute(track)
       message = track.stack.pop
-      puts message
+      puts message.ruby_value
 
       track.stack.push(nil)
     end

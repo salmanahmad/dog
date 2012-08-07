@@ -54,6 +54,7 @@ module Dog
   class Runtime
     class << self
       
+      # TODO - Do I need this anymore?
       attr_accessor :save_set
       
       attr_accessor :bundle
@@ -66,9 +67,10 @@ module Dog
         self.bundle_filename = File.expand_path(bundle_filename) rescue nil
         self.bundle_directory = File.dirname(File.expand_path(bundle_filename)) rescue Dir.pwd
         
-        self.bundle.link(::Dog::Library::System)
-        self.bundle.link(::Dog::Library::Collection)
-        self.bundle.link(::Dog::Library::People)
+        # TODO - Add these back
+        #self.bundle.link(::Dog::Library::System)
+        #self.bundle.link(::Dog::Library::Collection)
+        #self.bundle.link(::Dog::Library::People)
         
         options = {
           "config_file" => nil,
@@ -103,14 +105,63 @@ module Dog
         
         tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
         
-        for track in tracks do
+        tracks = tracks.to_a.map do |track|
           track = Track.from_hash(track)
+        end
+        
+        for track in tracks do
           run_track(track)
         end
         
         start_stop_server
+        return tracks
       end
       
+      def run_track(track)
+        return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
+        
+        instructions = track.context["instructions"]
+        
+        loop do
+          track.next_instruction = nil
+          track.next_track = nil
+          
+          instruction = instructions[track.current_instruction]
+          break unless instruction
+        
+          instruction.execute(track)
+        
+          if track.next_instruction then
+            track.current_instruction = track.next_instruction
+          else
+            track.current_instruction += 1
+          end
+          
+          if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
+            return_value = track.stack.last || ::Dog::Value.null_value
+            return_track = track.control_ancestors.last
+            return_track.stack.push(return_value)
+            return_track.state = Track::STATE::RUNNING
+            
+            run_track(return_track)
+            return
+          end
+          
+          if track.next_track then
+            next_track = track.next_track
+            track.next_track = nil
+        
+            run_track(next_track)
+            return
+          end
+        end
+        
+        if track.is_root? && track.state == Track::STATE::FINISHED then
+          start_stop_server
+        end
+      end
+      
+=begin      
       def run_track(track)
         # TODO - check for state first
         # TODO - Right now I have poor support for tail recursion. I may run out of stack space before too long
@@ -166,6 +217,7 @@ module Dog
         end
         
       end
+=end
       
       
       def start_stop_server

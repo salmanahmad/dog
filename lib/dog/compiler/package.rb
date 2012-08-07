@@ -21,14 +21,14 @@ module Dog
     end
 
     def pop_symbol
-      self.symbols_stack.pop(symbol)
+      self.symbols_stack.pop
     end
 
     def push_symbol(symbol)
       self.symbols[symbol] ||= {
         "name" => symbol,
-        "instructions" => [],
-        "catch_table" => []
+        "value" => nil,
+        "implementations" => [],
       }
       self.symbols_stack.push(symbol)
     end
@@ -36,17 +36,34 @@ module Dog
     def current_symbol
       self.symbols_stack.last
     end
-
+    
+    def current_context
+      self.symbols[self.current_symbol]
+    end
+    
+    def implementation
+      self.symbols[self.current_symbol]["implementations"].last
+    end
+    
     def instructions
-      self.symbols[self.current_symbol]["instructions"]
+      self.symbols[self.current_symbol]["implementations"].last["instructions"]
     end
 
     def instructions=(instructions)
-      self.symbols[self.current_symbol]["instructions"] = instructions
+      self.symbols[self.current_symbol]["implementations"].last["instructions"] = instructions
     end
 
     def catch_table
-      self.symbols[self.current_symbol]["catch_table"]
+      self.symbols[self.current_symbol]["implementations"].last["catch_table"]
+    end
+
+    def add_implementation
+      self.symbols[self.current_symbol]["implementations"] << {
+        "arguments" => [],
+        "optional_arguments" => [],
+        "instructions" => [],
+        "catch_table" => []
+      }
     end
 
     def add_to_instructions(instructions)
@@ -59,6 +76,8 @@ module Dog
     end
 
     def finalize
+      # TODO - Add bytecode verification. This include removing any duplicate empty symbols
+      
       for name, symbol in self.symbols do
         table = []
         mapping = {}

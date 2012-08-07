@@ -1,0 +1,53 @@
+#
+# Copyright 2011 by Salman Ahmad (salman@salmanahmad.com).
+# All rights reserved.
+#
+# Permission is granted for use, copying, modification, distribution,
+# and distribution of modified versions of this work as long as the
+# above copyright notice is included.
+#
+
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
+
+class RuntimeTests::ScratchTest < RuntimeTestCase
+  include Dog
+  
+  def test_simple
+    program = Nodes::Nodes.new([
+      Nodes::Assign.new(["i"], Nodes::StringLiteral.new("Hello, World!")),
+      Nodes::Access.new(["i"])
+    ])
+
+    track = run_nodes(program).first
+    assert_equal("Hello, World!", track.stack.last.ruby_value)
+  end
+
+  def test_function_call
+    program = Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("foo", Nodes::Nodes.new([
+        Nodes::Print.new(Nodes::StringLiteral.new("Foo Called!"))
+      ])),
+      Nodes::Call.new(Nodes::Access.new(["foo"]))
+    ])
+
+    tracks, out = run_nodes(program, true)
+    assert_equal("Foo Called!", out)
+  end
+  
+  def test_function_returns
+    program = Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("foo", Nodes::Nodes.new([
+        Nodes::Print.new(Nodes::StringLiteral.new("Foo Called!")),
+        Nodes::Return.new(Nodes::NumberLiteral.new(3.14))
+      ])),
+      Nodes::Call.new(Nodes::Access.new(["foo"]))
+    ])
+    
+    tracks, out = run_nodes(program, true)
+    
+    assert_equal(3.14, tracks.last.stack.last.ruby_value)
+    assert_equal("Foo Called!", out)
+  end
+  
+
+end

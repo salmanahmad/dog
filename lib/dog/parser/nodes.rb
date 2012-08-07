@@ -8,6 +8,20 @@
 #
 
 module Dog::Nodes
+  class Treetop::Runtime::SyntaxNode
+    def transform
+      if elements && elements.first then
+        return self.elements.first.compile
+      else
+        return nil
+      end
+    end
+    
+    def line
+      1 + self.input.slice(0, self.interval.begin).count("\n")
+    end
+  end
+
   class Node
     attr_accessor :line
     attr_accessor :file
@@ -33,12 +47,94 @@ module Dog::Nodes
       for node in nodes do
         node.compile(package)
         unless node == nodes.last
-          pop = Instructions::Pop.new
+          pop = ::Dog::Instructions::Pop.new
           set_instruction_context(pop)
 
           package.add_to_instructions([pop])
         end
       end
+    end
+  end
+  
+  class Package < Node
+    attr_accessor :name
+    
+    def initialize(name)
+      @name = name
+    end
+    
+    def compile
+      nil
+    end
+  end
+  
+  class FunctionDefinition < Node
+    attr_accessor :name
+    attr_accessor :implementation
+    attr_accessor :arguments
+    attr_accessor :optional_arguments
+    
+    def initialize(name, implementation = nil, arguments = nil, optional_arguments = nil)
+      @name = name
+      @implementation = implementation
+      @arguments = arguments
+      @optional_arguments = optional_arguments
+    end
+    
+    def compile(package)
+      package.push_symbol(@name)
+      
+      value = ::Dog::Value.new("function", {})
+      value["name"] = ::Dog::Value.string_value(name)
+      value["package"] = ::Dog::Value.string_value(package.name)
+      
+      package.current_context["value"] = value.to_hash
+      
+      if @implementation then
+        package.add_implementation
+        package.implementation["arguments"] = @arguments
+        package.implementation["optional_arguments"] = @optional_arguments
+        @implementation.compile(package)
+      end
+      
+      package.pop_symbol
+      
+      null = ::Dog::Instructions::PushNull.new
+      set_instruction_context(null)
+      package.add_to_instructions([null])
+    end
+  end
+  
+  class Definition < Node
+    attr_accessor :name
+    attr_accessor :value
+    attr_accessor :implementation
+    attr_accessor :arguments
+    attr_accessor :optional_arguments
+    
+    def initialize(name, value = nil, implementation = nil, arguments = nil, optional_arguments = nil)
+      @name = name
+      @value = value
+      @implementation = implementation
+      @arguments = arguments
+      @optional_arguments = optional_arguments
+    end
+    
+    def compile(package)
+      package.push_symbol(@name)
+      
+      if @value then
+        package.current_context["value"] = @value.to_hash
+      end
+      
+      if @implementation then
+        package.add_implementation
+        package.implementation["arguments"] = @arguments
+        package.implementation["optional_arguments"] = @optional_arguments
+        @implementation.compile(package)
+      end
+      
+      package.pop_symbol
     end
   end
 
@@ -52,17 +148,25 @@ module Dog::Nodes
     end
 
     def compile(package)
-      structure = Instructions::PushStructure.new(@type)
-      set_instruction_context(structure)
-      package.add_to_instructions([structure])
+      if @type then
+        @type.compile(package)
+        
+        build = ::Dog::Instructions::Build.new
+        set_instruction_context(build)
+        package.add_to_instructions([build])
+      else
+        structure = ::Dog::Instructions::PushStructure.new
+        set_instruction_context(structure)
+        package.add_to_instructions([structure])
+      end
 
       for key, property in @value do
         if key.kind_of? String then
-          push_string = Instructions::PushString.new(key)
+          push_string = ::Dog::Instructions::PushString.new(key)
           set_instruction_context(push_string)
           package.add_to_instructions([push_string])
         elsif key.kind_of? Numeric then
-          push_number = Instructions::PushNumber.new(key)
+          push_number = ::Dog::Instructions::PushNumber.new(key)
           set_instruction_context(push_number)
           package.add_to_instructions([push_number])
         else
@@ -71,7 +175,7 @@ module Dog::Nodes
 
         property.compile(package)
 
-        assign = Instructions::Assign.new(2)
+        assign = ::Dog::Instructions::Assign.new(2)
         set_instruction_context(assign)
         package.add_to_instructions([assign])
       end
@@ -86,7 +190,7 @@ module Dog::Nodes
     end
 
     def compile(package)
-      instruction = Instructions::PushString.new(value)
+      instruction = ::Dog::Instructions::PushString.new(value)
       set_instruction_context(instruction)
 
       package.add_to_instructions([instruction])
@@ -101,7 +205,7 @@ module Dog::Nodes
     end
 
     def compile(package)
-      instruction = Instructions::PushNumber.new(value)
+      instruction = ::Dog::Instructions::PushNumber.new(value)
       set_instruction_context(instruction)
 
       package.add_to_instructions([instruction])
@@ -110,7 +214,7 @@ module Dog::Nodes
 
   class TrueLiteral < Node
     def compile(package)
-      instruction = Instructions::PushTrue.new
+      instruction = ::Dog::Instructions::PushTrue.new
       set_instruction_context(instruction)
 
       package.add_to_instructions([instruction])
@@ -119,7 +223,7 @@ module Dog::Nodes
 
   class FalseLiteral < Node
     def compile(package)
-      instruction = Instructions::PushFalse.new
+      instruction = ::Dog::Instructions::PushFalse.new
       set_instruction_context(instruction)
 
       package.add_to_instructions([instruction])
@@ -128,7 +232,7 @@ module Dog::Nodes
 
   class NullLiteral < Node
     def compile(package)
-      instruction = Instructions::PushNull.new
+      instruction = ::Dog::Instructions::PushNull.new
       set_instruction_context(instruction)
 
       package.add_to_instructions([instruction])
@@ -147,18 +251,18 @@ module Dog::Nodes
     def compile(package)
       for item in path do
         if item == path.first then
-          read_variable = Instructions::ReadVariable.new(item)
+          read_variable = ::Dog::Instructions::ReadVariable.new(item)
           set_instruction_context(read_variable)
           package.add_to_instructions([read_variable])
         else
           if item.kind_of? Node then
             item.compile(package)
           elsif item.kind_of? String then
-            string = Instructions::PushString.new(item)
+            string = ::Dog::Instructions::PushString.new(item)
             set_instruction_context(string)
             package.add_to_instructions([string])
           elsif item.kind_of? Numeric then
-            number = Instructions::PushNumber.new(item)
+            number = ::Dog::Instructions::PushNumber.new(item)
             set_instruction_context(number)
             package.add_to_instructions([number])
           else
@@ -169,11 +273,11 @@ module Dog::Nodes
 
       value.compile(package)
 
-      assign = Instructions::Assign.new(path.size)
+      assign = ::Dog::Instructions::Assign.new(path.size)
       set_instruction_context(assign)
       package.add_to_instructions([assign])
 
-      write_variable = Instructions::WriteVariable.new(path.first)
+      write_variable = ::Dog::Instructions::WriteVariable.new(path.first)
       set_instruction_context(write_variable)
       package.add_to_instructions([write_variable])
     end
@@ -189,18 +293,18 @@ module Dog::Nodes
     def compile(package)
       for item in path do
         if item == path.first then
-          read_variable = Instructions::ReadVariable.new(item)
+          read_variable = ::Dog::Instructions::ReadVariable.new(item)
           set_instruction_context(read_variable)
           package.add_to_instructions([read_variable])
         else
           if item.kind_of? Node then
             item.compile(package)
           elsif item.kind_of? String then
-            string = Instructions::PushString.new(item)
+            string = ::Dog::Instructions::PushString.new(item)
             set_instruction_context(string)
             package.add_to_instructions([string])
           elsif item.kind_of? Numeric then
-            number = Instructions::PushNumber.new(item)
+            number = ::Dog::Instructions::PushNumber.new(item)
             set_instruction_context(number)
             package.add_to_instructions([number])
           else
@@ -209,7 +313,7 @@ module Dog::Nodes
         end
       end
 
-      access = Instructions::Access.new(path.size)
+      access = ::Dog::Instructions::Access.new(path.size)
       set_instruction_context(access)
       package.add_to_instructions([access])
     end
@@ -237,7 +341,7 @@ module Dog::Nodes
         arg2.compile(package)
       end
 
-      perform = Instructions::Perform.new(self.operation)
+      perform = ::Dog::Instructions::Perform.new(self.operation)
       set_instruction_context(perform)
 
       package.add_to_instructions([perform])
@@ -275,15 +379,15 @@ module Dog::Nodes
         false_nodes_instructions = []
       end
 
-      jump = Instructions::Jump.new(1 + false_nodes_instructions.size)
+      jump = ::Dog::Instructions::Jump.new(1 + false_nodes_instructions.size)
       set_instruction_context(jump)
       true_nodes_instructions.push(jump)
 
-      jump_if_true = Instructions::JumpIfTrue.new(2)
+      jump_if_true = ::Dog::Instructions::JumpIfTrue.new(2)
       set_instruction_context(jump_if_true)
       instructions.push(jump_if_true)
 
-      jump = Instructions::Jump.new(1 + true_nodes_instructions.size)
+      jump = ::Dog::Instructions::Jump.new(1 + true_nodes_instructions.size)
       set_instruction_context(jump)
       instructions.push(jump)
 
@@ -309,11 +413,11 @@ module Dog::Nodes
         body.compile(package)
         body_instructions = package.instructions
 
-        pop = Instructions::Pop.new
+        pop = ::Dog::Instructions::Pop.new
         set_instruction_context(pop)
         body_instructions.push(pop)
 
-        jump = Instructions::Jump.new(0 - body_instructions.size)
+        jump = ::Dog::Instructions::Jump.new(0 - body_instructions.size)
         set_instruction_context(jump)
         body_instructions.push(jump)
 
@@ -337,21 +441,62 @@ module Dog::Nodes
       if expression then
         expression.compile(package)
       else
-        null = Instructions::PushNull.new
+        null = ::Dog::Instructions::PushNull.new
         set_instruction_context(null)
 
         package.add_to_instructions([null])
       end
 
-      t = Instructions::Throw.new("break")
+      t = ::Dog::Instructions::Throw.new("break")
       set_instruction_context(t)
 
       package.add_to_instructions([t])
     end
   end
 
+  class RemoteCall < Node
+    attr_accessor :target
+    attr_accessor :identifier
+    attr_accessor :arguments
+    attr_accessor :optional_arguments
+    
+    def initialize(target, identifier, arguments, optional_arguments)
+      @target = target
+      @identifier = identifier
+      @arguments = arguments
+      @optional_arguments = optional_arguments
+    end
+    
+    def compile(package)
+      # TODO
+    end
+  end
+  
   class Call < Node
-    # TODO
+    attr_accessor :identifier
+    attr_accessor :arguments
+    attr_accessor :optional_arguments
+    
+    def initialize(identifier, arguments = nil, optional_arguments = nil)
+      @identifier = identifier
+      @arguments = arguments
+      @optional_arguments = optional_arguments
+    end
+    
+    def compile(package)
+      @identifier.compile(package)
+      
+      @arguments ||= []
+      for argument in @arguments do
+        argument.compile(package)
+      end
+      
+      @optional_arguments.compile(package) if @optional_arguments
+      
+      call = ::Dog::Instructions::Call.new(@arguments.count, !@optional_arguments.nil?)
+      set_instruction_context(call)
+      package.add_to_instructions([call])
+    end
   end
 
   class Return < Node
@@ -363,20 +508,21 @@ module Dog::Nodes
 
     def compile(package)
       if @expression then
-        @expression.compile
+        @expression.compile(package)
       else
-        null = Instructions::PushNull.new
+        null = ::Dog::Instructions::PushNull.new
         set_instruction_context(null)
         package.add_to_instructions([null])
       end
 
-      r = Instructions::Return.new
+      r = ::Dog::Instructions::Return.new
       set_instruction_context(r)
       package.add_to_instructions([r])
     end
   end
 
   class Print < Node
+    # TODO - Remove this in favor of a system library call
     attr_accessor :expression
 
     def initialize(expression)
@@ -387,14 +533,54 @@ module Dog::Nodes
       if expression then
         expression.compile(package)
       else
-        null = Instructions::PushNull.new
+        null = ::Dog::Instructions::PushNull.new
         set_instruction_context(null)
         package.add_to_instructions([null])
       end
 
-      print = Instructions::Print.new
+      print = ::Dog::Instructions::Print.new
       set_instruction_context(print)
       package.add_to_instructions([print])
     end
   end
+  
+  
+  
+#  Missing:
+#  
+#  Package
+#  FunctionDefinition
+#  RemoteCall
+# 
+#  SystemCalls:
+#  
+#  Listen
+#  Notify
+#  Import(?)
+#  
+#  ReWrite:
+#  
+#  If
+#  While
+#  For
+#  Break
+#  
+#  OnEachDefinition - Create a function and rewrite as a system call that sets the call back
+#  
+#  StructureDefinition - Rewrite to a function definition that creates the structure and returns it
+#  StructureDefinitionProperty
+#  
+#  CommunityDefinition - Rewrite to a function definition that houses a system call that create a community if it does not exists and returns a meta structure...
+#  CollectionDefinition
+#  
+#  ExternalDefinitions - Rewrite this as a function definition that returns a external function meta structure
+#  
+#  Remove:
+#  
+#  Inspect
+#  Perform
+#  StructureInstantiation
+  
+  
+  
 end

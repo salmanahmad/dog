@@ -1,7 +1,54 @@
 
 
+	data
+	fucntion
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+Two special "types"
+	Type "type"
+	Function "type"
+	
+	You can invoke these with call and build.
+	Byte code verifier
+		Checks for duplicate functions
+		Checks for types with multiple stuff
+
 "Macro System"
 
+	Dog VM
+		Symbol table organization:
+			{
+				name
+				value: {
+					type: function
+					value: {
+						name: <@naother_+symbol>
+					}
+				}
+				implementations: [
+					{
+						catch_table,
+						instructions:
+						mandatory_arguments:
+						optional_arguments:
+						type: {human | machine}
+					}
+				]
+			}
+			
+	
+	
+	build
+	
 	Create a small but complete set of "nodes"
 		StructureLiteral
 		StringLiteral
