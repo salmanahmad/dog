@@ -22,7 +22,6 @@ Dog::Config.set("default_community", "learners")
 
 Dog.bark! do
 
-# TODO - Do I need Dog::Application? I don't think I do. 
 # I could create this dynamically in bark!, right?
 module Dog::Application
   

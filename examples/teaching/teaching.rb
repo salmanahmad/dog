@@ -37,7 +37,6 @@ Dog.bark! do
   end
   
   class MeetingConversation < Dog::Event
-    # TODO - Some sort of person type in event...
     property "person", :type => String, :direction => "input"
   end
   

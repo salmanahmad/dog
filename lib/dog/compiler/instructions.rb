@@ -241,47 +241,17 @@ module Dog::Instructions
 
     def execute(track)
       case @operation
-      when "<="
-        arg2 = track.stack.pop
-        arg1 = track.stack.pop
-
-        track.stack.push(arg1 <= arg2)
-      when ">="
-        arg2 = track.stack.pop
-        arg1 = track.stack.pop
-
-        track.stack.push(arg1 >= arg2)
-      when "+"
-        arg2 = track.stack.pop
-        arg1 = track.stack.pop
-
-        track.stack.push(arg1 + arg2)
-      when "-"
-        arg2 = track.stack.pop
-        arg1 = track.stack.pop
-
-        track.stack.push(arg1 - arg2)
-      when "*"
-        arg2 = track.stack.pop
-        arg1 = track.stack.pop
-
-        track.stack.push(arg1 * arg2)
-      when "/"
-        arg2 = track.stack.pop
-        arg1 = track.stack.pop
-
-        track.stack.push(arg1 / arg2)
       when "!"
         arg1 = track.stack.pop
 
         track.stack.push(!arg1)
       else
-        arg2 = track.stack.pop
-        arg1 = track.stack.pop
+        arg2 = track.stack.pop.ruby_value
+        arg1 = track.stack.pop.ruby_value
 
         value = arg1.send(@operation, arg2)
+        value = ::Dog::Value.from_ruby_value(value)
         track.stack.push(value)
-
       end
     end
   end
@@ -383,7 +353,11 @@ module Dog::Instructions
         raise "I don't know how to call a non-function"
       end
       
-      # TODO - Handle argument passing... and default values
+      package = function["package"].value
+      name = function["name"].value
+      implementation = 0
+      
+      # TODO - Handle default values
       # Perhaps the default values for optional args are handled
       # by the runtime libraries and not the VM
       
@@ -391,9 +365,18 @@ module Dog::Instructions
       new_track.control_ancestors = track.control_ancestors.clone
       new_track.control_ancestors << track
       
-      new_track.package_name = function["package"].value
-      new_track.function_name = function["name"].value
-      new_track.implementation_name = 0
+      new_track.package_name = package
+      new_track.function_name = name
+      new_track.implementation_name = implementation
+      
+      symbol = ::Dog::Runtime.bundle.packages[package].symbols[name]["implementations"][implementation]
+      symbol_arguments = symbol["arguments"]
+      
+      arguments.each_index do |index|
+        argument = arguments[index]
+        variable_name = symbol_arguments[index]
+        new_track.variables[variable_name] = argument
+      end
       
       track.state = ::Dog::Track::STATE::CALLING
       track.next_track = new_track

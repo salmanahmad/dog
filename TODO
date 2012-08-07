@@ -1,18 +1,5 @@
 
 
-	data
-	fucntion
-	
-	
-	
-	
-	
-	
-
-
-
-
-
 Two special "types"
 	Type "type"
 	Function "type"
@@ -102,7 +89,7 @@ Two special "types"
 		convert / replace any pseudo instructions. Right now, all this would be is seek.
 		Seek will be converted to jumps with their jump distances computed at compile time.
 		
-		TODO: Consider adding an exception table (like JVM / YARV). This will handle
+		Consider adding an exception table (like JVM / YARV). This will handle
 		exceptions as well as possibly provide a workaround for converting seeks.
 		That is how YARV implements retry / next / break / throw. In which case, I may
 		want to remove the "seek" command and instead implement a "throw" command
@@ -230,6 +217,8 @@ Line numbers should be formatted as:
 Right now we have static linked libraries (with import). We may want to introduce a capability to dynamically link as well... maybe?
 
 Right now import will always import files relative to the current file. In this way it acts much like require_relative in ruby instead of plain require. We may want a way to add a non-relative import that uses a LOAD_PATH to use shared libraries in a common system location.
+
+Potentially reorgnize the directory structure. Basically, reduce right now there are a lot of dependcies between the main folders.
 
 Organize the symbol table hierarchically
 	- Makes it easier to find stuff by the funciton scopes

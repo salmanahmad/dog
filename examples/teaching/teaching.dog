@@ -34,7 +34,6 @@ event chat {
 DEFINE converse FOR people DO
   LISTEN TO people FOR chats
   
-  # TODO: Discuss this during meeting. What happens with ON EACH
   message = "Foobar"
   
   ON EACH chat DO
@@ -47,9 +46,7 @@ LISTEN TO learners VIA http FOR matched_teachers
 LISTEN TO learners VIA http FOR meeting_conversation
 
 ON EACH request IN find_teacher DO
-  # TODO: Discuss how to clear this
   REPLY TO requester WITH request.teachers = PEOPLE FROM learners WHERE teachables IN request.learnable
-
 END
 
 ON request IN matched_teachers DO

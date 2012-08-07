@@ -49,5 +49,27 @@ class RuntimeTests::ScratchTest < RuntimeTestCase
     assert_equal("Foo Called!", out)
   end
   
-
+  def test_function_arguments
+    program = Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("add", Nodes::Nodes.new([
+        Nodes::Return.new(Nodes::Operation.new(Nodes::Access.new(["a"]), Nodes::Access.new(["b"]), "+"))
+      ]), ["a", "b"]),
+      Nodes::Call.new(Nodes::Access.new(["add"]), [Nodes::NumberLiteral.new(5), Nodes::NumberLiteral.new(4)])
+    ])
+    
+    tracks = run_nodes(program)
+    assert_equal(9, tracks.last.stack.last.ruby_value)
+  end
+  
+  def test_function_implicit_returns
+    program = Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("add", Nodes::Nodes.new([
+        Nodes::Operation.new(Nodes::Access.new(["a"]), Nodes::Access.new(["b"]), "+")
+      ]), ["a", "b"]),
+      Nodes::Call.new(Nodes::Access.new(["add"]), [Nodes::NumberLiteral.new(5), Nodes::NumberLiteral.new(4)])
+    ])
+    
+    tracks = run_nodes(program)
+    assert_equal(9, tracks.last.stack.last.ruby_value)
+  end
 end

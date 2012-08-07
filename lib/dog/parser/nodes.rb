@@ -484,6 +484,7 @@ module Dog::Nodes
     end
     
     def compile(package)
+      # TODO - check if identifier is not an access and create a function type automatically
       @identifier.compile(package)
       
       @arguments ||= []

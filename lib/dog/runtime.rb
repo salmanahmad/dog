@@ -127,24 +127,32 @@ module Dog
           track.next_track = nil
           
           instruction = instructions[track.current_instruction]
-          break unless instruction
-        
-          instruction.execute(track)
-        
-          if track.next_instruction then
-            track.current_instruction = track.next_instruction
+          
+          if instruction.nil? then
+            track.finish
           else
-            track.current_instruction += 1
+            instruction.execute(track)
+        
+            if track.next_instruction then
+              track.current_instruction = track.next_instruction
+            else
+              track.current_instruction += 1
+            end
           end
           
           if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
             return_value = track.stack.last || ::Dog::Value.null_value
             return_track = track.control_ancestors.last
-            return_track.stack.push(return_value)
-            return_track.state = Track::STATE::RUNNING
             
-            run_track(return_track)
-            return
+            if return_track then
+              return_track.stack.push(return_value)
+              return_track.state = Track::STATE::RUNNING
+            
+              run_track(return_track)
+              return
+            else
+              break
+            end
           end
           
           if track.next_track then

@@ -101,17 +101,14 @@ class RuntimeTestCase < Test::Unit::TestCase
   
   def run_nodes(nodes, include_stdout = false)
     package = ::Dog::Package.new
-    package.push_symbol("@root")
     package.add_implementation
     
     nodes = [nodes] unless nodes.kind_of? Array
-      
     
     for node in nodes do
       node.compile(package)
     end
     
-    package.pop_symbol
     run_package(package, include_stdout)
   end
   
@@ -121,13 +118,18 @@ class RuntimeTestCase < Test::Unit::TestCase
     bundle.link(package)
     bundle.startup_package = package.name
     
-    sio = StringIO.new
-    old_stdout, $stdout = $stdout, sio
+    if include_stdout then
+      sio = StringIO.new
+      old_stdout, $stdout = $stdout, sio
+    end
     
     tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})    
     
-    $stdout = old_stdout
-    stdout = sio.string.strip
+    if include_stdout then
+      $stdout = old_stdout
+      stdout = sio.string.strip
+    end
+    
     
     if include_stdout then
       return tracks, stdout
