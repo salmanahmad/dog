@@ -5,9 +5,8 @@ LISTEN TO PUBLIC VIA http FOR offers
 i = 1
 
 ON offer DO
-  # i = ASK PUBLIC VIA http_response TO indicate_favorite_number
-  # TODO this is not working at the moment
-  # NOTIFY PUBLIC VIA http_response OF "Your favorite number is: " + i
+  i = ASK PUBLIC VIA http_response TO indicate_favorite_number
+  NOTIFY PUBLIC VIA http_response OF "Your favorite number is: " + i
   
   message = "your favorite number is: " + 4
   

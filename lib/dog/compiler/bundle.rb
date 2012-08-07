@@ -53,7 +53,6 @@ module Dog
           self.packages[name]["native_code"] = package
         end
       else
-        # TODO - Perhaps add a package type just like Bundle
         name = package.name
         self.packages[name] = package
       end

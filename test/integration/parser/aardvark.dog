@@ -31,7 +31,6 @@ ON question DO
   }
   
   FOR EACH user IN ranked_users DO
-    # TODO - if I add a space before the comment on the next line then things break. It is because of the way that on_clause is structured
     response = ASK user VIA email TO indicate_willingness# default timeout.
     potential_answerer = PERSON FROM response
     IF response == "yes" THEN # checks, response.body == yes
