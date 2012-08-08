@@ -230,20 +230,21 @@ module Dog
     end
 
     def to_hash_for_stream
-      api_state_finished = case self.state
+      api_state = case self.state
       when ::Dog::Track::STATE::FINISHED,
-        ::Dog::Track::STATE::LISTENING,
         ::Dog::Track::STATE::ERROR,
         ::Dog::Track::STATE::DELETED
-        true
+        'closed'
+      when ::Dog::Track::STATE::LISTENING
+        'listening'
       else
-        false
+        'open'
       end
       stream_hash = {
         "id" => self._id.to_s,
         "name" => self.function_name.split('.'),
         "type" => "track",
-        "finished" => api_state_finished
+        "state" => api_state
       }
       return stream_hash
     end
