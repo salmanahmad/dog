@@ -1,4 +1,53 @@
 
+Originaly we liked it when Dog only had 4 commands. It was really elegant and simple to explain:
+
+ASK
+NOTIFY
+LISTEN
+COMPUTE
+
+We then realized that we definitely need functions in the langauge but decided to keep on using COMPUTE for local Dog functions as well as machine functions. In doing so, we were able to keep the language down to the original 4 commands.
+
+However, as we built bigger and bigger applications we realized that we were relying more and more on internal Dog functions. For example, to add a user to a community:
+
+learners = COMPUTE add ON learner, learners
+
+This is really awkward so we decided to add additional commands to make it a bit nicer:
+
+ADD
+SAVE
+APPEND
+...
+
+However this starts to spiral out of control. Furthermore, the semantics of these commands are complicated and very specific. If it does not meet the exact need of a developer we will need to add an additional top-level commands or force developers to use our COMPUTE syntax to call system Dog functions. Both of which are not ideal.
+
+Another middle-of-the-road solution is to explore alternative syntax for invoking Dog functions that is flexible and easy to understand. That way, instead of adding new commands for every new use case we find, we can just add a nicely designed functional API. Futhermore, this functional API will likely be easier for developers to learn since it will be utilizing a standardized invocation syntax and familiar semantics rather than having to learn the intricacies of every new command we dream up.
+
+Additionally, we solve the original problem of avoiding awkward syntax like: "COMPUTE add ON learner, learners" at the paltry expense of not using 'COMPUTE' for both external machine functions and Dog functions.
+
+Thus, the new proposal is to add a new way to invoke Dog functions. The original "4 commands" will remain in the language without virtually any user-facing change with the exception that 'COMPUTE' will ONLY be used to invoke an external machine function rather than also being used to execute Dog functions. (Internally, there will be some additional changes: namely all of the 4 commands will be re-written as standard Dog function calls but that is not user-facing so we can ignore it.)
+
+Here are some proposals for the invocation syntax:
+
+# Simple and straight forward but confusing. What is 0? What is 5?
+substring("Hello, World!", 0, 5)
+
+# We can solve this problem with named parameters. However, the , and = may be a bit much.
+substring(source = "Hello, World!", from_index = 0, with_length = 5)
+
+# We can also explore ':' instead of parens to call functions. This is very similar to smalltalk:
+substring:"Hello, World" from_index:0 with_length:5
+
+# If we want to chain function together, we just add parens for order of operations:
+print:(substring:(random_string) from_index:0 with_length:5)
+
+substring << "Hello, World" << 0 << 5
+
+
+
+
+
+
 
 Two special "types"
 	Type "type"
@@ -8,6 +57,8 @@ Two special "types"
 	Byte code verifier
 		Checks for duplicate functions
 		Checks for types with multiple stuff
+
+	How do I handle the persistence capabilities of Dog when calling a native function from the API?
 
 "Macro System"
 
