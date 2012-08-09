@@ -23,7 +23,7 @@ grammar Dog
   
   rule statements
     statement+ {
-      def transform
+      def compile
         nodes = ::Dog::Nodes::Nodes.new
         nodes.line = self.line
         
@@ -50,7 +50,7 @@ grammar Dog
   
   rule statement
     s? expression s? t {
-      def transform
+      def compile
         return self.expression.compile
       end
     }
@@ -82,7 +82,7 @@ grammar Dog
   
   rule or_expression
     and_expression s or_operator s or_expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::OperatorInfixCall.new
         node.line = self.line
         
@@ -99,7 +99,7 @@ grammar Dog
   
   rule and_expression
     relational_expression s and_operator s and_expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::OperatorInfixCall.new
         node.line = self.line
         
@@ -116,7 +116,7 @@ grammar Dog
   
   rule relational_expression
     additive_expression s? relational_operator s? relational_expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::OperatorInfixCall.new
         node.line = self.line
         
@@ -133,7 +133,7 @@ grammar Dog
   
   rule additive_expression
     multiplicative_expression s? additive_operator s? additive_expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::OperatorInfixCall.new
         node.line = self.line
         
@@ -150,7 +150,7 @@ grammar Dog
   
   rule multiplicative_expression
     unary_expression s? multiplicative_operator s? multiplicative_expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::OperatorInfixCall.new
         node.line = self.line
         
@@ -167,7 +167,7 @@ grammar Dog
   
   rule unary_expression
     unary_operator s unary_expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::OperatorPrefixCall.new
         node.line = self.line
         
@@ -227,7 +227,7 @@ grammar Dog
   
   rule assignment
     scope:(scope:('external' / 'internal' / 'local') s)? assignment_access s? assignment_operator s? expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::Assignment.new
         node.line = self.line
         
@@ -244,7 +244,7 @@ grammar Dog
   
   rule assignment_access
     identifier access_tail:(access_tail)? {
-      def transform
+      def compile
         if !access_tail.empty? then
           return access_tail.compile.clone.unshift(identifier.text_value)
         else
@@ -256,7 +256,7 @@ grammar Dog
   
   rule access
     scope:(scope:('external' / 'internal' / 'local') s)? access_head access_tail:(access_tail)? {
-      def transform
+      def compile
         node = ::Dog::Nodes::Access.new
         node.line = self.line
         
@@ -279,13 +279,13 @@ grammar Dog
     literal
     /
     identifier {
-      def transform
+      def compile
         return self.text_value
       end
     }
     / 
     '(' sn? expression sn? ')' {
-      def transform
+      def compile
         return expression.compile
       end
     }
@@ -299,7 +299,7 @@ grammar Dog
   
   rule access_dot
     '.' identifier access_tail:(access_tail)? {
-      def transform
+      def compile
         if !access_tail.empty? then
           return access_tail.compile.clone.unshift(identifier.text_value)
         else
@@ -311,7 +311,7 @@ grammar Dog
   
   rule access_bracket
     '[' s? expression s? ']' access_tail:(access_tail)? {
-      def transform
+      def compile
         if !access_tail.empty? then
           return access_tail.compile.clone.unshift(expression.compile)
         else
@@ -329,7 +329,7 @@ grammar Dog
   
   rule assignment_operator
     '=' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -367,7 +367,7 @@ grammar Dog
   
   rule addition_operator
     '+' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -375,7 +375,7 @@ grammar Dog
   
   rule subtraction_operator
     '-' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -383,7 +383,7 @@ grammar Dog
   
   rule multiplication_operator
     '*' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -391,7 +391,7 @@ grammar Dog
   
   rule division_operator
     '/' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -399,7 +399,7 @@ grammar Dog
   
   rule equality_operator
     '==' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -407,7 +407,7 @@ grammar Dog
   
   rule inequality_operator
     '!=' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -415,7 +415,7 @@ grammar Dog
   
   rule greater_than_operator
     '>' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -423,7 +423,7 @@ grammar Dog
   
   rule less_than_operator
     '<' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -431,7 +431,7 @@ grammar Dog
   
   rule greater_than_equal_operator
     '>=' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -439,7 +439,7 @@ grammar Dog
   
   rule less_than_equal_operator
     '<=' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -447,7 +447,7 @@ grammar Dog
   
   rule and_operator
     'AND' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -455,7 +455,7 @@ grammar Dog
   
   rule or_operator
     'OR' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -463,7 +463,7 @@ grammar Dog
   
   rule not_operator
     'NOT' {
-      def transform
+      def compile
         return self.text_value
       end
     }
@@ -477,7 +477,7 @@ grammar Dog
   
   rule compute
     'COMPUTE' s packaged_identifier on_clause:(on_clause)? using_clause:(using_clause)? {
-      def transform
+      def compile
         node = ::Dog::Nodes::FunctionCall.new
         node.line = self.line
         
@@ -507,7 +507,7 @@ grammar Dog
   
   rule ask
     'ASK' sn ask_count? expression via_clause ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
-      def transform
+      def compile
         node = ::Dog::Nodes::FunctionAsyncCall.new
         node.line = self.line
         
@@ -526,7 +526,7 @@ grammar Dog
   # TODO - Actually use this information
   rule ask_count
     integer sn {
-      def transform
+      def compile
         return integer.text_value.to_f
       end
     }
@@ -536,7 +536,7 @@ grammar Dog
   #s 'TO' s (string / access)
   rule ask_to_clause
     s 'TO' s packaged_identifier {
-      def transform
+      def compile
         return packaged_identifier.compile
       end
     }
@@ -550,7 +550,7 @@ grammar Dog
   
   rule listen
     'LISTEN' listen_to_clause via_clause listen_for_clause {
-      def transform
+      def compile
         node = ::Dog::Nodes::Listen.new
         node.line = self.line
         
@@ -569,7 +569,7 @@ grammar Dog
 
   rule listen_to_clause
     s 'TO' s expression {
-      def transform
+      def compile
         return expression.compile
       end
     }
@@ -577,7 +577,7 @@ grammar Dog
   
   rule listen_for_clause
     s 'FOR' s identifier listen_of_clause:(listen_of_clause)? {
-      def transform
+      def compile
         if !listen_of_clause.empty?
           return [identifier.text_value, listen_of_clause.compile]
         else
@@ -589,7 +589,7 @@ grammar Dog
   
   rule listen_of_clause
     s 'OF' s packaged_identifier {
-      def transform
+      def compile
         return packaged_identifier.compile
       end
     }
@@ -603,7 +603,7 @@ grammar Dog
   
   rule notify
     'NOTIFY' s expression via_clause notify_of_clause {
-      def transform
+      def compile
         node = ::Dog::Nodes::Notify.new
         node.line = self.line
         
@@ -618,7 +618,7 @@ grammar Dog
 
   rule notify_of_clause
     s 'OF' s expression {
-      def transform
+      def compile
         return expression.compile
       end
     }
@@ -695,7 +695,7 @@ grammar Dog
   
   rule on
     'ON' on_each in_clause 'DO' sn statements:(statements)? s? 'END' {
-      def transform
+      def compile
         node = ::Dog::Nodes::OnEachDefinition.new
         node.line = self.line
         
@@ -714,7 +714,7 @@ grammar Dog
   
   rule on_each
     s 'EACH' on_each_count:(s integer)? {
-      def transform
+      def compile
         if !on_each_count.empty? then
           return on_each_count.integer.to_f
         else
@@ -734,7 +734,7 @@ grammar Dog
   
   rule function_definition
     'DEFINE' s identifier function_for:(function_for)? function_on:(function_on)? function_using:(function_using)? s 'DO' sn statements:(statements)? s? 'END' {
-      def transform
+      def compile
         node = ::Dog::Nodes::FunctionDefinition.new
         node.line = self.line
  
@@ -751,7 +751,7 @@ grammar Dog
   
   rule function_for
     s 'FOR' s identifier {
-      def transform
+      def compile
         return identifier.text_value
       end
     }
@@ -759,7 +759,7 @@ grammar Dog
   
   rule function_on
     s 'ON' s first:identifier rest:(s? ',' s? identifier)* {
-      def transform
+      def compile
         args = []
         
         args << first.text_value
@@ -775,7 +775,7 @@ grammar Dog
   
   rule function_using
     s 'USING' s function_using_parameter rest:(s? ',' s? function_using_parameter)* {
-      def transform
+      def compile
         args = {}
         
         parameter = function_using_parameter.compile
@@ -793,7 +793,7 @@ grammar Dog
   
   rule function_using_parameter
     identifier s? '=' s? expression {
-      def transform
+      def compile
         return [identifier.text_value, expression.compile]
       end
     }
@@ -801,7 +801,7 @@ grammar Dog
   
   rule structure_definition
     'DEFINE' s identifier sn? structure_properties {
-      def transform
+      def compile
         node = ::Dog::Nodes::StructureDefinition.new
         node.line = self.line
         
@@ -815,7 +815,7 @@ grammar Dog
   
   rule structure_properties 
     '{' sn? properties:(first:structure_property rest:(((sn? "," sn?)+ / "\n") structure_property)* )? sn? '}' {
-      def transform
+      def compile
         props = []
         
         if !properties.empty? then
@@ -834,7 +834,7 @@ grammar Dog
   
   rule structure_property
     sn? type:(identifier s) structure_property_key value:(s? '=' s? expression)? s? {
-      def transform
+      def compile
         property = ::Dog::Nodes::StructureDefinitionProperty.new
         property.line = self.line
         
@@ -847,7 +847,7 @@ grammar Dog
     }
     /
     sn? structure_property_key value:(s? '=' s? expression)? s? {
-      def transform
+      def compile
         property = ::Dog::Nodes::StructureDefinitionProperty.new
         property.line = self.line
         
@@ -862,19 +862,19 @@ grammar Dog
   
   rule structure_property_key
     identifier {
-      def transform
+      def compile
         return self.text_value
       end
     }
     / 
     string {
-      def transform
+      def compile
         return Shellwords::shellwords(self.text_value).first
       end
     }
     / 
     number {
-      def transform
+      def compile
         return self.text_value.to_f
       end
     }
@@ -882,7 +882,7 @@ grammar Dog
   
   rule collection_definition
     'DEFINE' s name:identifier s 'OF' s structure_name:packaged_identifier {
-      def transform
+      def compile
         pi = structure_name.compile
         
         node = ::Dog::Nodes::CollectionDefinition.new
@@ -899,7 +899,7 @@ grammar Dog
   
   rule community_definition
     'DEFINE' s 'COMMUNITY' s identifier sn? structure_properties {
-      def transform
+      def compile
         node = ::Dog::Nodes::CommunityDefinition.new
         node.line = self.line
         
@@ -920,7 +920,7 @@ grammar Dog
   
   rule perform 
     'PERFORM' s string {
-      def transform
+      def compile
         node = ::Dog::Nodes::Perform.new
         node.instructions = string.compile
         return node
@@ -931,7 +931,7 @@ grammar Dog
   # TODO
   rule import
     'IMPORT' s string {
-      def transform
+      def compile
         node = ::Dog::Nodes::Import.new
         node.line = self.line
         node.path = Shellwords::shellwords(string.text_value).first
@@ -942,7 +942,7 @@ grammar Dog
   
   rule print
     'PRINT' space expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::Print.new
         node.line = self.line
         
@@ -954,7 +954,7 @@ grammar Dog
   
   rule inspect
     'INSPECT' space expression {
-      def transform
+      def compile
         node = ::Dog::Nodes::Inspect.new
         node.line = self.line
         
@@ -976,7 +976,7 @@ grammar Dog
   
   rule if
     'IF' s expression s 'THEN' sn statements:(statements)? else_if_clause:(else_if_clause)* else_clause:(else_clause)? s? 'END' {
-      def transform
+      def compile
         node = ::Dog::Nodes::If.new
         node.line = self.line
         
@@ -1003,7 +1003,7 @@ grammar Dog
   
   rule else_if_clause
     sn? 'ELSE' s 'IF' s expression s 'THEN' sn statements:(statements)? {
-      def transform
+      def compile
         if !statements.empty? then
           return [expression.compile, statements.compile]          
         else
@@ -1015,7 +1015,7 @@ grammar Dog
   
   rule else_clause
     sn? 'ELSE' sn statements:(statements)? {
-      def transform
+      def compile
         if !statements.empty? then
           return [nil, statements.compile]
         else
@@ -1027,7 +1027,7 @@ grammar Dog
 
   rule for
     'FOR' s 'EACH' in_clause 'DO' sn statements:(statements)? s? 'END' {
-      def transform
+      def compile
         node = ::Dog::Nodes::For.new
         node.line = self.line
         
@@ -1047,7 +1047,7 @@ grammar Dog
   
   rule while
     'WHILE' s expression s 'DO' sn statements:(statements)? s? 'END' {
-      def transform
+      def compile
         node = ::Dog::Nodes::While.new
         node.line = self.line
         
@@ -1064,7 +1064,7 @@ grammar Dog
   
   rule break
     'BREAK' {
-      def transform
+      def compile
         node = ::Dog::Nodes::Break.new
         node.line = self.line
         return node
@@ -1074,7 +1074,7 @@ grammar Dog
   
   rule return
     'RETURN' expressions:(s first:expression rest:(s? ',' s? expression)*)? {
-      def transform
+      def compile
         node = ::Dog::Nodes::Return.new
         node.line = self.line
         
@@ -1104,7 +1104,7 @@ grammar Dog
   
   rule packaged_identifier
     package:(identifier '.')? symbol:identifier {
-      def transform
+      def compile
         if !self.package.empty? then
           return [package.identifier.text_value, symbol.text_value]
         else
@@ -1116,7 +1116,7 @@ grammar Dog
   
   rule using_clause
     s 'USING' s first:(identifier s? '=' s? expression) rest:(s? ',' s? identifier s? '=' s? expression)* {
-      def transform
+      def compile
         args = {}
         
         args[first.identifier.text_value] = first.expression.compile
@@ -1132,7 +1132,7 @@ grammar Dog
   
   rule on_clause
   s 'ON' s first:expression rest:(s? ',' s? expression)* {
-    def transform
+    def compile
       args = []
       
       args << first.compile
@@ -1146,7 +1146,7 @@ grammar Dog
   }
   /
   s 'ON' s first:(identifier s? '=' s? expression) rest:(s? ',' s? identifier s? '=' s? expression)* {
-    def transform
+    def compile
       args = {}
       
       args[first.identifier.text_value] = first.expression.compile
@@ -1162,7 +1162,7 @@ grammar Dog
   
   rule via_clause 
     s 'VIA' s identifier {
-      def transform
+      def compile
         return identifier.text_value
       end
     }
@@ -1170,7 +1170,7 @@ grammar Dog
   
   rule in_clause
     s identifier in_clause_expression:(s 'IN' s expression)? s {
-      def transform
+      def compile
         if !in_clause_expression.empty? then
           return [identifier.text_value, in_clause_expression.expression.compile]
         else
@@ -1221,7 +1221,7 @@ grammar Dog
   rule structure
     # TODO - Make this identifier a package identifier
     type:(packaged_identifier sn?)? '{' sn? associations:(first:association rest:(((sn? "," sn?)+ / "\n")  association)* )? (sn? ','* sn?) '}' {
-      def transform
+      def compile
         literal = ::Dog::Nodes::StructureLiteral.new
         literal.line = self.line
         
@@ -1253,7 +1253,7 @@ grammar Dog
 
   rule association
     sn? association_key s? '=' s? expression s? {
-      def transform
+      def compile
         return [association_key.compile, expression.compile]
       end
     }
@@ -1263,19 +1263,19 @@ grammar Dog
   # TODO - Consider making the the key an expression instead of identifier / string / number
   rule association_key
     identifier {
-      def transform
+      def compile
         return self.text_value
       end
     }
     / 
     string {
-      def transform
+      def compile
         return Shellwords::shellwords(self.text_value).first
       end
     }
     / 
     number {
-      def transform
+      def compile
         return self.text_value.to_f
       end
     }
@@ -1287,7 +1287,7 @@ grammar Dog
     /
     '\'' ('\\\'' / !'\'' .)* '\''
     ) {
-      def transform
+      def compile
         literal = ::Dog::Nodes::StringLiteral.new
         literal.line = self.line
         
@@ -1303,7 +1303,7 @@ grammar Dog
   
   rule integer 
     ('-' s?)? digit+ {
-    def transform
+    def compile
       literal = ::Dog::Nodes::NumberLiteral.new 
       literal.line = self.line
       
@@ -1315,7 +1315,7 @@ grammar Dog
   
   rule float
     ('-' s?)? digit+ '.' digit* {
-      def transform
+      def compile
         literal = ::Dog::Nodes::NumberLiteral.new 
         literal.line = self.line
         
@@ -1331,7 +1331,7 @@ grammar Dog
 
   rule true
     ('TRUE' / 'true') {
-      def transform
+      def compile
         node = ::Dog::Nodes::TrueLiteral.new
         node.line = self.line
         return node
@@ -1341,7 +1341,7 @@ grammar Dog
 
   rule false
     ('FALSE' / 'false') {
-    def transform
+    def compile
       node = ::Dog::Nodes::FalseLiteral.new
       node.line = self.line
       return node
@@ -1351,7 +1351,7 @@ grammar Dog
   
   rule null
     ('NULL' / 'null') {
-    def transform
+    def compile
       node = ::Dog::Nodes::NullLiteral.new
       node.line = self.line
       return node
