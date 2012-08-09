@@ -950,23 +950,29 @@ grammar Dog
   rule if
     'IF' s expression s 'THEN' sn statements:(statements)? else_if_clause:(else_if_clause)* else_clause:(else_clause)? s? 'END' {
       def transform
-        node = ::Dog::Nodes::If.new
+        node = ::Dog::Nodes::Branch.new(expression.transform)
         node.line = self.line
         
-        node.conditions = []
-        
         if !statements.empty? then
-          node.conditions << [expression.compile, statements.compile]
-        else
-          node.conditions << [expression.compile, nil]
+          node.true_nodes = statements.transform
         end
         
+        pointer = node
+        
         for clause in else_if_clause.elements
-          node.conditions << clause.compile
+          clause = clause.transform
+          
+          new_branch = ::Dog::Nodes::Branch.new(clause.first, clause.last)
+          new_branch_nodes = ::Dog::Nodes::Nodes.new([
+            new_branch
+          ])
+          
+          pointer.false_nodes = new_branch_nodes
+          pointer = new_branch
         end
         
         if !else_clause.empty? then
-          node.conditions << else_clause.compile
+          pointer.false_nodes = else_clause.transform
         end
         
         return node
@@ -978,9 +984,9 @@ grammar Dog
     sn? 'ELSE' s 'IF' s expression s 'THEN' sn statements:(statements)? {
       def transform
         if !statements.empty? then
-          return [expression.compile, statements.compile]          
+          return [expression.transform, statements.transform]
         else
-          return [expression.compile, nil]
+          return [expression.transform, nil]
         end
       end
     } 
@@ -990,9 +996,9 @@ grammar Dog
     sn? 'ELSE' sn statements:(statements)? {
       def transform
         if !statements.empty? then
-          return [nil, statements.compile]
+          return statements.transform
         else
-          return [nil, nil]
+          return nil
         end
       end
     }

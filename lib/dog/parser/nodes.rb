@@ -359,7 +359,7 @@ module Dog::Nodes
     attr_accessor :true_nodes
     attr_accessor :false_nodes
 
-    def initialize(condition, true_nodes, false_nodes = nil)
+    def initialize(condition, true_nodes = nil, false_nodes = nil)
       @condition = condition
       @true_nodes = true_nodes
       @false_nodes = false_nodes
