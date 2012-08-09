@@ -1089,11 +1089,20 @@ grammar Dog
   rule packaged_identifier
     package:(identifier '.')? symbol:identifier {
       def transform
+        path = []
+        scope = nil
         if !self.package.empty? then
-          return [package.identifier.text_value, symbol.text_value]
+          path [package.identifier.text_value, symbol.text_value]
+          scope = "external"
         else
-          return [nil, symbol.text_value]
+          path = [symbol.text_value]
         end
+        
+        node = ::Dog::Nodes::Access.new(path)
+        node.line = self.line
+        node.scope = scope
+        
+        return node
       end
     }
   end
@@ -1210,15 +1219,7 @@ grammar Dog
         structure_value = {}
         
         if !type.empty? then
-          pi = self.type.packaged_identifier.transform
-          package_name = pi.first
-          type_name = pi.last
-          
-          # TODO - How to handle types? Perhaps use PushValue wrapped with Nodes?
-          structure_type = ::Dog::Nodes::StructureLiteral.new("type", {
-            "package" => package_name,
-            "name" => type_name
-          })
+          structure_type = self.type.packaged_identifier.transform
         end
         
         if !associations.empty? then
