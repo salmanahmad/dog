@@ -8,9 +8,7 @@
 #
 
 module Dog
-  
   class Bundle
-    
     attr_accessor :dog_version
     attr_accessor :dog_version_codename
     
@@ -26,6 +24,12 @@ module Dog
       self.packages = {}
     end
     
+    def finalize
+      for name, package in self.packages do
+        package.finalize
+      end
+    end
+    
     def sign
       self.dog_version = VERSION::STRING
       self.dog_version_codename = VERSION::CODENAME
@@ -36,29 +40,82 @@ module Dog
     end
     
     def link(package)
-      # TODO - Figure out what the difference is between Bundle#link and Compiler#link
-      # Perhaps this is a dynamic link and compiler is static?
       if package.class == Module then
-        if package.respond_to?(:symbols) && package.respond_to?(:name) then
-          symbols = package.symbols
-          name = package.name
-          
-          for symbol, node in symbols do
-            self.add_symbol_to_package(symbol, [symbol], name)
-            self.packages[name]["code"] ||= {}
-            self.packages[name]["code"][symbol] = node
-          end
-          
-          self.packages[name]["name"] = name
-          self.packages[name]["native_code"] = package
-        end
+        package = package.package
+        name = package.name
+        self.packages[name] = package
       else
         name = package.name
         self.packages[name] = package
       end
-      
     end
+    
+    def to_hash
+      hash = {
+        "dog_version" => self.dog_version,
+        "dog_version_codename" => self.dog_version_codename,
+        "time" => self.time,
+        "signature" => self.signature,
+        "startup_package" => self.startup_package,
+        "packages" => {}
+      }
+      
+      for name, package in self.packages do
+        hash["packages"][name] = package
+        hash["packages"][name]["code"] = package["code"].to_hash
+      end
+      
+      return hash
+    end
+    
+    def self.from_hash(hash)
+      bundle = self.new
+      bundle.dog_version = hash["dog_version"]
+      bundle.dog_version_codename = hash["dog_version_codename"]
+      bundle.time = hash["time"]
+      bundle.signature = hash["signature"]
+      bundle.startup_package = hash["startup_package"]
+      bundle.packages = hash["packages"]
 
+      packages = bundle.packages
+      for name, package in packages do
+        # I need the second call here so that I can initialize the parent pointers in the tree.
+        # I may want to incorporate this into from_hash at some point.
+
+        ast = package["code"]
+        ast = Nodes::Node.from_hash(ast)
+        ast.compute_paths_of_descendants
+        
+        package["code"] = ast
+      end
+      
+      return bundle
+    end
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+=begin TODO - Remove these
     def read_package(package)
       name = package
       package = self.packages[package]
@@ -113,48 +170,19 @@ module Dog
       node = node_at_path(path, package)
       return node
     end
-
-    def to_hash
-      hash = {
-        "dog_version" => self.dog_version,
-        "dog_version_codename" => self.dog_version_codename,
-        "time" => self.time,
-        "signature" => self.signature,
-        "startup_package" => self.startup_package,
-        "packages" => {}
-      }
-      
-      for name, package in self.packages do
-        hash["packages"][name] = package
-        hash["packages"][name]["code"] = package["code"].to_hash
-      end
-      
-      return hash
-    end
+=end
     
-    def self.from_hash(hash)
-      bundle = self.new
-      bundle.dog_version = hash["dog_version"]
-      bundle.dog_version_codename = hash["dog_version_codename"]
-      bundle.time = hash["time"]
-      bundle.signature = hash["signature"]
-      bundle.startup_package = hash["startup_package"]
-      bundle.packages = hash["packages"]
-      
-      packages = bundle.packages
-      for name, package in packages do
-        # I need the second call here so that I can initialize the parent pointers in the tree.
-        # I may want to incorporate this into from_hash at some point.
-
-        ast = package["code"]
-        ast = Nodes::Node.from_hash(ast)
-        ast.compute_paths_of_descendants
-        
-        package["code"] = ast
-      end
-      
-      return bundle
-    end
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
   end
   

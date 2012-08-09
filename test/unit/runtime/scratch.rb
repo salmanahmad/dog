@@ -11,7 +11,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_hel
 
 class RuntimeTests::ScratchTest < RuntimeTestCase
   include Dog
-  
+
   def test_simple
     program = Nodes::Nodes.new([
       Nodes::Assign.new(["i"], Nodes::StringLiteral.new("Hello, World!")),
@@ -19,6 +19,7 @@ class RuntimeTests::ScratchTest < RuntimeTestCase
     ])
 
     track = run_nodes(program).first
+
     assert_equal("Hello, World!", track.stack.last.ruby_value)
   end
 

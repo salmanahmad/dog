@@ -14,79 +14,60 @@ module Dog
   end
   
   class Compiler
-    
+
     attr_accessor :bundle
     attr_accessor :errors
-    
-    attr_accessor :current_package
-    attr_accessor :packages_to_finalize
-    
+
     def self.compile(units)
       compiler = self.new
       for unit in units do
-        raise "A compilation units must contain two elements" unless unit.length == 2
+        raise "A compilation units must contain two elements [AST, filename]" unless unit.size == 2
         compiler.compile(unit[0], unit[1])
       end
-      
+
       compiler.finalize
     end
-    
+
     def initialize
       # TODO - Set the default package name from the project.config?
       self.bundle = Bundle.new
-      self.packages_to_finalize = []
       self.errors = []
     end
-    
+
     def compile(node, filename = "")
-      # TODO - The default package is blank. Is that okay?
-      package = ""
-      
-      ::Dog::Nodes::Node.each_descendant(node) do |d|
-        d.filename = filename
-        if d.kind_of? ::Dog::Nodes::Package then
-          package = d.name
-        end
+      package_name = ""
+
+      # TODO - Fix this
+      #::Dog::Nodes::Node.each_descendant(node) do |d|
+      #  d.filename = filename
+      #  if d.kind_of? ::Dog::Nodes::Package then
+      #    package_name = d.name
+      #  end
+      #end
+
+      package = self.bundle.packages[package_name]
+
+      unless package then
+        package = ::Dog::Package.new(package_name)
+        self.bundle.link(package)
       end
-      
-      self.packages_to_finalize << package
-      
-      unless self.bundle.packages[package] then
-        root = ::Dog::Nodes::Nodes.new
-        root.nodes = []
-            
-        self.bundle.packages[package] = {
-          "name" => package,
-          "symbols" => {},
-          "code" => root
-        }
+
+      #::Dog::Nodes::Node.each_descendant(node) do |d|
+      #  rule = Rules::Rule.new(self)
+      #  rule.apply(d)
+      #end
+
+      if errors.empty? then
+        node.compile(package)
       end
-      
-      self.bundle.packages[package]["code"].nodes << node
     end
-    
-    def link(package)
-      # TODO
-    end
-    
+
     def finalize
-      for package in self.packages_to_finalize do
-        self.current_package = package
-        
-        node = self.bundle.packages[package]["code"]
-        node.compute_paths_of_descendants
-        
-        ::Dog::Nodes::Node.each_descendant(node) do |d|
-          rule = Rules::Rule.new(self)
-          rule.apply(d)
-        end
-        
-        unless self.bundle.contains_symbol_in_package?("@root", package) then
-          self.bundle.add_symbol_to_package("@root", [], package)
-        end
-      end
-      
-      unless errors.empty?
+      if errors.empty? then
+        self.bundle.finalize
+        self.bundle.sign
+        return self.bundle
+      else
         compilation_error = nil
         
         if errors.size == 1 then 
@@ -100,17 +81,6 @@ module Dog
         compilation_error.errors = errors
         raise compilation_error
       end
-      
-      self.bundle.sign
-      return self.bundle
-    end
-    
-    def contains_symbol_in_current_package?(symbol)
-      self.bundle.contains_symbol_in_package?(symbol, self.current_package)
-    end
-    
-    def add_symbol_to_current_package(symbol, path)
-      self.bundle.add_symbol_to_package(symbol, path, self.current_package)
     end
     
     def report_error_for_node(node, description)

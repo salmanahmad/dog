@@ -271,6 +271,8 @@ Right now import will always import files relative to the current file. In this 
 
 Potentially reorgnize the directory structure. Basically, reduce right now there are a lot of dependcies between the main folders.
 
+Multiple VMs per process
+
 Organize the symbol table hierarchically
 	- Makes it easier to find stuff by the funciton scopes
 	- Maybe something like this will work:

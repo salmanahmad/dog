@@ -9,23 +9,17 @@
 
 module Dog::Library
   module System
+    include ::Dog::NativePackage
     
-    def self.name
-      "system"
-    end
+    name "system"
     
-    def self.symbols
-      return {
-        "type" => Type.new
-      }
-    end
-    
-    class Type < ::Dog::NativeFunction
-      def run(args = nil, optionals = nil)
+    implementation "type" do
+      argument "value"
+      
+      body do
         value = args.first.type
-        return ::Dog::Value.string_value(value) 
+        return ::Dog::Value.string_value(value)
       end
     end
-    
   end
 end

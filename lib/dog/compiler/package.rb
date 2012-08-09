@@ -17,7 +17,8 @@ module Dog
       self.name = name
       self.symbols = {}
       self.symbols_stack = []
-      push_symbol("@root")
+      self.push_symbol("@root")
+      self.add_implementation
     end
 
     def pop_symbol
@@ -76,29 +77,34 @@ module Dog
     end
 
     def finalize
+      raise "You cannot finalize a package twice" if @finalized
+      @finalized = true
+
       # TODO - Add bytecode verification. This include removing any duplicate empty symbols
-      
+
       for name, symbol in self.symbols do
-        table = []
-        mapping = {}
+        for implementation in symbol["implementations"] do
+          table = []
+          mapping = {}
 
-        instructions.each_index do |i|
-          instruction = instructions[i]
-          mapping[instruction] = i
+          instructions.each_index do |i|
+            instruction = instructions[i]
+            mapping[instruction] = i
+          end
+
+          for entry in implementation["catch_table"] do
+            new_entry = [
+              mapping[entry[0]],
+              mapping[entry[1]],
+              entry[2],
+              mapping[entry[1]] + entry[3]
+            ]
+
+            table.push(new_entry)
+          end
+
+          implementation["catch_table"] = table
         end
-
-        for entry in symbol["catch_table"] do
-          new_entry = [
-            mapping[entry[0]],
-            mapping[entry[1]],
-            entry[2],
-            mapping[entry[1]] + entry[3]
-          ]
-
-          table.push(new_entry)
-        end
-
-        symbol["catch_table"] = table
       end
     end
   end

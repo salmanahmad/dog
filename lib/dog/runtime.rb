@@ -33,7 +33,6 @@ require File.join(File.dirname(__FILE__), 'runtime/event.rb')
 require File.join(File.dirname(__FILE__), 'runtime/kernel_ext.rb')
 require File.join(File.dirname(__FILE__), 'runtime/library.rb')
 require File.join(File.dirname(__FILE__), 'runtime/message.rb')
-require File.join(File.dirname(__FILE__), 'runtime/native.rb')
 require File.join(File.dirname(__FILE__), 'runtime/person.rb')
 require File.join(File.dirname(__FILE__), 'runtime/property.rb')
 require File.join(File.dirname(__FILE__), 'runtime/server.rb')
@@ -45,12 +44,6 @@ require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
 Dir[File.join(File.dirname(__FILE__), "runtime/library", "*.rb")].each { |file| require file }
 
 module Dog
-  
-  # TODO - Right now the runtime is modeled as a singleton object.
-  # I may want to move the runtime into an instance-model so that
-  # there can be multiple runtimes per process. I am avoiding that
-  # for the time being because it would require changes to sinatra.
-  
   class Runtime
     class << self
       
@@ -67,10 +60,9 @@ module Dog
         self.bundle_filename = File.expand_path(bundle_filename) rescue nil
         self.bundle_directory = File.dirname(File.expand_path(bundle_filename)) rescue Dir.pwd
         
-        # TODO - Add these back
-        #self.bundle.link(::Dog::Library::System)
-        #self.bundle.link(::Dog::Library::Collection)
-        #self.bundle.link(::Dog::Library::People)
+        self.bundle.link(::Dog::Library::System)
+        self.bundle.link(::Dog::Library::Collection)
+        self.bundle.link(::Dog::Library::People)
         
         options = {
           "config_file" => nil,
@@ -334,7 +326,7 @@ module Dog
           "name" => name,
           "type" => type
         }
-        # FIXME hack to get name right
+        # TODO - Fixme - hack to get name right
         # if type == 'oneach'
         #   bag["name"] = bag["name"]["@each:".length, bag["name"].length]
         # end

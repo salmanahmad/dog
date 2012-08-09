@@ -20,10 +20,6 @@ module Dog
         database_default = Runtime.bundle.startup_package
         database_default = File.basename(Runtime.bundle_filename, ".bundle") if database_default == "" rescue ""
         
-        if database_default == "" then
-          raise "I could not start Dog because I did not have a database name I could use"
-        end
-        
         @config ||= {
           'port' => 4242, 
           'dog_prefix' => '/dog',
@@ -34,6 +30,10 @@ module Dog
         
         @config.merge!(JSON.parse(File.open(config_file).read)) rescue nil
         @config.merge!(config)
+        
+        if @config["database"] == "" then
+          raise "I could not start Dog because I did not have a database name I could use"
+        end
         
         if @config["dog_prefix"][-1,1] == "/" then
           @config["dog_prefix"].chop!

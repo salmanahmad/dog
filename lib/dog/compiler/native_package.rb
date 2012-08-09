@@ -7,8 +7,47 @@
 # above copyright notice is included.
 #
 
+
 module Dog
+  
+  # TODO - Change this to a class-based API instead of a DSL API
+  
+  class NativeImplementation
+    class << self
+      attr_accessor :arguments
+    end
+    
+    def self.argument(argument, options = {})
+      self.arguments << argument
+    end
+    
+    def execute
+      raise "Must be overridden"
+    end
+  end
+  
+  class NativeStructure
+    class << self
+      attr_accessor :properties
+    end
+    
+    def self.property(property, options = {})
+      self.properties << property
+    end
+    
+    def execute
+      
+    end
+  end
+  
+  class NativeValue
+    def value
+      
+    end
+  end
+  
   module NativePackage
+    
     def self.included(c)
       c.extend ClassMethods
     end
@@ -18,20 +57,20 @@ module Dog
         attr_accessor :arguments
         attr_accessor :optional_arguments
         attr_accessor :instructions
-  
+
         def initialize
           self.arguments = []
           self.optional_arguments = []
         end
-  
+
         def argument(arg, options = {})
           self.arguments << arg.to_s
         end
-  
+
         def optional(arg, options = {})
           self.optional_arguments << arg.to_s
         end
-  
+
         def body(&block)
           self.instructions = block
         end
@@ -101,7 +140,7 @@ module Dog
         self.package.current_context["value"] = value
         
         self.package.add_implementation
-        self.package.implementation["arugments"] = i.arugments
+        self.package.implementation["arguments"] = i.arguments
         self.package.implementation["optional_arguments"] = i.optional_arguments
         self.package.implementation["instructions"] = i.instructions
         

@@ -9,54 +9,30 @@
 
 module Dog::Library
   module People
-    
-    def self.name
-      "people"
+    include ::Dog::NativePackage
+
+    name "people"
+
+    structure "person" do
+      property "id"
+      property "first_name"
+      property "last_name"
+      property "handle"
+      property "email"
+      property "facebook"
+      property "twitter"
+      property "google"
+      property "communities"
+      property "profile"
     end
-    
-    def self.symbols
-      return {
-        "person" => Person.new,
-        "save" => Save.new
-      }
-    end
-    
-    class Person < ::Dog::NativeStructure
-      def read_definition
-        # TODO - Again, I probably really want to add something more sophisticated here
-        super
-      end
-      
-      def create
-        value = ::Dog::Value.new("person", {})
-        value._id = UUID.new.generate
-        value.value = {
-          "s:id" => ::Dog::Value.string_value(value._id),
-          "s:first_name" => ::Dog::Value.null_value,
-          "s:last_name" => ::Dog::Value.null_value,
-          "s:handle" => ::Dog::Value.null_value,
-          "s:email" => ::Dog::Value.null_value,
-          "s:facebook" => ::Dog::Value.null_value,
-          "s:twitter" => ::Dog::Value.null_value,
-          "s:google" => ::Dog::Value.null_value,
-          "s:communities" => ::Dog::Value.null_value,
-          "s:profile" => ::Dog::Value.null_value
-        }
-        
-        return value
-      end
-    end
-    
-    class Save < ::Dog::NativeFunction
-      def run(args = nil, optionals = nil)
-        person = args.first
-        
+
+    implementation "save" do
+      argument "person"
+
+      body do
         ::Dog.database["people"].save(person.to_hash)
-        
         return person
-        
       end
     end
-    
   end
 end

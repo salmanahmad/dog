@@ -100,16 +100,37 @@ class RuntimeTestCase < Test::Unit::TestCase
   end
   
   def run_nodes(nodes, include_stdout = false)
-    package = ::Dog::Package.new
-    package.add_implementation
-    
     nodes = [nodes] unless nodes.kind_of? Array
     
+    compiler = ::Dog::Compiler.new
+    
     for node in nodes do
-      node.compile(package)
+      compiler.compile(node)
     end
     
-    run_package(package, include_stdout)
+    bundle = compiler.finalize
+    run_bundle(bundle, include_stdout)
+  end
+  
+  def run_bundle(bundle, include_stdout = false)
+    if include_stdout then
+      sio = StringIO.new
+      old_stdout, $stdout = $stdout, sio
+    end
+    
+    tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})    
+    
+    if include_stdout then
+      $stdout = old_stdout
+      stdout = sio.string.strip
+    end
+    
+    if include_stdout then
+      return tracks, stdout
+    else
+      return tracks
+    end
+    
   end
   
   def run_package(package, include_stdout = false)
