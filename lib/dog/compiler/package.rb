@@ -21,6 +21,14 @@ module Dog
       self.add_implementation
     end
 
+    def to_hash
+      # TODO
+    end
+
+    def self.from_hash(hash)
+      # TODO
+    end
+
     def pop_symbol
       self.symbols_stack.pop
     end

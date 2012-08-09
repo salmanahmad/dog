@@ -61,8 +61,7 @@ module Dog
       }
       
       for name, package in self.packages do
-        hash["packages"][name] = package
-        hash["packages"][name]["code"] = package["code"].to_hash
+        hash["packages"][name] = package.to_hash
       end
       
       return hash
@@ -78,17 +77,14 @@ module Dog
       bundle.packages = hash["packages"]
 
       packages = bundle.packages
-      for name, package in packages do
-        # I need the second call here so that I can initialize the parent pointers in the tree.
-        # I may want to incorporate this into from_hash at some point.
+      new_packages = {}
 
-        ast = package["code"]
-        ast = Nodes::Node.from_hash(ast)
-        ast.compute_paths_of_descendants
-        
-        package["code"] = ast
+      for name, package in packages do
+        new_packages[name] = ::Dog::Package.from_hash(package)
       end
-      
+
+      bundle.packages = new_packages
+
       return bundle
     end
     
