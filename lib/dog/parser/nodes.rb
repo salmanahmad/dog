@@ -11,7 +11,7 @@ module Dog::Nodes
   class Treetop::Runtime::SyntaxNode
     def transform
       if elements && elements.first then
-        return self.elements.first.compile
+        return self.elements.first.transform
       else
         return nil
       end
@@ -242,6 +242,9 @@ module Dog::Nodes
   class Assign < Node
     attr_accessor :path
     attr_accessor :value
+    attr_accessor :scope
+
+    # TODO - Handle scope
 
     def initialize(path, value)
       @path = path
@@ -285,6 +288,9 @@ module Dog::Nodes
 
   class Access < Node
     attr_accessor :path
+    attr_accessor :scope
+
+    # TODO - Handle scope
 
     def initialize(path)
       @path = path
