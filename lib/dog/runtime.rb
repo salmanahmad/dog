@@ -161,7 +161,53 @@ module Dog
         end
       end
       
-=begin      
+      def start_stop_server
+        tracks = Track.find({"state" => { 
+          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
+          }
+        }, :sort => ["created_at", Mongo::DESCENDING])
+        
+        if tracks.count != 0 then
+          Server.run
+        else
+          EM.next_tick do
+            Process.kill('INT', Process.pid)
+          end
+        end
+      end
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      # TODO - Consider removing below this line:
+      
+=begin
       def run_track(track)
         # TODO - check for state first
         # TODO - Right now I have poor support for tail recursion. I may run out of stack space before too long
@@ -218,22 +264,7 @@ module Dog
         
       end
 =end
-      
-      
-      def start_stop_server
-        tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
-          }
-        }, :sort => ["created_at", Mongo::DESCENDING])
-        
-        if tracks.count != 0 then
-          Server.run
-        else
-          EM.next_tick do
-            Process.kill('INT', Process.pid)
-          end
-        end
-      end
+
       
       def symbol_exists?(name = [])
         # TODO - Fix this later.
