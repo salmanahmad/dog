@@ -53,6 +53,11 @@
 		padding-bottom:10px;
 	}
 	
+	#error {
+		color:red;
+		line-height:1em;
+	}
+	
 	</style>
 	
 	<script type="text/javascript">
@@ -79,6 +84,13 @@
 				</div>
 				<input type="submit" name="login-button" value="Login" style="width:100px"></input>
 			</form>
+			
+			<% if(session["login-auth"] == false) then %>
+			<div id="error">
+				The username/password combination you entered was incorrect. Please try again.
+				<% session["login-auth"] = true %>
+			</div>
+			<% end %>
 		</div>
 	</div>
 </body>

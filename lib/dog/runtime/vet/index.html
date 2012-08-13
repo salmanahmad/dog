@@ -300,9 +300,15 @@
 	
 	$(document).ready(function() {
 		$("#content").load("config.html")
-		$("#selected-button").offset({top:87})
 		$("#help-box").css("display", "none")
 		$("#account-box").css("display", "none")
+		
+		if($.browser.webkit) {
+			$("#selected-button").offset({top:87})
+		}
+		else {
+			$("#selected-button").offset({top:86})
+		}
 		
 		$(".nav-button").mouseenter(function() {
 			if(!$(this).hasClass("selected")) {
@@ -328,13 +334,25 @@
 		})
 		
 		$(".nav-button").click(function() {
-			var topOffset = 87+(43 * ($("li").index($(this))*1))
-			$("#selected-button").offset({top:topOffset})
-			$(".selected").removeClass("selected")
-			$("#content").load(this.id + ".html")
-			$(this).addClass("selected")
-			$(this).css("background-image", "")
-			$(this).css("border-right", "")
+			if($.browser.webkit) {
+				var topOffset = 87+(43 * ($("li").index($(this))*1))
+				$("#selected-button").offset({top:topOffset})
+				$(".selected").removeClass("selected")
+				$("#content").load(this.id + ".html")
+				$(this).addClass("selected")
+				$(this).css("background-image", "")
+				$(this).css("border-right", "")
+			}
+			else {
+				var topOffset = 86+(42 * ($("li").index($(this))*1))
+				$("#selected-button").offset({top:topOffset})
+				$(".selected").removeClass("selected")
+				$("#content").load(this.id + ".html")
+				$(this).addClass("selected")
+				$(this).css("background-image", "")
+				$(this).css("border-right", "")
+			}
+			
 		})
 		
 		$("#help").click(function(e) {

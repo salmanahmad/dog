@@ -43,7 +43,11 @@ module Dog
           if(session["login"] == true)
             redirect prefix + "/index.html"
           else
-            send_file File.join(File.dirname(__FILE__), "vet", "login.html")
+            template = Tilt.new(File.join(File.dirname(__FILE__), "vet", "login.erb"))
+            template.render(self)
+#            file = File.join(File.dirname(__FILE__), "vet", "login.erb")
+#            file = File.open(file)
+#            File.read(file)
           end
         end
 
@@ -55,6 +59,7 @@ module Dog
             redirect prefix + "/index.html"
           else
             session["login"] = false
+            session["login-auth"] = false
             redirect prefix + "/login.html"
           end
         end
