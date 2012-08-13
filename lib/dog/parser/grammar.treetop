@@ -451,24 +451,18 @@ grammar Dog
   # ===================
   
   rule compute
-  # FIXME
     'COMPUTE' s packaged_identifier on_clause:(on_clause)? using_clause:(using_clause)? {
       def transform
-        node = ::Dog::Nodes::FunctionCall.new
+        function = packaged_identifier.transform
+        mandatory_arguments = on_clause.transform unless on_clause.empty?
+        optional_arguments = using_clause.transform unless using_clause.empty?
+        
+        node = ::Dog::Nodes::Call.new(
+          function,
+          mandatory_arguments,
+          optional_arguments
+        )
         node.line = self.line
-        
-        pi = packaged_identifier.compile
-        
-        node.package_name = pi[0]
-        node.function_name = pi[1]
-        
-        unless on_clause.empty? then
-          node.mandatory_arguments = on_clause.compile
-        end
-        
-        unless using_clause.empty? then
-          node.optional_arguments = using_clause.compile
-        end
         
         return node
       end
@@ -528,7 +522,6 @@ grammar Dog
   rule listen
     'LISTEN' listen_to_clause via_clause listen_for_clause {
       def transform
-        
         query = listen_to_clause.transform
         for_clause = listen_for_clause.transform
         via = via_clause.transform
