@@ -451,6 +451,7 @@ grammar Dog
   # ===================
   
   rule compute
+  # FIXME
     'COMPUTE' s packaged_identifier on_clause:(on_clause)? using_clause:(using_clause)? {
       def transform
         node = ::Dog::Nodes::FunctionCall.new
@@ -481,6 +482,7 @@ grammar Dog
   # ===============
   
   rule ask
+  # FIXME
     'ASK' sn ask_count? expression via_clause ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
       def transform
         node = ::Dog::Nodes::FunctionAsyncCall.new
@@ -512,7 +514,7 @@ grammar Dog
   rule ask_to_clause
     s 'TO' s packaged_identifier {
       def transform
-        return packaged_identifier.compile
+        return packaged_identifier.transform
       end
     }
   end
@@ -524,6 +526,7 @@ grammar Dog
   # ==================
   
   rule listen
+  # FIXME
     'LISTEN' listen_to_clause via_clause listen_for_clause {
       def transform
         node = ::Dog::Nodes::Listen.new
@@ -554,7 +557,7 @@ grammar Dog
     s 'FOR' s identifier listen_of_clause:(listen_of_clause)? {
       def transform
         if !listen_of_clause.empty?
-          return [identifier.text_value, listen_of_clause.compile]
+          return [identifier.text_value, listen_of_clause.transform]
         else
           return [identifier.text_value, [nil, nil]]
         end
@@ -565,7 +568,7 @@ grammar Dog
   rule listen_of_clause
     s 'OF' s packaged_identifier {
       def transform
-        return packaged_identifier.compile
+        return packaged_identifier.transform
       end
     }
   end
@@ -577,6 +580,7 @@ grammar Dog
   # ==========
   
   rule notify
+  # FIXME
     'NOTIFY' s expression via_clause notify_of_clause {
       def transform
         node = ::Dog::Nodes::Notify.new
@@ -594,7 +598,7 @@ grammar Dog
   rule notify_of_clause
     s 'OF' s expression {
       def transform
-        return expression.compile
+        return expression.transform
       end
     }
   end
@@ -605,6 +609,8 @@ grammar Dog
   # ==================
   # = People Command =
   # ==================
+  
+  # FIXME
   
   rule user
     me / public / people / person
@@ -669,6 +675,7 @@ grammar Dog
   # ==============
   
   rule on
+  # FIXME
     'ON' on_each in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform
         node = ::Dog::Nodes::OnEachDefinition.new
@@ -853,6 +860,7 @@ grammar Dog
   end
   
   rule collection_definition
+  # FIXME
     'DEFINE' s name:identifier s 'OF' s structure_name:packaged_identifier {
       def transform
         pi = structure_name.compile
@@ -870,6 +878,7 @@ grammar Dog
   end
   
   rule community_definition
+  # FIXME
     'DEFINE' s 'COMMUNITY' s identifier sn? structure_properties {
       def transform
         node = ::Dog::Nodes::CommunityDefinition.new
@@ -891,6 +900,7 @@ grammar Dog
   # ===================
   
   rule perform 
+    # FIXME
     'PERFORM' s string {
       def transform
         node = ::Dog::Nodes::Perform.new
@@ -902,6 +912,7 @@ grammar Dog
   
   # TODO
   rule import
+  # FIXME - Change to include
     'IMPORT' s string {
       def transform
         node = ::Dog::Nodes::Import.new
@@ -1002,6 +1013,7 @@ grammar Dog
   end
 
   rule for
+    # FIXME
     'FOR' s 'EACH' in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform
         node = ::Dog::Nodes::For.new
