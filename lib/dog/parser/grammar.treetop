@@ -678,12 +678,14 @@ grammar Dog
   # FIXME
     'ON' on_each in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform
+        clause = in_clause.compile
+        
         node = ::Dog::Nodes::OnEachDefinition.new
         node.line = self.line
         
-        clause = in_clause.compile
+        
         # TODO - Create a name rule to update these names to their fully qualified names
-		# On the other hand - can't I just use the symbol table? Hmm...
+        # On the other hand - can't I just use the symbol table? Hmm...
         node.name = "@each:#{clause[0]}"
         node.variable = clause[0]
         node.collection = clause[1]
@@ -697,6 +699,7 @@ grammar Dog
   rule on_each
     s 'EACH' on_each_count:(s integer)? {
       def transform
+        # TODO - Support the count variable
         if !on_each_count.empty? then
           return on_each_count.integer.to_f
         else
@@ -1013,7 +1016,6 @@ grammar Dog
   end
 
   rule for
-    # FIXME
     'FOR' s 'EACH' in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform
         unique_number = ::Dog::Helper.unique_number
@@ -1029,20 +1031,25 @@ grammar Dog
         variable_name = args.first
         source_structure = args.last
         
+        keys_variable_name = "@keys_#{unique_number}"
+        size_variable_name = "@size_#{unique_number}"
+        counter_variable_name = "@counter_#{unique_number}"
+        structure_variable_name = "@structure_#{unique_number}"
+        
         if source_structure.nil? then
           source_structure = ::Dog::Nodes::Access([::Dog::Helper.pluralize(variable_name)])
         end
         
-        keys_variable_name = "@keys_#{unique_number}"
-        size_variable_name = "@size_#{unique_number}"
-        counter_variable_name = "@counter_#{unique_number}"
-        
         node = ::Dog::Nodes::Nodes.new([
+          ::Dog::Nodes::Assign.new(
+            [structure_variable_name],
+            source_structure
+          ),
           ::Dog::Nodes::Assign.new(
             [keys_variable_name], 
             ::Dog::Nodes::Call.new(
               ::Dog::Nodes::Access.new(["system", "keys"]),
-              [source_structure]
+              [::Dog::Nodes::Access.new([structure_variable_name])]
             )
           ),
           ::Dog::Nodes::Assign.new(
@@ -1061,6 +1068,18 @@ grammar Dog
                 "<"
               ),
               ::Dog::Nodes::Nodes.new([
+                ::Dog::Nodes::Nodes.new([
+                  ::Dog::Nodes::Assign.new(
+                    [variable_name],
+                    ::Dog::Nodes::Access.new([
+                      structure_variable_name,
+                      ::Dog::Nodes::Access.new([
+                        keys_variable_name, 
+                        ::Dog::Nodes::Access.new([counter_variable_name])
+                      ])
+                    ])
+                  )
+                ]),
                 ::Dog::Nodes::Assign.new(
                   [counter_variable_name],
                   ::Dog::Nodes::Operation.new(
