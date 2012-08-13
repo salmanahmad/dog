@@ -479,15 +479,21 @@ grammar Dog
   # FIXME
     'ASK' sn ask_count? expression via_clause ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
       def transform
-        node = ::Dog::Nodes::FunctionAsyncCall.new
-        node.line = self.line
+        # TODO - Handle VIA
+        # TODO - Handle AskCount
+        actor = expression.transform
+        via = via_clause.transform
+        function = ask_to_clause.transform
+        mandatory_arguments = on_clause.transform unless on_clause.empty?
+        optional_arguments = using_clause.transform unless using_clause.empty?
         
-        node.target = expression.compile
-        node.package_name = ask_to_clause.compile[0]
-        node.function_name = ask_to_clause.compile[1]
-        node.mandatory_arguments = on_clause.compile unless on_clause.empty?
-        node.optional_arguments = using_clause.compile unless using_clause.empty?
-        node.via = via_clause.compile
+        node = ::Dog::Nodes::AsyncCall.new(
+          actor,
+          function,
+          mandatory_arguments,
+          optional_arguments
+        )
+        node.line = self.line
         
         return node
       end

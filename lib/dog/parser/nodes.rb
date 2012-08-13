@@ -533,21 +533,35 @@ module Dog::Nodes
     end
   end
 
-  class RemoteCall < Node
-    attr_accessor :target
+  class AsyncCall < Node
+    attr_accessor :actor
     attr_accessor :identifier
     attr_accessor :arguments
     attr_accessor :optional_arguments
     
-    def initialize(target, identifier, arguments, optional_arguments)
-      @target = target
+    def initialize(actor, identifier, arguments = nil, optional_arguments = nil)
+      @actor = actor
       @identifier = identifier
       @arguments = arguments
       @optional_arguments = optional_arguments
     end
     
     def compile(package)
-      # TODO
+      # TODO - check if identifier is not an access and create a function type automatically
+      # This would be similar to StructureLiteral in many ways
+      @actor.compile(package)
+      @identifier.compile(package)
+      
+      @arguments ||= []
+      for argument in @arguments do
+        argument.compile(package)
+      end
+      
+      @optional_arguments.compile(package) if @optional_arguments
+      
+      call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?)
+      set_instruction_context(call)
+      package.add_to_instructions([call])
     end
   end
   
@@ -564,6 +578,7 @@ module Dog::Nodes
     
     def compile(package)
       # TODO - check if identifier is not an access and create a function type automatically
+      # This would be similar to StructureLiteral in many ways
       @identifier.compile(package)
       
       @arguments ||= []

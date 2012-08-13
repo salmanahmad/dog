@@ -383,9 +383,14 @@ module Dog::Instructions
     end
   end
 
-  class RemoteCall < Instruction
+  class AsyncCall < Instruction
     attr_accessor :arg_count
     attr_accessor :has_optionals
+    
+    def initialize(arg_count, has_optionals)
+      @arg_count = arg_count
+      @has_optionals = has_optionals
+    end
     
     def execute(track)
       optionals = nil
@@ -393,7 +398,7 @@ module Dog::Instructions
       
       arguments = track.stack.pop(arg_count)
       function = track.stack.pop
-      routing = track.stack.pop
+      actor = track.stack.pop
       
       # TODO
     end
