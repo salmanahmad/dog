@@ -583,12 +583,11 @@ grammar Dog
   # FIXME
     'NOTIFY' s expression via_clause notify_of_clause {
       def transform
-        node = ::Dog::Nodes::Notify.new
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["system", "notify"]),
+          [notify_of_clause.transform, expression.transform, via_clause.transform]
+        )
         node.line = self.line
-        
-        node.target = expression.compile
-        node.message = notify_of_clause.compile
-        node.via = via_clause.compile
         
         return node
       end
@@ -675,7 +674,6 @@ grammar Dog
   # ==============
   
   rule on
-  # FIXME
     'ON' on_each in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform
         args = in_clause.transform
@@ -704,7 +702,6 @@ grammar Dog
           [source_structure, ::Dog::Nodes::StringLiteral.new(function_name)]
         )
         register.line = self.line
-        
         
         nodes = ::Dog::Nodes::Nodes.new([
           node,

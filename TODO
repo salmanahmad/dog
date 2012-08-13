@@ -1,4 +1,17 @@
 
+Things that are bothering me:
+
+	Call and build use the stack to invoke functions
+	Parameter passing for functions
+	No access to the package name in the parser
+	
+
+
+
+
+
+
+
 Originaly we liked it when Dog only had 4 commands. It was really elegant and simple to explain:
 
 ASK
