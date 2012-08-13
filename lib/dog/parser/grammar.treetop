@@ -534,11 +534,28 @@ grammar Dog
         via = via_clause.transform
         
         variable_name = for_clause.first
+        type = for_clause.last
         
-        if for_clause.last then
-          type = nil # TODO
-        else
-          type = nil # TODO
+        if type.nil? then
+          string_value = ::Dog::Value.new("type", {})
+          string_value["name"] = ::Dog::Value.string_value("string")
+          string_value["package"] = ::Dog::Value.string_value("system")
+          
+          structure_value = ::Dog::Nodes::Access.new([::Dog::Helper.pluralize(variable_name)])
+          
+          type = ::Dog::Nodes::Branch.new(
+            ::Dog::Nodes::Operation.new(
+              structure_value,
+              ::Dog::Nodes::NullLiteral.new,
+              "=="
+            ),
+            ::Dog::Nodes::Nodes.new([
+              string_value
+            ]),
+            ::Dog::Nodes::Nodes.new([
+              structure_value
+            ])
+          )
         end
         
         node = ::Dog::Nodes::Assign.new(
@@ -569,7 +586,7 @@ grammar Dog
         if !listen_of_clause.empty?
           return [identifier.text_value, listen_of_clause.transform]
         else
-          return [identifier.text_value, [nil, nil]]
+          return [identifier.text_value, nil]
         end
       end
     }
@@ -745,6 +762,7 @@ grammar Dog
   # TODO - This is a huge problem - I need to add type annotations to the function declaration and implement the multiple dispatch
   
   rule function_definition
+  # TODO - How do I handle nested function names?
     'DEFINE' s identifier function_for:(function_for)? function_on:(function_on)? function_using:(function_using)? s 'DO' sn statements:(statements)? s? 'END' {
       def transform
         function_name = identifier.text_value

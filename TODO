@@ -4,7 +4,8 @@ Things that are bothering me:
 	Call and build use the stack to invoke functions
 	Parameter passing for functions
 	No access to the package name in the parser
-	
+	Nested function names / type names / access paths?
+	Bootstraping the Type type
 
 
 

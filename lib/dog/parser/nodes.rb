@@ -214,9 +214,16 @@ module Dog::Nodes
 
     def compile(package)
       if @type then
-        # TODO - Support passing a string identifier here in addition to Access nodes
-        @type.compile(package)
-        
+        if @type.kind_of? Node then
+          @type.compile(package)
+        elsif @type.kind_of? ::Dog::Value
+          push = ::Dog::Nodes::Push.new(@type)
+          set_instruction_context(push)
+          package.add_to_instructions([push])
+        else
+          raise "Compilation error"
+        end
+
         build = ::Dog::Instructions::Build.new
         set_instruction_context(build)
         package.add_to_instructions([build])
