@@ -19,7 +19,7 @@ class ParserTests::ForTest < Test::Unit::TestCase
   def test_empty_for
     program = <<-EOD
     FOR EACH a IN b DO 
-
+      
     END
     EOD
 
