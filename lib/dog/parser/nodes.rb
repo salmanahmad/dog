@@ -88,13 +88,78 @@ module Dog::Nodes
       value["name"] = ::Dog::Value.string_value(name)
       value["package"] = ::Dog::Value.string_value(package.name)
       
-      package.current_context["value"] = value.to_hash
+      package.current_context["value"] = @value
       
       if @implementation then
         package.add_implementation
         package.implementation["arguments"] = @arguments
         package.implementation["optional_arguments"] = @optional_arguments
         @implementation.compile(package)
+      end
+      
+      package.pop_symbol
+      
+      null = ::Dog::Instructions::PushNull.new
+      set_instruction_context(null)
+      package.add_to_instructions([null])
+    end
+  end
+  
+  class StructureDefinition < Node
+    attr_accessor :name
+    attr_accessor :properties
+    
+    def initialize(name, properties)
+      @name = name
+      @properties = properties
+    end
+    
+    def compile(package)
+      package.push_symbol(@name)
+      
+      value = ::Dog::Value.new("type", {})
+      value["name"] = ::Dog::Value.string_value(name)
+      value["package"] = ::Dog::Value.string_value(package.name)
+      
+      package.current_context["value"] = @value
+      
+      package.add_implementation
+      
+      value = ::Dog::Value("#{package.name}.#{name}", {})
+      structure = ::Dog::Instructions::Push.new(value)
+      set_instruction_context(structure)
+      add_to_instructions(structure)
+      
+      if @properties then
+        for property in @properties do
+          # TODO - Handle "type"
+          name = property["name"]
+          default = property["default"]
+          
+          if name.kind_of? String then
+            push_string = ::Dog::Instructions::PushString.new(key)
+            set_instruction_context(push_string)
+            package.add_to_instructions([push_string])
+          elsif name.kind_of? Numeric then
+            push_number = ::Dog::Instructions::PushNumber.new(key)
+            set_instruction_context(push_number)
+            package.add_to_instructions([push_number])
+          else
+            raise "Compilation error"
+          end
+          
+          if default then
+            default.compile(package)
+          else
+            null = ::Dog::Instructions::PushNull.new
+            set_instruction_context(null)
+            package.add_to_instructions([null])
+          end
+          
+          assign = ::Dog::Instructions::Assign.new(2)
+          set_instruction_context(assign)
+          package.add_to_instructions([assign])
+        end
       end
       
       package.pop_symbol
@@ -124,7 +189,7 @@ module Dog::Nodes
       package.push_symbol(@name)
       
       if @value then
-        package.current_context["value"] = @value.to_hash
+        package.current_context["value"] = @value
       end
       
       if @implementation then
@@ -149,6 +214,7 @@ module Dog::Nodes
 
     def compile(package)
       if @type then
+        # TODO - Support passing a string identifier here in addition to Access nodes
         @type.compile(package)
         
         build = ::Dog::Instructions::Build.new

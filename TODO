@@ -291,7 +291,7 @@ Organize the symbol table hierarchically
 
 
 
-
+Add a package-level configuration functionality that also breaks out side effect rules and is linked to the project.config file? Useful for common things like file paths, or flags, etc.? Perhaps not writeable while the project is running, but at the very least standardized for package developers.
 
 
 

@@ -777,11 +777,11 @@ grammar Dog
   rule structure_definition
     'DEFINE' s identifier sn? structure_properties {
       def transform
-        node = ::Dog::Nodes::StructureDefinition.new
-        node.line = self.line
+        name = identifier.text_value
+        properties = structure_properties.transform
         
-        node.name = identifier.text_value
-        node.properties = structure_properties.compile
+        node = ::Dog::Nodes::StructureDefinition.new(name, properties)
+        node.line = self.line
         
         return node
       end
@@ -795,10 +795,10 @@ grammar Dog
         
         if !properties.empty? then
           props = []
-          props << properties.first.compile
+          props << properties.first.transform
           
           for r in properties.rest.elements do
-            props << r.structure_property.compile
+            props << r.structure_property.transform
           end
         end
         
@@ -810,12 +810,11 @@ grammar Dog
   rule structure_property
     sn? type:(identifier s) structure_property_key value:(s? '=' s? expression)? s? {
       def transform
-        property = ::Dog::Nodes::StructureDefinitionProperty.new
-        property.line = self.line
+        property = {}
         
-        property.type = type.identifier.text_value unless type.empty?
-        property.name = structure_property_key.compile
-        property.default = value.expression.compile unless value.empty?
+        property["type"] = type.identifier.text_value unless type.empty?
+        property["name"] = structure_property_key.transform
+        property["default"] = value.expression.transform unless value.empty?
         
         return property
       end
@@ -823,15 +822,13 @@ grammar Dog
     /
     sn? structure_property_key value:(s? '=' s? expression)? s? {
       def transform
-        property = ::Dog::Nodes::StructureDefinitionProperty.new
-        property.line = self.line
+        property = {}
         
-        property.name = structure_property_key.compile
-        property.default = value.expression.compile unless value.empty?
+        property["name"] = structure_property_key.transform
+        property["default"] = value.expression.transform unless value.empty?
         
         return property
       end
-      
     }
   end
   
@@ -1027,7 +1024,6 @@ grammar Dog
   rule while
     'WHILE' s expression s 'DO' sn statements:(statements)? s? 'END' {
       def transform
-        
         if !statements.empty? then
           body = statements.transform
         else
@@ -1112,10 +1108,10 @@ grammar Dog
       def transform
         args = {}
         
-        args[first.identifier.text_value] = first.expression.compile
+        args[first.identifier.text_value] = first.expression.transform
         
         for r in rest.elements do
-          args[r.identifier.text_value] = r.expression.compile
+          args[r.identifier.text_value] = r.expression.transform
         end
         
         return args
@@ -1128,10 +1124,10 @@ grammar Dog
     def transform
       args = []
       
-      args << first.compile
+      args << first.transform
       
       for r in rest.elements do
-        args << r.expression.compile
+        args << r.expression.transform
       end
       
       return args
@@ -1142,10 +1138,10 @@ grammar Dog
     def transform
       args = {}
       
-      args[first.identifier.text_value] = first.expression.compile
+      args[first.identifier.text_value] = first.expression.transform
       
       for r in rest.elements do
-        args[r.identifier.text_value] = r.expression.compile
+        args[r.identifier.text_value] = r.expression.transform
       end
       
       return args
@@ -1228,7 +1224,7 @@ grammar Dog
           
           if self.associations.rest then
             for a in self.associations.rest.elements do
-              a = a.association.compile
+              a = a.association.transform
               structure_value[a.first] = a.last
             end
           end
