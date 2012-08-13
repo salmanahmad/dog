@@ -678,20 +678,41 @@ grammar Dog
   # FIXME
     'ON' on_each in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform
-        clause = in_clause.compile
+        args = in_clause.transform
+        body = statements.transform unless statements.empty?
         
-        node = ::Dog::Nodes::OnEachDefinition.new
+        variable_name = args.first
+        source_structure = args.last
+        
+        if source_structure.nil? then
+          source_structure = ::Dog::Nodes::Access.new([::Dog::Helper.pluralize(variable_name)])
+        end
+        
+        # TODO - Detect duplicated ON EACH names somehow
+        function_name = "@each:#{variable_name}"
+        function_target = nil
+        function_mandatory_arguments = [variable_name]
+        function_optional_arguments = nil
+        function_body = body
+        
+        node = ::Dog::Nodes::FunctionDefinition.new(function_name, function_body, function_mandatory_arguments, function_optional_arguments)
         node.line = self.line
         
+        # TODO - This is another example of when I would want to have access to the package name
+        register = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["system", "register_local_callback"]),
+          [source_structure, ::Dog::Nodes::StringLiteral.new(function_name)]
+        )
+        register.line = self.line
         
-        # TODO - Create a name rule to update these names to their fully qualified names
-        # On the other hand - can't I just use the symbol table? Hmm...
-        node.name = "@each:#{clause[0]}"
-        node.variable = clause[0]
-        node.collection = clause[1]
-        node.body = statements.compile unless statements.empty?
         
-        return node
+        nodes = ::Dog::Nodes::Nodes.new([
+          node,
+          register
+        ])
+        nodes.line = self.line
+        
+        return nodes
       end
     }
   end
