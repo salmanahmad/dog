@@ -245,6 +245,20 @@ module Dog::Instructions
 
     def execute(track)
       case @operation
+      when "OR"
+        arg2 = track.stack.pop.ruby_value
+        arg1 = track.stack.pop.ruby_value
+        
+        value = arg1 || arg2
+        value = ::Dog::Value.from_ruby_value(value)
+        track.stack.push(value)
+      when "AND"
+        arg2 = track.stack.pop.ruby_value
+        arg1 = track.stack.pop.ruby_value
+        
+        value = arg1 && arg2
+        value = ::Dog::Value.from_ruby_value(value)
+        track.stack.push(value)
       when "!"
         arg1 = track.stack.pop
 

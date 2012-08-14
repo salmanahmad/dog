@@ -38,7 +38,7 @@ module RuntimeHelper
     parser = ::Dog::Parser.new
     ast = parser.parse(source)
     
-    run_nodes(ast)
+    run_nodes(ast, include_stdout)
   end
   
   def run_nodes(nodes, include_stdout = false)
@@ -60,7 +60,7 @@ module RuntimeHelper
       old_stdout, $stdout = $stdout, sio
     end
     
-    tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})    
+    tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})
     
     if include_stdout then
       $stdout = old_stdout
