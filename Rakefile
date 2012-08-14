@@ -32,26 +32,33 @@ namespace 'test' do
   
   
   desc "Run all integration tests"
-  task 'integrations' => ['integration:parser', 'integration:compiler', 'integration:runtime']
+  task 'integrations' => ['integration:all']
+  #task 'integrations' => ['integration:parser', 'integration:compiler', 'integration:runtime']
   
   namespace 'integration' do
-    Rake::TestTask.new('parser') { |t|
-      t.pattern = 'test/integration/parser/*.rb'
+    Rake::TestTask.new('all') { |t|
+      t.pattern = 'test/integration/*.rb'
       t.verbose = false
       t.warning = false
     }
     
-    Rake::TestTask.new('compiler') { |t|
-      t.pattern = 'test/integration/compiler/*.rb'
-      t.verbose = false
-      t.warning = false
-    }
-    
-    Rake::TestTask.new('runtime') { |t|
-      t.pattern = 'test/integration/runtime/*.rb'
-      t.verbose = false
-      t.warning = false
-    }
+    #Rake::TestTask.new('parser') { |t|
+    #  t.pattern = 'test/integration/parser/*.rb'
+    #  t.verbose = false
+    #  t.warning = false
+    #}
+    #
+    #Rake::TestTask.new('compiler') { |t|
+    #  t.pattern = 'test/integration/compiler/*.rb'
+    #  t.verbose = false
+    #  t.warning = false
+    #}
+    #
+    #Rake::TestTask.new('runtime') { |t|
+    #  t.pattern = 'test/integration/runtime/*.rb'
+    #  t.verbose = false
+    #  t.warning = false
+    #}
   end
   
 end

@@ -9,7 +9,8 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class RuntimeTests::ScratchTest < RuntimeTestCase
+class RuntimeTests::ScratchTest < Test::Unit::TestCase
+  include RuntimeHelper
   include Dog
 
   def test_simple

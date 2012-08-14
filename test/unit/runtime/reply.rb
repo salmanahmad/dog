@@ -40,7 +40,7 @@ end
 sleep(1)
 =end
 
-class RuntimeTests::ServerTest < RuntimeTestCase  
+class RuntimeTests::ServerTest < Test::Unit::TestCase  
   include RuntimeHelper
   
   def test_invalid_input

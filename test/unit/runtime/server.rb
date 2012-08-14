@@ -13,7 +13,7 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class RuntimeTests::ServerTest < RuntimeTestCase  
+class RuntimeTests::ServerTest < Test::Unit::TestCase  
   #ENV['RACK_ENV'] = 'test'
   include Rack::Test::Methods
   

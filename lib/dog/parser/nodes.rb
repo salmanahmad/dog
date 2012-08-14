@@ -439,9 +439,15 @@ module Dog::Nodes
     def compile(package)
       for item in path do
         if item == path.first then
-          read_variable = ::Dog::Instructions::ReadVariable.new(item)
-          set_instruction_context(read_variable)
-          package.add_to_instructions([read_variable])
+          if item.kind_of? Node then
+            # TODO - This is special cased for literals. This may be
+            # something that should be fixed in the grammar.
+            item.compile(package)
+          else
+            read_variable = ::Dog::Instructions::ReadVariable.new(item)
+            set_instruction_context(read_variable)
+            package.add_to_instructions([read_variable])
+          end
         else
           if item.kind_of? Node then
             item.compile(package)
