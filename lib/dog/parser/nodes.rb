@@ -151,7 +151,7 @@ module Dog::Nodes
       package.push_symbol(@name)
       
       value = ::Dog::Value.new("function", {})
-      value["name"] = ::Dog::Value.string_value(name)
+      value["name"] = ::Dog::Value.string_value(@name)
       value["package"] = ::Dog::Value.string_value(package.name)
       
       package.current_context["value"] = value
