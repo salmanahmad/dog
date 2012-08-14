@@ -23,13 +23,11 @@ class IntegrationTests::FunctionTest < Test::Unit::TestCase
     EOD
 
     tracks, output = run_source(program, true)
-
     assert_equal("foobar", tracks.last.stack.last.value)
     assert_equal("foobar", tracks.last.variables["i"].value)
     assert_equal("foo called", output)
   end
-  
-  
+
   def test_recusion
     program = <<-EOD
     DEFINE fib ON a DO
@@ -41,12 +39,13 @@ class IntegrationTests::FunctionTest < Test::Unit::TestCase
     END
     
     i = COMPUTE fib ON 10
+    PRINT i
+    i
     EOD
 
     tracks, output = run_source(program, true)
     assert_equal(55, tracks.last.stack.last.value)
     assert_equal(55, tracks.last.variables["i"].value)
+    assert_equal(55.to_f.to_s, output)
   end
-  
-  
 end

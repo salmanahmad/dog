@@ -1175,9 +1175,13 @@ grammar Dog
           body = ::Dog::Nodes::Nodes.new([])
         end
         
-        condition = ::Dog::Nodes::Branch.new(expression.transform, ::Dog::Nodes::Nodes.new([
-          ::Dog::Nodes::Break.new
-        ]))
+        condition = ::Dog::Nodes::Branch.new(
+          expression.transform, 
+          ::Dog::Nodes::Nodes.new([]),
+          ::Dog::Nodes::Nodes.new([
+            ::Dog::Nodes::Break.new
+          ])
+        )
         body.nodes.unshift(condition)
         
         node = ::Dog::Nodes::Loop.new body
@@ -1189,9 +1193,15 @@ grammar Dog
   end
   
   rule break
-    'BREAK' {
+    'BREAK' e:(s expression)? {
       def transform
-        node = ::Dog::Nodes::Break.new
+        exp = nil
+        
+        if !e.empty? then
+          exp = e.expression.transform
+        end
+        
+        node = ::Dog::Nodes::Break.new(exp)
         node.line = self.line
         return node
       end
