@@ -138,10 +138,14 @@ module Dog::Instructions
         pointer = path.shift
         for item in path do
           key = ""
-          if item.kind_of? String then
-            key = "s:#{item.to_s}"
-          elsif item.kind_of? Numeric then
-            key = "n:#{item.to_s}"
+          
+          item_value = item
+          item_value = item.value if item.kind_of? ::Dog::Value
+          
+          if item_value.kind_of? String then
+            key = item_value.to_s
+          elsif item_value.kind_of? Numeric then
+            key = item_value.to_s
           else
             raise "Runtime error"
           end
@@ -173,10 +177,14 @@ module Dog::Instructions
 
         for item in path do
           key = ""
-          if item.kind_of? String then
-            key = "s:#{item.to_s}"
-          elsif item.kind_of? Numeric then
-            key = "n:#{item.to_s}"
+          
+          item_value = item
+          item_value = item.value if item.kind_of? ::Dog::Value
+          
+          if item_value.kind_of? String then
+            key = item_value.to_s
+          elsif item_value.kind_of? Numeric then
+            key = item_value.to_s
           else
             raise "Runtime error"
           end

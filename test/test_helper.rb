@@ -38,6 +38,8 @@ module RuntimeHelper
     parser = ::Dog::Parser.new
     ast = parser.parse(source)
     
+    #puts ast.inspect
+    
     run_nodes(ast, include_stdout)
   end
   
@@ -51,6 +53,9 @@ module RuntimeHelper
     end
     
     bundle = compiler.finalize
+    
+    #puts bundle.packages[""].symbols["@root"]
+    
     run_bundle(bundle, include_stdout)
   end
   
