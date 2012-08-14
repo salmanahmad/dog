@@ -221,7 +221,6 @@ module Dog::Instructions
           # TODO - I believe that a un-serialized package already has its 
           # values as Dog::Value - there should be no need to call from_hash
           #value = ::Dog::Value.from_hash(symbol["value"])
-          
           value = symbol["value"]
         end
       end

@@ -47,11 +47,23 @@ class IntegrationTests::StructureTest < Test::Unit::TestCase
     EOD
     
     tracks = run_source(program)
-    
     assert_equal("foobar", tracks.last.variables["name"].value)
     assert_equal(7, tracks.last.variables["age"].value)
     assert_equal(true, tracks.last.variables["admin"].value)
   end
   
-  
+  def test_defaults
+    program = <<-EOD
+    
+    DEFINE car {
+      wheels = 4
+    }
+    
+    civic = car {}
+    EOD
+    
+    tracks = run_source(program)
+    assert_equal(4, tracks.last.variables["civic"].value["s:wheels"].value)
+    assert_equal(4, tracks.last.variables["civic"].ruby_value["wheels"])
+  end
 end

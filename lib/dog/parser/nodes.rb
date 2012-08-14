@@ -188,14 +188,14 @@ module Dog::Nodes
       value["name"] = ::Dog::Value.string_value(name)
       value["package"] = ::Dog::Value.string_value(package.name)
       
-      package.current_context["value"] = @value
+      package.current_context["value"] = value
       
       package.add_implementation
       
-      value = ::Dog::Value("#{package.name}.#{name}", {})
+      value = ::Dog::Value.new("#{package.name}.#{name}", {})
       structure = ::Dog::Instructions::Push.new(value)
       set_instruction_context(structure)
-      add_to_instructions(structure)
+      package.add_to_instructions([structure])
       
       if @properties then
         for property in @properties do
@@ -204,11 +204,11 @@ module Dog::Nodes
           default = property["default"]
           
           if name.kind_of? String then
-            push_string = ::Dog::Instructions::PushString.new(key)
+            push_string = ::Dog::Instructions::PushString.new(name)
             set_instruction_context(push_string)
             package.add_to_instructions([push_string])
           elsif name.kind_of? Numeric then
-            push_number = ::Dog::Instructions::PushNumber.new(key)
+            push_number = ::Dog::Instructions::PushNumber.new(name)
             set_instruction_context(push_number)
             package.add_to_instructions([push_number])
           else
