@@ -476,7 +476,6 @@ grammar Dog
   # ===============
   
   rule ask
-  # FIXME
     'ASK' sn ask_count? expression via_clause ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
       def transform
         # TODO - Handle VIA
@@ -764,16 +763,33 @@ grammar Dog
   # TODO - How do I handle nested function names?
     'DEFINE' s identifier function_for:(function_for)? function_on:(function_on)? function_using:(function_using)? s 'DO' sn statements:(statements)? s? 'END' {
       def transform
+        actor = function_for.transform unless function_for.empty?
+
         function_name = identifier.text_value
-        function_target = function_for.transform unless function_for.empty?
         function_mandatory_arguments = function_on.transform unless function_on.empty?
         function_optional_arguments = function_using.transform unless function_using.empty?
-        function_body = statements.transform unless statements.empty?
-        
-        node = ::Dog::Nodes::FunctionDefinition.new(function_name, function_body, function_mandatory_arguments, function_optional_arguments)
-        node.line = self.line
-        
-        return node
+
+        if actor then
+          instructions = nil
+          output = nil
+
+          if !statements.empty? then
+            instructions = statements.external_instructions
+            output = statements.external_output
+          end
+
+          node = ::Dog::Nodes::ExternalFunctionDefinition.new(function_name, actor, instructions, function_mandatory_arguments, function_optional_arguments, output)
+          node.line = self.line
+
+          return node
+        else
+          function_body = statements.transform unless statements.empty?
+
+          node = ::Dog::Nodes::FunctionDefinition.new(function_name, function_body, function_mandatory_arguments, function_optional_arguments)
+          node.line = self.line
+
+          return node
+        end
       end
     }
   end
@@ -947,12 +963,14 @@ grammar Dog
   # ===================
   
   rule perform 
-    # FIXME
     'PERFORM' s string {
+      def external_instructions
+        # Return a ruby string object, not a Dog string literal
+        return string.transform.value
+      end
+      
       def transform
-        node = ::Dog::Nodes::Perform.new
-        node.instructions = string.compile
-        return node
+        raise "Parser error: perform must only be present in an external function definition."
       end
     }
   end
@@ -1182,6 +1200,32 @@ grammar Dog
   
   rule return
     'RETURN' expressions:(s first:expression rest:(s? ',' s? expression)*)? {
+      def external_output
+        # TODO - I am duplicating this for now until I add proper multiple returns.
+        # See the transform method for additional context. Down the road I should just
+        # call self.transform directly
+        
+        output = []
+        es = []
+        if !self.expressions.empty? then
+          es << self.expressions.first.transform
+          
+          for r in self.expressions.rest.elements do
+            es << r.expression.transform
+          end
+        end
+        
+        for e in es do
+          if e.class == ::Dog::Nodes::Access && e.path.size == 1 then
+            output << e.path.first
+          else
+            raise "Parser error: return statements in external functions can only return expressions"
+          end
+        end
+        
+        return output
+      end
+      
       def transform
         # TODO - Handle multiple return values - Build a structure and just return that?
         

@@ -2,10 +2,11 @@
 Things that are bothering me:
 
 	Call and build use the stack to invoke functions
-	Parameter passing for functions
+	Parameter passing for functions - Especially optional parameters with default values
 	No access to the package name in the parser
 	Nested function names / type names / access paths?
 	Bootstraping the Type type
+	External functions - how safe is my "custom method" solution like external_parameters
 
 
 

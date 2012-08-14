@@ -9,6 +9,32 @@
 
 module Dog::Nodes
   class Treetop::Runtime::SyntaxNode
+    def external_instructions
+      instructions = nil
+      
+      if elements then
+        for element in elements do
+          instructions = element.external_instructions
+          break unless instructions.nil?
+        end
+      end
+      
+      return instructions
+    end
+    
+    def external_output
+      output = nil
+      
+      if elements then
+        for element in elements do
+          output = element.external_output
+          break unless output.nil?
+        end
+      end
+      
+      return output
+    end
+    
     def transform
       if elements && elements.first then
         return self.elements.first.transform
@@ -67,7 +93,47 @@ module Dog::Nodes
       nil
     end
   end
-  
+
+  class ExternalFunctionDefinition < Node
+    attr_accessor :name
+    attr_accessor :actor
+    attr_accessor :instructions
+    attr_accessor :arguments
+    attr_accessor :optional_arguments
+    attr_accessor :output
+
+    def initialize(name, actor, instructions = nil, arguments = nil, optional_arguments = nil, output = nil)
+      @name = name
+      @actor = actor
+      @instructions = instructions
+      @arguments = arguments
+      @optional_arguments = optional_arguments
+      @output = output
+    end
+    
+    def compile(package)
+      package.push_symbol(@name)
+      
+      value ::Dog::Value.new("external_function", {})
+      value["package"] = ::Dog::Value.string_value(package.name)
+      value["name"] = ::Dog::Value.string_value(@name)
+      value["actor"] = ::Dog::Value.string_value(@actor)
+      value["instructions"] = ::Dog::Value.string_value(@instructions)
+      value["arguments"] = ::Dog::Value.string_value(@arguments)
+      value["optional_arguments"] = ::Dog::Value.string_value(@optional_arguments)
+      value["output"] = ::Dog::Value.string_value(@output)
+      
+      package.current_context["value"] = value
+      
+      package.pop_symbol
+      
+      # TODO - Push.new(value) instead of PushNull?
+      null = ::Dog::Instructions::PushNull.new
+      set_instruction_context(null)
+      package.add_to_instructions([null])
+    end
+  end
+
   class FunctionDefinition < Node
     attr_accessor :name
     attr_accessor :implementation
@@ -88,7 +154,7 @@ module Dog::Nodes
       value["name"] = ::Dog::Value.string_value(name)
       value["package"] = ::Dog::Value.string_value(package.name)
       
-      package.current_context["value"] = @value
+      package.current_context["value"] = value
       
       if @implementation then
         package.add_implementation
@@ -99,6 +165,7 @@ module Dog::Nodes
       
       package.pop_symbol
       
+      # TODO - Push.new(value) instead of PushNull?
       null = ::Dog::Instructions::PushNull.new
       set_instruction_context(null)
       package.add_to_instructions([null])
