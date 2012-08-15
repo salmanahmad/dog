@@ -1,11 +1,14 @@
 
 module Dog
   class FacebookPerson < Person
-    # not sure what this does
-    # collection "facebook"
 
-    def self.find_by_facebook_id(fb_id)
-      self.find_one({"facebook.id" => fb_id}) rescue nil
+    # sets the collection_name in DatabaseObject
+    collection "people"
+
+    class << self
+      def find_by_facebook_id(fb_id)
+        find_one({"facebook.id" => fb_id}) rescue nil
+      end
     end
 
     def add_facebook_profile(fb_id, optionals)

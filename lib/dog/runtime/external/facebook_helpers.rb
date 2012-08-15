@@ -1,6 +1,4 @@
 
-require 'pp'
-
 module Dog
   class FacebookHelpers
     include HTTParty
@@ -72,23 +70,21 @@ module Dog
           access_token: access_token_response['access_token']
         })
         me_info = JSON::parse response.body
-        # FIXME debug output
-        pp me_info
         return nil if me_info['error']
         person = FacebookPerson.find_by_facebook_id(me_info['id'])
         unless person
           person = FacebookPerson.new
         end
         person.first_name = me_info['first_name']
-        person.first_name = me_info['last_name']
-        # convert to days
-        expires = access_token_response['expires'].to_f / (24 * 60 * 60)
+        person.last_name = me_info['last_name']
+        expires = access_token_response['expires'].to_i # in seconds
         person.add_facebook_profile(me_info['id'], {
           access_token: access_token_response['access_token'],
-          access_token_expires: DateTime.now() + expires,
+          access_token_expires: Time.now() + expires,
           username: me_info['username'] || person.facebook && person.facebook[:username],
           link: me_info['link'] || person.facebook && person.facebook[:link]
         })
+        person.save
         person
       end
 
