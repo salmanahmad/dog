@@ -204,15 +204,19 @@ module Dog
 
           case provider
           when 'facebook'
-            redirect to( ::Dog::FacebookHelpers::oauth_dialog_url )
+            return redirect FacebookHelpers::oauth_dialog_url(request) unless params['code'] and params['state']
+            @output = FacebookHelpers::oauth_callback(request)
           else
             @output["success"] = false
             @output["errors"] ||= []
             @output["errors"] << "Unsupported OAuth provider."
           end
 
-          content_type 'application/json'
-          @output.to_json
+          unless @output["success"] and params['redirect_uri']
+            content_type 'application/json'
+            return @output.to_json
+          end
+          redirect to(params['redirect_uri'])
         end
 
         get prefix + '/account/logout' do

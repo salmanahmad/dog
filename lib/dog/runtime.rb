@@ -18,6 +18,8 @@ require 'sinatra/async'
 require 'uuid'
 require 'json'
 require 'mongo'
+require 'httparty'
+require 'json'
 
 # TODO Add back the Instant Messaging Capabilities.
 #require 'blather/client/client'
