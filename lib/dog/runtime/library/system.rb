@@ -13,6 +13,15 @@ module Dog::Library
     
     name "system"
     
+    implementation "add" do
+      argument "a"
+      argument "b"
+      
+      body do
+        puts "Hi"
+      end
+    end
+    
     implementation "type" do
       argument "value"
       

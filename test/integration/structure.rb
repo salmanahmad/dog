@@ -65,5 +65,25 @@ class IntegrationTests::StructureTest < Test::Unit::TestCase
     tracks = run_source(program)
     assert_equal(4, tracks.last.variables["civic"].value["s:wheels"].value)
     assert_equal(4, tracks.last.variables["civic"].ruby_value["wheels"])
+    
+    
+    program = <<-EOD
+    
+    DEFINE foo DO
+      "foo"
+    END
+    
+    DEFINE car {
+      wheels = COMPUTE foo
+    }
+    
+    civic = car {}
+    EOD
+    
+    tracks = run_source(program)
+    assert_equal("foo", tracks.last.variables["civic"].value["s:wheels"].value)
+    assert_equal("foo", tracks.last.variables["civic"].ruby_value["wheels"])
+    
+    
   end
 end
