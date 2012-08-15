@@ -89,6 +89,28 @@ module Dog
         end
       end
       
+      class Helper
+        attr_accessor :track
+        
+        def initialize(track)
+          @track = track
+        end
+        
+        def variable(name)
+          track.variables[name]
+        end
+        
+        def dog_return(value)
+          # TODO - Handle multiple returns
+          
+          if value.kind_of? ::Dog::Value then
+            track.stack.push(value)
+          else
+            track.stack.push(::Dog::Value.from_ruby_value(value))
+          end
+        end
+      end
+      
       def package
         @package ||= Package.new
       end
@@ -110,8 +132,8 @@ module Dog
         s.instance_eval(&block)
         
         value = ::Dog::Value.new("type", {})
-        value["name"] = symbol
-        value["package"] = self.package.name
+        value["name"] = ::Dog::Value.string_value(symbol)
+        value["package"] = ::Dog::Value.string_value(self.package.name)
         
         instructions = Proc.new do
           # TODO - Build and return the structure
@@ -132,8 +154,8 @@ module Dog
         i.instance_eval(&block)
         
         value = ::Dog::Value.new("function", {})
-        value["name"] = symbol
-        value["package"] = self.package.name
+        value["name"] = ::Dog::Value.string_value(symbol)
+        value["package"] = ::Dog::Value.string_value(self.package.name)
         
         self.package.push_symbol(symbol)
         
@@ -142,7 +164,10 @@ module Dog
         self.package.add_implementation
         self.package.implementation["arguments"] = i.arguments
         self.package.implementation["optional_arguments"] = i.optional_arguments
-        self.package.implementation["instructions"] = i.instructions
+        self.package.implementation["instructions"] = Proc.new do |track|
+          Helper.new(track).instance_exec(track, &i.instructions)
+          track.finish
+        end
         
         self.package.pop_symbol
       end

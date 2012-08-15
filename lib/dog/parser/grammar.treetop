@@ -1269,7 +1269,7 @@ grammar Dog
         path = []
         scope = nil
         if !self.package.empty? then
-          path [package.identifier.text_value, symbol.text_value]
+          path = [package.identifier.text_value, symbol.text_value]
           scope = "external"
         else
           path = [symbol.text_value]

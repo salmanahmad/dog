@@ -118,17 +118,21 @@ module Dog
           track.next_instruction = nil
           track.next_track = nil
           
-          instruction = instructions[track.current_instruction]
-          
-          if instruction.nil? then
-            track.finish
+          if instructions.kind_of? Proc then
+            instructions.call(track)
           else
-            instruction.execute(track)
-        
-            if track.next_instruction then
-              track.current_instruction = track.next_instruction
+            instruction = instructions[track.current_instruction]
+            
+            if instruction.nil? then
+              track.finish
             else
-              track.current_instruction += 1
+              instruction.execute(track)
+              
+              if track.next_instruction then
+                track.current_instruction = track.next_instruction
+              else
+                track.current_instruction += 1
+              end
             end
           end
           

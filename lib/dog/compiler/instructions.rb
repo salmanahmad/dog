@@ -215,13 +215,23 @@ module Dog::Instructions
       else
         package = track.package_name
         symbol = ::Dog::Runtime.bundle.packages[package].symbols[@variable_name]
-        if symbol.nil? || symbol["value"].nil? then
-          value = ::Dog::Value.null_value
-        else
-          # TODO - I believe that a un-serialized package already has its 
-          # values as Dog::Value - there should be no need to call from_hash
-          #value = ::Dog::Value.from_hash(symbol["value"])
+        if symbol && !symbol["value"].nil? then
           value = symbol["value"]
+        else
+          package = ::Dog::Runtime.bundle.packages[@variable_name]
+          if package then
+            value = ::Dog::Value.new("package", {})
+            
+            for name, symbol in package.symbols do
+              if symbol["value"] then
+                value[name] = symbol["value"]
+              else
+                value[name] = ::Dog::Value.null_value
+              end
+            end
+          else
+            value = ::Dog::Value.null_value
+          end
         end
       end
       

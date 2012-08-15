@@ -13,12 +13,11 @@ module Dog::Library
     
     name "system"
     
-    implementation "add" do
-      argument "a"
-      argument "b"
+    implementation "print" do
+      argument "arg"
       
-      body do
-        puts "Hi"
+      body do |track|
+        puts variable("arg").ruby_value
       end
     end
     
