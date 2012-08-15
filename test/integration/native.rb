@@ -26,4 +26,22 @@ class IntegrationTests::NativeTest < Test::Unit::TestCase
     tracks, output = run_source(program, true)
     assert_equal(10.to_f.to_s, output)
   end
+  
+  
+  def test_simple
+    program = <<-EOD
+
+    DEFINE car {}
+
+    civic = car {
+      age = 5
+    }
+
+    type = COMPUTE system.type_of ON civic
+
+    EOD
+
+    tracks = run_source(program)
+    assert_equal(".car", tracks.last.variables["type"].ruby_value)
+  end
 end

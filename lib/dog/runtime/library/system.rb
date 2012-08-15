@@ -21,12 +21,13 @@ module Dog::Library
       end
     end
     
-    implementation "type" do
+    implementation "type_of" do
       argument "value"
       
       body do
-        value = args.first.type
-        return ::Dog::Value.string_value(value)
+        value = variable("value")
+        type = value.type
+        dog_return ::Dog::Value.string_value(type)
       end
     end
   end

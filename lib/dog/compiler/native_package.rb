@@ -102,12 +102,13 @@ module Dog
         
         def dog_return(value)
           # TODO - Handle multiple returns
-          
           if value.kind_of? ::Dog::Value then
             track.stack.push(value)
           else
             track.stack.push(::Dog::Value.from_ruby_value(value))
           end
+          
+          throw :return
         end
       end
       
@@ -165,7 +166,10 @@ module Dog
         self.package.implementation["arguments"] = i.arguments
         self.package.implementation["optional_arguments"] = i.optional_arguments
         self.package.implementation["instructions"] = Proc.new do |track|
-          Helper.new(track).instance_exec(track, &i.instructions)
+          catch :return do
+            Helper.new(track).instance_exec(track, &i.instructions)
+          end
+          
           track.finish
         end
         
