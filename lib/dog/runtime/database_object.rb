@@ -30,7 +30,7 @@ module Dog
     def from_hash(hash)
       for key, value in hash do
         self.instance_variable_set("@#{key}".intern, value)
-      end      
+      end
     end
     
     def self.from_hash(hash)

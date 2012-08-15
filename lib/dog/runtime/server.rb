@@ -49,7 +49,7 @@ module Dog
       def layout(name)
         # Intentionally blank. Used by our template system.
       end
-      
+
       def verify_current_user(message = "You need to be logged in when performing this operation")
         @output = {}
         
