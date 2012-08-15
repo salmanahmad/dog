@@ -29,8 +29,8 @@ class CompilerTests::BundleTest < Test::Unit::TestCase
     
     bundle_hash = bundle.to_hash
     
-    bundle = ::Dog::Bundle.from_hash(bundle_hash)
-    tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})
+    x = ::Dog::Bundle.from_hash(bundle_hash)
+    tracks = ::Dog::Runtime.run(x, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})
     assert_equal(5, tracks.last.variables["x"].ruby_value)
     
   end

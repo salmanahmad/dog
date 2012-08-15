@@ -150,9 +150,9 @@ class Compile < Command
       bundle_file.write(JSON.dump(bundle.to_hash))
       
       bundle_file.close
-
+      
       puts bundle.dump_bytecode if dump
-
+      
       return true
     rescue Dog::CompilationError => error
       puts error

@@ -25,6 +25,7 @@ module Dog
       processed_symbols = symbols.clone
       
       for name, symbol in symbols do
+        processed_symbols[name] = symbol.clone
         processed_implementations = []
         
         for implementation in symbol["implementations"] do
