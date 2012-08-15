@@ -41,9 +41,9 @@ module Dog::Instructions
     end
 
     def self.from_hash(hash)
-      klass = hash.shift
+      klass = hash["class"]
       klass = Kernel::qualified_const_get(klass)
-      object = klass.new
+      object = klass.allocate
       
       for key, value in hash do
         if object.attributes.include? key then

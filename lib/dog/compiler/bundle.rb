@@ -88,7 +88,17 @@ module Dog
       return bundle
     end
     
-    
+    def dump_bytecode
+      dump = ""
+      for name, package in self.packages do
+        dump << "== package:%#{name}% =="
+        dump << "\n"
+        dump << "\n"
+        dump << package.dump_bytecode
+      end
+      
+      return dump
+    end
     
     
     

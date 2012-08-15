@@ -10,3 +10,4 @@ END
 
 
 PRINT "Hello, World!"
+COMPUTE foo

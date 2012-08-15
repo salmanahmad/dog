@@ -4,7 +4,6 @@
 Plan:
 
 	Figue out communities and collections - use package or not?
-	Serializing packages and tracks and bundles
 	Predicates and Queries
 	Access Scope Modifiers
 	Calling Dog code from ruby - handling checkpoints, etc.

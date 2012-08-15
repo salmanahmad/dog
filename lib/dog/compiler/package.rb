@@ -38,8 +38,8 @@ module Dog
           processed_implementations << processed_implementation
         end
         
-        processed_symbols["implementations"] = processed_implementations
-        processed_symbols["value"] = symbol["value"].to_hash rescue nil
+        processed_symbols[name]["implementations"] = processed_implementations
+        processed_symbols[name]["value"] = symbol["value"].to_hash if symbol["value"]
       end
       
       return {
@@ -49,7 +49,27 @@ module Dog
     end
 
     def self.from_hash(hash)
-      # TODO
+      package = self.new
+      package.name = hash["name"]
+      package.symbols = hash["symbols"]
+      
+      for name, symbol in package.symbols do
+        implementations = []
+        
+        for implementation in symbol["implementations"] do
+          
+          implementation["instructions"].map! do |instruction|
+            ::Dog::Instructions::Instruction.from_hash(instruction)
+          end
+          
+          implementations << implementation
+        end
+        
+        symbol["implementations"] = implementations
+        symbol["value"] = ::Dog::Value.from_hash(symbol["value"]) if symbol["value"]
+      end
+      
+      return package
     end
 
     def dump_bytecode
@@ -145,6 +165,7 @@ module Dog
       @finalized = true
 
       # TODO - Add bytecode verification. This include removing any duplicate empty symbols
+      # TODO - Also consider catching patterns like push_nil pop
 
       for name, symbol in self.symbols do
         for implementation in symbol["implementations"] do
