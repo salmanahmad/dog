@@ -151,8 +151,8 @@ module Dog
           table = []
           mapping = {}
 
-          instructions.each_index do |i|
-            instruction = instructions[i]
+          implementation["instructions"].each_index do |i|
+            instruction = implementation["instructions"][i]
             mapping[instruction] = i
           end
 

@@ -81,4 +81,21 @@ class IntegrationTests::LoopTest < Test::Unit::TestCase
     tracks = run_source(program)
     assert_equal(-5, tracks.last.variables["i"].value)
   end
+  
+  def test_break_in_function
+    program = <<-EOD
+    DEFINE foo DO
+      i = WHILE true DO
+        BREAK "Hi"
+      END
+      
+      PRINT i
+    END
+    
+    COMPUTE foo
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("Hi", output)
+  end
 end
