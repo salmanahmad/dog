@@ -25,9 +25,11 @@ module Dog
         end
         
         @config ||= {
-          'port' => 4242, 
+          'port' => 4242,
           'dog_prefix' => '/dog',
-          'database' => database_default
+          'database' => database_default,
+          'facebook_app_id' => '433590860017315',
+          'facebook_app_secret' => '31cb6a2193855a179f3df40274b4ca27'
         }
         
         config_file ||= File.join(Runtime.bundle_directory, "config.json")

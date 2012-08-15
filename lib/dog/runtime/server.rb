@@ -197,6 +197,24 @@ module Dog
           @output.to_json
         end
 
+        get prefix + '/account/:provider/login' do |provider|
+          return { "success" => true } if session[:current_user]
+
+          @output = {}
+
+          case provider
+          when 'facebook'
+            redirect to( ::Dog::FacebookHelpers::oauth_dialog_url )
+          else
+            @output["success"] = false
+            @output["errors"] ||= []
+            @output["errors"] << "Unsupported OAuth provider."
+          end
+
+          content_type 'application/json'
+          @output.to_json
+        end
+
         get prefix + '/account/logout' do
           session.clear
 

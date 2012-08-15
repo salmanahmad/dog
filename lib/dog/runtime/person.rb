@@ -93,10 +93,6 @@ module Dog
       self.find_one({"email" => email})
     end
     
-    def self.find_by_google(google)
-      self.find_one({"google" => google})
-    end
-    
     def self.find_ids_for_predicate(conditions)
       self.find(conditions, {:fields => ["_id"]}).to_a
     end
