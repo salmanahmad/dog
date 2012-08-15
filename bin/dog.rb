@@ -119,6 +119,14 @@ class Compile < Command
   end
   
   def run(args)
+    
+    if args.first == "-asm" then
+      dump = true
+      args.shift
+    else
+      dump = false
+    end
+    
     source_filename = args.first
     source_code = ""
     source_filename += ".dog"
@@ -143,7 +151,7 @@ class Compile < Command
       
       bundle_file.close
       
-      puts bundle.packages[""].dump_bytecode
+      puts bundle.packages[""].dump_bytecode if dump
       
       return true
     rescue Dog::CompilationError => error

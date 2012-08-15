@@ -1,7 +1,10 @@
 
 
-WHILE true DO
-    
+DEFINE foo ON bar DO
+  c = 1
+  WHILE c < 10 DO
+    c = c + 1
+  END
 END
 
 
