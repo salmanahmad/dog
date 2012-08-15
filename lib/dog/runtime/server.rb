@@ -343,11 +343,11 @@ module Dog
 
         post prefix + '/stream/object/:id' do |id|
           object = ::Dog::StreamObject.find_by_id(id)
-          
+
           if object.class == ::Dog::RoutedTask then
             task = object
             response = {}
-            
+
             for property in task.properties do
               if property.direction == "input" then
                 response[property.identifier] = params[property.identifier]
@@ -356,10 +356,10 @@ module Dog
                 end
               end
             end
-            
+
             task.responses << response
             task.save
-            
+
             if task.completed? then
               track = ::Dog::Track.find_by_id(task.track_id)
               if track.asking_id == task.id.to_s then
@@ -367,13 +367,13 @@ module Dog
                 ::Dog::Runtime.run_track(track)
               end
             end
-            
+
           elsif object.class == ::Dog::RoutedEvent then
-            
+
             # TODO - Handle the package here
             track = ::Dog::Track.new(object.handler)
             track.control_ancestors = [::Dog::Track.root.id]
-            
+
             argument = {}
             for property in object.properties do
               argument[property.identifier] = params[property.identifier]
@@ -392,7 +392,7 @@ module Dog
 
             ::Dog::Runtime.run_track(track)
           end
-          
+
           content_type 'application/json'
           return {
             "success" => true
@@ -403,7 +403,7 @@ module Dog
 
 
         get '*' do
-          path = params[:splat].first
+          path = params['splat'].first
           path = "/index.html" if path == "/"
           path = settings.public_folder + path
 
@@ -415,7 +415,7 @@ module Dog
                 template = settings.public_folder + match[1]
                 template_content = File.open(template, &:read)
                 path_content = File.open(path, &:read)
-                
+
                 erb path_content, :layout => template_content, :views => '/'
               else
                 send_file path
