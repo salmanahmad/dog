@@ -465,13 +465,4 @@ module Dog::Instructions
       track.finish
     end
   end
-
-  class Print < Instruction
-    def execute(track)
-      message = track.stack.pop
-      puts message.ruby_value
-
-      track.stack.push(nil)
-    end
-  end
 end

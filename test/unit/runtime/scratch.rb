@@ -13,6 +13,13 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
   include RuntimeHelper
   include Dog
 
+  def print_helper(expression)
+    ::Dog::Nodes::Call.new(
+      ::Dog::Nodes::Access.new(["system", "print"]),
+      [expression]
+    )
+  end
+
   def test_simple
     program = Nodes::Nodes.new([
       Nodes::Assign.new(["i"], Nodes::StringLiteral.new("Hello, World!")),
@@ -27,7 +34,7 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
   def test_function_call
     program = Nodes::Nodes.new([
       Nodes::FunctionDefinition.new("foo", Nodes::Nodes.new([
-        Nodes::Print.new(Nodes::StringLiteral.new("Foo Called!"))
+        print_helper(Nodes::StringLiteral.new("Foo Called!"))
       ])),
       Nodes::Call.new(Nodes::Access.new(["foo"]))
     ])
@@ -39,7 +46,7 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
   def test_function_returns
     program = Nodes::Nodes.new([
       Nodes::FunctionDefinition.new("foo", Nodes::Nodes.new([
-        Nodes::Print.new(Nodes::StringLiteral.new("Foo Called!")),
+        print_helper(Nodes::StringLiteral.new("Foo Called!")),
         Nodes::Return.new(Nodes::NumberLiteral.new(3.14))
       ])),
       Nodes::Call.new(Nodes::Access.new(["foo"]))

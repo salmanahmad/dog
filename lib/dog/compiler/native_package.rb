@@ -168,8 +168,8 @@ module Dog
         self.package.implementation["instructions"] = Proc.new do |track|
           catch :return do
             Helper.new(track).instance_exec(track, &i.instructions)
+            track.stack.push(::Dog::Value.null_value)
           end
-          
           track.finish
         end
         

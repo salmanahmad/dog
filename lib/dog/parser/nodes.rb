@@ -688,31 +688,6 @@ module Dog::Nodes
       package.add_to_instructions([r])
     end
   end
-
-  class Print < Node
-    # TODO - Remove this in favor of a system library call
-    attr_accessor :expression
-
-    def initialize(expression)
-      @expression = expression
-    end
-
-    def compile(package)
-      if expression then
-        expression.compile(package)
-      else
-        null = ::Dog::Instructions::PushNull.new
-        set_instruction_context(null)
-        package.add_to_instructions([null])
-      end
-
-      print = ::Dog::Instructions::Print.new
-      set_instruction_context(print)
-      package.add_to_instructions([print])
-    end
-  end
-  
-  
   
 #  Missing:
 #  
