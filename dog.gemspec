@@ -32,10 +32,10 @@ spec = Gem::Specification.new do |s|
   s.add_dependency 'tilt'
   s.add_dependency 'uuid'
   s.add_dependency 'rack-test'
-  
+  s.add_dependency 'httparty'
+
   s.add_dependency 'blather'
-  
-  s.add_development_dependency 'httparty'
+
   s.add_development_dependency 'rake'
 
   #s.extra_rdoc_files = %w[README.rdoc]
