@@ -22,11 +22,67 @@ module Dog
     end
 
     def to_hash
-      # TODO
+      processed_symbols = symbols.clone
+      
+      for name, symbol in symbols do
+        processed_implementations = []
+        
+        for implementation in symbol["implementations"] do
+          processed_implementation = implementation.clone
+          processed_implementation["instructions"] = []
+          
+          for instruction in implementation["instructions"] do
+            processed_implementation["instructions"] << instruction.to_hash
+          end
+          
+          processed_implementations << processed_implementation
+        end
+        
+        processed_symbols["implementations"] = processed_implementations
+        processed_symbols["value"] = symbol["value"].to_hash rescue nil
+      end
+      
+      return {
+        "name" => self.name,
+        "symbols" => processed_symbols
+      }
     end
 
     def self.from_hash(hash)
       # TODO
+    end
+
+    def dump_bytecode
+      dump = ""
+      
+      for name, symbol in self.symbols do
+        for implementation in symbol["implementations"] do
+          arg_list = []
+          arg_count = implementation["arguments"].size rescue 0
+          arg_count.times { arg_list << "void" }
+          
+          dump << "== asm:#{name}(#{arg_list.join(",")}) ==\n"
+          dump << "== catch ==\n"
+          
+          for entry in implementation["catch_table"] do
+            dump << entry.join(" ") << "\n"
+          end
+          
+          dump << "\n"
+          
+          count = 0
+          for instruction in implementation["instructions"] do
+            dump << sprintf("%04d ", count) << instruction.bytecode.join(" ") << "\n"
+            count += 1
+          end
+          
+          dump << "\n"
+          dump << "\n"
+          
+        end
+      end
+      
+      return dump
     end
 
     def pop_symbol

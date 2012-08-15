@@ -54,6 +54,19 @@ module Dog::Instructions
       return object
     end
 
+    def bytecode
+      name = ::Dog::Helper.underscore(self.class.name.split("::").last)
+      code = [name.intern.inspect]
+      
+      for attribute in self.attributes.reverse do
+        next if attribute.to_s == "line"
+        next if attribute.to_s == "file"
+        code << self.send(attribute.intern).inspect
+      end
+      
+      return code
+    end
+
     def execute(track)
       raise "Execute must be overridden by a subclass of instruction"
     end
@@ -66,7 +79,7 @@ module Dog::Instructions
   end
 
   class Push < Instruction
-    attr_accessor :value
+    attribute :value
     
     def initialize(value)
       @value = value
@@ -75,10 +88,27 @@ module Dog::Instructions
     def execute(track)
       track.stack.push(@value)
     end
+    
+    def to_hash
+      hash = super
+      hash["value"] = self.value.to_hash
+    end
+    
+    def self.from_hash(hash)
+      push = super(hash)
+      push.value = ::Dog::Value.from_hash(push.value)
+    end
+    
+    def bytecode
+      code = super
+      code.pop
+      code.push(self.value.inspect)
+      return code
+    end
   end
 
   class PushString < Instruction
-    attr_accessor :value
+    attribute :value
 
     def initialize(value)
       @value = value
@@ -90,7 +120,7 @@ module Dog::Instructions
   end
 
   class PushNumber < Instruction
-    attr_accessor :value
+    attribute :value
 
     def initialize(value)
       @value = value
@@ -126,7 +156,7 @@ module Dog::Instructions
   end
   
   class Access < Instruction
-    attr_accessor :path_size
+    attribute :path_size
 
     def initialize(path_size)
       @path_size = path_size
@@ -159,7 +189,7 @@ module Dog::Instructions
   end
 
   class Assign < Instruction
-    attr_accessor :path_size
+    attribute :path_size
 
     def initialize(path_size)
       @path_size = path_size
@@ -202,7 +232,7 @@ module Dog::Instructions
   end
 
   class ReadVariable < Instruction
-    attr_accessor :variable_name
+    attribute :variable_name
 
     def initialize(variable_name)
       @variable_name = variable_name
@@ -240,7 +270,7 @@ module Dog::Instructions
   end
 
   class WriteVariable < Instruction
-    attr_accessor :variable_name
+    attribute :variable_name
 
     def initialize(variable_name)
       @variable_name = variable_name
@@ -254,7 +284,7 @@ module Dog::Instructions
   end
 
   class Perform < Instruction
-    attr_accessor :operation
+    attribute :operation
 
     def initialize(operation)
       @operation = operation
@@ -292,7 +322,7 @@ module Dog::Instructions
   end
 
   class Jump < Instruction
-    attr_accessor :offset
+    attribute :offset
 
     def initialize(offset)
       @offset = offset
@@ -304,7 +334,7 @@ module Dog::Instructions
   end
 
   class JumpIfTrue < Instruction
-    attr_accessor :offset
+    attribute :offset
 
     def initialize(offset)
       @offset = offset
@@ -320,7 +350,7 @@ module Dog::Instructions
   end
 
   class JumpIfFalse < Instruction
-    attr_accessor :offset
+    attribute :offset
 
     def initialize(offset)
       @offset = offset
@@ -336,7 +366,7 @@ module Dog::Instructions
   end
 
   class Throw < Instruction
-    attr_accessor :symbol
+    attribute :symbol
 
     def initialize(symbol)
       @symbol = symbol
@@ -369,8 +399,8 @@ module Dog::Instructions
   end
 
   class Call < Instruction
-    attr_accessor :arg_count
-    attr_accessor :has_optionals
+    attribute :arg_count
+    attribute :has_optionals
 
     def initialize(arg_count, has_optionals)
       @arg_count = arg_count
@@ -419,8 +449,8 @@ module Dog::Instructions
   end
 
   class AsyncCall < Instruction
-    attr_accessor :arg_count
-    attr_accessor :has_optionals
+    attribute :arg_count
+    attribute :has_optionals
     
     def initialize(arg_count, has_optionals)
       @arg_count = arg_count

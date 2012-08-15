@@ -140,7 +140,10 @@ class Compile < Command
       bundle_file = File.open(bundle_filename, "w")
       
       bundle_file.write(JSON.dump(bundle.to_hash))
+      
       bundle_file.close
+      
+      puts bundle.packages[""].dump_bytecode
       
       return true
     rescue Dog::CompilationError => error
@@ -151,6 +154,7 @@ class Compile < Command
       puts "Error: An unknown compilation error occured: "
       puts
       puts error
+      raise error
     end
     
     return false
