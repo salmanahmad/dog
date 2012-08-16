@@ -18,6 +18,8 @@ require 'sinatra/async'
 require 'uuid'
 require 'json'
 require 'mongo'
+require 'httparty'
+require 'json'
 
 # TODO Add back the Instant Messaging Capabilities.
 #require 'blather/client/client'
@@ -43,6 +45,7 @@ require File.join(File.dirname(__FILE__), 'runtime/value.rb')
 require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
 
 Dir[File.join(File.dirname(__FILE__), "runtime/library", "*.rb")].each { |file| require file }
+Dir[File.join(File.dirname(__FILE__), "runtime/external", "*.rb")].each { |file| require file }
 
 module Dog
   
