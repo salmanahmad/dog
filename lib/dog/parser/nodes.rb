@@ -269,6 +269,75 @@ module Dog::Nodes
     end
   end
   
+  class CommunityDefinition < Node
+    attr_accessor :name
+    attr_accessor :profile_name
+    attr_accessor :properties
+    
+    def initialize(name, profile_name, properties = [])
+      @name = name
+      @profile_name = profile_name
+      @properties = properties
+    end
+    
+    def compile(package)
+      # TODO - Abstract this with structure definition
+      package.push_symbol(@name)
+      
+      value = ::Dog::Value.new("community", {})
+      value["name"] = ::Dog::Value.string_value(@name)
+      value["profile"] = ::Dog::Value.string_value(@profile_name)
+      value["package"] = ::Dog::Value.string_value(package.name)
+      
+      package.current_context["value"] = value
+      
+      package.add_implementation
+      
+      value = ::Dog::Value.new("profile", {})
+      structure = ::Dog::Instructions::Push.new(value)
+      set_instruction_context(structure)
+      package.add_to_instructions([structure])
+      
+      if @properties then
+        for property in @properties do
+          # TODO - Handle "type"
+          name = property["name"]
+          default = property["default"]
+          
+          if name.kind_of? String then
+            push_string = ::Dog::Instructions::PushString.new(name)
+            set_instruction_context(push_string)
+            package.add_to_instructions([push_string])
+          elsif name.kind_of? Numeric then
+            push_number = ::Dog::Instructions::PushNumber.new(name)
+            set_instruction_context(push_number)
+            package.add_to_instructions([push_number])
+          else
+            raise "Compilation error"
+          end
+          
+          if default then
+            default.compile(package)
+          else
+            null = ::Dog::Instructions::PushNull.new
+            set_instruction_context(null)
+            package.add_to_instructions([null])
+          end
+          
+          assign = ::Dog::Instructions::Assign.new(2)
+          set_instruction_context(assign)
+          package.add_to_instructions([assign])
+        end
+      end
+      
+      package.pop_symbol
+      
+      null = ::Dog::Instructions::PushNull.new
+      set_instruction_context(null)
+      package.add_to_instructions([null])
+    end
+  end
+  
   class Definition < Node
     attr_accessor :name
     attr_accessor :value

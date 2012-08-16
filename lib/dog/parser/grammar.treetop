@@ -940,14 +940,10 @@ grammar Dog
   end
   
   rule community_definition
-  # FIXME
-    'DEFINE' s 'COMMUNITY' s identifier sn? structure_properties {
+    'DEFINE' s 'COMMUNITY' s name:identifier s 'USING' s profile_name:identifier sn? structure_properties {
       def transform
-        node = ::Dog::Nodes::CommunityDefinition.new
+        node = ::Dog::Nodes::CommunityDefinition.new(name.text_value, profile_name.text_value, structure_properties.transform)
         node.line = self.line
-        
-        node.name = identifier.text_value
-        node.properties = structure_properties.compile
         
         return node
       end

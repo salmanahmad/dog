@@ -4,9 +4,11 @@ Plan:
 
 	Figue out communities and collections - use package or not?
 	Predicates and Queries
-	Access Scope Modifiers
+	Access Scope Modifiers - Properties
+		Update compute and function calls to just use access - this paves the road for having dynamic properties for structures - think about collections and doing COMPUTE cars.type
+	INCLUDE / Testing PACKAGE
 	Calling Dog code from ruby - handling checkpoints, etc.
-	Update compute and function calls to just use access - this paves the road for having dynamic properties for structures - think about collections and doing COMPUTE cars.type
+	
 
 
 Things that are bothering me:
