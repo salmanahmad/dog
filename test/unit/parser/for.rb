@@ -49,21 +49,22 @@ END
   end
 
   def test_until
-    program = <<-EOD
-    FOR EACH a IN b DO
-      c = a + 1
-    UNTIL c == 7
-    EOD
-
-    @parser.parse(program.strip)
-
-    program = <<-EOD
-    FOR EACH a IN b DO
-      c = a + 1
-    UNTIL c + 7 - 9
-    EOD
-
-    @parser.parse(program.strip)
+    # TODO - Bring this back maybe?
+    #program = <<-EOD
+    #FOR EACH a IN b DO
+    #  c = a + 1
+    #UNTIL c == 7
+    #EOD
+    #
+    #@parser.parse(program.strip)
+    #
+    #program = <<-EOD
+    #FOR EACH a IN b DO
+    #  c = a + 1
+    #UNTIL c + 7 - 9
+    #EOD
+    #
+    #@parser.parse(program.strip)
 
   end
 

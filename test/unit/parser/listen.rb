@@ -25,12 +25,6 @@ class ParserTests::ListenTest < Test::Unit::TestCase
     @parser.parse("LISTEN TO PEOPLE FROM mit WHERE age > 19 VIA sms FOR event")
   end
   
-  def test_listen_at
-    @parser.parse("LISTEN TO PUBLIC VIA chat AT '/path' FOR event")
-    @parser.parse("LISTEN TO PUBLIC VIA chat AT '/some/nested/path' FOR event")
-    @parser.parse("LISTEN TO PUBLIC VIA chat AT '' FOR event")
-  end
-  
   def test_for_required
     assert_raise Dog::ParseError do 
       @parser.parse("LISTEN TO students VIA sms")

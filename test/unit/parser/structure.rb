@@ -15,60 +15,159 @@ class ParserTests::StructureTest < Test::Unit::TestCase
     @parser = Dog::Parser.new
     @parser.parser.root = :structure
   end
+  
+  def test_definition
+    struct = <<-EOD
+      car {}
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
 
-  def test_simple
+
+
+    @parser.parser.root = :structure_definition
+    
     struct = <<-EOD
-      DEFINE event post {
-        name
-        string
+      DEFINE car {
+      
+        model = "hi"
       }
     EOD
     struct.strip!
     @parser.parse(struct)
+    
+    
   end
   
-  def test_optional
+  def test_empty
     struct = <<-EOD
-      DEFINE event post {
-        optional name
-        string
-      }
+      {}
     EOD
     struct.strip!
     @parser.parse(struct)
-  end
-  
-  def test_default
-    struct = <<-EOD
-      DEFINE event post {
-        optional name = "foo"
-        string
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-  end
-  
-  def test_input_output
-    struct = <<-EOD
-      DEFINE event post {
-        optional input name = "foo"
-        output string
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
-  end
-  
-  def test_input_output_2
-    struct = <<-EOD
-      DEFINE event post {
-        optional input name = "foo"
-        required output string
-      }
-    EOD
-    struct.strip!
-    @parser.parse(struct)
+    
   end
 
+  def test_single_line
+    struct = <<-EOD
+      { name = "name", string = "String" }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    
+    struct = <<-EOD
+      { name = "name"       ,      string = "String" }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+  end
+
+  def test_multi_line
+    struct = <<-EOD
+{
+  name = "Name",
+  
+  ,,,,
+  
+  string = "string"
+}
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    
+    
+    struct = <<-EOD
+    {
+      name = "Name",
+      string = "string"
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+
+    struct = <<-EOD
+    {
+      name = "Name",,,
+      string = "string"
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+
+    
+    struct = <<-EOD
+    {
+      name = "Name"
+      string = "string"
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    
+    struct = <<-EOD
+    {
+      
+      name = "Name"
+      
+      
+      string = "string"
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    struct = <<-EOD
+    {
+      name = "Name"
+  
+  ,,   ,      
+  
+      string = "string"
+    
+      5 = 7
+    
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+    
+    
+    struct = <<-EOD
+    {name = "Name"
+  
+  ,,   ,      
+  
+      string = "string"
+    
+      ,,, 
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+    
+  end
+  
+  def test_instance
+    
+    struct = <<-EOD
+     person {name = "Name"
+  
+  ,,   ,      
+  
+      string = "string"
+    
+      ,,, 
+    }
+    EOD
+    struct.strip!
+    @parser.parse(struct)
+  end
+  
 end
