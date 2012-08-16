@@ -2,7 +2,7 @@
 
 Plan:
 
-	Figue out communities and collections - use package or not?
+	Async / Pending Structures
 	Predicates and Queries
 	Access Scope Modifiers - Properties
 		Update compute and function calls to just use access - this paves the road for having dynamic properties for structures - think about collections and doing COMPUTE cars.type
