@@ -183,6 +183,8 @@ grammar Dog
     /
     import
     /
+    package
+    /
     print
     /
     inspect
@@ -961,6 +963,21 @@ grammar Dog
   # ===================
   # = Others Commands =
   # ===================
+  
+  rule package 
+    'PACKAGE' s identifier {
+      def package(call_root = false)
+        return identifier.text_value
+      end
+      
+      def compile
+        node = ::Dog::Nodes::Package.new(identifier.text_value)
+        node.line = self.line
+        
+        return node
+      end
+    }
+  end
   
   rule perform 
     'PERFORM' s string {

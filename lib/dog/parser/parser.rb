@@ -21,12 +21,12 @@ module Dog
       attr_accessor :grammar_loaded
     end
 
+    attr_accessor :parser
+
     def self.parse(program, filename = "")
       parser = self.new
       parser.parse(program, filename)
     end
-
-    attr_accessor :parser
 
     def initialize
       unless Parser.grammar_loaded then

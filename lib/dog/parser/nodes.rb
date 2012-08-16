@@ -35,6 +35,38 @@ module Dog::Nodes
       return output
     end
     
+    def root
+      pointer = self
+      while pointer.parent do
+        pointer = pointer.parent
+      end
+      
+      return pointer
+    end
+    
+    def package(call_root = true)
+      return @package if @package
+      
+      root = self.root
+      
+      if call_root then
+        @package = root.package(false)
+      else
+        if elements then
+          for element in elements do
+            p = element.package(false)
+            @package = p if p
+          end
+        end
+      end
+      
+      if root == self && @package.nil? then
+        @package = ""
+      end
+      
+      return @package
+    end
+    
     def transform
       if elements && elements.first then
         return self.elements.first.transform

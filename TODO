@@ -1,6 +1,5 @@
 
 
-
 Plan:
 
 	Figue out communities and collections - use package or not?
@@ -17,6 +16,8 @@ Things that are bothering me:
 	Nested function names / type names / access paths?
 	Bootstraping the Type type
 	External functions - how safe is my "custom method" solution like external_parameters
+	Transpiling langauges: tamejs and coffeescript
+	Can I compile down to JVM? Is it possible to have the asynchronous stuff *NOT* at the VM level. Basically, how much of Dog could I re-implement ontop of a general purpose programming language with good framework support?
 
 
 
