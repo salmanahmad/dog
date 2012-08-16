@@ -10,16 +10,16 @@
 #END
 
 
-DEFINE task label {
-  input string
+DEFINE label {
+  string input
 }
 
-DEFINE event video {
+DEFINE video {
   title
   description
 }
 
-DEFINE message m {
+DEFINE message {
   body
 }
 
@@ -27,7 +27,7 @@ LISTEN TO salman VIA http FOR videos
 
 ASK salman VIA stream TO label ON images
 
-NOTIFY salman VIA stream OF m USING body: "Hello, World!"
+NOTIFY salman VIA stream OF m
 
 DEFINE fib ON n DO
   IF n == 0 THEN
@@ -71,7 +71,7 @@ PRINT 'Before Add!'
 
 
 PRINT COMPUTE add ON 5, 8
-PRINT COMPUTE add ON b:10, a:8
+PRINT COMPUTE add ON b = 10, a = 8
 
 PRINT 'After Add!'
 

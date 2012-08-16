@@ -15,7 +15,7 @@ module Dog::Rules
     
     def applicable_nodes
       [
-        ::Dog::Nodes::Reply,
+        ::Dog::Nodes::Perform,
         ::Dog::Nodes::Return
       ]
     end
@@ -23,12 +23,12 @@ module Dog::Rules
     def apply(node)
       parent = node
       while parent = parent.parent do
-        if [::Dog::Nodes::On, ::Dog::Nodes::DefineFunction].include? parent.class then
+        if [::Dog::Nodes::OnEachDefinition, ::Dog::Nodes::FunctionDefinition].include? parent.class then
           return
         end
       end
       
-      report_error_for_node(node, "#{node.class.name.split("::").last} cannot appear in top level scope. They must appear inside a function.")
+      self.compiler.report_error_for_node(node, "#{node.class.name.split("::").last} cannot appear in top level scope. They must appear inside a function.")
     end
     
   end 

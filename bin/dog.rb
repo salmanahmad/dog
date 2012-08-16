@@ -121,6 +121,7 @@ class Compile < Command
   def run(args)
     source_filename = args.first
     source_code = ""
+    source_filename += ".dog"
     
     begin
       source_code = File.open(source_filename).read
@@ -130,14 +131,16 @@ class Compile < Command
     end
     
     begin
+      # TODO - Update this to handle multiple files
+      
       bark = Dog::Parser.parse(source_code, source_filename)
-      bite = Dog::Compiler.compile(bark, source_filename)
+      bundle = Dog::Compiler.compile([[bark, source_filename]])
       
-      bite_code_filename = File.basename(source_filename, ".dog") + ".bite"
-      bite_code_file = File.open(bite_code_filename, "w")
+      bundle_filename = File.basename(source_filename, ".dog") + ".bundle"
+      bundle_file = File.open(bundle_filename, "w")
       
-      bite_code_file.write(JSON.dump(bite))
-      bite_code_file.close
+      bundle_file.write(JSON.dump(bundle.to_hash))
+      bundle_file.close
       
       return true
     rescue Dog::CompilationError => error
@@ -211,8 +214,10 @@ class Run < Command
   
   def run(args)
     begin
-      Dog::Runtime.run_file(args.first, parse_options(args))
+      bundle_filename = args.first + ".bundle"
+      Dog::Runtime.run_file(bundle_filename, parse_options(args))
     rescue Exception => e
+      raise e
       puts e
     end
   end
@@ -237,7 +242,7 @@ class Debug < Command
   end
   
   def run(args)
-    bite_code_file = File.basename(args.first, '.dog') + '.bite'
+    bundle_filename = args.first + ".bundle"
     
     compile_command = Compile.new
     unless compile_command.run(args) then
@@ -251,13 +256,48 @@ class Debug < Command
     }
     
     begin
-      Dog::Runtime.run_file(bite_code_file, options)
+      Dog::Runtime.run_file(bundle_filename, options)
     rescue Exception => e
       puts e
       raise e
     end
   end
   
+end
+
+class Reset < Command
+  Command.register(self)
+  
+  def description
+    "Clears the database associated with the dog application."
+  end
+  
+  def usage
+    super
+    puts
+    puts "Usage: dog reset [FILE] [options]"
+    puts
+    puts "  Clears the database associated with the dog application. Takes the same options as 'run'."
+    puts
+  end
+
+  def run(args)
+    bundle_filename = args.first + ".bundle"
+    json = File.open(bundle_filename).read
+    hash = JSON.load(json)
+    bundle = ::Dog::Bundle.from_hash(hash)
+    
+    
+    run_command = Run.new
+    
+    options = run_command.parse_options(args)
+    options["database"] = {
+      "reset" => true
+    }
+    
+    ::Dog::Runtime.initialize(bundle, bundle_filename, options)
+  end
+
 end
 
 class Shell < Command
@@ -338,11 +378,11 @@ class Version < Command
   
   def usage
     super
-    puts 
+    puts
     puts "Usage: dog version"
     puts
     puts "  #{description}"
-    puts    
+    puts
   end
   
   def run(args)

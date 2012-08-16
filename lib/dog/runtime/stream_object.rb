@@ -7,6 +7,8 @@
 # above copyright notice is included.
 #
 
+require File.join(File.dirname(__FILE__), '../helper.rb')
+
 module Dog
   class StreamObject < DatabaseObject
     include Routability
@@ -66,7 +68,21 @@ module Dog
       hash.delete("_id")
       hash["id"] = self.id.to_s
       hash["track_id"] = self.track_id.to_s
-      
+      hash["name"] = hash["name"].split('.')
+      hash["type"] = case self.type.name
+      when 'Dog::RoutedEvent'
+        'listen'
+      when 'Dog::RoutedMessage'
+        'notify'
+      when 'Dog::RoutedTask'
+        'ask'
+      else
+        raise 'Invalid StreamObject type: ' + self.type.name
+      end
+      # FIXME HACK -- remove this once the name is pluralized properly on backend
+      if hash["type"] == 'listen'
+        hash["name"][-1] = ::Helper::Language::pluralize( hash["name"][-1] )
+      end
       return hash
     end
     

@@ -23,7 +23,7 @@ class ScratchTest < Test::Unit::TestCase
   end
   
   def test_assignment
-    @parser.parse("LISTEN TO public VIA http FOR images")
+    pp @parser.parse("foo.bar")
   end
   
 end

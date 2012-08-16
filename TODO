@@ -1,12 +1,74 @@
 
-Ensure the proper ASTs
+Virtual Properties
 
-Handle TODOs
+Macros
+	Do I feel okay about macros and side-effects?
 
-Check status on http_response
+Criticisms of Dog:
+	It is a new language (security issues, performance problems, lack of stability)
+	The syntax is not the easiest or most conducive for building large applications - and do we have the property suitable abstraction capabilities?
+	The lack of library support
+	It is a special purpose language - however, it that purpose too broad or too constrained? What if I wanted to build something off the trodden path --- can I? Do I have low level enough support to do things like implement a bookmarklet or a TCP handling mechanism?
+	Semantics --- are they useful? How hard will the client-side javascript be?
 
+Pending structures
+	- Are they able to be shared? How do you pass in a channel to another function for call backs?
+	- Investigate the API with Go channels (especially timers)
+	- Investigate the API with Python yield
+
+
+Things left to implement:
+
+	Import
+
+	Communities
+
+	Predicates
+
+	External functions
+
+	Implement unary operator
+
+	Dog error reporting
+
+	Dog unit test cases
+
+	Add support for nested collections and nested functions inside of "ACCESS" - this would be the so called "cascasing" scope modifier.
+
+	Update COMPUTE, ASK, LISTEN, etc to take an expression rather than just an identifier. Note: This does mean augmenting defintions with package information
+
+	using @state instead of track.has_visited?
+
+	Evaluator / Interpretter (related to bite code)
+
+	Decide on anonymous functions vs blocks vs channels
+
+Done:
+
+	Organiation of the bite code and symbol table (filenames)
+
+	System libraries (The ability to implement dog functions in Ruby)
+
+	Scopes when ACCESSing
+
+	Add a "type", "definition" or "symbol" structure to refer to definitions and box it as a value.
+
+	Collections API
+
+	People
+
+	Null Pointer references for symbol look ups. Don't seem to be handled too well. Try to use system.add and it will not work.
+
+
+
+Add unit parser tests for:
+	import
+	config
+	
 dog compile and dog run
 	Extensions are optional..
+
+Dog restart instead of Dog debug
 
 Error codes
 	Integration with a discussion page
@@ -22,7 +84,6 @@ Configuration file should be called:
 	
 	Also consider including a read only CONFIG command to give access from within Dog
 	
-
 Line numbers should be formatted as:
 	"In line {number} of {file}" rather than "file:number"
 
@@ -44,56 +105,15 @@ Organize the symbol table hierarchically
 
 
 
-Dog restart instead of Dog debug
-
-
-
-
-		I need to add a VALUE class to hold all of the primitive stuff...
-
-
-
-
-Improve the space efficiency of the bite code generation
-
-
-
-
-Serialize the stack
-
-Runtime tree traversal... (updating the "program counter")
-
-What do things like "AccessHead" return and place on the stack?
-
-What about non-primative stack placements like people? Do we need a language wide "json" serialization architecture...
 
 
 
 
 
-ON EACH variable and LISTEN / ASK collections...
 
-	We have two conflicting goals: search and variable scoping
-	
-	title
-	
-	ON EACH video DO
-		# does 'title' refer to the global variable or the video
-	END
-	
-	vs
-	
-	LISTEN FOR videos
-	
-	videos[title == "hello"]
-	
-	videos[video.title == "hello"]
-	
-	vs
-	
-	@each:videos[video.title == "Hello"]
-	
-	
+
+
+
 
 
 
@@ -105,12 +125,7 @@ Ruby API (similar to the C api for ruby)
 
 How do you "require" a C module in ruby and what woudl that look like for Dog???
 	Do these do what we expect: "require 'hello'" vs "require 'hello.so'" vs "require 'hello.rb'"
-	Should we have the similar approach??? 
-
-
-
-
-
+	Should we have the similar approach???
 
 functional languages
 	Everything in the language is immutable

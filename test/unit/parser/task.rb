@@ -9,42 +9,26 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class ParserTests::RepeatTest < Test::Unit::TestCase
+class ParserTests::TaskTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :repeat
-    @parser.should_clean_tree = true
+    @parser.parser.root = :function_definition
   end
   
   def test_simple
     program = <<-EOD
-
-REPEAT 5 DO
-  i = 5 + 5
+DEFINE label FOR person ON image DO
+  PERFORM "Hello, World"
+  RETURN 5+5, foobar
 END
-
 EOD
     
     program.strip!
-    
     @parser.parse(program)
-    
-    
-    program = <<-EOD
-
-REPEAT 5 DO
-  PRINT 'hello'
-  PRINT 'hi'
-END
-
-EOD
-
-    program.strip!
-
-    @parser.parse(program)
-    
     
   end
+  
+  
   
 end

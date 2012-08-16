@@ -9,22 +9,16 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-# TODO - Ensure that these parsed expression return the correct Tag
-
-class ParserTests::ProgramTest < Test::Unit::TestCase
+class ParserTests::PrintTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
   end
   
-  def test_config
-    @parser.parse("foo; bar; baz;")
-    @parser.parse("foo;bar;baz;")
-    @parser.parse("foo;bar;baz")
-    @parser.parse("\n\n\nfoo;bar;baz\n\n\n")
-    @parser.parse(" ; ; ;")
-    @parser.parse(";;;")
-    @parser.parse("\n\n\n")
+  def test_simple
+    @parser.parse("PRINT 5+5")
   end
+  
+  
   
 end

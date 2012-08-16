@@ -18,10 +18,8 @@ class ParserTests::AssignmentTest < Test::Unit::TestCase
   
   def test_assignment
     
-    @parser.parse("foo = (5) UNION (5 - 5) / 5")
-    
     @parser.parse("i = ASK ME VIA email TO rank")
-
+    @parser.parse("i = j = k = 5")
     @parser.parse("i = 0")
     @parser.parse("i = 1")
     @parser.parse("i = -1")
@@ -29,18 +27,17 @@ class ParserTests::AssignmentTest < Test::Unit::TestCase
     @parser.parse("i = -1.1")
     @parser.parse("i = true")
     @parser.parse("i = false")
-    @parser.parse("i = [1,2,3]")
     @parser.parse('i = "Foo bar"')
     @parser.parse("i = 'Foo bar'")
-    @parser.parse("i = {'key':'value'}")
+    @parser.parse("i = {'key'='value'}")
 
     @parser.parse("i.j = 8") 
-    @parser.parse("i[i] = {'key':'value'}")
-    @parser.parse("i[0] = {'key':'value'}")
-    @parser.parse("i['string'] = {'key':'value'}")
-    @parser.parse("i[j[k]][l] = {'key':'value'}")
+    @parser.parse("i[i] = {'key'='value'}")
+    @parser.parse("i[0] = {'key'='value'}")
+    @parser.parse("i['string'] = {'key'='value'}")
+    @parser.parse("i[j[k]][l] = {'key'='value'}")
 
-    @parser.parse("i.j.k.l = {'key':'value'}")
+    @parser.parse("i.j.k.l = {'key'='value'}")
     
     # TODO - Add back possessives
     #@parser.parse("i's j's k = {'key':'value'}")
