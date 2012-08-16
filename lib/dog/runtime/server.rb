@@ -170,10 +170,10 @@ module Dog
 
           if session[:current_user]
             @output["success"] = true
-            @output["logged_in"] = true
+            @output["authentication"] = true
           else
             @output["success"] = true
-            @output["logged_in"] = false
+            @output["authentication"] = false
           end
 
           content_type 'application/json'
@@ -227,11 +227,7 @@ module Dog
 
         get prefix + '/account/logout' do
           session.clear
-
-          content_type 'application/json'
-          return {
-            "success" => true
-          }.to_json
+          redirect params['redirect_uri'] || '/'
         end
 
         post prefix + '/account/create' do
