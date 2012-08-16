@@ -925,17 +925,14 @@ grammar Dog
   end
   
   rule collection_definition
-  # FIXME
     'DEFINE' s name:identifier s 'OF' s structure_name:packaged_identifier {
       def transform
-        pi = structure_name.compile
+        value = ::Dog::Value.new("collection", {})
+        value["name"] = ::Dog::Value.string_value(name.text_value)
+        value["package"] = ::Dog::Value.string_value(self.package)
         
-        node = ::Dog::Nodes::CollectionDefinition.new
+        node = ::Dog::Nodes::Definition.new(name.text_value, value, structure_name.transform)
         node.line = self.line
-        
-        node.name = name.text_value
-        node.structure_package_name = pi.first
-        node.structure_name = pi.last
         
         return node
       end
@@ -966,11 +963,11 @@ grammar Dog
   
   rule package 
     'PACKAGE' s identifier {
-      def package(call_root = false)
+      def package(call_root = true)
         return identifier.text_value
       end
       
-      def compile
+      def transform
         node = ::Dog::Nodes::Package.new(identifier.text_value)
         node.line = self.line
         
@@ -1281,12 +1278,12 @@ grammar Dog
   # ==================
   
   rule packaged_identifier
-    package:(identifier '.')? symbol:identifier {
+    the_package:(identifier '.')? symbol:identifier {
       def transform
         path = []
         scope = nil
-        if !self.package.empty? then
-          path = [package.identifier.text_value, symbol.text_value]
+        if !self.the_package.empty? then
+          path = [the_package.identifier.text_value, symbol.text_value]
           scope = "external"
         else
           path = [symbol.text_value]

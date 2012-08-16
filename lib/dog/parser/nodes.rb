@@ -299,6 +299,11 @@ module Dog::Nodes
       end
       
       package.pop_symbol
+      
+      # TODO - Push.new(value) instead of PushNull?
+      null = ::Dog::Instructions::PushNull.new
+      set_instruction_context(null)
+      package.add_to_instructions([null])
     end
   end
 

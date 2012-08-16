@@ -13,6 +13,23 @@ module Dog::Library
 
     name "collection"
 
+    implementation "type" do
+      argument "collection"
+      
+      body do
+        collection = variable("collection").ruby_value
+        
+        # TODO - Have a better way to call Dog functions which handles checkpoints, etc.
+        # Currenlty this is really really unsafe. I have no idea how this will work and it
+        # very well may crash and burn
+        track = ::Dog::Track.new(collection["name"], collection["package"])
+        ::Dog::Runtime.run_track(track)
+        type = track.stack.pop
+        
+        dog_return(type)
+      end
+    end
+
     implementation "save" do
       argument "struct"
       argument "collection"

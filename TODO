@@ -6,13 +6,14 @@ Plan:
 	Predicates and Queries
 	Access Scope Modifiers
 	Calling Dog code from ruby - handling checkpoints, etc.
+	Update compute and function calls to just use access - this paves the road for having dynamic properties for structures - think about collections and doing COMPUTE cars.type
 
 
 Things that are bothering me:
 
 	Call and build use the stack to invoke functions - it feels weird to use "Access" to call a function
 	Parameter passing for functions - Especially optional parameters with default values
-	No access to the package name in the parser
+	Access to the package name in the parser - Right now I am allow it but it does not feel right because the parser should not need to understand the semantics of the language. Consider being flexible in adding additional nodes. And determine where the "cut off" is. Obviously somethings (like for loops) are more easily done in the parser than the compiler because nodes are easier to work with than instructions.
 	Nested function names / type names / access paths?
 	Bootstraping the Type type
 	External functions - how safe is my "custom method" solution like external_parameters
