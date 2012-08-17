@@ -1,12 +1,14 @@
 
 module Dog
-  class FacebookPerson < Person
+  module FacebookPerson
 
-    # sets the collection_name in DatabaseObject
-    collection "people"
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
 
-    class << self
+    module ClassMethods
       def find_by_facebook_id(fb_id)
+        return nil unless self.facebook
         find_one({"facebook.id" => fb_id}) rescue nil
       end
     end
@@ -20,7 +22,8 @@ module Dog
         link: optionals[:link],
         friends: []
       }
-      self.facebook = profile
+      self.facebook = self.facebook || {}
+      self.facebook.merge! profile
       self
     end
 

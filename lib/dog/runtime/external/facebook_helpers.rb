@@ -1,16 +1,13 @@
 
 module Dog
-  class FacebookHelpers
-    include HTTParty
-    extend Sinatra::Helpers
-    extend Rack::Utils
+  module ServerHelpers
+    module Facebook
+      include HTTParty
 
-    base_uri "https://graph.facebook.com"
-
-    class << self
+      base_uri "https://graph.facebook.com"
 
       # test with: http://localhost:8080/dog/account/facebook/login
-      def oauth_dialog_url(request)
+      def self.oauth_dialog_url(request)
         session = request.session
         permissions = [ 'user_actions:dog-lang' ]
         bytes = SecureRandom.random_bytes(16)
@@ -25,7 +22,7 @@ module Dog
         )
       end
 
-      def oauth_callback(request)
+      def self.oauth_callback(request)
         session = request.session
         params = request.params
         output = {}
@@ -54,7 +51,7 @@ module Dog
         output
       end
 
-      def oauth_get_access_token(request)
+      def self.oauth_get_access_token(request)
         params = request.params
         response = self.get( '/oauth/access_token', :query => {
           'client_id' => Config::get('facebook_app_id'),
@@ -65,15 +62,15 @@ module Dog
         parse_query response.body
       end
 
-      def update_current_person(access_token_response)
+      def self.update_current_person(access_token_response)
         response = self.get( '/me', :query => {
           access_token: access_token_response['access_token']
         })
         me_info = JSON::parse response.body
         return nil if me_info['error']
-        person = FacebookPerson.find_by_facebook_id(me_info['id'])
+        person = Person.find_by_facebook_id(me_info['id'])
         unless person
-          person = FacebookPerson.new
+          person = Person.new
         end
         person.first_name = me_info['first_name']
         person.last_name = me_info['last_name']

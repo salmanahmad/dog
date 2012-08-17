@@ -9,6 +9,7 @@
 
 module Dog
   class Person < DatabaseObject
+    include Dog::FacebookPerson
 
     # sets the collection_name in DatabaseObject
     collection "people"
