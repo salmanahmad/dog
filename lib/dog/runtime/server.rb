@@ -11,8 +11,6 @@ module Dog
 
   class Server < Sinatra::Base
 
-    include Dog::ServerHelpers
-
     # Automatically parse JSON
 
     before do
@@ -211,9 +209,9 @@ module Dog
           when 'facebook'
             unless params['code'] and params['state']
               session[:oauth_redirect] = params['redirect_uri'] || '/'
-              return redirect ServerHelpers::Facebook::oauth_dialog_url(request)
+              return redirect to Facebook::oauth_dialog_url(request, session)
             end
-            @output = ServerHelpers::Facebook::oauth_callback(request)
+            @output = Facebook::oauth_callback(request, session, params)
           else
             @output["success"] = false
             @output["errors"] ||= []

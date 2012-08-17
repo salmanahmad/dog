@@ -14,15 +14,4 @@ module Helper
     end
   end
 
-  class URI
-    class << self
-
-      def to_qs(hash)
-        hash.map do |key, value|
-          key + "=" + value
-        end.join('&')
-      end
-
-    end
-  end
 end

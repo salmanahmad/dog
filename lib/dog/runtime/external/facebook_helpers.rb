@@ -1,35 +1,34 @@
 
 module Dog
-  module ServerHelpers
+
+  class Server < Sinatra::Base
+
     module Facebook
       include HTTParty
+      extend Rack::Utils
 
       base_uri "https://graph.facebook.com"
 
       # test with: http://localhost:8080/dog/account/facebook/login
-      def self.oauth_dialog_url(request)
-        session = request.session
+      def self.oauth_dialog_url(request, session)
         permissions = [ 'user_actions:dog-lang' ]
         bytes = SecureRandom.random_bytes(16)
         session[:oauth_state] = Digest::SHA1.base64digest bytes
-        return url("https://www.facebook.com/dialog/oauth?" +
-          Helper::URI::to_qs({
-            'client_id' => Config::get('facebook_app_id'),
-            'redirect_uri' => escape( redirect_uri(request) ),
-            'scope' => permissions.map { |p| escape(p) }.join(','),
-            'state' => escape(session[:oauth_state])
-          })
-        )
+        qs = URI::encode_www_form({
+          'client_id' => Config::get('facebook_app_id'),
+          'redirect_uri' => redirect_uri(request),
+          'scope' => permissions.join(','),
+          'state' => session[:oauth_state]
+        })
+        return "https://www.facebook.com/dialog/oauth?" + qs
       end
 
-      def self.oauth_callback(request)
-        session = request.session
-        params = request.params
+      def self.oauth_callback(request, session, params)
         output = {}
         if params['error'] or (params['state'] != session[:oauth_state]) then
           return error_output params['error']['message'] || "Possible CSRF attack taking place."
         end
-        access_token_response = self.oauth_get_access_token(request)
+        access_token_response = self.oauth_get_access_token(request, params)
         return error_output access_token_response['error']['message'] if access_token_response['error']
         person = self.update_current_person access_token_response
         return error_output "Fetching your information failed." if not person
@@ -39,11 +38,11 @@ module Dog
         output
       end
 
-      def redirect_uri(request)
+      def self.redirect_uri(request)
         request.scheme + "://" + request.host_with_port + Config::get('dog_prefix') + '/account/facebook/login'
       end
 
-      def error_output(error_msg)
+      def self.error_output(error_msg)
         output = {}
         output["success"] = false
         output["errors"] ||= []
@@ -51,8 +50,7 @@ module Dog
         output
       end
 
-      def self.oauth_get_access_token(request)
-        params = request.params
+      def self.oauth_get_access_token(request, params)
         response = self.get( '/oauth/access_token', :query => {
           'client_id' => Config::get('facebook_app_id'),
           'client_secret' => Config::get('facebook_app_secret'),
@@ -86,5 +84,6 @@ module Dog
       end
 
     end
+
   end
 end

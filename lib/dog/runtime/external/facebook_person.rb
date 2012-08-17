@@ -8,8 +8,7 @@ module Dog
 
     module ClassMethods
       def find_by_facebook_id(fb_id)
-        return nil unless self.facebook
-        find_one({"facebook.id" => fb_id}) rescue nil
+        find_one({"facebook.id" => fb_id})
       end
     end
 
