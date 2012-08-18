@@ -47,4 +47,10 @@ class ParserTests::ExpressionTest < Test::Unit::TestCase
     @parser.parse("foo[bar][baz[foo][bar]][poo]")
   end
   
+  def test_unary
+    @parser.parse("NOT true")
+    @parser.parse("NOT x")
+    @parser.parse("NOT NOT x")
+  end
+  
 end

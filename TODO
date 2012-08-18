@@ -3,7 +3,7 @@
 Plan:
 
 	Async / Pending Structures
-	Predicates and Queries
+	Predicates and Queries --- Just implement transform for predicates according to Mongo
 	Access Scope Modifiers - Properties
 		Update compute and function calls to just use access - this paves the road for having dynamic properties for structures - think about collections and doing COMPUTE cars.type
 	INCLUDE / Testing PACKAGE
