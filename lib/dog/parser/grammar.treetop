@@ -77,6 +77,19 @@ grammar Dog
   rule assignment_expression
     assignment
     /
+    match_expression
+  end
+  
+  rule match_expression
+    left:(or_expression) s? match_operator s? right:(or_expression) {
+      def transform
+        node = ::Dog::Nodes::Operation.new(left.transform, right.transform, match_operator.transform)
+        node.line = self.line
+        
+        return node
+      end
+    }
+    /
     or_expression
   end
   
@@ -149,19 +162,6 @@ grammar Dog
     unary_operator s unary_expression {
       def transform
         node = ::Dog::Nodes::Operation.new(unary_expression.transform, nil, unary_operator.transform)
-        node.line = self.line
-        
-        return node
-      end
-    }
-    /
-    match_expression
-  end
-  
-  rule match_expression
-    query_expression s? match_operator s? right:(query_expression) {
-      def transform
-        node = ::Dog::Nodes::Operation.new(left.transform, right.transform, match_operator.transform)
         node.line = self.line
         
         return node
@@ -706,7 +706,11 @@ grammar Dog
   end
   
   rule predicate
-    'WHERE' sn predicate_expression
+    'WHERE' sn predicate_expression {
+      def transform
+        predicate_expression.transform
+      end
+    }
   end
   
   rule predicate_expression
@@ -735,7 +739,11 @@ grammar Dog
   
   # This was 'access' before 'expression'
   rule predicate_conditional
-    key_paths s? relational_operator s? expression
+    key_paths s? relational_operator s? expression {
+      def transform
+        {key_paths.transform => expression.transform}
+      end
+    }
   end
   
   
@@ -1414,13 +1422,21 @@ grammar Dog
   # =========
   
   rule key_paths
-    key_path+
+    identifier rest:('.' identifier)* {
+      def transform
+        ids = []
+        ids << identifier.text_value
+        
+        if rest then
+          for i in rest.elements do
+            ids << i.identifier.text_value
+          end
+        end
+        
+        ids.join(".")
+      end
+    }
   end
-  
-  rule key_path
-    identifier ('.' &key_path / '' !key_path)
-  end
-  
   
   
   
