@@ -174,13 +174,10 @@ grammar Dog
   rule query_expression
     primary_expression s predicate {
       def transform
-        # TODO - Make this a structure
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "build_query"]), [
-            primary_expression.transform,
-            predicate.transform
-          ]
-        )
+        node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
+          "object" => primary_expression.transform,
+          "predicate" => predicate.transform
+        })
         node.line = self.line
         
         return node
