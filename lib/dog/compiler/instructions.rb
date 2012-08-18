@@ -86,6 +86,7 @@ module Dog::Instructions
     end
     
     def execute(track)
+      @value._id = UUID.new.generate
       track.stack.push(@value)
     end
     
@@ -165,6 +166,14 @@ module Dog::Instructions
     def execute(track)
       if @path_size > 1 then
         path = track.stack.pop(@path_size)
+
+        if path.first.pending then
+          puts path.first.inspect
+          raise "Hi!"
+          track.stack.concat(path)
+          return
+        end
+        
         pointer = path.shift
         for item in path do
           key = ""

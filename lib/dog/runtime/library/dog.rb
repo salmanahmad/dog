@@ -35,6 +35,7 @@ module Dog::Library
           raise "Invalid type for pending structure"
         end
 
+        value.pending = true
         value.buffer_size = size
         value.channel_mode = channel
 

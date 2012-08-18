@@ -19,8 +19,10 @@ module Dog
     attr_accessor :value
     
     def initialize(type = nil, value = nil)
+      self._id = UUID.new.generate
       self.type = type
       self.value = value
+      self.pending = false
     end
     
     def self.primitive_types

@@ -17,9 +17,12 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
 
     foo = COMPUTE dog.pending_structure ON "structure", -1, false
     PRINT foo
+    PRINT foo.hi
 
     EOD
 
-    tracks, output = run_source(program, true)
+    assert_raise RuntimeError do
+      tracks, output = run_source(program, true)
+    end
   end
 end
