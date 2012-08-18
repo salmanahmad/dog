@@ -16,6 +16,6 @@ class ParserTests::QueryTest < Test::Unit::TestCase
   end
   
   def test_simple_comparison
-    pp @parser.parse("i WHERE x == 8")
+    @parser.parse("i WHERE x == 8")
   end
 end

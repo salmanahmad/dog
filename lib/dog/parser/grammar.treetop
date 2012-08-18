@@ -155,12 +155,26 @@ grammar Dog
       end
     }
     /
+    match_expression
+  end
+  
+  rule match_expression
+    query_expression s? match_operator s? right:(query_expression) {
+      def transform
+        node = ::Dog::Nodes::Operation.new(left.transform, right.transform, match_operator.transform)
+        node.line = self.line
+        
+        return node
+      end
+    }
+    /
     query_expression
   end
   
   rule query_expression
     primary_expression s predicate {
       def transform
+        # TODO - Make this a structure
         node = ::Dog::Nodes::Call.new(
           ::Dog::Nodes::Access.new(["dog", "build_query"]), [
             primary_expression.transform,
@@ -466,6 +480,13 @@ grammar Dog
     }
   end
   
+  rule match_operator
+    '?' {
+      def transform
+        return self.text_value
+      end
+    }
+  end
   
   
   # ===================
@@ -715,8 +736,9 @@ grammar Dog
     '(' s? predicate_expression s? ')'
   end
   
+  # This was 'access' before 'expression'
   rule predicate_conditional
-    key_paths s? relational_operator s? access
+    key_paths s? relational_operator s? expression
   end
   
   

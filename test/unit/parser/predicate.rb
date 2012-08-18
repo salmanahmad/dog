@@ -63,4 +63,12 @@ class ParserTests::PredicateTest < Test::Unit::TestCase
     @parser.parse("user.i > 5 AND user.i != 5 AND user.i == 5")
   end
   
+  
+  def test_nested_expressions
+    @parser.parse("user.i == i")
+    @parser.parse("user.i == i[7]")
+    @parser.parse("user.i == i + 6")
+    @parser.parse("user.i == i ? x > 5")
+  end
+  
 end
