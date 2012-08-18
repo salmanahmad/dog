@@ -13,7 +13,7 @@ class ParserTests::PredicateTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :predicate
+    @parser.parser.root = :predicate_expression
   end
   
   def test_simple_comparison
@@ -21,6 +21,7 @@ class ParserTests::PredicateTest < Test::Unit::TestCase
     @parser.parse("i.i.i == 5")
     @parser.parse("i.i.i == 'string'")
     @parser.parse("i.i.i == true")
+    @parser.parse("i.i.i == {0 = 1, 1 = true, 2 = 'string'}")
     #@parser.parse("i.i.i == [1, true, 'string']")
   end
   

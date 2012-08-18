@@ -159,6 +159,10 @@ grammar Dog
   end
   
   rule primary_expression
+    query
+    /
+    predicate
+    /
     access
     /
     compute
@@ -631,9 +635,9 @@ grammar Dog
   
   
   
-  # ==================
-  # = People Command =
-  # ==================
+  # ==================================
+  # = Predicates and Queries Command =
+  # ==================================
   
   # FIXME
   
@@ -664,11 +668,25 @@ grammar Dog
   end
 
   rule people_where_clause
-    sn 'WHERE' sn predicate
+    sn 'WHERE' sn predicate_expression
+  end
+  
+  # TODO
+  
+  rule query
+    predicate
   end
   
   rule predicate
-    predicate_unary / predicate_binary / predicate_primary
+    'WHERE' sn predicate_expression
+  end
+  
+  rule predicate_expression
+    predicate_unary
+    /
+    predicate_binary
+    /
+    predicate_primary
   end 
   
   rule predicate_unary
@@ -676,7 +694,7 @@ grammar Dog
   end
   
   rule predicate_binary
-    predicate_primary s (and_operator / or_operator) s predicate
+    predicate_primary s (and_operator / or_operator) s predicate_expression
   end
   
   rule predicate_primary 
@@ -684,7 +702,7 @@ grammar Dog
   end 
   
   rule predicate_parenthesis 
-    '(' s? predicate s? ')'
+    '(' s? predicate_expression s? ')'
   end
   
   rule predicate_conditional
