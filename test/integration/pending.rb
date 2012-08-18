@@ -9,39 +9,17 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test_helper.rb'))
 
-class IntegrationTests::NativeTest < Test::Unit::TestCase
+class IntegrationTests::PendingTest < Test::Unit::TestCase
   include RuntimeHelper
 
   def test_simple
     program = <<-EOD
 
-    DEFINE foo DO
-
-    END
-
-    sum = COMPUTE system.print ON 5 + 5
+    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+    PRINT foo
 
     EOD
 
     tracks, output = run_source(program, true)
-    assert_equal(10.to_f.to_s, output)
-  end
-  
-  
-  def test_simple_2
-    program = <<-EOD
-
-    DEFINE car {}
-
-    civic = car {
-      age = 5
-    }
-
-    type = COMPUTE system.type_of ON civic
-
-    EOD
-
-    tracks = run_source(program)
-    assert_equal(".car", tracks.last.variables["type"].ruby_value)
   end
 end

@@ -10,15 +10,15 @@ Plan:
 		Add dog.pending_structure system call to create system call
 
 		Update Access so that it blocks accordingly
+			Pending collection
+				structure_id
+				tracks
+				handlers
 			Inserts an entry into the pending collection
 			Update track with the proper statuses
 			Update the VM to respect those statuses
 
 		AsyncCall system call
-			Pending collection
-				structure_id
-				tracks
-				handlers
 			Update the VM so that when something finishes it closes the pending structure
 
 		Implement dog.add system call
