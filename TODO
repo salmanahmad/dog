@@ -1,12 +1,50 @@
 
-
 Plan:
 
 	Async / Pending Structures
-	Predicates and Queries --- Just implement transform for predicates according to Mongo
-	Access Scope Modifiers - Properties
+		Add additional properties to Value
+			pending: {true | false}
+			buffer_size
+			channel_mode (allow_block, never_close, etc.)
+		
+		Add dog.pending_structure system call to create system call
+
+		Update Access so that it blocks accordingly
+			Inserts an entry into the pending collection
+			Update track with the proper statuses
+			Update the VM to respect those statuses
+
+		AsyncCall system call
+			Pending collection
+				structure_id
+				tracks
+				handlers
+			Update the VM so that when something finishes it closes the pending structure
+
+		Implement dog.add system call
+			Invoke handlers
+			Wake up tracks
+			What happens if you are resuming a bunch of tracks but we crash before all of them hit a stable point?
+
+		Implement dog.ask / dog.listen
+
+		Web API
+			Just accept the request and call dog.add, right?
+			Figure out when to COMPUTE dog.add ON variables, close_me_type_message
+
+	Predicates and Queries
+		Just implement transform for predicates according to Mongo
+		Implement dog.find
+
+	Implement CRUD operators
+		
+
+	Access Scope Modifiers
+		Properties
 		Update compute and function calls to just use access - this paves the road for having dynamic properties for structures - think about collections and doing COMPUTE cars.type
+
 	INCLUDE / Testing PACKAGE
+
 	Calling Dog code from ruby - handling checkpoints, etc.
 	
 
