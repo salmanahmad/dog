@@ -35,6 +35,7 @@ module Dog
     
     attr_accessor :stack
     attr_accessor :variables
+    attr_accessor :futures
     attr_accessor :state
     
     attr_accessor :access_ancestors
@@ -54,6 +55,7 @@ module Dog
       
       self.stack = []
       self.variables = {}
+      self.futures = {}
       self.state = STATE::RUNNING
       
       self.access_ancestors = []
@@ -88,8 +90,14 @@ module Dog
         variables[key] = ::Dog::Value.from_hash(value)
       end
       
+      futures = {}
+      for key, value in object.futures do
+        futures[key] = ::Dog::Value.from_hash(value)
+      end
+      
       object.stack = stack
       object.variables = variables
+      object.futures = futures
       
       return object
     end
@@ -107,6 +115,15 @@ module Dog
       for key, value in self.variables do
         if value.kind_of? ::Dog::Value then
           variables[key] = value.to_hash
+        else
+          raise "A non-value was present on the stack"
+        end
+      end
+      
+      futures = {}
+      for key, value in self.futures do
+        if value.kind_of? ::Dog::Value then
+          futures[key] = value.to_hash
         else
           raise "A non-value was present on the stack"
         end
@@ -137,6 +154,7 @@ module Dog
         "state" => self.state,
         "stack" => stack,
         "variables" => variables,
+        "futures" => futures,
         
         "access_ancestors" => access_ancestors,
         "control_ancestors" => control_ancestors,

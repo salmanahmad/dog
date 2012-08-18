@@ -12,6 +12,7 @@ Plan:
 		Update Access so that it blocks accordingly
 			Pending collection
 				structure_id
+				value
 				tracks
 				handlers
 			Inserts an entry into the pending collection
