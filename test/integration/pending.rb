@@ -21,8 +21,8 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
 
     EOD
 
-    assert_raise RuntimeError do
-      tracks, output = run_source(program, true)
-    end
+    tracks, output = run_source(program, true)
+    assert_equal("{}", output)
+    assert_equal(::Dog::Track::STATE::WAITING, tracks.last.state)
   end
 end

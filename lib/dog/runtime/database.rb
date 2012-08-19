@@ -19,6 +19,10 @@ module Dog
     
     class << self
       
+      def reset
+        @initialized = false
+      end
+      
       def initialize(options = {})
         return if @initialized
         @initialized = true

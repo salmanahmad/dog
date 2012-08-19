@@ -25,7 +25,15 @@ module CompilerTests end
 module RuntimeTests end
 module IntegrationTests end
 
-module RuntimeHelper  
+module ::Dog
+  class Server
+    def self.run
+      
+    end
+  end
+end
+
+module RuntimeHelper
   def program_for(test_path)
     directory = File.absolute_path(File.dirname(test_path))
     basename = File.basename(test_path, ".rb") + ".dog"
@@ -69,6 +77,8 @@ module RuntimeHelper
       old_stdout, $stdout = $stdout, sio
     end
     
+    ::Dog::Config.reset
+    ::Dog::Database.reset
     tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})
     
     if include_stdout then
@@ -90,28 +100,11 @@ module RuntimeHelper
     bundle.link(package)
     bundle.startup_package = package.name
     
-    if include_stdout then
-      sio = StringIO.new
-      old_stdout, $stdout = $stdout, sio
-    end
-    
-    tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})    
-    
-    if include_stdout then
-      $stdout = old_stdout
-      stdout = sio.string.strip
-    end
-    
-    
-    if include_stdout then
-      return tracks, stdout
-    else
-      return tracks
-    end
+    return run_bundle(bundle, include_stdout)
   end
   
   def invalid?(res)
-    res.code < 100 || res.code >= 600;        
+    res.code < 100 || res.code >= 600 
   end
 
   def informational?(res)

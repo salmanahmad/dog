@@ -30,6 +30,7 @@ require File.join(File.dirname(__FILE__), 'runtime/community.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
 require File.join(File.dirname(__FILE__), 'runtime/database.rb')
 require File.join(File.dirname(__FILE__), 'runtime/event.rb')
+require File.join(File.dirname(__FILE__), 'runtime/future.rb')
 require File.join(File.dirname(__FILE__), 'runtime/kernel_ext.rb')
 require File.join(File.dirname(__FILE__), 'runtime/library.rb')
 require File.join(File.dirname(__FILE__), 'runtime/message.rb')
@@ -112,6 +113,8 @@ module Dog
       end
       
       def run_track(track)
+        # TODO - I need to know when I need to save
+        
         return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
         
         instructions = track.context["instructions"]
@@ -137,32 +140,43 @@ module Dog
               end
             end
           end
-          
+
+          if track.state == Track::STATE::WAITING then
+            track.save
+            break
+          end
+
           if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
             return_value = track.stack.last || ::Dog::Value.null_value
             return_track = track.control_ancestors.last
-            
+
             if return_track then
+              for name, future in track.futures do
+                future = future.to_hash
+                future = ::Dog::Future.from_hash(future)
+                return_track.futures[name] = future
+              end
+
               return_track.stack.push(return_value)
               return_track.state = Track::STATE::RUNNING
-            
+
               run_track(return_track)
               return
             else
               break
             end
           end
-          
+
           if track.next_track then
             next_track = track.next_track
             track.next_track = nil
-        
+
             run_track(next_track)
             return
           end
         end
         
-        if track.is_root? && track.state == Track::STATE::FINISHED then
+        if track.is_root? && track.state == ::Dog::Track::STATE::FINISHED then
           start_stop_server
         end
       end

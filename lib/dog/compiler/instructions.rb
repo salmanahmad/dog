@@ -168,12 +168,25 @@ module Dog::Instructions
         path = track.stack.pop(@path_size)
 
         if path.first.pending then
-          puts path.first.inspect
-          raise "Hi!"
-          track.stack.concat(path)
-          return
+          id = path.first._id
+          if track.futures[id] then
+            new_value = track.futures[id].to_hash
+            new_value = ::Dog::Value.from_hash(new_value)
+
+            path.shift
+            path.unshift(new_value)
+          else
+            track.stack.concat(path)
+
+            value = path.first
+            future = ::Dog::Future.new(value._id, value)
+            future.save
+
+            track.state = ::Dog::Track::STATE::WAITING
+            return
+          end
         end
-        
+
         pointer = path.shift
         for item in path do
           key = ""

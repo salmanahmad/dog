@@ -43,7 +43,7 @@ module Dog
       
       def reset
         @initialized = false
-        @config = {}
+        @config = nil
       end
       
       def set(key, value)
