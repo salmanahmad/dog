@@ -25,4 +25,44 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
     assert_equal("{}", output)
     assert_equal(::Dog::Track::STATE::WAITING, tracks.last.state)
   end
+  
+  def test_no_block
+    program = <<-EOD
+
+    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal(::Dog::Track::STATE::FINISHED, tracks.last.state)
+  end
+  
+  def test_add_without_block
+    program = <<-EOD
+
+    foo = {}
+    foo = COMPUTE dog.add ON foo, 5
+    foo = COMPUTE dog.add ON foo, "Hello"
+    
+    EOD
+    
+    tracks = run_source(program)
+    assert_equal(5, tracks.last.variables["foo"].value["n:0"].value)
+    assert_equal("Hello", tracks.last.variables["foo"].value["n:1"].value)
+  end
+  
+  def test_add
+    program = <<-EOD
+
+    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+    
+    #ON EACH i IN foo DO
+    #
+    #END
+    
+    COMPUTE dog.add ON foo, "Hello!"
+    EOD
+
+    tracks, output = run_source(program, true)
+  end
 end

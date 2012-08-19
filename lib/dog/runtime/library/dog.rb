@@ -21,7 +21,23 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
         
-        
+        if container.type == "collection" then
+          # TODO
+        else
+          if container.pending then
+            
+          else
+            if container.max_numeric_key then
+              index = container.max_numeric_key.ceil + 1
+            else
+              index = 0
+            end
+            
+            container[index] = value
+          end
+          
+          dog_return(container)
+        end
       end
     end
     
