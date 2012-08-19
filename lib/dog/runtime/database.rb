@@ -32,7 +32,12 @@ module Dog
         begin
           connection = Mongo::Connection.new
           
-          connection.drop_database(database_name) if options["reset"]
+          if options["reset"] then
+            temp_db = connection.db(database_name)
+            for collection in temp_db.collections
+              collection.drop rescue nil
+            end
+          end
           
           ::Dog.database = connection.db(database_name)
         rescue Exception => e

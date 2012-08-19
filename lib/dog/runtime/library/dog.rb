@@ -13,12 +13,24 @@ module Dog::Library
 
     name "dog"
 
+    implementation "add" do
+      argument "container"
+      argument "value"
+      
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+        
+        
+      end
+    end
+    
     implementation "pending_structure" do
       argument "type"
       argument "buffer_size"
       argument "channel_mode"
 
-      body do
+      body do |track|
         value = nil
 
         type = variable("type")

@@ -83,7 +83,63 @@ class IntegrationTests::StructureTest < Test::Unit::TestCase
     tracks = run_source(program)
     assert_equal("foo", tracks.last.variables["civic"].value["s:wheels"].value)
     assert_equal("foo", tracks.last.variables["civic"].ruby_value["wheels"])
+  end
+  
+  def test_min_max_key
+    program = <<-EOD
     
+    DEFINE car {
+      wheels = 4
+      age = 35
+    }
+    
+    civic = car {}
+    EOD
+    
+    tracks = run_source(program)
+    
+    civic = tracks.last.variables["civic"]
+    assert_equal(nil, civic.min_numeric_key)
+    assert_equal(nil, civic.max_numeric_key)
+    
+    program = <<-EOD
+    
+    DEFINE car {
+      wheels = 4
+      age = 35
+      5 = 9
+      9 = 5
+    }
+    
+    civic = car {}
+    EOD
+    
+    tracks = run_source(program)
+    
+    civic = tracks.last.variables["civic"]
+    
+    assert_equal(5, civic.min_numeric_key)
+    assert_equal(9, civic.max_numeric_key)
+    
+    
+    
+    program = <<-EOD
+    
+    DEFINE car {
+      wheels = 4
+      age = 35
+      5 = 9
+      9 = 5
+    }
+    
+    civic = car {}
+    civic[0] = 5
+    EOD
+    
+    tracks = run_source(program)
+    civic = tracks.last.variables["civic"]
+    assert_equal(0, civic.min_numeric_key)
+    assert_equal(9, civic.max_numeric_key)
     
   end
 end

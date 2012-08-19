@@ -234,9 +234,11 @@ module Dog::Instructions
           item_value = item.value if item.kind_of? ::Dog::Value
           
           if item_value.kind_of? String then
-            key = item_value.to_s
+            key = item_value
+            #key = item_value.to_s
           elsif item_value.kind_of? Numeric then
-            key = item_value.to_s
+            key = item_value
+            #key = item_value.to_s
           else
             raise "Runtime error"
           end

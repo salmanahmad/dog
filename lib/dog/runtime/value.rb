@@ -18,6 +18,9 @@ module Dog
     attr_accessor :type
     attr_accessor :value
     
+    attr_accessor :min_numeric_key
+    attr_accessor :max_numeric_key
+    
     def initialize(type = nil, value = nil)
       self._id = UUID.new.generate
       self.type = type
@@ -68,6 +71,12 @@ module Dog
     
     def []=(k, v)
       if k.kind_of? Numeric then
+        self.min_numeric_key ||= k
+        self.max_numeric_key ||= k
+        
+        self.min_numeric_key = [k, self.min_numeric_key].min
+        self.max_numeric_key = [k, self.max_numeric_key].max
+        
         k = "n:#{k}"
       else
         k = "s:#{k}"
@@ -109,14 +118,7 @@ module Dog
         value.value = {}
         
         for k, v in ruby_value do
-          # TODO - I should abstract this key aliasing at some point
-          if k.kind_of? Numeric then
-            k = "n:#{k}"
-          else
-            k = "s:#{k}"
-          end
-          
-          value.value[k] = self.from_ruby_value(v)
+          value[k] = self.from_ruby_value(v)
         end
         
         return value
