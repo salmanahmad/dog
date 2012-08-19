@@ -40,7 +40,9 @@ module Dog
           "buffer_size" => self.buffer_size,
           "channel_mode" => self.channel_mode,
           "type" => self.type,
-          "value" => self.value
+          "value" => self.value,
+          "min_numeric_key" => self.min_numeric_key,
+          "max_numeric_key" => self.max_numeric_key
         }
       else
         processed_value = {}
@@ -54,7 +56,9 @@ module Dog
           "buffer_size" => self.buffer_size,
           "channel_mode" => self.channel_mode,
           "type" => self.type,
-          "value" => processed_value
+          "value" => processed_value,
+          "min_numeric_key" => self.min_numeric_key,
+          "max_numeric_key" => self.max_numeric_key
         }
       end
     end
@@ -93,6 +97,8 @@ module Dog
       value.channel_mode = hash["channel_mode"]
       value.type = hash["type"]
       value.value = hash["value"]
+      value.min_numeric_key = hash["min_numeric_key"]
+      value.max_numeric_key = hash["max_numeric_key"]
       
       unless Value.primitive_types.include? value.type then
         real_value = {}
