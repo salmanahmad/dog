@@ -8,11 +8,11 @@
 #
 
 module Dog
-  
+
   class Server < Sinatra::Base
-    
+
     # Automatically parse JSON
-    
+
     before do
       if request.media_type == 'application/json' then
         parameters = nil
@@ -21,15 +21,15 @@ module Dog
         rescue
           parameters = {}
         end
-        
+
         params.merge!(parameters)
       end
     end
-    
+
     # CORS Supports
     # TODO - Support JSONP
     # TODO - Host dog.js from Dog to avoid any XSS
-    
+
     after do
       response['Access-Control-Allow-Origin'] = '*'
       response['Access-Control-Allow-Methods'] = 'POST, PUT, GET, DELETE, OPTIONS'
@@ -49,7 +49,7 @@ module Dog
       def layout(name)
         # Intentionally blank. Used by our template system.
       end
-      
+
       def verify_current_user(message = "You need to be logged in when performing this operation")
         @output = {}
         
@@ -109,7 +109,7 @@ module Dog
     
     # TODO - Set the secret here!
     use Rack::Session::Cookie
-    enable :logging  
+    enable :logging
     #enable :sessions
     #enable :raise_errors
     
@@ -170,10 +170,10 @@ module Dog
 
           if session[:current_user]
             @output["success"] = true
-            @output["logged_in"] = true
+            @output["authentication"] = true
           else
             @output["success"] = true
-            @output["logged_in"] = false
+            @output["authentication"] = false
           end
 
           content_type 'application/json'
@@ -197,13 +197,37 @@ module Dog
           @output.to_json
         end
 
+        get prefix + '/account/:provider/login' do |provider|
+          if session[:current_user] then
+            content_type 'application/json'
+            return { "success" => true }.to_json
+          end
+
+          @output = {}
+
+          case provider
+          when 'facebook'
+            unless params['code'] and params['state']
+              session[:oauth_redirect] = params['redirect_uri'] || '/'
+              return redirect to Facebook::oauth_dialog_url(request, session)
+            end
+            @output = Facebook::oauth_callback(request, session, params)
+          else
+            @output["success"] = false
+            @output["errors"] ||= []
+            @output["errors"] << "Unsupported OAuth provider."
+          end
+
+          unless @output["success"]
+            content_type 'application/json'
+            return @output.to_json
+          end
+          redirect to(session[:oauth_redirect] || '/')
+        end
+
         get prefix + '/account/logout' do
           session.clear
-
-          content_type 'application/json'
-          return {
-            "success" => true
-          }.to_json
+          redirect params['redirect_uri'] || '/'
         end
 
         post prefix + '/account/create' do
@@ -325,11 +349,11 @@ module Dog
 
         post prefix + '/stream/object/:id' do |id|
           object = ::Dog::StreamObject.find_by_id(id)
-          
+
           if object.class == ::Dog::RoutedTask then
             task = object
             response = {}
-            
+
             for property in task.properties do
               if property.direction == "input" then
                 response[property.identifier] = params[property.identifier]
@@ -338,10 +362,10 @@ module Dog
                 end
               end
             end
-            
+
             task.responses << response
             task.save
-            
+
             if task.completed? then
               track = ::Dog::Track.find_by_id(task.track_id)
               if track.asking_id == task.id.to_s then
@@ -349,13 +373,13 @@ module Dog
                 ::Dog::Runtime.run_track(track)
               end
             end
-            
+
           elsif object.class == ::Dog::RoutedEvent then
-            
+
             # TODO - Handle the package here
             track = ::Dog::Track.new(object.handler)
             track.control_ancestors = [::Dog::Track.root.id]
-            
+
             argument = {}
             for property in object.properties do
               argument[property.identifier] = params[property.identifier]
@@ -374,7 +398,7 @@ module Dog
 
             ::Dog::Runtime.run_track(track)
           end
-          
+
           content_type 'application/json'
           return {
             "success" => true
@@ -385,7 +409,7 @@ module Dog
 
 
         get '*' do
-          path = params[:splat].first
+          path = params['splat'].first
           path = "/index.html" if path == "/"
           path = settings.public_folder + path
 
@@ -397,7 +421,7 @@ module Dog
                 template = settings.public_folder + match[1]
                 template_content = File.open(template, &:read)
                 path_content = File.open(path, &:read)
-                
+
                 erb path_content, :layout => template_content, :views => '/'
               else
                 send_file path
@@ -421,7 +445,7 @@ module Dog
         # the developer wants to, they can add in the packages to their configuration file, much like
         # include Rack or Java middleware.
 
-        unless ::Dog::Config.get("profile_editting") == true then
+        unless ::Dog::Config.get("profile_editing") == true then
           get prefix + '/profile/view' do
             return unless verify_current_user("You have to be logged in to view your profile.")
 

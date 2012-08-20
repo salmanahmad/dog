@@ -18,7 +18,7 @@ module Dog
       ASKING = "asking"
       WAITING = "waiting"
       LISTENING = "listening"
-      FINISHED = "finished" 
+      FINISHED = "finished"
       ERROR = "error"
       DELETED = "deleted"
     end
@@ -165,11 +165,23 @@ module Dog
     end
 
     def to_hash_for_stream
-      return {
+      api_state = case self.state
+      when ::Dog::Track::STATE::FINISHED,
+        ::Dog::Track::STATE::ERROR,
+        ::Dog::Track::STATE::DELETED
+        'closed'
+      when ::Dog::Track::STATE::LISTENING
+        'listening'
+      else
+        'open'
+      end
+      stream_hash = {
         "id" => self._id.to_s,
         "name" => self.function_name.split('.'),
-        "type" => "track"
+        "type" => "track",
+        "state" => api_state
       }
+      return stream_hash
     end
     
     def self.root

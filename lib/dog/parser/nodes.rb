@@ -246,7 +246,7 @@ module Dog::Nodes
           else
             raise "Compilation error"
           end
-          
+
           if default then
             default.compile(package)
           else
