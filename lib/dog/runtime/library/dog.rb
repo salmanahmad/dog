@@ -13,6 +13,30 @@ module Dog::Library
 
     name "dog"
 
+    implementation "ask" do
+      # TODO
+    end
+
+    implementation "listen" do
+      argument "type"
+      argument "query"
+      argument "via"
+
+      body do |track|
+        # TODO
+      end
+    end
+
+    implementation "notify" do
+      argument "value"
+      argument "query"
+      argument "via"
+
+      body do |track|
+        # TODO
+      end
+    end
+
     implementation "add" do
       argument "container"
       argument "value"
@@ -94,6 +118,22 @@ module Dog::Library
           end
         end
       end
+    end
+    
+    implementation "find" do
+      # TODO
+    end
+    
+    implementation "update" do
+      # TODO
+    end
+    
+    implementation "remove" do
+      # TODO
+    end
+    
+    implementation "save" do
+      # TODO
     end
     
     implementation "register_handler" do
