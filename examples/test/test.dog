@@ -1,3 +1,11 @@
 
 
-PRINT "Hello!"
+foo = COMPUTE dog.pending_structure ON "structure", -1, false
+
+ON EACH i IN foo DO
+  PRINT i
+END
+
+COMPUTE dog.add ON foo, "3"
+COMPUTE dog.add ON foo, "2"
+COMPUTE dog.add ON foo, "1"

@@ -60,7 +60,9 @@ module Dog
         for implementation in symbol["implementations"] do
           
           implementation["instructions"].map! do |instruction|
-            ::Dog::Instructions::Instruction.from_hash(instruction)
+            klass = ::Dog::Instructions::Instruction.class_from_hash(instruction)
+            instruction = klass.from_hash(instruction)
+            instruction
           end
           
           implementations << implementation

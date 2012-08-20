@@ -40,9 +40,14 @@ module Dog::Instructions
       return hash
     end
 
-    def self.from_hash(hash)
+    def self.class_from_hash(hash)
       klass = hash["class"]
       klass = Kernel::qualified_const_get(klass)
+      return klass
+    end
+
+    def self.from_hash(hash)
+      klass = class_from_hash(hash)
       object = klass.allocate
       
       for key, value in hash do
@@ -93,11 +98,13 @@ module Dog::Instructions
     def to_hash
       hash = super
       hash["value"] = self.value.to_hash
+      return hash
     end
     
     def self.from_hash(hash)
       push = super(hash)
       push.value = ::Dog::Value.from_hash(push.value)
+      return push
     end
     
     def bytecode
