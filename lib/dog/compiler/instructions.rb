@@ -46,7 +46,7 @@ module Dog::Instructions
       object = klass.allocate
       
       for key, value in hash do
-        if object.attributes.include? key then
+        if object.attributes.include? key.intern then
           object.send("#{key.to_s}=".intern, value)
         end
       end

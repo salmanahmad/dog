@@ -21,4 +21,14 @@ class IntegrationTests::StringTest < Test::Unit::TestCase
     assert_equal("foobar", tracks.last.stack.last.value)
   end
   
+  
+  def test_print
+    program = <<-EOD
+    PRINT "Hello!"
+    EOD
+    
+    tracks, output = run_source(program, true)
+    assert_equal("Hello!", output)
+  end
+  
 end
