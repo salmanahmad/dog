@@ -146,7 +146,7 @@ module Dog::Nodes
     def compile(package)
       package.push_symbol(@name)
       
-      value ::Dog::Value.new("external_function", {})
+      value = ::Dog::Value.new("external_function", {})
       value["package"] = ::Dog::Value.string_value(package.name)
       value["name"] = ::Dog::Value.string_value(@name)
       value["actor"] = ::Dog::Value.string_value(@actor)

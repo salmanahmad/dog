@@ -6,17 +6,16 @@
 
 module Dog
 
-  class Language
-    class << self
+  module Language
 
-      def singularize(word)
-        return word[0...-1]
-      end
-
-      def pluralize(word)
-        return "#{word}s"
-      end
+    def self.singularize(word)
+      return word[0...-1]
     end
+
+    def self.pluralize(word)
+      return "#{word}s"
+    end
+
   end
 
   module Helper
