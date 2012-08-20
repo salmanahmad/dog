@@ -79,4 +79,44 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
     assert_equal("@each:i", handler["name"].value)
     assert_equal("3\n2\n1", output)
   end
+  
+  def test_on_each_returns
+    program = <<-EOD
+
+    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+
+    ON EACH i IN foo DO
+      RETURN i + 5
+    END
+
+    output = COMPUTE dog.add ON foo, 5
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal(10, tracks.last.variables["output"].ruby_value)
+  end
+  
+  
+  def test_multiple_on_each_returns
+    program = <<-EOD
+
+    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+
+    ON EACH i IN foo DO
+      RETURN i + 5
+    END
+    
+    ON EACH x IN foo DO
+      RETURN x - 5
+    END
+
+    output = COMPUTE dog.add ON foo, 5
+    EOD
+
+    tracks, output = run_source(program, true)
+    o = tracks.last.variables["output"]
+    assert_equal(2, o.value.size)
+    assert_equal(10, o[0].ruby_value)
+    assert_equal(0, o[1].ruby_value)
+  end
 end

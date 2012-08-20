@@ -27,6 +27,8 @@ module Dog::Library
           if container.pending then
             future = ::Dog::Future.find_one("value_id" => container._id)
             
+            return_values = []
+            
             for handler in future.handlers do
               handler = ::Dog::Value.from_hash(handler)
               
@@ -55,11 +57,31 @@ module Dog::Library
                 # like save the track or read the return value. If there are
                 # multiple tracks with multiple return values then I should return
                 # an array with a list of the values. Note: these values may include
-                # a future - or should it include a "receipt". 
+                # a future - or should it include a "receipt"?
                 ::Dog::Runtime.run_track(track)
+                
+                if track.state == ::Dog::Track::STATE::FINISHED
+                  return_value = track.stack.pop
+                  unless return_value.nil?
+                    return_values << return_value
+                  end
+                end
               end
             end
             
+            if return_values.size == 0 then
+              dog_return(::Dog::Value.null_value)
+            elsif return_values.size == 1 then
+              dog_return(return_values.first)
+            else
+              output = ::Dog::Value.new("structure", {})
+              
+              return_values.each_index do |index|
+                output[index] = return_values[index]
+              end
+              
+              dog_return(output)
+            end
           else
             if container.max_numeric_key then
               index = container.max_numeric_key.ceil + 1
@@ -68,9 +90,8 @@ module Dog::Library
             end
             
             container[index] = value
+            dog_return(container)
           end
-          
-          dog_return(container)
         end
       end
     end
