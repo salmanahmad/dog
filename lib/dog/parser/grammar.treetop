@@ -768,6 +768,7 @@ grammar Dog
         end
         
         # TODO - Detect duplicated ON EACH names somehow
+        # TODO - Handle nested ON EACH stuffs
         function_name = "@each:#{variable_name}"
         function_target = nil
         function_mandatory_arguments = [variable_name]
@@ -777,10 +778,14 @@ grammar Dog
         node = ::Dog::Nodes::FunctionDefinition.new(function_name, function_body, function_mandatory_arguments, function_optional_arguments)
         node.line = self.line
         
+        type = ::Dog::Value.new("type", {})
+        type["name"] = ::Dog::Value.string_value(function_name)
+        type["package"] = ::Dog::Value.string_value(self.package)
+        
         # TODO - This is another example of when I would want to have access to the package name
         register = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["system", "register_local_callback"]),
-          [source_structure, ::Dog::Nodes::StringLiteral.new(function_name)]
+          ::Dog::Nodes::Access.new(["dog", "register_handler"]),
+          [source_structure, ::Dog::Nodes::ValueLiteral.new(type)]
         )
         register.line = self.line
         
@@ -820,6 +825,8 @@ grammar Dog
   # TODO - How do I handle nested function names?
     'DEFINE' s identifier function_for:(function_for)? function_on:(function_on)? function_using:(function_using)? s 'DO' sn statements:(statements)? s? 'END' {
       def transform
+        # TODO - Handle nested function definitions
+        
         actor = function_for.transform unless function_for.empty?
 
         function_name = identifier.text_value

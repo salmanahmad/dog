@@ -180,6 +180,7 @@ module Dog::Instructions
 
             value = path.first
             future = ::Dog::Future.new(value._id, value)
+            future.tracks << track
             future.save
 
             track.state = ::Dog::Track::STATE::WAITING

@@ -428,6 +428,22 @@ module Dog::Nodes
     end
   end
 
+  class ValueLiteral < Node
+    attr_accessor :value
+    
+    def initialize(value)
+      @value = value
+    end
+    
+    def compile(package)
+      if @value.kind_of? ::Dog::Value
+        push = ::Dog::Instructions::Push.new(@value)
+        set_instruction_context(push)
+        package.add_to_instructions([push])
+      end
+    end
+  end
+
   class StringLiteral < Node
     attr_accessor :value
 

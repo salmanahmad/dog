@@ -41,6 +41,25 @@ module Dog::Library
       end
     end
     
+    implementation "register_handler" do
+      argument "structure"
+      argument "type"
+      
+      body do |track|
+        structure = variable("structure")
+        type = variable("type")
+        
+        future = ::Dog::Future.find_one("value_id" => structure._id)
+        
+        if future.nil? then
+          future = ::Dog::Future.new(structure._id, structure)
+        end
+        
+        future.handlers << type
+        future.save
+      end
+    end
+    
     implementation "pending_structure" do
       argument "type"
       argument "buffer_size"

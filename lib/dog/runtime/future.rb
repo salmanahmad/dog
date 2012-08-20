@@ -12,24 +12,39 @@ module Dog
     collection "futures"
     
     attr_accessor :_id
-    attr_accessor :structure_id
+    attr_accessor :value_id
     attr_accessor :value
     attr_accessor :tracks
     attr_accessor :handlers
     
-    def initialize(id, value)
-      self.structure_id = id
+    def initialize(id = nil, value = nil)
+      self.value_id = id
       self.value = value
       self.tracks = []
       self.handlers = []
     end
     
     def to_hash
+      tracks = self.tracks.map do |item|
+        if item.kind_of? Track then
+          item.save
+          item._id
+        elsif item.kind_of? BSON::ObjectId then
+          item
+        else
+          raise "An invalid object appeared in the tracks list for a future"
+        end
+      end
+      
+      handlers = self.handlers.map do |handler|
+        handler.to_hash
+      end
+      
       hash = {
-        "future_id" => self.structure_id,
+        "value_id" => self.value_id,
         "value" => self.value.to_hash,
-        "tracks" => self.tracks,
-        "handlers" => self.handlers
+        "tracks" => tracks,
+        "handlers" => handlers
       }
       
       return hash
