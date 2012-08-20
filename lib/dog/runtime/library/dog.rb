@@ -25,6 +25,40 @@ module Dog::Library
           # TODO
         else
           if container.pending then
+            future = ::Dog::Future.find_one("value_id" => container._id)
+            
+            for handler in future.handlers do
+              handler = ::Dog::Value.from_hash(handler)
+              
+              package_name = handler["package"].value
+              function_name = handler["name"].value
+              
+              package = ::Dog::Runtime.bundle.packages[package_name]
+              symbol = package.symbols[function_name]
+              
+              if future.value.max_numeric_key then
+                index = future.value.max_numeric_key.ceil + 1
+              else
+                index = 0
+              end
+              
+              future.value[index] = value
+              future.save
+              
+              if symbol["implementations"].size != 0 then
+                argument_name = symbol["implementations"].first["arguments"].first
+                
+                track = ::Dog::Track.new(function_name, package_name)
+                track.variables[argument_name] = value
+                
+                # TODO - I need to handle the output fromt this and do things
+                # like save the track or read the return value. If there are
+                # multiple tracks with multiple return values then I should return
+                # an array with a list of the values. Note: these values may include
+                # a future - or should it include a "receipt". 
+                ::Dog::Runtime.run_track(track)
+              end
+            end
             
           else
             if container.max_numeric_key then

@@ -55,25 +55,28 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
     program = <<-EOD
 
     foo = COMPUTE dog.pending_structure ON "structure", -1, false
-    
+
     ON EACH i IN foo DO
-    
+      PRINT i
     END
-    
-    COMPUTE dog.add ON foo, "Hello!"
+
+    COMPUTE dog.add ON foo, "3"
+    COMPUTE dog.add ON foo, "2"
+    COMPUTE dog.add ON foo, "1"
     EOD
 
-    tracks = run_source(program)
-    
+    tracks, output = run_source(program, true)
+
     foo = tracks.last.variables["foo"]
     future = ::Dog::Future.find_one("value_id" => foo._id)
-    
+
     assert(future != nil)
     assert_equal(1, future.handlers.size)
-    
+
     handler = ::Dog::Value.from_hash(future.handlers.first)
-    
+
     assert_equal("@each:i", future.handlers.first["value"]["s:name"]["value"])
     assert_equal("@each:i", handler["name"].value)
+    assert_equal("3\n2\n1", output)
   end
 end

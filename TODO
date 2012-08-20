@@ -22,9 +22,9 @@ Plan:
 		Implement dog.add system call
 			Dog structure numeric indices
 			What happens if you are resuming a bunch of tracks but we crash before all of them hit a stable point?
-			
 			Implement ON EACH
 			Invoke handlers
+			
 			Wake up tracks
 
 		AsyncCall system call
