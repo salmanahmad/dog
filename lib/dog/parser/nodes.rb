@@ -774,10 +774,7 @@ module Dog::Nodes
         argument.compile(package)
       end
       
-      if @optional_arguments then
-        # TODO - Figure out optional arguments
-        @optional_arguments.compile(package)
-      end
+      @optional_arguments.compile(package) if @optional_arguments
       
       call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?)
       set_instruction_context(call)

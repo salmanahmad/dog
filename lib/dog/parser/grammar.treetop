@@ -1373,7 +1373,10 @@ grammar Dog
           args[r.identifier.text_value] = r.expression.transform
         end
         
-        return args
+        node = ::Dog::Nodes::StructureLiteral.new(nil, args)
+        node.line = self.line
+        
+        return node
       end
     }
   end

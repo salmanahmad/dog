@@ -540,6 +540,19 @@ module Dog::Instructions
           
           # TODO - Handle optionals
           
+          if optionals then
+            for key in optionals.keys do
+              optional = optionals[key].ruby_value
+              
+              property = ::Dog::Property.new
+              property.identifier = key
+              property.direction = "output"
+              property.required = false
+              property.value = optional
+              properties << property
+            end
+          end
+          
           return_values = function["output"]
           return_values.value.keys.each_index do |index|
             return_value = return_values[index].ruby_value
