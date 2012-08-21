@@ -524,9 +524,10 @@ module Dog
 
       def run
         Server.initialize
-        Thin::Server.start '0.0.0.0', Config.get('port'), Server
+        unless Thin::Server.running?
+          Thin::Server.start '0.0.0.0', Config.get('port'), Server
+        end
       end
-
     end
 
   end

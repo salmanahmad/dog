@@ -190,8 +190,13 @@ module Dog
         if tracks.count != 0 then
           Server.run
         else
-          EM.next_tick do
-            Process.kill('INT', Process.pid)
+          futures = ::Dog::Future.find()
+          if futures.count != 0 then
+            Server.run
+          else
+            EM.next_tick do
+              Process.kill('INT', Process.pid)
+            end
           end
         end
       end
