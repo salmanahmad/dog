@@ -28,6 +28,47 @@ module Dog::Library
         query = variable("query")
         via = variable("via")
 
+        structure_type = nil
+        properties = []
+
+        unless type["name"].value == "string" && type["package"].value == "system"
+          track = ::Dog::Track.new(type["name"], type["package"])
+          ::Dog::Runtime.run_track(track)
+          value = track.stack.pop
+
+          structure_type = value.type
+
+          properties = value.keys
+          properties.map! do
+            p = ::Dog::Property.new
+            p.identifier = p.name
+            p.direction = "input"
+            p
+          end
+        else
+          property = ::Dog::Property.new
+          property.identifier = "@value"
+          property.direction = "input"
+
+          structure_type = "string"
+          properties = [property]
+        end
+
+        channel = ::Dog::Value.new("structure", {})
+        channel.pending = true
+        channel.buffer_size = 0
+        channel.channel_mode = true
+
+        event = ::Dog::RoutedEvent.new
+        event.name = structure_type
+        event.properties = properties
+        event.channel_id = channel._id
+        #event.track_id = track.id # TODO
+        #event.routing = nil # TODO
+        event.created_at = Time.now.utc
+        event.save
+
+        dog_return(channel)
       end
     end
 
@@ -55,6 +96,16 @@ module Dog::Library
           if container.pending then
             future = ::Dog::Future.find_one("value_id" => container._id)
 
+            # TODO - Deal with buffer_size and channel_mode here
+            if future.value.max_numeric_key then
+              index = future.value.max_numeric_key.ceil + 1
+            else
+              index = 0
+            end
+
+            future.value[index] = value
+            future.save
+
             return_values = []
 
             for handler in future.handlers do
@@ -65,15 +116,6 @@ module Dog::Library
 
               package = ::Dog::Runtime.bundle.packages[package_name]
               symbol = package.symbols[function_name]
-
-              if future.value.max_numeric_key then
-                index = future.value.max_numeric_key.ceil + 1
-              else
-                index = 0
-              end
-
-              future.value[index] = value
-              future.save
 
               if symbol["implementations"].size != 0 then
                 argument_name = symbol["implementations"].first["arguments"].first

@@ -15,6 +15,7 @@ module Dog
     collection "stream"
     
     attr_accessor :_id
+    attr_accessor :channel_id
     attr_accessor :track_id
     attr_accessor :type
     attr_accessor :name
@@ -50,6 +51,7 @@ module Dog
     
     def to_hash
       return {
+        "channel_id" => self.channel_id,
         "track_id" => self.track_id,
         "type" => self.type.name,
         "name" => self.name,
@@ -67,6 +69,7 @@ module Dog
       hash = to_hash
       hash.delete("_id")
       hash["id"] = self.id.to_s
+      hash["channel_id"] = self.channel_id.to_s
       hash["track_id"] = self.track_id.to_s
       hash["name"] = hash["name"].split('.')
       hash["type"] = case self.type.name

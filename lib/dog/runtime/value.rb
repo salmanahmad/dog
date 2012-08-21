@@ -63,6 +63,21 @@ module Dog
       end
     end
     
+    def keys
+      items = []
+      for key, v in self.value do
+        item = key[2, key.length]
+
+        if key[0,1] == "n" then
+          item = item.to_f
+        end
+
+        items << item
+      end
+
+      return items
+    end
+    
     def [](k)
       if k.kind_of? Numeric then
         k = "n:#{k}"
