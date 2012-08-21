@@ -446,37 +446,44 @@ module Dog::Instructions
       arguments = track.stack.pop(arg_count)
       function = track.stack.pop
       
-      if function.type != "function" then
+      if function.type == "function" then
+        package = function["package"].value
+        name = function["name"].value
+        implementation = 0
+        
+        # TODO - Handle default values
+        # Perhaps the default values for optional args are handled
+        # by the runtime libraries and not the VM
+        
+        new_track = ::Dog::Track.new
+        new_track.control_ancestors = track.control_ancestors.clone
+        new_track.control_ancestors << track
+        
+        new_track.package_name = package
+        new_track.function_name = name
+        new_track.implementation_name = implementation
+        
+        symbol = ::Dog::Runtime.bundle.packages[package].symbols[name]["implementations"][implementation]
+        symbol_arguments = symbol["arguments"]
+        
+        arguments.each_index do |index|
+          argument = arguments[index]
+          variable_name = symbol_arguments[index]
+          new_track.variables[variable_name] = argument
+        end
+        
+        track.state = ::Dog::Track::STATE::CALLING
+        track.next_track = new_track
+      elsif function.type == "external_function"
+        actor = function["actor"].ruby_value
+        if actor == "shell"
+          # TODO
+        else
+          raise "I cannot synchronously call an external function for '#{actor}'"
+        end
+      else
         raise "I don't know how to call a non-function"
       end
-      
-      package = function["package"].value
-      name = function["name"].value
-      implementation = 0
-      
-      # TODO - Handle default values
-      # Perhaps the default values for optional args are handled
-      # by the runtime libraries and not the VM
-      
-      new_track = ::Dog::Track.new
-      new_track.control_ancestors = track.control_ancestors.clone
-      new_track.control_ancestors << track
-      
-      new_track.package_name = package
-      new_track.function_name = name
-      new_track.implementation_name = implementation
-      
-      symbol = ::Dog::Runtime.bundle.packages[package].symbols[name]["implementations"][implementation]
-      symbol_arguments = symbol["arguments"]
-      
-      arguments.each_index do |index|
-        argument = arguments[index]
-        variable_name = symbol_arguments[index]
-        new_track.variables[variable_name] = argument
-      end
-      
-      track.state = ::Dog::Track::STATE::CALLING
-      track.next_track = new_track
     end
   end
 
@@ -497,7 +504,21 @@ module Dog::Instructions
       function = track.stack.pop
       actor = track.stack.pop
       
-      # TODO
+      if function.type == "function" then
+        # TODO
+      elsif function.type == "external_function" then
+        function_actor = function["actor"].ruby_value
+        
+        if function_actor == "shell" then
+          # TODO
+        elsif function_actor == "people" then
+          
+        else
+          raise "I cannot asynchronously call an external function for '#{function_actor}'"
+        end
+      else
+        raise "Unable to perform an async call on type '#{function.type}'"
+      end
     end
   end
   

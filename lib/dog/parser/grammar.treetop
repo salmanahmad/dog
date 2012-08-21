@@ -516,7 +516,7 @@ grammar Dog
   # ===============
   
   rule ask
-    'ASK' sn ask_count? expression via_clause ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
+    'ASK' sn ask_count? expression via_clause:(via_clause)? ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
       def transform
         # TODO - Handle VIA
         # TODO - Handle AskCount

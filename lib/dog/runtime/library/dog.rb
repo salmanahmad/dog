@@ -127,6 +127,8 @@ module Dog::Library
         if container.type == "collection" then
           # TODO
         else
+          # TODO - I need to handle the "close" message
+
           if container.pending then
             future = ::Dog::Future.find_one("value_id" => container._id)
 

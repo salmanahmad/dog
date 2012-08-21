@@ -24,6 +24,7 @@ module Dog
     end
     
     attr_accessor :_id
+    attr_accessor :future_return_id
     
     attr_accessor :package_name
     attr_accessor :function_name
@@ -144,6 +145,7 @@ module Dog
       access_ancestors = []
       
       return {
+        "future_return_id" => self.future_return_id,
         "package_name" => self.package_name,
         "function_name" => self.function_name,
         "implementation_name" => self.implementation_name,
@@ -160,7 +162,7 @@ module Dog
         "control_ancestors" => control_ancestors,
         
         "has_listen" => self.has_listen,
-        "asking_id" => self.asking_id,
+        "asking_id" => self.asking_id
       }
     end
 
