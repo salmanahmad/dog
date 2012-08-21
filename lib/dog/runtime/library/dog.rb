@@ -24,6 +24,10 @@ module Dog::Library
 
       body do |track|
         # TODO
+        type = variable("type")
+        query = variable("query")
+        via = variable("via")
+        
       end
     end
 

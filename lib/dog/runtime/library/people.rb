@@ -13,6 +13,19 @@ module Dog::Library
 
     name "people"
 
+    structure "public" do
+
+    end
+
+    implementation "save" do
+      argument "person"
+
+      body do
+        ::Dog.database["people"].save(person.to_hash)
+        return person
+      end
+    end
+
     structure "person" do
       property "id"
       property "first_name"

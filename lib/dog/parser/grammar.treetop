@@ -565,11 +565,16 @@ grammar Dog
   # ==================
   
   rule listen
-    'LISTEN' listen_to_clause via_clause listen_for_clause {
+    'LISTEN' listen_to_clause via_clause:(via_clause)? listen_for_clause {
       def transform
         query = listen_to_clause.transform
         for_clause = listen_for_clause.transform
-        via = via_clause.transform
+        
+        if via_clause.empty?
+          via = ::Dog::Nodes::NullLiteral.new
+        else
+          via = via_clause.transform
+        end
         
         variable_name = for_clause.first
         type = for_clause.last
@@ -578,6 +583,7 @@ grammar Dog
           string_value = ::Dog::Value.new("type", {})
           string_value["name"] = ::Dog::Value.string_value("string")
           string_value["package"] = ::Dog::Value.string_value("system")
+          string_value = ::Dog::Nodes::ValueLiteral.new(string_value)
           
           structure_value = ::Dog::Nodes::Access.new([::Dog::Helper.pluralize(variable_name)])
           

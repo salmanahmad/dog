@@ -136,8 +136,15 @@ module Dog
         value["name"] = ::Dog::Value.string_value(symbol)
         value["package"] = ::Dog::Value.string_value(self.package.name)
         
-        instructions = Proc.new do
-          # TODO - Build and return the structure
+        instructions = Proc.new do |track|
+          struct = ::Dog::Value.new("#{self.package.name}.#{symbol}", {})
+          for property in s.properties do
+            property_name = property["name"]
+            struct[property_name] = ::Dog::Value.null_value
+          end
+          
+          track.stack.push(struct)
+          track.finish
         end
         
         self.package.push_symbol(symbol)
