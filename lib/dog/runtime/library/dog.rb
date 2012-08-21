@@ -79,7 +79,40 @@ module Dog::Library
       argument "via"
 
       body do |track|
-        # TODO
+        value = variable("value")
+        query = variable("query")
+        via = variable("via")
+
+        ruby_value = value.ruby_value
+
+        message = ::Dog::RoutedMessage.new
+        properties = []
+
+        if ruby_value.kind_of? Hash then
+          message.name = value.type
+
+          for k, v in ruby_value do
+            p = ::Dog::Property.new
+            p.direction = "output"
+            p.identifier = k
+            p.value = v
+            properties << p
+          end
+        else
+          message.name = "primitive"
+
+          p = ::Dog::Property.new
+          p.direction = "output"
+          p.identifier = "@value"
+          p.value = ruby_value
+          properties << p
+        end
+
+        message.track_id = track.id
+        message.routing = nil # TODO
+        message.created_at = Time.now.utc
+        message.properties = properties
+        message.save
       end
     end
 
