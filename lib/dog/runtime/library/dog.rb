@@ -14,7 +14,9 @@ module Dog::Library
     name "dog"
 
     implementation "ask" do
-      # TODO
+      # TODO - Right now, this is implemented directly inside the AsyncCall
+      # isntruction. Do I want to keep it there or can I actually move it
+      # over here?
     end
 
     implementation "listen" do

@@ -15,6 +15,7 @@ module Dog
     collection "stream"
     
     attr_accessor :_id
+    # TODO - Rename this to future_id
     attr_accessor :channel_id
     attr_accessor :track_id
     attr_accessor :type

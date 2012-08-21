@@ -151,9 +151,31 @@ module Dog::Nodes
       value["name"] = ::Dog::Value.string_value(@name)
       value["actor"] = ::Dog::Value.string_value(@actor)
       value["instructions"] = ::Dog::Value.string_value(@instructions)
-      value["arguments"] = ::Dog::Value.string_value(@arguments)
-      value["optional_arguments"] = ::Dog::Value.string_value(@optional_arguments)
-      value["output"] = ::Dog::Value.string_value(@output)
+      
+      value["arguments"] = ::Dog::Value.empty_structure
+      value["optional_arguments"] = ::Dog::Value.empty_structure
+      value["output"] = ::Dog::Value.empty_structure
+      
+      if @arguments then
+        @arguments.each_index do |index|
+          argument = @arguments[index]
+          value["arguments"][index] = ::Dog::Value.string_value(argument)
+        end
+      end
+      
+      if @optional_arguments then
+        @optional_arguments.each_index do |index|
+          optional_argument = @optional_arguments[index]
+          value["optional_arguments"][index] = ::Dog::Value.string_value(optional_argument)
+        end
+      end
+      
+      if @output then
+        @output.each_index do |index|
+          return_value = @output[index]
+          value["output"][index] = ::Dog::Value.string_value(return_value)
+        end
+      end
       
       package.current_context["value"] = value
       
@@ -752,7 +774,10 @@ module Dog::Nodes
         argument.compile(package)
       end
       
-      @optional_arguments.compile(package) if @optional_arguments
+      if @optional_arguments then
+        # TODO - Figure out optional arguments
+        @optional_arguments.compile(package)
+      end
       
       call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?)
       set_instruction_context(call)

@@ -16,7 +16,8 @@ class IntegrationTests::AskTest < Test::Unit::TestCase
     program = <<-EOD
 
     DEFINE label FOR people ON message DO
-    
+      PERFORM "Label these pictures"
+      RETURN images
     END
 
     ASK people.public TO label ON "Hello!"
@@ -24,6 +25,12 @@ class IntegrationTests::AskTest < Test::Unit::TestCase
     EOD
 
     tracks = run_source(program)
+    tasks = ::Dog::RoutedTask.find().to_a
+    task = tasks.first
+    
+    assert_equal(1, tasks.size)
+    assert_equal(3, task["properties"].size)
+    assert_equal(["instructions", "message", "images"], task["properties"].map { |p| p["identifier"] })
 
   end
 end

@@ -504,6 +504,11 @@ module Dog::Instructions
       function = track.stack.pop
       actor = track.stack.pop
       
+      future = ::Dog::Value.new("structure", {})
+      future.pending = true
+      future.buffer_size = 0
+      future.channel_mode = true
+      
       if function.type == "function" then
         # TODO
       elsif function.type == "external_function" then
@@ -512,13 +517,59 @@ module Dog::Instructions
         if function_actor == "shell" then
           # TODO
         elsif function_actor == "people" then
+          properties = []
           
+          property = ::Dog::Property.new
+          property.identifier = "instructions"
+          property.direction = "output"
+          property.required = true
+          property.value = function["instructions"].ruby_value
+          properties << property
+          
+          arguments.each_index do |index|
+            argument = arguments[index]
+            variable_name = function["arguments"][index].ruby_value
+            
+            property = ::Dog::Property.new
+            property.identifier = variable_name
+            property.direction = "output"
+            property.required = true
+            property.value = argument.ruby_value
+            properties << property
+          end
+          
+          # TODO - Handle optionals
+          
+          return_values = function["output"]
+          return_values.value.keys.each_index do |index|
+            return_value = return_values[index].ruby_value
+            
+            property = ::Dog::Property.new
+            property.identifier = return_value
+            property.direction = "input"
+            property.required = true
+            property.value = nil
+            properties << property
+          end
+          
+          task = ::Dog::RoutedTask.new
+          task.name = function["name"].ruby_value
+          task.replication = 1
+          task.duplication = 1
+          task.properties = properties
+          task.channel_id = future._id
+          #task.track_id = track.control_ancestors.last
+          #task.routing = nil
+          task.created_at = Time.now.utc
+          task.save
         else
           raise "I cannot asynchronously call an external function for '#{function_actor}'"
         end
       else
         raise "Unable to perform an async call on type '#{function.type}'"
       end
+      
+      track.stack.push(future)
     end
   end
   
