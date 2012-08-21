@@ -27,7 +27,7 @@ module Dog::Library
         type = variable("type")
         query = variable("query")
         via = variable("via")
-        
+
       end
     end
 
@@ -44,50 +44,50 @@ module Dog::Library
     implementation "add" do
       argument "container"
       argument "value"
-      
+
       body do |track|
         container = variable("container")
         value = variable("value")
-        
+
         if container.type == "collection" then
           # TODO
         else
           if container.pending then
             future = ::Dog::Future.find_one("value_id" => container._id)
-            
+
             return_values = []
-            
+
             for handler in future.handlers do
               handler = ::Dog::Value.from_hash(handler)
-              
+
               package_name = handler["package"].value
               function_name = handler["name"].value
-              
+
               package = ::Dog::Runtime.bundle.packages[package_name]
               symbol = package.symbols[function_name]
-              
+
               if future.value.max_numeric_key then
                 index = future.value.max_numeric_key.ceil + 1
               else
                 index = 0
               end
-              
+
               future.value[index] = value
               future.save
-              
+
               if symbol["implementations"].size != 0 then
                 argument_name = symbol["implementations"].first["arguments"].first
-                
+
                 track = ::Dog::Track.new(function_name, package_name)
                 track.variables[argument_name] = value
-                
+
                 # TODO - I need to handle the output fromt this and do things
                 # like save the track or read the return value. If there are
                 # multiple tracks with multiple return values then I should return
                 # an array with a list of the values. Note: these values may include
                 # a future - or should it include a "receipt"?
                 ::Dog::Runtime.run_track(track)
-                
+
                 if track.state == ::Dog::Track::STATE::FINISHED
                   return_value = track.stack.pop
                   unless return_value.nil?
@@ -96,18 +96,18 @@ module Dog::Library
                 end
               end
             end
-            
+
             if return_values.size == 0 then
               dog_return(::Dog::Value.null_value)
             elsif return_values.size == 1 then
               dog_return(return_values.first)
             else
               output = ::Dog::Value.new("structure", {})
-              
+
               return_values.each_index do |index|
                 output[index] = return_values[index]
               end
-              
+
               dog_return(output)
             end
           else
@@ -116,49 +116,49 @@ module Dog::Library
             else
               index = 0
             end
-            
+
             container[index] = value
             dog_return(container)
           end
         end
       end
     end
-    
+
     implementation "find" do
       # TODO
     end
-    
+
     implementation "update" do
       # TODO
     end
-    
+
     implementation "remove" do
       # TODO
     end
-    
+
     implementation "save" do
       # TODO
     end
-    
+
     implementation "register_handler" do
       argument "structure"
       argument "type"
-      
+
       body do |track|
         structure = variable("structure")
         type = variable("type")
-        
+
         future = ::Dog::Future.find_one("value_id" => structure._id)
-        
+
         if future.nil? then
           future = ::Dog::Future.new(structure._id, structure)
         end
-        
+
         future.handlers << type
         future.save
       end
     end
-    
+
     implementation "pending_structure" do
       argument "type"
       argument "buffer_size"
