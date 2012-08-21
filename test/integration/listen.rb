@@ -29,4 +29,24 @@ class IntegrationTests::ListenTest < Test::Unit::TestCase
     assert_equal(true, variable.channel_mode)
     assert_equal(event["channel_id"], variable._id)
   end
+  
+  def test_structure
+    program = <<-EOD
+    
+    DEFINE event {
+      title
+      body
+      description
+    }
+
+    LISTEN TO people.public FOR events
+
+    EOD
+
+    tracks = run_source(program)
+
+    variable = tracks.last.variables["events"]
+    event = ::Dog::RoutedEvent.find().to_a.first
+    assert_equal(3, event["properties"].size)
+  end
 end

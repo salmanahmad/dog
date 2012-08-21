@@ -15,6 +15,10 @@ module Dog
       return "#{word}s"
     end
 
+    def self.singularize(word)
+      return word.chop
+    end
+
     def self.underscore(string)
       string.gsub(/::/, '/').
       gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').

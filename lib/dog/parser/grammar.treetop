@@ -585,7 +585,7 @@ grammar Dog
           string_value["package"] = ::Dog::Value.string_value("system")
           string_value = ::Dog::Nodes::ValueLiteral.new(string_value)
           
-          structure_value = ::Dog::Nodes::Access.new([::Dog::Helper.pluralize(variable_name)])
+          structure_value = ::Dog::Nodes::Access.new([::Dog::Helper.singularize(variable_name)])
           
           type = ::Dog::Nodes::Branch.new(
             ::Dog::Nodes::Operation.new(

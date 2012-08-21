@@ -32,16 +32,17 @@ module Dog::Library
         properties = []
 
         unless type["name"].value == "string" && type["package"].value == "system"
-          track = ::Dog::Track.new(type["name"], type["package"])
+          track = ::Dog::Track.new(type["name"].ruby_value, type["package"].ruby_value)
+          
           ::Dog::Runtime.run_track(track)
           value = track.stack.pop
 
           structure_type = value.type
 
           properties = value.keys
-          properties.map! do
+          properties.map! do |name|
             p = ::Dog::Property.new
-            p.identifier = p.name
+            p.identifier = name
             p.direction = "input"
             p
           end
