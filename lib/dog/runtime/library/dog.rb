@@ -122,7 +122,7 @@ module Dog::Library
       argument "container"
       argument "value"
 
-      body do |track|
+      body do |current_track|
         container = variable("container")
         value = variable("value")
 
@@ -174,6 +174,7 @@ module Dog::Library
                     return_values << return_value
                   end
                 end
+                
               end
             end
 

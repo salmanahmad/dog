@@ -189,7 +189,7 @@ module Dog
     end
     
     def is_root?
-      self.control_ancestors.empty?
+      return self.function_name == "@root" && self.package_name == ::Dog::Runtime.bundle.startup_package
     end
   end
 end

@@ -156,7 +156,7 @@ module Dog
       def initialize
         return if @initialized
         @initialized = true
-
+        
         prefix = Config.get('dog_prefix')
 
         # TODO - I have to figure this out for production
@@ -524,9 +524,9 @@ module Dog
 
       def run
         Server.initialize
-        unless Thin::Server.running?
-          Thin::Server.start '0.0.0.0', Config.get('port'), Server
-        end
+        return if @running
+        @running = true
+        Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
     end
 
