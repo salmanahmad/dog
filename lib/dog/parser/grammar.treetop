@@ -584,9 +584,7 @@ grammar Dog
           string_value["name"] = ::Dog::Value.string_value("string")
           string_value["package"] = ::Dog::Value.string_value("system")
           string_value = ::Dog::Nodes::ValueLiteral.new(string_value)
-          
-          structure_value = ::Dog::Nodes::Access.new([::Dog::Helper.singularize(variable_name)])
-          
+          structure_value = ::Dog::Nodes::Access.new([::Dog::Language::singularize(variable_name)])
           type = ::Dog::Nodes::Branch.new(
             ::Dog::Nodes::Operation.new(
               structure_value,
@@ -770,7 +768,7 @@ grammar Dog
         source_structure = args.last
         
         if source_structure.nil? then
-          source_structure = ::Dog::Nodes::Access.new([::Dog::Helper.pluralize(variable_name)])
+          source_structure = ::Dog::Nodes::Access.new([::Dog::Language::pluralize(variable_name)])
         end
         
         # TODO - Detect duplicated ON EACH names somehow
@@ -1177,7 +1175,7 @@ grammar Dog
         structure_variable_name = "@structure_#{unique_number}"
         
         if source_structure.nil? then
-          source_structure = ::Dog::Nodes::Access([::Dog::Helper.pluralize(variable_name)])
+          source_structure = ::Dog::Nodes::Access([::Dog::Language::pluralize(variable_name)])
         end
         
         node = ::Dog::Nodes::Nodes.new([

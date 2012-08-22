@@ -9,23 +9,28 @@
 
 module Dog
   class Person < DatabaseObject
+    include Dog::FacebookPerson
+
+    # sets the collection_name in DatabaseObject
     collection "people"
-    
-    def self.default_properties
-      return [
-        "_id",
-        "first_name",
-        "last_name",
-        "handle",
-        "email",
-        "facebook",
-        "twitter",
-        "google",
-        "communities",
-        "profile"
-      ]
+
+    class << self
+      def default_properties
+        return [
+          "_id",
+          "first_name",
+          "last_name",
+          "handle",
+          "email",
+          "facebook",
+          "twitter",
+          "google",
+          "communities",
+          "profile"
+        ]
+      end
     end
-    
+
     attr_accessor :_id
     attr_accessor :first_name
     attr_accessor :last_name
@@ -37,12 +42,12 @@ module Dog
     attr_accessor :password
     attr_accessor :communities
     attr_accessor :profile
-    
+
     # For routing
     attr_accessor :last_task_id
     attr_accessor :last_message_id
     attr_accessor :last_workflow_id
-    
+
     def to_hash
       hash = {
         first_name: self.first_name,
@@ -59,16 +64,16 @@ module Dog
         last_message_id: self.last_message_id,
         last_workflow_id: self.last_workflow_id
       }
-      
+
       hash.delete(:handle) unless hash[:handle]
       hash.delete(:email) unless hash[:email]
       hash.delete(:facebook) unless hash[:facebook]
       hash.delete(:twitter) unless hash[:twitter]
       hash.delete(:google) unless hash[:google]
-      
+
       return hash
     end
-    
+
     def to_hash_for_event
       hash = self.to_hash
       hash[:_id] = self._id
@@ -78,7 +83,7 @@ module Dog
       hash.delete(:last_workflow_id)
       return hash
     end
-    
+
     def self.search(query)
       query = Regexp.new(query)
       self.find({"$or" => [
@@ -88,63 +93,59 @@ module Dog
         {"email" => query}
       ]}).to_a
     end
-    
+
     def self.find_by_email(email)
       self.find_one({"email" => email})
     end
-    
-    def self.find_by_google(google)
-      self.find_one({"google" => google})
-    end
-    
+
     def self.find_ids_for_predicate(conditions)
       self.find(conditions, {:fields => ["_id"]}).to_a
     end
-    
+
     # TODO - Update the API so this will return multiple
     # people and accept and array not only an id
     def self.from(data)
       person_id = nil
-      
+
       if data.kind_of?(Hash) then
         person_id = data["_person_id"]
       else
         person_id = data.person_id rescue nil
       end
-      
+
       if person_id then
         return Person.find_by_id(person_id)
       else
         return nil
       end
     end
-    
+
     def join_community(community)
       # Note: This adds the community to the profile but does not
       # save the actual person object. You have to call #save. This
       # was done so that we can ensure atomic updates
-      
+
       return nil if community.nil?
-      
+
       self.communities ||= []
       self.communities = self.communities | [community.name]
-      
+
       self.profile ||= {}
       self.profile[community.name] ||= {}
-      
+
       for key, value in community.properties do
         unless self.profile[community.name].include?(key) then
           self.profile[community.name][key] = nil
-        end   
+        end
       end
-      
+
       return true
     end
-    
+
     def join_community_named(community_name)
       join_community(Community.find_by_name(community_name))
     end
-    
+
     def leave_community(community)
       # Note: Just like join, this does not save the object
       

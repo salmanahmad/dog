@@ -5,19 +5,20 @@
 #
 
 module Dog
-  module Helper
+
+  module Language
 
     def self.singularize(word)
-      return word[0...-1]
+      return word.chop
     end
 
     def self.pluralize(word)
       return "#{word}s"
     end
 
-    def self.singularize(word)
-      return word.chop
-    end
+  end
+
+  module Helper
 
     def self.underscore(string)
       string.gsub(/::/, '/').

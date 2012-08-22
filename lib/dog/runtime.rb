@@ -18,6 +18,8 @@ require 'sinatra/async'
 require 'uuid'
 require 'json'
 require 'mongo'
+require 'httparty'
+require 'json'
 
 # TODO Add back the Instant Messaging Capabilities.
 #require 'blather/client/client'
@@ -25,6 +27,8 @@ require 'mongo'
 require File.join(File.dirname(__FILE__), 'runtime/database_object.rb')
 require File.join(File.dirname(__FILE__), 'runtime/routability.rb')
 require File.join(File.dirname(__FILE__), 'runtime/stream_object.rb')
+
+Dir[File.join(File.dirname(__FILE__), "runtime/external", "*.rb")].each { |file| require file }
 
 require File.join(File.dirname(__FILE__), 'runtime/community.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
@@ -324,7 +328,7 @@ module Dog
         name = name.join(".")
 
         # special case root
-        name = '' if name == 'root'
+        name = '' if name == '@root'
 
         symbols = self.bundle.packages[self.bundle.startup_package]["symbols"]
 
