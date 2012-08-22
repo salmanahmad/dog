@@ -1,9 +1,71 @@
 
-optional_arguments - function side
+external functions
 close message
 resume
-external functions
 collection api
+
+optional_arguments - function side
+async call
+	Internal functions have yield / return
+		This proposal need much more work.
+	
+		Basically, return stops execution and returns - it does
+		not actually return anything. yield is what returns stuff
+		by adding to a special "@yield" variable. 
+		
+		yield 5
+		yield 6
+		yield 7
+		
+		is the same as:
+		
+		return 5,6,7
+		
+		A empty "return" on its own, does not actually push a null
+		on the stack, it will just go ahead and return "@yield" - which
+		by default is null
+		
+		So:
+		
+		return 5
+		
+		is the same as:
+		
+		yield 5
+		return
+		
+		The one main problem here is how do I support automatically
+		returning the value from the last expression? 
+		
+		do
+			5 + 5
+		end
+		
+		Perhaps one solution is that an empty return has different
+		semantics from no return / return null. In other words, the first two 
+		are the same but hte last one is different:
+		
+		do
+			
+		end
+		 
+		do
+			return null
+		end
+		
+		do
+			return
+		end
+		
+		
+
+	External functions have to be re-written in the grammar
+	so they create the default values for optional parameters
+	and in addition they pass in the current_future_return_id to
+	special framework function for "ask" and "compute". If these 
+	functions recieve "null" as the future_return_id they obviously
+	assume that the function is being called synchronously.
+
 
 Plan:
 
@@ -12,7 +74,7 @@ Plan:
 			pending: {true | false}
 			buffer_size
 			channel_mode (allow_block, never_close, etc.)
-		
+
 		Add dog.pending_structure system call to create system call
 
 		Update Access so that it blocks accordingly
@@ -30,7 +92,7 @@ Plan:
 			What happens if you are resuming a bunch of tracks but we crash before all of them hit a stable point?
 			Implement ON EACH
 			Invoke handlers
-			
+
 			Wake up tracks
 
 		AsyncCall system call
@@ -47,7 +109,7 @@ Plan:
 		Implement dog.find
 
 	Implement CRUD operators
-		
+
 
 	Access Scope Modifiers
 		Properties
