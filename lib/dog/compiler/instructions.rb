@@ -477,7 +477,47 @@ module Dog::Instructions
       elsif function.type == "external_function"
         actor = function["actor"].ruby_value
         if actor == "shell"
-          # TODO
+          
+          input = {
+            "argv" => [],
+            "kwargs" => {},
+            "name" => function["name"].ruby_value
+          }
+          
+          arguments.each_index do |index|
+            argument = arguments[index]
+            input["argv"] << argument.ruby_value
+          end
+          
+          if optionals then
+            for key in optionals.keys do
+              optional = optionals[key].ruby_value
+              input["argv"][key] << argument.ruby_value
+            end
+          end
+          
+          output = {}
+          
+          Open3.popen3(function["instructions"].ruby_value) { |stdin, stdout, stderr, process|
+            stdin.puts(input.to_json) if input
+            stdin.close
+                
+            exit_status = process.value
+            shell_output = stdout.read
+                
+            begin
+              output = JSON.parse(shell_output)
+              output = output["output"]
+            rescue
+              output = shell_output
+            end
+                
+            stdout.close
+            stderr.close
+          }
+              
+          output = ::Dog::Value.from_ruby_value(output)
+          track.stack.push(output)
         else
           raise "I cannot synchronously call an external function for '#{actor}'"
         end
@@ -537,8 +577,6 @@ module Dog::Instructions
             property.value = argument.ruby_value
             properties << property
           end
-          
-          # TODO - Handle optionals
           
           if optionals then
             for key in optionals.keys do

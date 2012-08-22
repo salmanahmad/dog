@@ -34,7 +34,7 @@ class IntegrationTests::AskTest < Test::Unit::TestCase
 
   end
 
-  def test_simple
+  def test_simple_2
     program = <<-EOD
 
     DEFINE label FOR people ON message DO
