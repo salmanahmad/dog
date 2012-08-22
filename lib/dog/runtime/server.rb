@@ -325,6 +325,8 @@ module Dog
 
         post prefix + '/stream/object/:id' do |id|
           object = ::Dog::StreamObject.find_by_id(id)
+          response = nil
+          
           
           if object.class == ::Dog::RoutedTask then
             task = object
@@ -357,6 +359,7 @@ module Dog
             track.control_ancestors = [::Dog::Track.root.id]
             
             argument = {}
+            
             for property in object.properties do
               argument[property.identifier] = params[property.identifier]
               if property.required && argument[property.identifier].nil? then
@@ -364,20 +367,29 @@ module Dog
               end
             end
 
-            if object.handler_argument then
-              dog_value = ::Dog::Value.from_ruby_value(argument, object.name)
-              track.write_variable(object.handler_argument, dog_value)
+            future = ::Dog::Future.find_one("value_id" => object.channel_id)
+            future = future.value
+
+            track = ::Dog::Track.new
+            track.variables["container"] = future
+
+            if argument.size == 1 and argument.keys.first == "*value" then
+              track.variables["value"] = ::Dog::Value.from_ruby_value(argument["*value"])
+            else
+              track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
             end
 
-            track.listen_argument = object.handler_argument
-            track.save
+            proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+            proc.call(track)
 
-            ::Dog::Runtime.run_track(track)
+            response = track.stack.pop.ruby_value
+
           end
-          
+
           content_type 'application/json'
           return {
-            "success" => true
+            "success" => true,
+            "response" => response
           }.to_json
 
         end

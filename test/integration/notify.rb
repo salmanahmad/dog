@@ -25,7 +25,7 @@ class IntegrationTests::NotifyTest < Test::Unit::TestCase
 
     assert_equal(1, messages.size)
     assert_equal(1, message["properties"].size)
-    assert_equal("@value", message["properties"].first["identifier"])
+    assert_equal("*value", message["properties"].first["identifier"])
     assert_equal("Hello!", message["properties"].first["value"])
   end
   

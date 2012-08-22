@@ -50,7 +50,7 @@ module Dog::Library
           end
         else
           property = ::Dog::Property.new
-          property.identifier = "@value"
+          property.identifier = "*value"
           property.direction = "input"
 
           structure_type = "string"
@@ -105,7 +105,7 @@ module Dog::Library
 
           p = ::Dog::Property.new
           p.direction = "output"
-          p.identifier = "@value"
+          p.identifier = "*value"
           p.value = ruby_value
           properties << p
         end
