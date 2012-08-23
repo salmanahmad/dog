@@ -692,6 +692,7 @@ module Dog::Instructions
           task.duplication = 1
           task.properties = properties
           task.channel_id = future._id
+          task.track_id = track.id
           #task.track_id = track.control_ancestors.last
           #task.routing = nil
           task.created_at = Time.now.utc
