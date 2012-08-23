@@ -1,12 +1,23 @@
+DEFINE draw_curved_line_corner FOR people DO
+  PERFORM "draw a curved line from one corner to another"
+  RETURN confirmation
+END
+
+DEFINE draw_curved_line_intersection FOR people DO
+  PERFORM "draw a curved line from on intersection point to either another intersection point, a corner, or a side"
+  RETURN confirmation
+END
+
+DEFINE color_shape FOR people DO
+  PERFORM "color a shape"
+  RETURN confirmation
+END
 
 PRINT "Going to draw corner lines."
-
-WAIT ON ASK 5 people.people TO "Draw a curved line from one corner to another"
+WAIT ON ASK 5 people.public TO draw_curved_line_corner
 
 PRINT "Going to draw intersection lines."
-
-WAIT ON ASK 5 people.people TO "Draw a curved line from on intersection point to either another intersection point, a corner, or a side"
+WAIT ON ASK 5 people.public TO draw_curved_line_intersection
 
 PRINT "Going to color the shapes."
-
-WAIT ON ASK 5 people.people TO "Color a shape"
+WAIT ON ASK 5 people.public TO color_shape
