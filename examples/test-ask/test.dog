@@ -4,9 +4,12 @@ DEFINE label FOR people ON image DO
   RETURN label
 END
 
-labels = ASK people.public TO label ON "Foobar"
+labels = {}
 
-PRINT labels[0].label
+labels["test"] = ASK people.public TO label ON "Foobar"
+
+PRINT labels["test"]
+PRINT labels["test"][0].label
 
 
 PRINT "All Done:"

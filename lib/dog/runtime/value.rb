@@ -167,7 +167,11 @@ module Dog
       else
         h = {}
         for k, v in self.value do
-          h[k[2,k.length]] = v.ruby_value
+          if k[0,1] == "n" then
+            h[k[2,k.length].to_f] = v.ruby_value
+          else
+            h[k[2,k.length]] = v.ruby_value
+          end
         end
         
         return h

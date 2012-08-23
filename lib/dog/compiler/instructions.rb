@@ -190,11 +190,7 @@ module Dog::Instructions
             value = path.first
 
             future = ::Dog::Future.find_one({"value_id" => value._id})
-
-            if future.nil? then
-              future = ::Dog::Future.new(value._id, value)
-            end
-
+            future = ::Dog::Future.new(value._id, value) if future.nil?
             future.tracks << track
             future.save
 
@@ -204,8 +200,8 @@ module Dog::Instructions
           end
         end
 
-        pointer = path.shift
-        for item in path do
+        pointer = path.first
+        for item in path[1, path.size - 1] do
           key = ""
 
           item_value = item
@@ -219,10 +215,34 @@ module Dog::Instructions
             raise "Runtime error"
           end
 
+          if pointer.pending then
+            if track.futures[pointer._id] then
+              pointer = track.futures[pointer._id]
+              track.state = ::Dog::Track::STATE::RUNNING
+            else
+              track.stack.concat(path)
+
+              future = ::Dog::Future.find_one({"value_id" => pointer._id})
+              future = ::Dog::Future.new(pointer._id, pointer) if future.nil?
+              future.tracks << track
+              future.save
+
+              track.next_instruction = track.current_instruction
+              track.state = ::Dog::Track::STATE::WAITING
+              return
+            end
+          end
+
           pointer = pointer[key]
           pointer = ::Dog::Value.null_value if pointer.nil?
         end
-
+        
+        if pointer.pending then
+          if track.futures[pointer._id] then
+            pointer = track.futures[pointer._id]
+          end
+        end
+        
         track.stack.push(pointer)
       end
     end
@@ -304,6 +324,12 @@ module Dog::Instructions
           else
             value = ::Dog::Value.null_value
           end
+        end
+      end
+      
+      if value.pending then
+        if track.futures[value._id] then
+          value = track.futures[value._id]
         end
       end
       
