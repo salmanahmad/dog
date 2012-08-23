@@ -163,6 +163,7 @@ module Dog
               run_track(return_track)
               return
             else
+              track.save
               break
             end
           end

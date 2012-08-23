@@ -100,7 +100,7 @@ module Dog
           track.variables[name]
         end
         
-        def dog_return(value)
+        def dog_return(value = ::Dog::Value.null_value)
           # TODO - Handle multiple returns
           if value.kind_of? ::Dog::Value then
             track.stack.push(value)

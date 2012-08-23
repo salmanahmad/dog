@@ -39,6 +39,10 @@ module Dog
       return object
     end
     
+    def self.remove(selector = {}, opts = {})
+      ::Dog::database[self.collection_name].remove(selector, opts)
+    end
+    
     def self.find_by_id(id)
       return nil if id.nil?
       id = BSON::ObjectId.from_string(id) if id.class == String

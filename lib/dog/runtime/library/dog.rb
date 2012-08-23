@@ -130,66 +130,81 @@ module Dog::Library
           # TODO
         else
           # TODO - I need to handle the "close" message
-
           if container.pending then
             future = ::Dog::Future.find_one("value_id" => container._id)
 
-            # TODO - Deal with buffer_size and channel_mode here
-            if future.value.max_numeric_key then
-              index = future.value.max_numeric_key.ceil + 1
-            else
-              index = 0
-            end
-
-            future.value[index] = value
-            future.save
-
-            return_values = []
-
-            for handler in future.handlers do
-              handler = ::Dog::Value.from_hash(handler)
-
-              package_name = handler["package"].value
-              function_name = handler["name"].value
-
-              package = ::Dog::Runtime.bundle.packages[package_name]
-              symbol = package.symbols[function_name]
-
-              if symbol["implementations"].size != 0 then
-                argument_name = symbol["implementations"].first["arguments"].first
-
-                track = ::Dog::Track.new(function_name, package_name)
-                track.variables[argument_name] = value
-
-                # TODO - I need to handle the output fromt this and do things
-                # like save the track or read the return value. If there are
-                # multiple tracks with multiple return values then I should return
-                # an array with a list of the values. Note: these values may include
-                # a future - or should it include a "receipt"?
-                ::Dog::Runtime.run_track(track)
-
-                if track.state == ::Dog::Track::STATE::FINISHED
-                  return_value = track.stack.pop
-                  unless return_value.nil?
-                    return_values << return_value
-                  end
-                end
+            if value.type == "close" then
+              ::Dog::Future.remove("value_id" => container._id)
+              
+              future.value.pending = false
+              
+              for track_id in future.tracks do
+                track = ::Dog::Track.find_one(track_id)
+                track.futures[future.value_id] = future.value
                 
+                ::Dog::Runtime.run_track(track)
               end
-            end
-
-            if return_values.size == 0 then
-              dog_return(::Dog::Value.null_value)
-            elsif return_values.size == 1 then
-              dog_return(return_values.first)
+              dog_return
             else
-              output = ::Dog::Value.new("structure", {})
+              # TODO - Deal with buffer_size and channel_mode here
+              if future.value.max_numeric_key then
+                index = future.value.max_numeric_key.ceil + 1
+              else
+                index = 0
+              end
+              
+              index = index.to_f
+              
+              future.value[index] = value
+              future.save
 
-              return_values.each_index do |index|
-                output[index] = return_values[index]
+              return_values = []
+
+              for handler in future.handlers do
+                handler = ::Dog::Value.from_hash(handler)
+
+                package_name = handler["package"].value
+                function_name = handler["name"].value
+
+                package = ::Dog::Runtime.bundle.packages[package_name]
+                symbol = package.symbols[function_name]
+
+                if symbol["implementations"].size != 0 then
+                  argument_name = symbol["implementations"].first["arguments"].first
+
+                  track = ::Dog::Track.new(function_name, package_name)
+                  track.variables[argument_name] = value
+
+                  # TODO - I need to handle the output fromt this and do things
+                  # like save the track or read the return value. If there are
+                  # multiple tracks with multiple return values then I should return
+                  # an array with a list of the values. Note: these values may include
+                  # a future - or should it include a "receipt"?
+                  ::Dog::Runtime.run_track(track)
+
+                  if track.state == ::Dog::Track::STATE::FINISHED
+                    return_value = track.stack.pop
+                    unless return_value.nil?
+                      return_values << return_value
+                    end
+                  end
+                
+                end
               end
 
-              dog_return(output)
+              if return_values.size == 0 then
+                dog_return(::Dog::Value.null_value)
+              elsif return_values.size == 1 then
+                dog_return(return_values.first)
+              else
+                output = ::Dog::Value.new("structure", {})
+
+                return_values.each_index do |index|
+                  output[index] = return_values[index]
+                end
+
+                dog_return(output)
+              end
             end
           else
             if container.max_numeric_key then
@@ -197,6 +212,8 @@ module Dog::Library
             else
               index = 0
             end
+
+            index = index.to_f
 
             container[index] = value
             dog_return(container)

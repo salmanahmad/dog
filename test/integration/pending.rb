@@ -47,8 +47,8 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
     EOD
     
     tracks = run_source(program)
-    assert_equal(5, tracks.last.variables["foo"].value["n:0"].value)
-    assert_equal("Hello", tracks.last.variables["foo"].value["n:1"].value)
+    assert_equal(5, tracks.last.variables["foo"].value["n:0.0"].value)
+    assert_equal("Hello", tracks.last.variables["foo"].value["n:1.0"].value)
   end
   
   def test_add

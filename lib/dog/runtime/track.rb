@@ -108,7 +108,7 @@ module Dog
         if item.kind_of? ::Dog::Value then
           item.to_hash
         else
-          raise "A non-value was present on the stack"
+          raise "A non-value was present on the stack: #{item.inspect}"
         end
       end
       

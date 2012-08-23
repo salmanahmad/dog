@@ -325,7 +325,7 @@ module Dog
 
         post prefix + '/stream/object/:id' do |id|
           object = ::Dog::StreamObject.find_by_id(id)
-          response = nil
+          output = nil
           
           
           if object.class == ::Dog::RoutedTask then
@@ -340,16 +340,34 @@ module Dog
                 end
               end
             end
-            
+
             task.responses << response
             task.save
-            
+
+            argument = response
+
+            future = ::Dog::Future.find_one("value_id" => object.channel_id)
+            future = future.value
+
+            track = ::Dog::Track.new
+            track.variables["container"] = future
+
+            if argument.size == 1 and argument.keys.first == "*value" then
+              track.variables["value"] = ::Dog::Value.from_ruby_value(argument["*value"])
+            else
+              track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
+            end
+
+            proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+            proc.call(track)
+
             if task.completed? then
-              track = ::Dog::Track.find_by_id(task.track_id)
-              if track.asking_id == task.id.to_s then
-                track.state = ::Dog::Track::STATE::RUNNING
-                ::Dog::Runtime.run_track(track)
-              end
+              track = ::Dog::Track.new
+              track.variables["container"] = future
+              track.variables["value"] = ::Dog::Value.new("close", {})
+
+              proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+              proc.call(track)
             end
             
           elsif object.class == ::Dog::RoutedEvent then
@@ -382,14 +400,14 @@ module Dog
             proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
             proc.call(track)
 
-            response = track.stack.pop.ruby_value
+            output = track.stack.pop.ruby_value
 
           end
 
           content_type 'application/json'
           return {
             "success" => true,
-            "response" => response
+            "response" => output
           }.to_json
 
         end

@@ -182,14 +182,23 @@ module Dog::Instructions
 
             path.shift
             path.unshift(new_value)
+
+            track.state = ::Dog::Track::STATE::RUNNING
           else
             track.stack.concat(path)
 
             value = path.first
-            future = ::Dog::Future.new(value._id, value)
+
+            future = ::Dog::Future.find_one({"value_id" => value._id})
+
+            if future.nil? then
+              future = ::Dog::Future.new(value._id, value)
+            end
+
             future.tracks << track
             future.save
 
+            track.next_instruction = track.current_instruction
             track.state = ::Dog::Track::STATE::WAITING
             return
           end
@@ -198,19 +207,20 @@ module Dog::Instructions
         pointer = path.shift
         for item in path do
           key = ""
-          
+
           item_value = item
           item_value = item.value if item.kind_of? ::Dog::Value
-          
+
           if item_value.kind_of? String then
             key = item_value.to_s
           elsif item_value.kind_of? Numeric then
-            key = item_value.to_s
+            key = item_value.to_f
           else
             raise "Runtime error"
           end
 
           pointer = pointer[key]
+          pointer = ::Dog::Value.null_value if pointer.nil?
         end
 
         track.stack.push(pointer)
