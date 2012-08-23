@@ -218,6 +218,8 @@ grammar Dog
     /
     inspect
     /
+    wait
+    /
     on
     /
     user
@@ -1024,6 +1026,17 @@ grammar Dog
   # ===================
   # = Others Commands =
   # ===================
+  
+  rule wait
+  'WAIT' s 'ON' s expression {
+    def transform
+      node = ::Dog::Nodes::Wait.new(expression.transform)
+      node.line = self.line
+      
+      return node
+    end
+  }
+  end
   
   rule package 
     'PACKAGE' s identifier {

@@ -4,12 +4,16 @@ DEFINE label FOR people ON image DO
   RETURN label
 END
 
-labels = {}
+labels = ASK people.public TO label ON "Foobar"
 
-labels["test"] = ASK people.public TO label ON "Foobar"
+PRINT "before"
 
-PRINT labels["test"]
-PRINT labels["test"][0].label
+WAIT ON labels
+
+PRINT "after"
+
+PRINT labels
+PRINT labels[0].label
 
 
 PRINT "All Done:"

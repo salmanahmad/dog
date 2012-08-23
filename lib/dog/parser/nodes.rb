@@ -726,6 +726,23 @@ module Dog::Nodes
     end
   end
 
+  class Wait < Node
+    attr_accessor :expression
+    
+    def initialize(expression)
+      @expression = expression
+    end
+    
+    def compile(package)
+      expression.compile(package)
+      
+      wait = ::Dog::Instructions::Wait.new
+      set_instruction_context(wait)
+      
+      package.add_to_instructions([wait])
+    end
+  end
+
   class Break < Node
     attr_accessor :expression
 

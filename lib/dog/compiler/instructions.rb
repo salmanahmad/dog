@@ -163,6 +163,32 @@ module Dog::Instructions
     end
   end
   
+  class Wait < Instruction
+    def execute(track)
+      value = track.stack.pop
+
+      if value.pending then
+        if track.futures[value._id] then
+          value = track.futures[value._id]
+          track.state = ::Dog::Track::STATE::RUNNING
+        else
+          track.stack.push(value)
+
+          future = ::Dog::Future.find_one({"value_id" => value._id})
+          future = ::Dog::Future.new(value._id, value) if future.nil?
+          future.tracks << track
+          future.save
+
+          track.next_instruction = track.current_instruction
+          track.state = ::Dog::Track::STATE::WAITING
+          return
+        end
+      end
+      
+      track.stack.push(value)
+    end
+  end
+  
   class Access < Instruction
     attribute :path_size
 
@@ -236,13 +262,13 @@ module Dog::Instructions
           pointer = pointer[key]
           pointer = ::Dog::Value.null_value if pointer.nil?
         end
-        
+
         if pointer.pending then
           if track.futures[pointer._id] then
             pointer = track.futures[pointer._id]
           end
         end
-        
+
         track.stack.push(pointer)
       end
     end
