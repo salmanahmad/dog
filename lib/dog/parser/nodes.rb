@@ -581,8 +581,10 @@ module Dog::Nodes
     end
 
     def compile(package)
+      count = -1
       for item in path do
-        if item == path.first then
+        count += 1
+        if count == 0 then
           if item.kind_of? Node then
             # TODO - This is special cased for literals. This may be
             # something that should be fixed in the grammar.
@@ -772,12 +774,14 @@ module Dog::Nodes
     attr_accessor :identifier
     attr_accessor :arguments
     attr_accessor :optional_arguments
+    attr_accessor :replication
     
-    def initialize(actor, identifier, arguments = nil, optional_arguments = nil)
+    def initialize(actor, identifier, arguments = nil, optional_arguments = nil, replication = 1)
       @actor = actor
       @identifier = identifier
       @arguments = arguments
       @optional_arguments = optional_arguments
+      @replication = replication || 1
     end
     
     def compile(package)
@@ -793,7 +797,7 @@ module Dog::Nodes
       
       @optional_arguments.compile(package) if @optional_arguments
       
-      call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?)
+      call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?, @replication)
       set_instruction_context(call)
       package.add_to_instructions([call])
     end

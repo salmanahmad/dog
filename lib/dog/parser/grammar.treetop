@@ -518,21 +518,24 @@ grammar Dog
   # ===============
   
   rule ask
-    'ASK' sn ask_count? expression via_clause:(via_clause)? ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
+    'ASK' sn ask_count:(ask_count)? expression via_clause:(via_clause)? ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
       def transform
         # TODO - Handle VIA
         # TODO - Handle AskCount
+        
         actor = expression.transform
         via = via_clause.transform
         function = ask_to_clause.transform
         mandatory_arguments = on_clause.transform unless on_clause.empty?
         optional_arguments = using_clause.transform unless using_clause.empty?
+        count = ask_count.transform unless ask_count.empty?
         
         node = ::Dog::Nodes::AsyncCall.new(
           actor,
           function,
           mandatory_arguments,
-          optional_arguments
+          optional_arguments,
+          count
         )
         node.line = self.line
         
@@ -553,9 +556,9 @@ grammar Dog
   # TODO - Bring back - also for compute
   #s 'TO' s (string / access)
   rule ask_to_clause
-    s 'TO' s packaged_identifier {
+    s 'TO' s i:(packaged_identifier / string) {
       def transform
-        return packaged_identifier.transform
+        return i.transform
       end
     }
   end

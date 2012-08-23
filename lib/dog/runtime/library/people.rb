@@ -13,6 +13,10 @@ module Dog::Library
 
     name "people"
 
+    structure "people" do
+
+    end
+
     structure "public" do
 
     end

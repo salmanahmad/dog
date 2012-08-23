@@ -53,8 +53,21 @@ class IntegrationTests::AskTest < Test::Unit::TestCase
     assert_equal(1, tasks.size)
     assert_equal(4, task["properties"].size)
     assert_equal(["instructions", "message", "rating", "images"], task["properties"].map { |p| p["identifier"] })
-
-
+  end
+  
+  def test_replication_count
+    program = <<-EOD
+      WAIT ON ASK 5 people.people TO "Draw a curved line from one corner to another"
+    EOD
+    
+    tracks = run_source(program)
+    tasks = ::Dog::RoutedTask.find().to_a
+    task = tasks.first
+    
+    assert_equal(1, tasks.size)
+    assert_equal(5, task["replication"])
+    
+    
   end
   
 end

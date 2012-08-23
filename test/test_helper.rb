@@ -42,6 +42,12 @@ module RuntimeHelper
     return program
   end
   
+  def parse_source(source)
+    parser = ::Dog::Parser.new
+    ast = parser.parse(source)
+    return ast
+  end
+  
   def run_source(source, include_stdout = false)
     parser = ::Dog::Parser.new
     ast = parser.parse(source)

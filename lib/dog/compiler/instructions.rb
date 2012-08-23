@@ -227,6 +227,7 @@ module Dog::Instructions
         end
 
         pointer = path.first
+
         for item in path[1, path.size - 1] do
           key = ""
 
@@ -592,10 +593,12 @@ module Dog::Instructions
   class AsyncCall < Instruction
     attribute :arg_count
     attribute :has_optionals
+    attribute :replication
     
-    def initialize(arg_count, has_optionals)
+    def initialize(arg_count, has_optionals, replication = 1)
       @arg_count = arg_count
       @has_optionals = has_optionals
+      @replication = replication || 1
     end
     
     def execute(track)
@@ -613,61 +616,79 @@ module Dog::Instructions
       
       if function.type == "function" then
         # TODO
-      elsif function.type == "external_function" then
-        function_actor = function["actor"].ruby_value
+      elsif function.type == "external_function" || function.type == "string" then
+        # TODO - Propertly handle string literals rather than hard coding results here. It should be possible to call a shell command as well.
+        function_actor = function["actor"].ruby_value rescue nil
         
         if function_actor == "shell" then
           # TODO
-        elsif function_actor == "people" then
+        elsif function_actor == "people" || function.type == "string" then
           properties = []
           
-          property = ::Dog::Property.new
-          property.identifier = "instructions"
-          property.direction = "output"
-          property.required = true
-          property.value = function["instructions"].ruby_value
-          properties << property
-          
-          arguments.each_index do |index|
-            argument = arguments[index]
-            variable_name = function["arguments"][index].ruby_value
-            
+          if function.type == "string" then
             property = ::Dog::Property.new
-            property.identifier = variable_name
+            property.identifier = "instructions"
             property.direction = "output"
             property.required = true
-            property.value = argument.ruby_value
+            property.value = function.ruby_value
             properties << property
-          end
-          
-          if optionals then
-            for key in optionals.keys do
-              optional = optionals[key].ruby_value
-              
-              property = ::Dog::Property.new
-              property.identifier = key
-              property.direction = "output"
-              property.required = false
-              property.value = optional
-              properties << property
-            end
-          end
-          
-          return_values = function["output"]
-          return_values.value.keys.each_index do |index|
-            return_value = return_values[index].ruby_value
             
             property = ::Dog::Property.new
-            property.identifier = return_value
+            property.identifier = "*value"
             property.direction = "input"
             property.required = true
             property.value = nil
             properties << property
+          else
+            property = ::Dog::Property.new
+            property.identifier = "instructions"
+            property.direction = "output"
+            property.required = true
+            property.value = function["instructions"].ruby_value
+            properties << property
+          
+            arguments.each_index do |index|
+              argument = arguments[index]
+              variable_name = function["arguments"][index].ruby_value
+            
+              property = ::Dog::Property.new
+              property.identifier = variable_name
+              property.direction = "output"
+              property.required = true
+              property.value = argument.ruby_value
+              properties << property
+            end
+          
+            if optionals then
+              for key in optionals.keys do
+                optional = optionals[key].ruby_value
+                
+                property = ::Dog::Property.new
+                property.identifier = key
+                property.direction = "output"
+                property.required = false
+                property.value = optional
+                properties << property
+              end
+            end
+            
+            return_values = function["output"]
+            return_values.value.keys.each_index do |index|
+              return_value = return_values[index].ruby_value
+              
+              property = ::Dog::Property.new
+              property.identifier = return_value
+              property.direction = "input"
+              property.required = true
+              property.value = nil
+              properties << property
+            end
           end
           
           task = ::Dog::RoutedTask.new
-          task.name = function["name"].ruby_value
-          task.replication = 1
+          # TODO - This rescue is here because of inline - string functions for ASKs. Deal with it at some point. Okay?
+          task.name = function["name"].ruby_value rescue "@inline_code"
+          task.replication = @replication
           task.duplication = 1
           task.properties = properties
           task.channel_id = future._id

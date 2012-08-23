@@ -1,0 +1,7 @@
+WAIT ON ASK 5 people.people TO "Draw a curved line from one corner to another"
+
+PRINT "Going on to intersection points!"
+
+WAIT ON ASK 5 people.people TO "Draw a curved line from on intersection point to either another intersection point, a corner, or a side"
+
+WAIT ON ASK 5 people.people TO "Color a shape"
