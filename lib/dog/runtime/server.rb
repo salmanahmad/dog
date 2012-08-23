@@ -392,6 +392,8 @@ module Dog
 
               proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
               proc.call(track)
+              
+              ::Dog::RoutedTask.remove({"_id" => object._id})
             end
 
           elsif object.class == ::Dog::RoutedEvent then
