@@ -327,7 +327,7 @@ module Dog
         # special case root
         name = '' if name == 'root'
 
-        symbols = self.bundle.packages[self.bundle.startup_package]["symbols"]
+        symbols = self.bundle.packages[self.bundle.startup_package].symbols
 
         for symbol, path in symbols do
           if symbol.start_with?(name) then
