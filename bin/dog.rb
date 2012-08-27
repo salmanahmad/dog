@@ -27,9 +27,6 @@
 
 
 
-#dog parse
-#dog compile
-#
 #dog start
 #dog restart
 #
@@ -286,7 +283,37 @@ class Run < Command
   end
 end
 
-class Debug < Command
+class Start < Command
+  Command.register(self)
+  
+  def description
+    "Compile and execute a dog program and clears the database if needed"
+  end
+  
+  def usage
+    super
+    puts
+    puts "Usage: dog start [FILE.dog] [options]"
+    puts
+    puts "  TODO"
+    puts
+  end
+  
+  def run(args)
+    source_filename = args.first + ".dog"
+    bundle_filename = args.first + ".bundle"
+    
+    if File.exists?(source_filename) && File.exist?(bundle_filename) && (File.mtime(source_filename) > File.mtime(bundle_filename)) then
+      restart_command = Restart.new
+      restart_command.run(args)
+    else
+      run_command = Run.new
+      run_command.run(args)
+    end
+  end
+end
+
+class Restart < Command
   Command.register(self)
   
   def description
@@ -296,10 +323,10 @@ class Debug < Command
   def usage
     super
     puts
-    puts "Usage: dog debug [FILE.dog] [options]"
+    puts "Usage: dog restart [FILE.dog] [options]"
     puts
     puts "  Compile a Dog program and execute the resulting bite code. If this program has already been executed"
-    puts "  previously, 'debug' will clear that database so the code is run from a 'clean slate'. This command "
+    puts "  previously, 'restart' will clear that database so the code is run from a 'clean slate'. This command "
     puts "  takes the same options as the 'run' command."
     puts
   end
@@ -325,7 +352,6 @@ class Debug < Command
       raise e
     end
   end
-  
 end
 
 class Reset < Command
