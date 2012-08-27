@@ -235,6 +235,8 @@ grammar Dog
     save
     /
     remove
+    /
+    delete
   end
   
   # TODO - Remove this. I am keeping it around for documentaiton purposes
@@ -772,9 +774,26 @@ grammar Dog
   # =========================
   
   rule add
-    'ADD' s expression s 'TO' s expression {
+    'ADD' s value_expression:expression s 'TO' s container:expression {
       def transform
+        value = value_expression.transform
+        if value.class == ::Dog::Nodes::Access && value.path.first.kind_of?(String) then
+          node = ::Dog::Nodes::Assign.new(
+            value.path,
+            ::Dog::Nodes::Call.new(
+              ::Dog::Nodes::Access.new(["dog", "add"]), 
+              [container.transform, value]
+            )
+          )
+        else
+          node = ::Dog::Nodes::Call.new(
+            ::Dog::Nodes::Access.new(["dog", "add"]),
+            [container.transform, value]
+          )
+        end
         
+        node.line = self.line
+        return node
       end
     }
   end
@@ -782,31 +801,57 @@ grammar Dog
   rule find
     'FIND' s query_expression {
       def transform
-        
-      end
-    }
-  end
-  
-  rule update
-    'UPDATE' s expression s 'IN' s expression {
-      def transform
-        
-      end
-    }
-  end
-  
-  rule save
-    'SAVE' s expression s 'TO' s expression {
-      def transform
-        
+        # TODO
       end
     }
   end
   
   rule remove
-    'REMOVE' s expression s 'FROM' s expression {
+    'REMOVE' s query_expression {
       def transform
+        # TODO
+      end
+    }
+  end
+  
+  rule update
+    'UPDATE' s value:expression s 'IN' s container:expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "update"]),
+          [container.transform, value.transform]
+        )
+        node.line = self.line
         
+        return node
+      end
+    }
+  end
+  
+  rule save
+    'SAVE' s value:expression s 'TO' s container:expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "save"]),
+          [container.transform, value.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
+  end
+  
+  rule delete
+    'DELETE' s value:expression s 'FROM' s container:expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "delete"]),
+          [container.transform, value.transform]
+        )
+        node.line = self.line
+        
+        return node
       end
     }
   end

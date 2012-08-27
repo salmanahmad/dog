@@ -127,7 +127,11 @@ module Dog::Library
         value = variable("value")
 
         if container.type == "collection" then
-          # TODO
+          collection = container["name"].ruby_value
+
+          value._id = UUID.new.generate
+          ::Dog.database[collection].insert(value.to_hash)
+          dog_return(value)
         else
           # TODO - I need to handle the "close" message
           if container.pending then
@@ -226,16 +230,56 @@ module Dog::Library
       # TODO
     end
 
-    implementation "update" do
-      # TODO
-    end
-
     implementation "remove" do
       # TODO
     end
 
+    implementation "update" do
+      argument "container"
+      argument "value"
+
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+
+        if container.type == "collection" then
+          ::Dog::database[container["name"].ruby_value].update({"_id" => value._id}, value.to_hash, {:safe => true})
+        end
+
+        dog_return(value)
+      end
+    end
+
     implementation "save" do
-      # TODO
+      argument "container"
+      argument "value"
+
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+        
+        if container.type == "collection" then
+          ::Dog::database[container["name"].ruby_value].save(value.to_hash, {:safe => true, :upsert => true})
+        end
+        
+        dog_return(value)
+      end
+    end
+
+    implementation "delete" do
+      argument "container"
+      argument "value"
+
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+
+        if container.type == "collection" then
+          ::Dog::database[container["name"].ruby_value].remove({"_id" => value._id}, {:safe => true})
+        end
+
+        dog_return(value)
+      end
     end
 
     implementation "register_handler" do

@@ -133,7 +133,7 @@ class Parse < Command
     
     begin
       parse_tree = Dog::Parser.parse(source_code, source_filename)
-      pp parse_tree.to_sexp
+      pp parse_tree
     rescue Dog::ParseError => error
       puts error
     end
