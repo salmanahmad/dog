@@ -175,7 +175,7 @@ grammar Dog
     primary_expression s predicate {
       def transform
         node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
-          "object" => primary_expression.transform,
+          "collection" => primary_expression.transform,
           "predicate" => predicate.transform
         })
         node.line = self.line
@@ -729,7 +729,14 @@ grammar Dog
   rule predicate
     'WHERE' sn predicate_expression {
       def transform
-        predicate_expression.transform
+        predicate = predicate_expression.transform
+        predicate = ::Dog::Value.from_ruby_value({}, "predicate")
+        
+        
+        node = ::Dog::Nodes::ValueLiteral.new(predicate)
+        node.line = self.line
+        
+        return node
       end
     }
   end
@@ -801,7 +808,13 @@ grammar Dog
   rule find
     'FIND' s query_expression {
       def transform
-        # TODO
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "find"]),
+          [query_expression.transform]
+        )
+        node.line = self.line
+        
+        return node
       end
     }
   end
@@ -809,7 +822,13 @@ grammar Dog
   rule remove
     'REMOVE' s query_expression {
       def transform
-        # TODO
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "remove"]),
+          [query_expression.transform]
+        )
+        node.line = self.line
+        
+        return node
       end
     }
   end

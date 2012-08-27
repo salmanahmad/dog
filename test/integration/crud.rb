@@ -157,7 +157,37 @@ class IntegrationTests::CrudTest < Test::Unit::TestCase
   
   
   def test_find
-    # TODO
+    program = <<-EOD
+
+    DEFINE car {
+      name
+      index
+    }
+
+    DEFINE cars OF car
+
+    civic = car {
+      name = "civic"
+    }
+
+    civic.index = 0
+    ADD civic TO cars
+    
+    civic.index = 1
+    ADD civic TO cars
+    
+    civic.index = 2
+    ADD civic TO cars
+    
+    civic.index = 3
+    ADD civic TO cars
+    
+    civics = FIND cars WHERE name == "civic"
+    
+    EOD
+    
+    tracks = run_source(program)
+    assert_equal(4, tracks.last.variables["civics"].ruby_value.size)
   end
   
   

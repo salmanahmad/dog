@@ -24,6 +24,10 @@ class ParserTests::CrudTest < Test::Unit::TestCase
     @parser.parse("FIND users WHERE age == 7")
   end
   
+  def test_remove
+    @parser.parse("REMOVE user WHERE age == 7")
+  end
+  
   def test_update
     @parser.parse("UPDATE user IN people")
   end
@@ -32,8 +36,8 @@ class ParserTests::CrudTest < Test::Unit::TestCase
     @parser.parse("SAVE user TO people")
   end
   
-  def test_save
-    @parser.parse("REMOVE user FROM people")
+  def test_delete
+    @parser.parse("DELETE user FROM people")
   end
   
 end

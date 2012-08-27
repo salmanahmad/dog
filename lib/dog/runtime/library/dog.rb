@@ -13,6 +13,11 @@ module Dog::Library
 
     name "dog"
 
+    structure "query" do
+      property "collection"
+      property "predicate"
+    end
+
     implementation "ask" do
       # TODO - Right now, this is implemented directly inside the AsyncCall
       # isntruction. Do I want to keep it there or can I actually move it
@@ -227,11 +232,25 @@ module Dog::Library
     end
 
     implementation "find" do
-      # TODO
+      argument "query"
+      
+      body do |track|
+        # TODO
+        query = variable("query")
+        
+        #pp query.ruby_value
+      end
     end
 
     implementation "remove" do
-      # TODO
+      argument "query"
+      
+      body do |track|
+        # TODO
+        query = variable("query")
+        
+        puts query.inspect
+      end
     end
 
     implementation "update" do
