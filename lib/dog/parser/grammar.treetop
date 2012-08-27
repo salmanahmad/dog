@@ -225,6 +225,16 @@ grammar Dog
     user
     /
     predicate
+    /
+    add
+    /
+    find
+    /
+    update
+    /
+    save
+    /
+    remove
   end
   
   # TODO - Remove this. I am keeping it around for documentaiton purposes
@@ -756,6 +766,50 @@ grammar Dog
   end
   
   
+
+  # =========================
+  # = Collection Operations =
+  # =========================
+  
+  rule add
+    'ADD' s expression s 'TO' s expression {
+      def transform
+        
+      end
+    }
+  end
+  
+  rule find
+    'FIND' s query_expression {
+      def transform
+        
+      end
+    }
+  end
+  
+  rule update
+    'UPDATE' s expression s 'IN' s expression {
+      def transform
+        
+      end
+    }
+  end
+  
+  rule save
+    'SAVE' s expression s 'TO' s expression {
+      def transform
+        
+      end
+    }
+  end
+  
+  rule remove
+    'REMOVE' s expression s 'FROM' s expression {
+      def transform
+        
+      end
+    }
+  end
   
   
   
