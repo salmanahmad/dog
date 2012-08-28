@@ -34,8 +34,8 @@ module Dog
     end
     
     def to_hash
-      if self.person then
-        person = person.to_hash
+      if !self.person.nil? then
+        person = self.person.to_hash
       else
         person = nil
       end

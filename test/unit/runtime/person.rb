@@ -48,5 +48,25 @@ class RuntimeTests::PersonTest < Test::Unit::TestCase
     assert_equal(p.id, p2.id)
   end
   
+  
+  def test_id
+    run_source("")
+    
+    assert_equal(0, ::Dog.database["people"].count)
+    
+    p = ::Dog::Person.new
+    p.first_name = "salman"
+    p.email = "salman@example.com"
+    p.save
+    
+    p2 = ::Dog::Person.find_by_email("salman@example.com")
+    
+    id = p2.id
+    assert_equal(String, id.class)
+    
+    p3 = ::Dog::Person.find_by_id(id)
+    assert_equal(p3.id, p2.id)
+  end
+  
 end
 

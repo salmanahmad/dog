@@ -44,10 +44,26 @@ module Dog
       response['Content-Type'] = 'text/plain'
       return ''
     end
-    
+
     helpers do
       def layout(name)
         # Intentionally blank. Used by our template system.
+      end
+
+      def find_or_generate_current_user
+        person = Person.find_by_id(session[:current_user])
+
+        if person.nil? then
+          if session[:current_user_object] then
+            person = ::Dog::Person.from_hash(session[:current_user_object])
+          else
+            person = ::Dog::Person.new()
+            session[:current_user_object] = person.to_hash
+            session[:current_user] = person.id
+          end
+        end
+
+        return person
       end
 
       def verify_current_user(message = "You need to be logged in when performing this operation")
@@ -382,6 +398,8 @@ module Dog
               track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
             end
 
+            track.variables["value"].person = find_or_generate_current_user
+
             proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
             proc.call(track)
 
@@ -423,11 +441,12 @@ module Dog
               track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
             end
 
+            track.variables["value"].person = find_or_generate_current_user
+
             proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
             proc.call(track)
 
             output = track.stack.pop.ruby_value
-
           end
 
           content_type 'application/json'

@@ -3,7 +3,6 @@ PRINT should resolve futures
 fix $not, $and, $or with predicates
 people
   Routing
-  Update the server stuff
 
 optional_arguments - function side
 async call
