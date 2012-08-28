@@ -16,6 +16,7 @@ module Dog
 
     class << self
       def default_properties
+        # TODO - Used by the old People class for predicates
         return [
           "_id",
           "first_name",
@@ -31,94 +32,130 @@ module Dog
       end
     end
 
-    attr_accessor :_id
-    attr_accessor :first_name
-    attr_accessor :last_name
-    attr_accessor :handle
-    attr_accessor :email
-    attr_accessor :facebook
-    attr_accessor :twitter
-    attr_accessor :google
-    attr_accessor :password
-    attr_accessor :communities
-    attr_accessor :profile
+    def self.attribute(*vars)
+      for var in vars do
+        self.instance_eval do
+          define_method var do
+            if var == :_id then
+              self.dog_value._id
+            else
+              self.dog_value[var.to_s].ruby_value
+            end
+          end
+          
+          define_method "#{var}=".intern do |value|
+            self.dog_value[var.to_s] = ::Dog::Value.from_ruby_value(value)
+          end
+        end
+      end
+    end
 
-    # For routing
-    attr_accessor :last_task_id
-    attr_accessor :last_message_id
-    attr_accessor :last_workflow_id
+    def initialize(dog_value = nil)
+      @dog_value = dog_value
+
+      if @dog_value.nil? then
+        # TODO - Fix this so that I can call Dog functions from ruby 
+        # more easily. The problem here is that the dog runtime may not
+        # always be running which means that Track#new will break when 
+        # getting the current package
+        @dog_value = ::Dog::Value.new("people.person", {})
+      end
+    end
+
+    attr_accessor :dog_value
+
+    attribute :_id
+    attribute :id
+    attribute :first_name
+    attribute :last_name
+    attribute :handle
+    attribute :email
+    attribute :facebook
+    attribute :twitter
+    attribute :google
+    attribute :password
+    attribute :communities
+    attribute :profile
 
     def to_hash
-      hash = {
-        first_name: self.first_name,
-        last_name: self.last_name,
-        handle: self.handle,
-        email: self.email,
-        facebook: self.facebook,
-        twitter: self.twitter,
-        google: self.google,
-        password: self.password,
-        communities: self.communities,
-        profile: self.profile,
-        last_task_id: self.last_task_id,
-        last_message_id: self.last_message_id,
-        last_workflow_id: self.last_workflow_id
-      }
+      self.dog_value.to_hash
+      
+      # TODO - Remove this cruft
+      #hash = {
+      #  first_name: self.first_name,
+      #  last_name: self.last_name,
+      #  handle: self.handle,
+      #  email: self.email,
+      #  facebook: self.facebook,
+      #  twitter: self.twitter,
+      #  google: self.google,
+      #  password: self.password,
+      #  communities: self.communities,
+      #  profile: self.profile
+      #}
+      #
+      #hash.delete(:handle) unless hash[:handle]
+      #hash.delete(:email) unless hash[:email]
+      #hash.delete(:facebook) unless hash[:facebook]
+      #hash.delete(:twitter) unless hash[:twitter]
+      #hash.delete(:google) unless hash[:google]
+      #
+      #return hash
+    end
 
-      hash.delete(:handle) unless hash[:handle]
-      hash.delete(:email) unless hash[:email]
-      hash.delete(:facebook) unless hash[:facebook]
-      hash.delete(:twitter) unless hash[:twitter]
-      hash.delete(:google) unless hash[:google]
+    def self.from_hash(hash)
+      person = self.new
+      person.dog_value = ::Dog::Value.from_hash(hash)
+      
+      return person
+    end
 
-      return hash
+    def save
+      ::Dog::database[self.collection_name].save(self.to_hash, {:safe => true, :upsert => true})
     end
 
     def to_hash_for_event
-      hash = self.to_hash
-      hash[:_id] = self._id
+      hash = self.to_hash.ruby_value
+      hash["id"] = self.id
       hash.delete(:password)
-      hash.delete(:last_task_id)
-      hash.delete(:last_message_id)
-      hash.delete(:last_workflow_id)
       return hash
     end
 
     def self.search(query)
       query = Regexp.new(query)
       self.find({"$or" => [
-        {"first_name" => query},
-        {"last_name" => query},
-        {"handle" => query},
-        {"email" => query}
+        {"value.s:first_name" => query},
+        {"value.s:last_name" => query},
+        {"value.s:handle" => query},
+        {"value.s:email" => query}
       ]}).to_a
     end
 
     def self.find_by_email(email)
-      self.find_one({"email" => email})
+      self.find_one({"value.s:email" => email})
     end
 
     def self.find_ids_for_predicate(conditions)
       self.find(conditions, {:fields => ["_id"]}).to_a
     end
 
-    # TODO - Update the API so this will return multiple
-    # people and accept and array not only an id
-    def self.from(data)
-      person_id = nil
-
-      if data.kind_of?(Hash) then
-        person_id = data["_person_id"]
+    def accepts_routing?(predicate)
+      # TODO - Optimize this with client side evaluation. For now I suppose this is okay...
+      
+      raise "A person must be saved before matching it against a predicate." unless self.id
+      predicate["_id"] = self.id
+      
+      if self.class.find_one(predicate) then
+        return true
       else
-        person_id = data.person_id rescue nil
-      end
-
-      if person_id then
-        return Person.find_by_id(person_id)
-      else
-        return nil
+        return false
       end
     end
+
+
+
+
+
 
     def join_community(community)
       # Note: This adds the community to the profile but does not
@@ -307,19 +344,6 @@ module Dog
           self.profile[community.name][key] ||= []
           self.profile[community.name][key] -= value
         end
-      end
-    end
-    
-    def accepts_routing?(predicate)
-      # TODO - Optimize this with client side evaluation. For now I suppose this is okay...
-      
-      raise "A person must be saved before matching it against a predicate." unless self._id
-      predicate["_id"] = self._id
-      
-      if self.class.find_one(predicate) then
-        return true
-      else
-        return false
       end
     end
     

@@ -30,6 +30,7 @@ module Dog::Library
       property "facebook"
       property "twitter"
       property "google"
+      property "password"
       property "communities"
       property "profile"
     end
