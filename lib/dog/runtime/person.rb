@@ -72,7 +72,7 @@ module Dog
     attribute :last_name
     attribute :handle
     attribute :email
-    attribute :facebook
+    attribute :facebook_profile
     attribute :twitter
     attribute :google
     attribute :password
@@ -155,7 +155,11 @@ module Dog
     end
 
 
-
+    # Antiquated code, **do not use**
+    # -------------------------------
+    #
+    # Till the end of the class Person
+    #
 
 
 
