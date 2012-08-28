@@ -695,6 +695,7 @@ module Dog::Instructions
           task.track_id = track.id
           #task.track_id = track.control_ancestors.last
           #task.routing = nil
+          task.routing = ::Dog::Helper.routing_for_actor(actor)
           task.created_at = Time.now.utc
           task.save
         else
