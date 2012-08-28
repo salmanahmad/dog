@@ -70,4 +70,10 @@ class ParserTests::PredicateTest < Test::Unit::TestCase
     @parser.parse("user.i == i ? x > 5")
   end
   
+  def test_predicate
+    @parser.parser.root = :predicate
+    @parser.parse("WHERE age == 7")
+  end
+  
+  
 end

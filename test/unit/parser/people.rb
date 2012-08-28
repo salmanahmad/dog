@@ -30,12 +30,14 @@ class ParserTests::PeopleTest < Test::Unit::TestCase
   
   def test_person_and_people
     @parser.parse("PEOPLE")
-    @parser.parse("PERSON")
+    # TODO - Clean up?
+    #@parser.parse("PERSON")
   end
   
   def test_from_optional
     @parser.parse("PEOPLE WHERE age > 7")
-    @parser.parse("PERSON WHERE age > 7")
+    # TODO - Clean up?
+    #@parser.parse("PERSON WHERE age > 7")
   end
   
   def test_assignment

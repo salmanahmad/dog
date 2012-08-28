@@ -1,5 +1,7 @@
 
 
+car = 7
+
 #DEFINE fib ON a DO
 #  IF a == 1 OR a == 0 THEN
 #    RETURN a

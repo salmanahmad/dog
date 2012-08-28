@@ -89,6 +89,28 @@ module Dog
         end
       end
       
+      
+      class Collection
+        attr_accessor :type_package
+        attr_accessor :type_name
+        
+        def initialize
+          self.type_package = ""
+          self.type_name = ""
+        end
+        
+        def type(name)
+          name = name.split(".")
+          
+          if name.size == 2 then
+            self.type_package = name[0]
+            self.type_name = name[1]
+          else
+            self.type_name = name[0]
+          end
+        end
+      end
+      
       class Helper
         attr_accessor :track
         
@@ -125,6 +147,30 @@ module Dog
         
         self.package.push_symbol(symbol)
         self.package.current_context["value"] = value
+        self.package.pop_symbol
+      end
+      
+      def collection(symbol, &block)
+        c = Collection.new
+        c.instance_eval(&block)
+        
+        value = ::Dog::Value.new("collection", {})
+        value["name"] = ::Dog::Value.string_value(symbol)
+        value["package"] = ::Dog::Value.string_value(self.package.name)
+        
+        instructions = Proc.new do |track|
+          type = ::Dog::Value.new("type", {})
+          type["name"] = ::Dog::Value.string_value(c.type_name)
+          type["package"] = ::Dog::Value.string_value(c.type_package)
+          
+          track.stack.push(type)
+          track.finish
+        end
+        
+        self.package.push_symbol(symbol)
+        self.package.current_context["value"] = value
+        self.package.add_implementation
+        self.package.implementation["instructions"] = instructions
         self.package.pop_symbol
       end
       

@@ -13,6 +13,22 @@ module Dog::Library
 
     name "dog"
 
+    structure "query" do
+      property "container"
+      property "predicate"
+    end
+
+
+    implementation "id" do
+      argument "value"
+      
+      body do |track|
+        value = variable("value")
+        dog_return(::Dog::Value.string_value(value._id))
+      end
+    end
+
+
     implementation "ask" do
       # TODO - Right now, this is implemented directly inside the AsyncCall
       # isntruction. Do I want to keep it there or can I actually move it
@@ -127,7 +143,11 @@ module Dog::Library
         value = variable("value")
 
         if container.type == "collection" then
-          # TODO
+          collection = container["name"].ruby_value
+
+          value._id = UUID.new.generate
+          ::Dog.database[collection].insert(value.to_hash)
+          dog_return(value)
         else
           # TODO - I need to handle the "close" message
           if container.pending then
@@ -222,20 +242,112 @@ module Dog::Library
       end
     end
 
-    implementation "find" do
-      # TODO
+    implementation "find_by_id" do
+      argument "container"
+      argument "value"
+      
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+        
+        if container.type == "collection" then
+          if value.type == "string" then
+            value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value.ruby_value})
+          else
+            value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value._id})
+          end
+          
+          value = ::Dog::Value.from_hash(value)
+          dog_return(value)
+        end
+      end
     end
 
-    implementation "update" do
-      # TODO
+    implementation "find" do
+      argument "query"
+
+      body do |track|
+        query = variable("query")
+        container = query["container"]
+        selector = query["predicate"].ruby_value
+
+        if container.type == "collection" then
+          results = ::Dog::database[container["name"].ruby_value].find(selector)
+          value = ::Dog::Value.empty_array
+
+          i = 0
+          for result in results do
+            value[i] = ::Dog::Value.from_hash(result)
+            i += 1
+          end
+
+          dog_return(value)
+        end
+
+      end
     end
 
     implementation "remove" do
-      # TODO
+      argument "query"
+      
+      body do |track|
+        query = variable("query")
+        container = query["container"]
+        selector = query["predicate"].ruby_value
+
+        if container.type == "collection" then
+          results = ::Dog::database[container["name"].ruby_value].remove(selector)
+          dog_return(::Dog::Value.true_value)
+        end
+      end
+    end
+
+    implementation "update" do
+      argument "container"
+      argument "value"
+
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+
+        if container.type == "collection" then
+          ::Dog::database[container["name"].ruby_value].update({"_id" => value._id}, value.to_hash, {:safe => true})
+        end
+
+        dog_return(value)
+      end
     end
 
     implementation "save" do
-      # TODO
+      argument "container"
+      argument "value"
+
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+        
+        if container.type == "collection" then
+          ::Dog::database[container["name"].ruby_value].save(value.to_hash, {:safe => true, :upsert => true})
+        end
+        
+        dog_return(value)
+      end
+    end
+
+    implementation "delete" do
+      argument "container"
+      argument "value"
+
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+
+        if container.type == "collection" then
+          ::Dog::database[container["name"].ruby_value].remove({"_id" => value._id}, {:safe => true})
+        end
+
+        dog_return(value)
+      end
     end
 
     implementation "register_handler" do

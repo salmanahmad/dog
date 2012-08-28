@@ -13,21 +13,12 @@ module Dog::Library
 
     name "people"
 
-    structure "people" do
-
+    collection "people" do
+      type "people.person"
     end
 
     structure "public" do
 
-    end
-
-    implementation "save" do
-      argument "person"
-
-      body do
-        ::Dog.database["people"].save(person.to_hash)
-        return person
-      end
     end
 
     structure "person" do
@@ -39,17 +30,9 @@ module Dog::Library
       property "facebook"
       property "twitter"
       property "google"
+      property "password"
       property "communities"
       property "profile"
-    end
-
-    implementation "save" do
-      argument "person"
-
-      body do
-        ::Dog.database["people"].save(person.to_hash)
-        return person
-      end
     end
   end
 end
