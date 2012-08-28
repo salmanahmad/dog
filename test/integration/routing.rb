@@ -14,7 +14,22 @@ class IntegrationTests::RoutingTest < Test::Unit::TestCase
 
   def test_simple
     program = <<-EOD
-
+    
+    DEFINE do_laundry FOR people DO
+      PERFORM "do laundry"
+      RETURN confirmation
+    END
+    
+    salman = people.person {
+      first_name = "salman"
+    }
+    
+    ASK salman TO do_laundry
+    
     EOD
+    
+    run_source(program)
+    assert_equal(1, ::Dog::RoutedTask.find().count)
+    
   end
 end

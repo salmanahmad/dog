@@ -85,7 +85,7 @@ module Dog
       end
       # FIXME HACK -- remove this once the name is pluralized properly on backend
       if hash["type"] == 'listen'
-        hash["name"][-1] = ::Helper::Language::pluralize( hash["name"][-1] )
+        hash["name"][-1] = ::Dog::Language::pluralize( hash["name"][-1] )
       end
       return hash
     end
