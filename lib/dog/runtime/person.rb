@@ -23,7 +23,7 @@ module Dog
           "last_name",
           "handle",
           "email",
-          "facebook",
+          "facebook_profile",
           "twitter",
           "google",
           "communities",
@@ -40,8 +40,10 @@ module Dog
               self.dog_value._id
             elsif var == :id then
               self.dog_value._id
-            else
+            elsif self.dog_value && self.dog_value[var.to_s] then
               self.dog_value[var.to_s].ruby_value
+            else
+              nil
             end
           end
           
