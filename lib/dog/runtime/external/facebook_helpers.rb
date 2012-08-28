@@ -73,12 +73,13 @@ module Dog
         person.first_name = me_info['first_name']
         person.last_name = me_info['last_name']
         expires = access_token_response['expires'].to_i # in seconds
-        person.add_facebook_profile(me_info['id'], {
+        profile = {
           access_token: access_token_response['access_token'],
           access_token_expires: Time.now() + expires,
-          username: me_info['username'] || person.facebook && person.facebook[:username],
-          link: me_info['link'] || person.facebook && person.facebook[:link]
-        })
+        }
+        profile[:username] = me_info['username'] if me_info['username']
+        profile[:link] = me_info['link'] if me_info['link']
+        person.add_facebook_profile(me_info['id'], profile)
         person.save
         person
       end
