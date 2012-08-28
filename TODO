@@ -1,6 +1,7 @@
 
 PRINT should resolve futures
-collection api
+fix $not, $and, $or with predicates
+people
 
 optional_arguments - function side
 async call
