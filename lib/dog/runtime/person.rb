@@ -38,6 +38,8 @@ module Dog
           define_method var do
             if var == :_id then
               self.dog_value._id
+            elsif var == :id then
+              self.dog_value._id
             else
               self.dog_value[var.to_s].ruby_value
             end
@@ -132,7 +134,7 @@ module Dog
     end
 
     def self.find_by_email(email)
-      self.find_one({"value.s:email" => email})
+      self.find_one({"value.s:email.value" => email})
     end
 
     def self.find_ids_for_predicate(conditions)

@@ -255,7 +255,7 @@ module Dog
               person = Person.new
               person.email = params["email"]
               person.password = Digest::SHA1.hexdigest params["password"]
-              person.join_community_named(Config.get("default_community"))
+              #person.join_community_named(Config.get("default_community"))
               person.save
 
               session[:current_user] = person.id
