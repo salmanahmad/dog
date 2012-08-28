@@ -297,26 +297,14 @@ module Dog
 
       
       def symbol_exists?(name = [])
-        # TODO - Fix this later.
-        #name = name.join(".")
-        #if name == "" then
-        #  return true
-        #else
-        #  return self.bite_code["symbols"].include? name
-        #end
-        
-        self.bundle.contains_symbol_in_package?(name.join("."), self.bundle.startup_package)
+        self.bundle.packages[self.bundle.startup_package].symbols.include? name.join(".")
       end
 
       def symbol_info(name = [])
-        #path = self.bite_code["symbols"][name.join(".")].clone
-        #path.shift
-        #
-        #node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-        
-        node = self.bundle.node_for_symbol(name.join("."), self.bundle.startup_package)
-        type = self.typeof_node(node)
-        
+        symbol_value = self.bundle.packages[self.bundle.startup_package].symbols[name.join(".")]
+        symbol_value = symbol_value["value"]
+        type = self.typeof_symbol(symbol_value)
+
         if type then
           return self.to_hash_for_stream(name, type)
         else
@@ -376,15 +364,15 @@ module Dog
       #  return node
       #end
 
-      def typeof_symbol(node)
+      def typeof_symbol(symbol)
         return case
-        when node.type == "external_function" || node.type == "function"
-          if /^@each:/.match(node["name"].ruby_value) then
+        when symbol.type == "external_function" || symbol.type == "function"
+          if /^@each:/.match(symbol["name"].ruby_value) then
             "oneach"
           else
             "function"
           end
-        when node.type == "type"
+        when symbol.type == "type"
           "structure"
         else
           nil
