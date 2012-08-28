@@ -19,7 +19,11 @@ module Dog
   end
 
   module Helper
-
+    
+    def self.routing_for_actor(routing = nil)
+      return nil
+    end
+    
     def self.underscore(string)
       string.gsub(/::/, '/').
       gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').

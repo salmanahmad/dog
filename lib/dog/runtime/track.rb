@@ -190,7 +190,8 @@ module Dog
       root = self.find_one({
         "control_ancestors" => {
           "$size" => 0
-        }
+        },
+        "function_name" => "@root"
       })
       
       if root then
