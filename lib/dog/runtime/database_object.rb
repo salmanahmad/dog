@@ -45,7 +45,10 @@ module Dog
     
     def self.find_by_id(id)
       return nil if id.nil?
-      id = BSON::ObjectId.from_string(id) if id.class == String
+      if id.class == String
+        id = BSON::ObjectId.from_string(id) rescue id
+      end
+      
       return self.find_one({"_id" => id})
     end
     

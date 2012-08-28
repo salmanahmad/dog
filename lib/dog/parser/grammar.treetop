@@ -175,7 +175,7 @@ grammar Dog
     primary_expression s predicate {
       def transform
         node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
-          "object" => primary_expression.transform,
+          "container" => primary_expression.transform,
           "predicate" => predicate.transform
         })
         node.line = self.line
@@ -225,6 +225,18 @@ grammar Dog
     user
     /
     predicate
+    /
+    add
+    /
+    find
+    /
+    update
+    /
+    save
+    /
+    remove
+    /
+    delete
   end
   
   # TODO - Remove this. I am keeping it around for documentaiton purposes
@@ -697,7 +709,18 @@ grammar Dog
   end
   
   rule person
-    'PERSON' people_from_clause? (people_where_clause)?
+    #'PERSON' people_from_clause? (people_where_clause)?
+    'PERSON' people_from_clause {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["system", "person_from_value"]),
+          [people_from_clause.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
   end
   
   rule people
@@ -707,7 +730,11 @@ grammar Dog
   # TODO - Add back community list. Right now, you can only access people from 
   # one community at a time...
   rule people_from_clause
-    sn 'FROM' sn access
+    sn 'FROM' sn expression {
+      def transform
+        expression.transform
+      end
+    }
   end
 
   rule people_where_clause
@@ -717,7 +744,9 @@ grammar Dog
   rule predicate
     'WHERE' sn predicate_expression {
       def transform
-        predicate_expression.transform
+        node = predicate_expression.transform
+        
+        return node
       end
     }
   end
@@ -731,31 +760,222 @@ grammar Dog
   end 
   
   rule predicate_unary
-    not_operator s? '(' s? predicate_primary s? ')'
+    not_operator s? '(' s? predicate_primary s? ')' {
+      def transform
+        # TODO
+      end
+    }
   end
-  
+
   rule predicate_binary
-    predicate_primary s (and_operator / or_operator) s predicate_expression
+    first:predicate_primary s binary_operator:(and_operator / or_operator) s second:predicate_expression {
+      def transform
+        # TODO - Fix the ambiguity between query AND and expression AND
+
+        operator = binary_operator.transform
+
+        case operator
+        when "AND"
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$and" => ::Dog::Nodes::StructureLiteral.new("array", {
+              0 => first.transform,
+              1 => second.transform,
+            })
+          })
+        when "OR"
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$or" => ::Dog::Nodes::StructureLiteral.new("array", {
+              0 => first.transform,
+              1 => second.transform,
+            })
+          })
+        else
+          raise "Parse error"
+        end
+
+        node = ::Dog::Nodes::StructureLiteral.new(nil, structure)
+        node.line = self.line
+        
+        return node
+      end
+    }
   end
-  
+
   rule predicate_primary 
     predicate_parenthesis / predicate_conditional
   end 
   
   rule predicate_parenthesis 
-    '(' s? predicate_expression s? ')'
+    '(' s? predicate_expression s? ')' {
+      def transform
+        predicate_expression.transform
+      end
+    }
   end
   
   # This was 'access' before 'expression'
   rule predicate_conditional
     key_paths s? relational_operator s? expression {
       def transform
-        {key_paths.transform => expression.transform}
+        operator = relational_operator.transform
+
+        case operator
+        when "!="
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$ne" => expression.transform
+            })
+          })
+        when ">="
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$gte" => expression.transform
+            })
+          })
+        when "<="
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$lte" => expression.transform
+            })
+          })
+        when ">"
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$gt" => expression.transform
+            })
+          })
+        when "<"
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$lt" => expression.transform
+            })
+          })
+        else
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => expression.transform
+          })
+        end
+
+        node = structure
+        node.line = self.line
+        
+        return node
       end
     }
   end
   
   
+
+  # =========================
+  # = Collection Operations =
+  # =========================
+  
+  rule add
+    'ADD' s value_expression:expression s 'TO' s container:expression {
+      def transform
+        value = value_expression.transform
+        if value.class == ::Dog::Nodes::Access && value.path.first.kind_of?(String) then
+          node = ::Dog::Nodes::Assign.new(
+            value.path,
+            ::Dog::Nodes::Call.new(
+              ::Dog::Nodes::Access.new(["dog", "add"]), 
+              [container.transform, value]
+            )
+          )
+        else
+          node = ::Dog::Nodes::Call.new(
+            ::Dog::Nodes::Access.new(["dog", "add"]),
+            [container.transform, value]
+          )
+        end
+        
+        node.line = self.line
+        return node
+      end
+    }
+  end
+  
+  rule find
+    'FIND' s value:expression s 'IN' s container:expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "find_by_id"]),
+          [container.transform, value.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
+    /
+    'FIND' s query_expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "find"]),
+          [query_expression.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
+  end
+  
+  rule remove
+    'REMOVE' s query_expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "remove"]),
+          [query_expression.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
+  end
+  
+  rule update
+    'UPDATE' s value:expression s 'IN' s container:expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "update"]),
+          [container.transform, value.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
+  end
+  
+  rule save
+    'SAVE' s value:expression s 'TO' s container:expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "save"]),
+          [container.transform, value.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
+  end
+  
+  rule delete
+    'DELETE' s value:expression s 'FROM' s container:expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "delete"]),
+          [container.transform, value.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
+  end
   
   
   
@@ -1463,7 +1683,7 @@ grammar Dog
           end
         end
         
-        ids.join(".")
+        ("value.s:" + ids.join(".value.s:") + ".value")
       end
     }
   end

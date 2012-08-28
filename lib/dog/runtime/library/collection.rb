@@ -29,26 +29,21 @@ module Dog::Library
         dog_return(type)
       end
     end
-
-    implementation "save" do
-      argument "struct"
-      argument "collection"
-
-      body do
-        collection = collection.ruby_value["name"]
-        ::Dog.database[collection].save(struct.to_hash)
-        return ::Dog::Value.true_value
-      end
-    end
     
-    implementation "delete" do
-      argument "struct"
+    
+    implementation "size" do
       argument "collection"
-
-      body do
-        collection = collection.ruby_value["name"]
-        ::Dog.database[collection].remove({"_id" => struct._id})
-        return ::Dog::Value.true_value
+      
+      body do |track|
+        collection = variable("collection")
+        
+        if collection.type == "collection" then
+          # TODO
+        else
+          size = ::Dog::Value.number_value(collection.value.keys.size)
+        end
+        
+        dog_return(size)
       end
     end
   end

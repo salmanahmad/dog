@@ -26,6 +26,7 @@
 #ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
 
 require 'rubygems'
+require 'pp'
 #require 'bundler/setup'
 require File.join(File.dirname(__FILE__), '../lib/dog/version.rb')
 
@@ -102,6 +103,42 @@ class Init < Command
   def run(args)
     usage
   end  
+end
+
+class Parse < Command
+  Command.register(self)
+  
+  def description
+    "Parse a Dog source file and return the resulting syntax tree."
+  end
+  
+  def usage
+    super
+    puts
+    puts "Usage: dog parse [FILE.dog]"
+    puts
+  end
+  
+  def run(args)
+    source_filename = args.first
+    source_code = ""
+    source_filename += ".dog"
+    
+    begin
+      source_code = File.open(source_filename).read
+    rescue
+      puts "Error: Could not read '#{source_filename}'"
+      exit
+    end
+    
+    begin
+      parse_tree = Dog::Parser.parse(source_code, source_filename)
+      pp parse_tree
+    rescue Dog::ParseError => error
+      puts error
+    end
+  end
+  
 end
 
 class Compile < Command
@@ -235,7 +272,37 @@ class Run < Command
   end
 end
 
-class Debug < Command
+class Start < Command
+  Command.register(self)
+  
+  def description
+    "Compile and execute a dog program and clears the database if needed"
+  end
+  
+  def usage
+    super
+    puts
+    puts "Usage: dog start [FILE.dog] [options]"
+    puts
+    puts "  TODO"
+    puts
+  end
+  
+  def run(args)
+    source_filename = args.first + ".dog"
+    bundle_filename = args.first + ".bundle"
+    
+    if File.exists?(source_filename) && File.exist?(bundle_filename) && (File.mtime(source_filename) > File.mtime(bundle_filename)) then
+      restart_command = Restart.new
+      restart_command.run(args)
+    else
+      run_command = Run.new
+      run_command.run(args)
+    end
+  end
+end
+
+class Restart < Command
   Command.register(self)
   
   def description
@@ -245,10 +312,10 @@ class Debug < Command
   def usage
     super
     puts
-    puts "Usage: dog debug [FILE.dog] [options]"
+    puts "Usage: dog restart [FILE.dog] [options]"
     puts
     puts "  Compile a Dog program and execute the resulting bite code. If this program has already been executed"
-    puts "  previously, 'debug' will clear that database so the code is run from a 'clean slate'. This command "
+    puts "  previously, 'restart' will clear that database so the code is run from a 'clean slate'. This command "
     puts "  takes the same options as the 'run' command."
     puts
   end
@@ -274,7 +341,6 @@ class Debug < Command
       raise e
     end
   end
-  
 end
 
 class Reset < Command

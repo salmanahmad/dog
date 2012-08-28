@@ -21,6 +21,21 @@ module Dog::Library
       end
     end
     
+    implementation "person_from_value" do
+      argument "value"
+      
+      body do
+        value = variable("value")
+        person = value.person
+        
+        if person.nil? then
+          person = ::Dog::Value.null_value
+        end
+        
+        dog_return(person)
+      end
+    end
+    
     implementation "type_of" do
       argument "value"
       

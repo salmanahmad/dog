@@ -57,7 +57,7 @@ module Dog
       #  rule.apply(d)
       #end
 
-      if errors.empty? then
+      if errors.empty? && node then
         node.compile(package)
       end
     end

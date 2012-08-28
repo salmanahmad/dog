@@ -15,6 +15,12 @@ PRINT "after"
 PRINT labels
 PRINT labels[0].label
 
+PRINT  "Labels Person: "
+PRINT PERSON FROM labels
+
+PRINT  "Labels[0] Person: "
+PRINT PERSON FROM labels[0]
+
 
 PRINT "All Done:"
 PRINT labels
