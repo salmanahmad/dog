@@ -13,17 +13,12 @@ module Dog
     end
 
     def add_facebook_profile(fb_id, optionals)
-      profile = {
-        id: fb_id,
-        access_token: optionals[:access_token],
-        access_token_expires: optionals[:access_token_expires],
-        username: optionals[:username],
-        link: optionals[:link],
-        friends: []
-      }
-      self.facebook = self.facebook || {}
-      self.facebook.merge! profile
-      self
+      self.dog_value["facebook_profile"] ||= Value::empty_structure
+      self.dog_value["facebook_profile"]["id"] = Value::string_value fb_id
+      optionals.each do |k, v|
+        self.dog_value["facebook_profile"][k.to_s] = Value::string_value v
+      end
+      self.dog_value["facebook_profile"]["friends"] = Value::empty_array
     end
 
   end
