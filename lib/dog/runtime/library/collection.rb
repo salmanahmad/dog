@@ -29,6 +29,23 @@ module Dog::Library
         dog_return(type)
       end
     end
+    
+    
+    implementation "size" do
+      argument "collection"
+      
+      body do |track|
+        collection = variable("collection")
+        
+        if collection.type == "collection" then
+          # TODO
+        else
+          size = ::Dog::Value.number_value(collection.value.keys.size)
+        end
+        
+        dog_return(size)
+      end
+    end
 
     implementation "save" do
       argument "struct"

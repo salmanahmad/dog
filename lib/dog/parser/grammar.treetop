@@ -175,7 +175,7 @@ grammar Dog
     primary_expression s predicate {
       def transform
         node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
-          "collection" => primary_expression.transform,
+          "container" => primary_expression.transform,
           "predicate" => predicate.transform
         })
         node.line = self.line
@@ -729,12 +729,7 @@ grammar Dog
   rule predicate
     'WHERE' sn predicate_expression {
       def transform
-        predicate = predicate_expression.transform
-        predicate = ::Dog::Value.from_ruby_value({}, "predicate")
-        
-        
-        node = ::Dog::Nodes::ValueLiteral.new(predicate)
-        node.line = self.line
+        node = predicate_expression.transform
         
         return node
       end
@@ -750,26 +745,106 @@ grammar Dog
   end 
   
   rule predicate_unary
-    not_operator s? '(' s? predicate_primary s? ')'
+    not_operator s? '(' s? predicate_primary s? ')' {
+      def transform
+        # TODO
+      end
+    }
   end
-  
+
   rule predicate_binary
-    predicate_primary s (and_operator / or_operator) s predicate_expression
+    first:predicate_primary s binary_operator:(and_operator / or_operator) s second:predicate_expression {
+      def transform
+        # TODO - Fix the ambiguity between query AND and expression AND
+
+        operator = binary_operator.transform
+
+        case operator
+        when "AND"
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$and" => ::Dog::Nodes::StructureLiteral.new("array", {
+              0 => first.transform,
+              1 => second.transform,
+            })
+          })
+        when "OR"
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$or" => ::Dog::Nodes::StructureLiteral.new("array", {
+              0 => first.transform,
+              1 => second.transform,
+            })
+          })
+        else
+          raise "Parse error"
+        end
+
+        node = ::Dog::Nodes::StructureLiteral.new(nil, structure)
+        node.line = self.line
+        
+        return node
+      end
+    }
   end
-  
+
   rule predicate_primary 
     predicate_parenthesis / predicate_conditional
   end 
   
   rule predicate_parenthesis 
-    '(' s? predicate_expression s? ')'
+    '(' s? predicate_expression s? ')' {
+      def transform
+        predicate_expression.transform
+      end
+    }
   end
   
   # This was 'access' before 'expression'
   rule predicate_conditional
     key_paths s? relational_operator s? expression {
       def transform
-        {key_paths.transform => expression.transform}
+        operator = relational_operator.transform
+
+        case operator
+        when "!="
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$ne" => expression.transform
+            })
+          })
+        when ">="
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$gte" => expression.transform
+            })
+          })
+        when "<="
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$lte" => expression.transform
+            })
+          })
+        when ">"
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$gt" => expression.transform
+            })
+          })
+        when "<"
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "$lt" => expression.transform
+            })
+          })
+        else
+          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+            key_paths.transform => expression.transform
+          })
+        end
+
+        node = structure
+        node.line = self.line
+        
+        return node
       end
     }
   end
@@ -1593,7 +1668,7 @@ grammar Dog
           end
         end
         
-        ids.join(".")
+        ("value.s:" + ids.join(".value.s:") + ".value")
       end
     }
   end

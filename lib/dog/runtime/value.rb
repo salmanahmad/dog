@@ -80,7 +80,7 @@ module Dog
     
     def [](k)
       if k.kind_of? Numeric then
-        k = "n:#{k}"
+        k = "n:#{k.to_f}"
       else
         k = "s:#{k}"
       end
@@ -96,7 +96,7 @@ module Dog
         self.min_numeric_key = [k, self.min_numeric_key].min
         self.max_numeric_key = [k, self.max_numeric_key].max
         
-        k = "n:#{k}"
+        k = "n:#{k.to_f}"
       else
         k = "s:#{k}"
       end
@@ -164,6 +164,14 @@ module Dog
       
       if self.primitive? then
         return self.value
+      elsif self.type == "array"
+        a = []
+        
+        for k, v in self.value do
+          a << v.ruby_value
+        end
+        
+        return a
       else
         h = {}
         for k, v in self.value do
@@ -181,7 +189,14 @@ module Dog
     def primitive?
       Value.primitive_types.include? self.type
     end
-    
+
+    def self.empty_array
+      value = Value.new
+      value.type = "array"
+      value.value = {}
+      return value
+    end
+
     def self.empty_structure
       value = Value.new
       value.type = "structure"

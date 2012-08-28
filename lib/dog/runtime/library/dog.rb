@@ -14,7 +14,7 @@ module Dog::Library
     name "dog"
 
     structure "query" do
-      property "collection"
+      property "container"
       property "predicate"
     end
 
@@ -265,12 +265,25 @@ module Dog::Library
 
     implementation "find" do
       argument "query"
-      
+
       body do |track|
-        # TODO
         query = variable("query")
-        
-        #pp query.ruby_value
+        container = query["container"]
+        selector = query["predicate"].ruby_value
+
+        if container.type == "collection" then
+          results = ::Dog::database[container["name"].ruby_value].find(selector)
+          value = ::Dog::Value.empty_array
+
+          i = 0
+          for result in results do
+            value[i] = ::Dog::Value.from_hash(result)
+            i += 1
+          end
+
+          dog_return(value)
+        end
+
       end
     end
 
@@ -278,10 +291,14 @@ module Dog::Library
       argument "query"
       
       body do |track|
-        # TODO
         query = variable("query")
-        
-        puts query.inspect
+        container = query["container"]
+        selector = query["predicate"].ruby_value
+
+        if container.type == "collection" then
+          results = ::Dog::database[container["name"].ruby_value].remove(selector)
+          dog_return(::Dog::Value.true_value)
+        end
       end
     end
 

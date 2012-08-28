@@ -245,16 +245,57 @@ class IntegrationTests::CrudTest < Test::Unit::TestCase
     ADD civic TO cars
     
     civics = FIND cars WHERE name == "civic"
+    first = civics[0]
     
     EOD
     
+    
     tracks = run_source(program)
-    #assert_equal(4, tracks.last.variables["civics"].ruby_value.size)
+    
+    assert_equal(4, tracks.last.variables["civics"].ruby_value.size)
+    assert_equal("civic", tracks.last.variables["first"]["name"].ruby_value)
   end
   
   
   def test_remove
-    # TODO
+    program = <<-EOD
+
+    DEFINE car {
+      name
+      index
+    }
+
+    DEFINE cars OF car
+
+    civic = car {
+      name = "civic"
+    }
+
+    civic.index = 0
+    ADD civic TO cars
+    
+    civic.index = 1
+    ADD civic TO cars
+    
+    civic.index = 2
+    ADD civic TO cars
+    
+    civic.index = 3
+    ADD civic TO cars
+    
+    civics = FIND cars WHERE name == "civic"
+    PRINT COMPUTE collection.size ON civics
+    
+    REMOVE cars WHERE name == "civic"
+    
+    civics = FIND cars WHERE name == "civic"
+    PRINT COMPUTE collection.size ON civics
+    
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("4\n0", output)
+
   end
 
 
