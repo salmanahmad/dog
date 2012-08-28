@@ -18,6 +18,17 @@ module Dog::Library
       property "predicate"
     end
 
+
+    implementation "id" do
+      argument "value"
+      
+      body do |track|
+        value = variable("value")
+        dog_return(::Dog::Value.string_value(value._id))
+      end
+    end
+
+
     implementation "ask" do
       # TODO - Right now, this is implemented directly inside the AsyncCall
       # isntruction. Do I want to keep it there or can I actually move it
@@ -227,6 +238,27 @@ module Dog::Library
             container[index] = value
             dog_return(container)
           end
+        end
+      end
+    end
+
+    implementation "find_by_id" do
+      argument "container"
+      argument "value"
+      
+      body do |track|
+        container = variable("container")
+        value = variable("value")
+        
+        if container.type == "collection" then
+          if value.type == "string" then
+            value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value.ruby_value})
+          else
+            value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value._id})
+          end
+          
+          value = ::Dog::Value.from_hash(value)
+          dog_return(value)
         end
       end
     end

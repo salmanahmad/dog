@@ -806,6 +806,18 @@ grammar Dog
   end
   
   rule find
+    'FIND' s value:expression s 'IN' s container:expression {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "find_by_id"]),
+          [container.transform, value.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
+    /
     'FIND' s query_expression {
       def transform
         node = ::Dog::Nodes::Call.new(
