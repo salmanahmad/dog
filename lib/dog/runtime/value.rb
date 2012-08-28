@@ -30,7 +30,7 @@ module Dog
     end
     
     def self.primitive_types
-      ["string", "number", "boolean", "null", "time"]
+      ["string", "number", "boolean", "null"]
     end
     
     def to_hash
@@ -79,8 +79,6 @@ module Dog
 
         if key[0,1] == "n" then
           item = item.to_f
-        elsif key[0,1] == "t" then
-          item = Time.parse item
         end
 
         items << item
@@ -92,8 +90,6 @@ module Dog
     def [](k)
       if k.kind_of? Numeric then
         k = "n:#{k.to_f}"
-      elsif k.kind_of? Time then
-        k = "t:#{k}"
       else
         k = "s:#{k}"
       end
@@ -110,8 +106,6 @@ module Dog
         self.max_numeric_key = [k, self.max_numeric_key].max
         
         k = "n:#{k.to_f}"
-      elsif k.kind_of? Time then
-        k = "t:#{k}"
       else
         k = "s:#{k}"
       end
@@ -168,8 +162,6 @@ module Dog
           return self.string_value(ruby_value)
         elsif ruby_value.kind_of? Numeric then
           return self.number_value(ruby_value)
-        elsif ruby_value.kind_of? Time then
-          return self.time_value(ruby_value)
         elsif ruby_value.kind_of? NilClass then
           return self.null_value
         elsif ruby_value.kind_of? FalseClass then
@@ -235,13 +227,6 @@ module Dog
       value = Value.new
       value.type = "number"
       value.value = number
-      return value
-    end
-    
-    def self.time_value(time)
-      value = Value.new
-      value.type = "time"
-      value.value = time
       return value
     end
     
