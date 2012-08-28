@@ -40,12 +40,13 @@ module Dog::Library
       argument "query"
       argument "via"
 
-      body do |track|
+      body do |original_track|
         # TODO
         type = variable("type")
         query = variable("query")
         via = variable("via")
-
+        
+        
         structure_type = nil
         properties = []
 
@@ -82,6 +83,10 @@ module Dog::Library
         event.name = structure_type
         event.properties = properties
         event.channel_id = channel._id
+        
+        event.track_id = original_track.control_ancestors.last
+        event.track_id = event.track_id._id if event.track_id.kind_of? ::Dog::Track
+        
         #event.track_id = track.id # TODO
         #event.routing = nil # TODO
         event.created_at = Time.now.utc
