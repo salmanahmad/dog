@@ -398,7 +398,7 @@ module Dog
               track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
             end
 
-            track.variables["value"].person = find_or_generate_current_user
+            track.variables["value"].person = find_or_generate_current_user.dog_value
 
             proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
             proc.call(track)
@@ -441,7 +441,7 @@ module Dog
               track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
             end
 
-            track.variables["value"].person = find_or_generate_current_user
+            track.variables["value"].person = find_or_generate_current_user.dog_value
 
             proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
             proc.call(track)
