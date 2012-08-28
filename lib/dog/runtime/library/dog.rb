@@ -130,8 +130,10 @@ module Dog::Library
           p.value = ruby_value
           properties << p
         end
-
-        message.track_id = track.id
+        
+        message.track_id = track.control_ancestors.last
+        message.track_id = message.track_id._id if message.track_id.kind_of? ::Dog::Track
+        
         message.routing = nil # TODO
         message.created_at = Time.now.utc
         message.properties = properties
