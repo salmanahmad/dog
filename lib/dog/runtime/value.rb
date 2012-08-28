@@ -15,6 +15,7 @@ module Dog
     attr_accessor :pending
     attr_accessor :buffer_size
     attr_accessor :channel_mode
+    attr_accessor :person
     attr_accessor :type
     attr_accessor :value
     
@@ -33,12 +34,19 @@ module Dog
     end
     
     def to_hash
+      if self.person then
+        person = person.to_hash
+      else
+        person = nil
+      end
+      
       if Value.primitive_types.include? self.type then
         return {
           "_id" => self._id,
           "pending" => self.pending,
           "buffer_size" => self.buffer_size,
           "channel_mode" => self.channel_mode,
+          "person" => person,
           "type" => self.type,
           "value" => self.value,
           "min_numeric_key" => self.min_numeric_key,
@@ -55,6 +63,7 @@ module Dog
           "pending" => self.pending,
           "buffer_size" => self.buffer_size,
           "channel_mode" => self.channel_mode,
+          "person" => person,
           "type" => self.type,
           "value" => processed_value,
           "min_numeric_key" => self.min_numeric_key,
@@ -110,10 +119,13 @@ module Dog
       value.pending = hash["pending"]
       value.buffer_size = hash["buffer_size"]
       value.channel_mode = hash["channel_mode"]
+      value.person = hash["person"]
       value.type = hash["type"]
       value.value = hash["value"]
       value.min_numeric_key = hash["min_numeric_key"]
       value.max_numeric_key = hash["max_numeric_key"]
+      
+      value.person = ::Dog::Value.from_hash(value.person) if value.person
       
       unless Value.primitive_types.include? value.type then
         real_value = {}

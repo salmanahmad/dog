@@ -27,4 +27,17 @@ class IntegrationTests::PeopleTest < Test::Unit::TestCase
     assert_equal(1, ::Dog.database["people"].count)
   end
   
+  
+  def test_person_from
+    program = <<-EOD
+
+    hi = "Hello!"
+    user = PERSON FROM hi
+
+    EOD
+
+    tracks = run_source(program)
+    assert_equal(nil, tracks.last.variables["user"].ruby_value)
+  end
+  
 end

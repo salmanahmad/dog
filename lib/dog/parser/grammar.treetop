@@ -709,7 +709,18 @@ grammar Dog
   end
   
   rule person
-    'PERSON' people_from_clause? (people_where_clause)?
+    #'PERSON' people_from_clause? (people_where_clause)?
+    'PERSON' people_from_clause {
+      def transform
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["system", "person_from_value"]),
+          [people_from_clause.transform]
+        )
+        node.line = self.line
+        
+        return node
+      end
+    }
   end
   
   rule people
@@ -719,7 +730,11 @@ grammar Dog
   # TODO - Add back community list. Right now, you can only access people from 
   # one community at a time...
   rule people_from_clause
-    sn 'FROM' sn access
+    sn 'FROM' sn expression {
+      def transform
+        expression.transform
+      end
+    }
   end
 
   rule people_where_clause

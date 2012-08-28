@@ -4,7 +4,6 @@ fix $not, $and, $or with predicates
 people
   Routing
   Update the server stuff
-  PERSON FROM
 
 optional_arguments - function side
 async call
