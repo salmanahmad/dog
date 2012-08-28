@@ -46,27 +46,5 @@ module Dog::Library
         dog_return(size)
       end
     end
-
-    implementation "save" do
-      argument "struct"
-      argument "collection"
-
-      body do
-        collection = collection.ruby_value["name"]
-        ::Dog.database[collection].save(struct.to_hash)
-        return ::Dog::Value.true_value
-      end
-    end
-    
-    implementation "delete" do
-      argument "struct"
-      argument "collection"
-
-      body do
-        collection = collection.ruby_value["name"]
-        ::Dog.database[collection].remove({"_id" => struct._id})
-        return ::Dog::Value.true_value
-      end
-    end
   end
 end
