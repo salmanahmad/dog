@@ -622,7 +622,7 @@ module Dog::Instructions
         
         if function_actor == "shell" then
           # TODO
-        elsif function_actor == "people" || function.type == "string" then
+        elsif function_actor == "people" || function_actor == "person" || function.type == "string" then
           properties = []
           
           if function.type == "string" then
