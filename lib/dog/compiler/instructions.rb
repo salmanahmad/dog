@@ -692,7 +692,19 @@ module Dog::Instructions
           task.duplication = 1
           task.properties = properties
           task.channel_id = future._id
+          
+          if track.id == nil then
+            # TODO - Fix this. I need to do this here so I can get a track.id
+            # which is assigned when I call DatabaseObject#save. Instead, "id" 
+            # should be automatically generated as a UUID or ObjectID or something
+            # and DatabaseObject#save should be updated so it always does an upsert 
+            # rather than checking the _id itself like a retard...
+            track.save
+          end
           task.track_id = track.id
+          
+          
+          
           #task.track_id = track.control_ancestors.last
           #task.routing = nil
           task.routing = ::Dog::Helper.routing_for_actor(actor)
