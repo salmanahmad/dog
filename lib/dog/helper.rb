@@ -20,6 +20,14 @@ module Dog
 
   module Helper
     
+    def self.person_matches_routing(person, routing)
+      if (person._id == routing["_id"]) then
+        return true
+      else
+        return false
+      end
+    end
+    
     def self.routing_for_actor(routing = nil)
       if routing.type == "people.person" then
         return {"_id" => routing._id}
