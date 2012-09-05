@@ -28,8 +28,15 @@ class IntegrationTests::RoutingTest < Test::Unit::TestCase
     
     EOD
     
-    run_source(program)
+    tracks = run_source(program)
+    track = tracks.last
+    
     assert_equal(1, ::Dog::RoutedTask.find().count)
+    
+    person = track.variables["salman"]
+    task = ::Dog::RoutedTask.find().to_a.first
+    
+    assert_equal(person._id, task["routing"]["_id"])
     
   end
 end

@@ -21,7 +21,11 @@ module Dog
   module Helper
     
     def self.routing_for_actor(routing = nil)
-      return nil
+      if routing.type == "people.person" then
+        return {"_id" => routing._id}
+      else
+        return nil
+      end
     end
     
     def self.underscore(string)
