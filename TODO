@@ -3,6 +3,9 @@ PRINT should resolve futures
 fix $not, $and, $or with predicates
 people
   Routing
+  
+Whatever is used to maintain session state isn't cleared when I restart the process. So it still thinks i'm logged in, when it shouldn't.
+  
 
 optional_arguments - function side
 async call

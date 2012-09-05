@@ -92,14 +92,17 @@ module Dog
         return true
       end
 
-      def fetch_stream_items_for_track(track = ::Dog::Track.root)
+      def fetch_stream_items_for_track(track = ::Dog::Track.root, person = nil)
         # L 335
         stream_items = []
         # fetch StreamObjects
         items = ::Dog::StreamObject.find({"track_id" => track.id})
         items.each do |item|
           item = ::Dog::StreamObject.from_hash(item)
-          stream_items << item.to_hash_for_stream
+          
+          if ::Dog::Helper.person_matches_routing(person, item.routing) then
+            stream_items << item.to_hash_for_stream
+          end
         end
 
         return stream_items
@@ -337,8 +340,11 @@ module Dog
           if track.nil?
             return [400, {"success" => false, "errors" => ["The runtime id '#{id}' does not correspond to a valid runtime item."] }.to_json]
           end
+
+          current_user = find_or_generate_current_user
+
           stream["self"] = track.to_hash_for_stream
-          stream["runtime"] = fetch_stream_items_for_track(track)
+          stream["runtime"] = fetch_stream_items_for_track(track, current_user)
           stream["lexical"] = ::Dog::Runtime.symbol_descendants(track.function_name.split('.'), depth)
 
           content_type 'application/json'
