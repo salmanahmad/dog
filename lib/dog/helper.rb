@@ -21,6 +21,8 @@ module Dog
   module Helper
     
     def self.person_matches_routing(person, routing)
+      return true if routing.nil? or routing.size <= 0
+
       if (person._id == routing["_id"]) then
         return true
       else
