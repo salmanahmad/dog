@@ -141,7 +141,7 @@ module Dog
               rescue Exception => e
                 exception = Exception.new("Dog error on line: #{instruction.line} in file: #{instruction.file}")
                 exception.set_backtrace(e.backtrace)
-                raise e
+                raise exception
               end
               
               if track.next_instruction then
