@@ -331,7 +331,7 @@ class Restart < Command
     run_command = Run.new
     options = run_command.parse_options(args)
     options["database"] = {
-      "reset" => true
+      "clear_state" => true
     }
     
     begin
