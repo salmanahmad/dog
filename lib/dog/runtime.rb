@@ -135,7 +135,14 @@ module Dog
             if instruction.nil? then
               track.finish
             else
-              instruction.execute(track)
+              
+              begin
+                instruction.execute(track)
+              rescue Exception => e
+                exception = Exception.new("Dog error on line: #{instruction.line} in file: #{instruction.file}")
+                exception.set_backtrace(e.backtrace)
+                raise e
+              end
               
               if track.next_instruction then
                 track.current_instruction = track.next_instruction
