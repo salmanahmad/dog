@@ -59,7 +59,7 @@ module Dog
           else
             person = ::Dog::Person.new()
             session[:current_user_object] = person.to_hash
-            session[:current_user] = person.id
+            #session[:current_user] = person.id
           end
         end
 
