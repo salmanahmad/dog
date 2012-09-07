@@ -173,7 +173,6 @@ module Dog
     end
     
     def ruby_value
-      
       if self.primitive? then
         return self.value
       elsif self.type == "array"
@@ -192,6 +191,27 @@ module Dog
           else
             h[k[2,k.length]] = v.ruby_value
           end
+        end
+        
+        return h
+      end
+    end
+    
+    def mongo_value
+      if self.primitive? then
+        return self.value
+      elsif self.type == "array"
+        a = []
+        
+        for k, v in self.value do
+          a << v.mongo_value
+        end
+        
+        return a
+      else
+        h = {}
+        for k, v in self.value do
+          h[k[2,k.length]] = v.mongo_value
         end
         
         return h

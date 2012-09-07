@@ -19,8 +19,6 @@ class IntegrationTests::AddTest < Test::Unit::TestCase
       messages = {}
     }
     
-    i.foo = 7
-    
     ADD "hi" TO car.messages
     ADD "hello" TO car.messages
 
