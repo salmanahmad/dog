@@ -98,4 +98,34 @@ class IntegrationTests::LoopTest < Test::Unit::TestCase
     tracks, output = run_source(program, true)
     assert_equal("Hi", output)
   end
+  
+  def test_for
+    program = <<-EOD
+
+    cars = {}
+    ADD "a" TO cars
+    ADD "a" TO cars
+    ADD "a" TO cars
+    ADD "a" TO cars
+
+    new_cars = {}
+
+    FOR EACH car IN cars DO
+      ADD car TO new_cars
+    END
+
+    EOD
+
+    tracks = run_source(program)
+    track = tracks.last
+    
+    assert_equal(4, track.variables["new_cars"].keys.size)
+    assert_equal("a", track.variables["new_cars"][0].ruby_value)
+    assert_equal("a", track.variables["new_cars"][1].ruby_value)
+    assert_equal("a", track.variables["new_cars"][2].ruby_value)
+    assert_equal("a", track.variables["new_cars"][3].ruby_value)
+    
+    
+  end
+  
 end

@@ -1434,7 +1434,7 @@ grammar Dog
             )
           ),
           Nodes::Assign.new([counter_variable_name], ::Dog::Nodes::NumberLiteral.new(0)),
-          ::Dog::Nodes::Loop.new([
+          ::Dog::Nodes::Loop.new(::Dog::Nodes::Nodes.new([
             ::Dog::Nodes::Branch.new(
               ::Dog::Nodes::Operation.new(
                 ::Dog::Nodes::Access.new([counter_variable_name]),
@@ -1468,7 +1468,7 @@ grammar Dog
               ])
             ),
             body
-          ])
+          ]))
         ])
         
         node.line = self.line
