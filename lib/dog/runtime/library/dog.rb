@@ -106,7 +106,7 @@ module Dog::Library
         query = variable("query")
         via = variable("via")
 
-        ruby_value = value.ruby_value
+        ruby_value = value.mongo_value
 
         message = ::Dog::RoutedMessage.new
         properties = []
