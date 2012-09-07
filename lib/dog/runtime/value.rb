@@ -211,7 +211,11 @@ module Dog
       else
         h = {}
         for k, v in self.value do
-          h[k[2,k.length]] = v.mongo_value
+          if k[0,1] == "n" then
+            h[k[2,k.length].to_i.to_s] = v.mongo_value
+          else
+            h[k[2,k.length]] = v.mongo_value
+          end
         end
         
         return h
