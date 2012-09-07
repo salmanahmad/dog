@@ -106,6 +106,12 @@ module Dog::Library
         query = variable("query")
         via = variable("via")
 
+        if via.ruby_value == "email" then
+          settings = ::Dog::Config.get("settings")
+          pp settings
+          dog_return
+        end
+
         ruby_value = value.mongo_value
 
         message = ::Dog::RoutedMessage.new

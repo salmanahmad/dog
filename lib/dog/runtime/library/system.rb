@@ -21,6 +21,43 @@ module Dog::Library
       end
     end
     
+    
+    implementation "keys" do
+      argument "value"
+      
+      body do
+        value = variable("value")
+        keys = ::Dog::Value.empty_array
+        
+        value = variable("value")
+        value_keys = value.keys
+        value_keys.each_index do |index|
+          key = value_keys[index]
+          if key.kind_of?(String) then
+            keys[index] = ::Dog::Value.string_value(key)
+          elsif key.kind_of?(Numeric)
+            keys[index] = ::Dog::Value.number_value(key)
+          else
+            raise "Invalid struture key"
+          end
+        end
+        
+        dog_return(keys)
+      end
+    end
+    
+    implementation "size" do
+      argument "value"
+      
+      body do
+        value = variable("value")
+        size = value.value.keys.size
+        
+        dog_return(::Dog::Value.number_value(size))
+      end
+    end
+    
+    
     implementation "person_from_value" do
       argument "value"
       
