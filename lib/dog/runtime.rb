@@ -29,7 +29,8 @@ require File.join(File.dirname(__FILE__), 'runtime/database_object.rb')
 require File.join(File.dirname(__FILE__), 'runtime/routability.rb')
 require File.join(File.dirname(__FILE__), 'runtime/stream_object.rb')
 
-Dir[File.join(File.dirname(__FILE__), "runtime/external", "*.rb")].each { |file| require file }
+require File.join(File.dirname(__FILE__), 'runtime/external/facebook_helpers.rb')
+require File.join(File.dirname(__FILE__), 'runtime/external/facebook_person.rb')
 
 require File.join(File.dirname(__FILE__), 'runtime/community.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
