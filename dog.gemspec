@@ -19,6 +19,7 @@ spec = Gem::Specification.new do |s|
   #s.default_executable = 'dog'
 
   s.has_rdoc = false
+  s.add_dependency 'pony', '~> 1.4'
   s.add_dependency 'treetop', '~> 1.4.10'
   s.add_dependency 'eventmachine', '~> 0.12.10'
   s.add_dependency 'sequel', '~> 3.37.0'

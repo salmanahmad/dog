@@ -16,12 +16,15 @@ class IntegrationTests::EmailTest < Test::Unit::TestCase
     program = <<-EOD
 
     salman = people.person {
-      email = "salman@salmanahmad.com"
+      email = "salmanahmad88@gmail.com"
     }
 
-    i = "Hello, World!"
-    
-    NOTIFY salman VIA email OF i
+    message = dog.email {
+      subject = "Hi, World!"
+      body = "This is a test"
+    } 
+
+    NOTIFY salman VIA email OF message
 
     EOD
 
