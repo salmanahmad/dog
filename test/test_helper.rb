@@ -83,9 +83,20 @@ module RuntimeHelper
       old_stdout, $stdout = $stdout, sio
     end
     
+    config_file = nil
+    config_file_path = File.expand_path('../test_config.json', __FILE__)
+    
+    if File.exists? config_file_path then
+      config_file = config_file_path
+    end
+    
     ::Dog::Config.reset
     ::Dog::Database.reset
-    tracks = ::Dog::Runtime.run(bundle, nil, {"config" => {"database" => "dog_unit_test"}, "database" => {"reset" => true}})
+    tracks = ::Dog::Runtime.run(bundle, nil, {
+      "config_file" =>  config_file,
+      "config" => {"database" => "dog_unit_test"},
+      "database" => {"reset" => true}
+    })
     
     if include_stdout then
       $stdout = old_stdout

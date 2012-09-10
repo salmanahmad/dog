@@ -18,6 +18,10 @@ module Dog::Library
       property "predicate"
     end
 
+    structure "email" do
+      property "subject"
+      property "body"
+    end
 
     implementation "id" do
       argument "value"
@@ -107,8 +111,56 @@ module Dog::Library
         via = variable("via")
 
         if via.ruby_value == "email" then
-          settings = ::Dog::Config.get("settings")
-          pp settings
+          settings = ::Dog::Config.get("email")
+
+          if query.type == "people.person" then
+            address = query["email"]
+            if address.nil? || address.is_null? then
+              dog_return(Dog::Value.false_value)
+            else
+              address = address.ruby_value.to_s
+            end
+          end
+
+          subject = ""
+          body = ""
+
+          if value.type == "dog.email" then
+            subject = value["subject"]
+            body = value["body"]
+
+            if subject.nil? || subject.is_null? then
+              subject = ""
+            else
+              subject = subject.ruby_value.to_s
+            end
+
+            if body.nil? || body.is_null? then
+              body = ""
+            else
+              body = body.ruby_value.to_s
+            end
+
+          else
+            body = value.ruby_value.inspect
+          end
+
+          via_options = {}
+          for key, value in settings do
+            via_options[key.intern] = value
+          end
+
+          envelope = {
+            :to => address,
+            :from => settings["from"],
+            :subject => subject,
+            :body => body,
+            :via => :smtp,
+            :via_options => via_options
+          }
+
+          Pony.mail(envelope)
+
           dog_return
         end
 

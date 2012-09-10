@@ -11,6 +11,7 @@ require 'digest/sha1'
 require 'set'
 require 'open3'
 
+require 'pony'
 require 'thin'
 require 'eventmachine'
 require 'sinatra/base'
