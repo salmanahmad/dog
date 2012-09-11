@@ -1,11 +1,9 @@
 
 
-foo = COMPUTE dog.pending_structure ON "structure", -1, false
+LISTEN TO people.public FOR events
 
-ON EACH i IN foo DO
-  PRINT i
+ON EACH event DO
+  PRINT event
+  RETURN 5 + 5
 END
 
-COMPUTE dog.add ON foo, "3"
-COMPUTE dog.add ON foo, "2"
-COMPUTE dog.add ON foo, "1"

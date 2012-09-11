@@ -15,10 +15,13 @@ spec = Gem::Specification.new do |s|
   s.require_paths = %w[lib]
   s.bindir = 'bin'
 
-  s.executables = ['dog']
-  s.default_executable = 'dog'
+  #s.executables = ['dog']
+  #s.default_executable = 'dog'
 
   s.has_rdoc = false
+  s.add_dependency 'rmagick', '~> 2.13.1'
+  s.add_dependency 'pony', '~> 1.4'
+  s.add_dependency 'mail', '~> 2.4.4'
   s.add_dependency 'treetop', '~> 1.4.10'
   s.add_dependency 'eventmachine', '~> 0.12.10'
   s.add_dependency 'sequel', '~> 3.37.0'

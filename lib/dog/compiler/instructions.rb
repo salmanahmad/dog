@@ -163,6 +163,32 @@ module Dog::Instructions
     end
   end
   
+  class Wait < Instruction
+    def execute(track)
+      value = track.stack.pop
+
+      if value.pending then
+        if track.futures[value._id] then
+          value = track.futures[value._id]
+          track.state = ::Dog::Track::STATE::RUNNING
+        else
+          track.stack.push(value)
+
+          future = ::Dog::Future.find_one({"value_id" => value._id})
+          future = ::Dog::Future.new(value._id, value) if future.nil?
+          future.tracks << track
+          future.save
+
+          track.next_instruction = track.current_instruction
+          track.state = ::Dog::Track::STATE::WAITING
+          return
+        end
+      end
+      
+      track.stack.push(value)
+    end
+  end
+  
   class Access < Instruction
     attribute :path_size
 
@@ -182,35 +208,66 @@ module Dog::Instructions
 
             path.shift
             path.unshift(new_value)
+
+            track.state = ::Dog::Track::STATE::RUNNING
           else
             track.stack.concat(path)
 
             value = path.first
-            future = ::Dog::Future.new(value._id, value)
+
+            future = ::Dog::Future.find_one({"value_id" => value._id})
+            future = ::Dog::Future.new(value._id, value) if future.nil?
             future.tracks << track
             future.save
 
+            track.next_instruction = track.current_instruction
             track.state = ::Dog::Track::STATE::WAITING
             return
           end
         end
 
-        pointer = path.shift
-        for item in path do
+        pointer = path.first
+
+        for item in path[1, path.size - 1] do
           key = ""
-          
+
           item_value = item
           item_value = item.value if item.kind_of? ::Dog::Value
-          
+
           if item_value.kind_of? String then
             key = item_value.to_s
           elsif item_value.kind_of? Numeric then
-            key = item_value.to_s
+            key = item_value.to_f
           else
             raise "Runtime error"
           end
 
+          if pointer.pending then
+            if track.futures[pointer._id] then
+              pointer = track.futures[pointer._id]
+              track.state = ::Dog::Track::STATE::RUNNING
+            else
+              track.stack.concat(path)
+
+              future = ::Dog::Future.find_one({"value_id" => pointer._id})
+              future = ::Dog::Future.new(pointer._id, pointer) if future.nil?
+              future.tracks << track
+              future.save
+
+              track.next_instruction = track.current_instruction
+              track.state = ::Dog::Track::STATE::WAITING
+              return
+            end
+          end
+
           pointer = pointer[key]
+          pointer = ::Dog::Value.null_value if pointer.nil?
+        end
+
+        if pointer.pending then
+          if track.futures[pointer._id] then
+            pointer = track.futures[pointer._id]
+          end
         end
 
         track.stack.push(pointer)
@@ -294,6 +351,12 @@ module Dog::Instructions
           else
             value = ::Dog::Value.null_value
           end
+        end
+      end
+      
+      if value.pending then
+        if track.futures[value._id] then
+          value = track.futures[value._id]
         end
       end
       
@@ -446,47 +509,96 @@ module Dog::Instructions
       arguments = track.stack.pop(arg_count)
       function = track.stack.pop
       
-      if function.type != "function" then
+      if function.type == "function" then
+        package = function["package"].value
+        name = function["name"].value
+        implementation = 0
+        
+        # TODO - Handle default values
+        # Perhaps the default values for optional args are handled
+        # by the runtime libraries and not the VM
+        
+        new_track = ::Dog::Track.new
+        new_track.control_ancestors = track.control_ancestors.clone
+        new_track.control_ancestors << track
+        
+        new_track.package_name = package
+        new_track.function_name = name
+        new_track.implementation_name = implementation
+        
+        symbol = ::Dog::Runtime.bundle.packages[package].symbols[name]["implementations"][implementation]
+        symbol_arguments = symbol["arguments"]
+        
+        arguments.each_index do |index|
+          argument = arguments[index]
+          variable_name = symbol_arguments[index]
+          new_track.variables[variable_name] = argument
+        end
+        
+        track.state = ::Dog::Track::STATE::CALLING
+        track.next_track = new_track
+      elsif function.type == "external_function"
+        actor = function["actor"].ruby_value
+        if actor == "shell"
+          
+          input = {
+            "argv" => [],
+            "kwargs" => {},
+            "name" => function["name"].ruby_value
+          }
+          
+          arguments.each_index do |index|
+            argument = arguments[index]
+            input["argv"] << argument.ruby_value
+          end
+          
+          if optionals then
+            for key in optionals.keys do
+              optional = optionals[key].ruby_value
+              input["argv"][key] << argument.ruby_value
+            end
+          end
+          
+          output = {}
+          
+          Open3.popen3(function["instructions"].ruby_value) { |stdin, stdout, stderr, process|
+            stdin.puts(input.to_json) if input
+            stdin.close
+                
+            exit_status = process.value
+            shell_output = stdout.read
+                
+            begin
+              output = JSON.parse(shell_output)
+              output = output["output"]
+            rescue
+              output = shell_output
+            end
+                
+            stdout.close
+            stderr.close
+          }
+              
+          output = ::Dog::Value.from_ruby_value(output)
+          track.stack.push(output)
+        else
+          raise "I cannot synchronously call an external function for '#{actor}'"
+        end
+      else
         raise "I don't know how to call a non-function"
       end
-      
-      package = function["package"].value
-      name = function["name"].value
-      implementation = 0
-      
-      # TODO - Handle default values
-      # Perhaps the default values for optional args are handled
-      # by the runtime libraries and not the VM
-      
-      new_track = ::Dog::Track.new
-      new_track.control_ancestors = track.control_ancestors.clone
-      new_track.control_ancestors << track
-      
-      new_track.package_name = package
-      new_track.function_name = name
-      new_track.implementation_name = implementation
-      
-      symbol = ::Dog::Runtime.bundle.packages[package].symbols[name]["implementations"][implementation]
-      symbol_arguments = symbol["arguments"]
-      
-      arguments.each_index do |index|
-        argument = arguments[index]
-        variable_name = symbol_arguments[index]
-        new_track.variables[variable_name] = argument
-      end
-      
-      track.state = ::Dog::Track::STATE::CALLING
-      track.next_track = new_track
     end
   end
 
   class AsyncCall < Instruction
     attribute :arg_count
     attribute :has_optionals
+    attribute :replication
     
-    def initialize(arg_count, has_optionals)
+    def initialize(arg_count, has_optionals, replication = 1)
       @arg_count = arg_count
       @has_optionals = has_optionals
+      @replication = replication || 1
     end
     
     def execute(track)
@@ -497,7 +609,116 @@ module Dog::Instructions
       function = track.stack.pop
       actor = track.stack.pop
       
-      # TODO
+      future = ::Dog::Value.new("structure", {})
+      future.pending = true
+      future.buffer_size = 0
+      future.channel_mode = true
+      
+      if function.type == "function" then
+        # TODO
+      elsif function.type == "external_function" || function.type == "string" then
+        # TODO - Propertly handle string literals rather than hard coding results here. It should be possible to call a shell command as well.
+        function_actor = function["actor"].ruby_value rescue nil
+        
+        if function_actor == "shell" then
+          # TODO
+        elsif function_actor == "people" || function_actor == "person" || function.type == "string" then
+          properties = []
+          
+          if function.type == "string" then
+            property = ::Dog::Property.new
+            property.identifier = "instructions"
+            property.direction = "output"
+            property.required = true
+            property.value = function.ruby_value
+            properties << property
+            
+            property = ::Dog::Property.new
+            property.identifier = "*value"
+            property.direction = "input"
+            property.required = true
+            property.value = nil
+            properties << property
+          else
+            property = ::Dog::Property.new
+            property.identifier = "instructions"
+            property.direction = "output"
+            property.required = true
+            property.value = function["instructions"].ruby_value
+            properties << property
+          
+            arguments.each_index do |index|
+              argument = arguments[index]
+              variable_name = function["arguments"][index].ruby_value
+            
+              property = ::Dog::Property.new
+              property.identifier = variable_name
+              property.direction = "output"
+              property.required = true
+              property.value = argument.ruby_value
+              properties << property
+            end
+          
+            if optionals then
+              for key in optionals.keys do
+                optional = optionals[key].ruby_value
+                
+                property = ::Dog::Property.new
+                property.identifier = key
+                property.direction = "output"
+                property.required = false
+                property.value = optional
+                properties << property
+              end
+            end
+            
+            return_values = function["output"]
+            return_values.value.keys.each_index do |index|
+              return_value = return_values[index].ruby_value
+              
+              property = ::Dog::Property.new
+              property.identifier = return_value
+              property.direction = "input"
+              property.required = true
+              property.value = nil
+              properties << property
+            end
+          end
+          
+          task = ::Dog::RoutedTask.new
+          # TODO - This rescue is here because of inline - string functions for ASKs. Deal with it at some point. Okay?
+          task.name = function["name"].ruby_value rescue "@inline_code"
+          task.replication = @replication
+          task.duplication = 1
+          task.properties = properties
+          task.channel_id = future._id
+          
+          if track.id == nil then
+            # TODO - Fix this. I need to do this here so I can get a track.id
+            # which is assigned when I call DatabaseObject#save. Instead, "id" 
+            # should be automatically generated as a UUID or ObjectID or something
+            # and DatabaseObject#save should be updated so it always does an upsert 
+            # rather than checking the _id itself like a retard...
+            track.save
+          end
+          task.track_id = track.id
+          
+          
+          #task.track_id = track.control_ancestors.last
+          #task.routing = nil
+          
+          
+          task.routing = ::Dog::Helper.routing_for_actor(actor)
+          task.created_at = Time.now.utc
+          task.save
+        else
+          raise "I cannot asynchronously call an external function for '#{function_actor}'"
+        end
+      else
+        raise "Unable to perform an async call on type '#{function.type}'"
+      end
+      
+      track.stack.push(future)
     end
   end
   

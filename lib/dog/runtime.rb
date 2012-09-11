@@ -11,6 +11,7 @@ require 'digest/sha1'
 require 'set'
 require 'open3'
 
+require 'pony'
 require 'thin'
 require 'eventmachine'
 require 'sinatra/base'
@@ -28,7 +29,8 @@ require File.join(File.dirname(__FILE__), 'runtime/database_object.rb')
 require File.join(File.dirname(__FILE__), 'runtime/routability.rb')
 require File.join(File.dirname(__FILE__), 'runtime/stream_object.rb')
 
-Dir[File.join(File.dirname(__FILE__), "runtime/external", "*.rb")].each { |file| require file }
+require File.join(File.dirname(__FILE__), 'runtime/external/facebook_helpers.rb')
+require File.join(File.dirname(__FILE__), 'runtime/external/facebook_person.rb')
 
 require File.join(File.dirname(__FILE__), 'runtime/community.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
@@ -97,6 +99,15 @@ module Dog
           raise "This program was compiled using a different version of Dog. It was compiled with #{bundle.dog_version}. I am Dog version #{VERSION::STRING}."
         end
         
+        if ::Dog::Config.get("email") then
+          pid = Process.fork
+          if pid.nil? then
+            require File.join(File.dirname(__FILE__), "runtime/external/mail_receiver.rb")
+          else
+            Process.detach(pid)
+          end
+        end
+        
         unless Track.root then
           root = Track.new("@root", bundle.startup_package)
           root.save
@@ -135,7 +146,14 @@ module Dog
             if instruction.nil? then
               track.finish
             else
-              instruction.execute(track)
+              
+              begin
+                instruction.execute(track)
+              rescue Exception => e
+                exception = Exception.new("Dog error on line: #{instruction.line} in file: #{instruction.file}")
+                exception.set_backtrace(e.backtrace)
+                raise exception
+              end
               
               if track.next_instruction then
                 track.current_instruction = track.next_instruction
@@ -153,8 +171,13 @@ module Dog
           if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
             return_value = track.stack.last || ::Dog::Value.null_value
             return_track = track.control_ancestors.last
-
+            
             if return_track then
+              
+              if return_track.kind_of?(::BSON::ObjectId) then
+                return_track = Track.find_by_id(return_track)
+              end
+              
               for name, future in track.futures do
                 future = future.to_hash
                 future = ::Dog::Future.from_hash(future)
@@ -167,6 +190,7 @@ module Dog
               run_track(return_track)
               return
             else
+              track.save
               break
             end
           end
@@ -194,8 +218,13 @@ module Dog
         if tracks.count != 0 then
           Server.run
         else
-          EM.next_tick do
-            Process.kill('INT', Process.pid)
+          futures = ::Dog::Future.find()
+          if futures.count != 0 then
+            Server.run
+          else
+            EM.next_tick do
+              Process.kill('INT', Process.pid)
+            end
           end
         end
       end
@@ -291,26 +320,14 @@ module Dog
 
       
       def symbol_exists?(name = [])
-        # TODO - Fix this later.
-        #name = name.join(".")
-        #if name == "" then
-        #  return true
-        #else
-        #  return self.bite_code["symbols"].include? name
-        #end
-        
-        self.bundle.contains_symbol_in_package?(name.join("."), self.bundle.startup_package)
+        self.bundle.packages[self.bundle.startup_package].symbols.include? name.join(".")
       end
 
       def symbol_info(name = [])
-        #path = self.bite_code["symbols"][name.join(".")].clone
-        #path.shift
-        #
-        #node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-        
-        node = self.bundle.node_for_symbol(name.join("."), self.bundle.startup_package)
-        type = self.typeof_node(node)
-        
+        symbol_value = self.bundle.packages[self.bundle.startup_package].symbols[name.join(".")]
+        symbol_value = symbol_value["value"]
+        type = self.typeof_symbol(symbol_value)
+
         if type then
           return self.to_hash_for_stream(name, type)
         else
@@ -325,7 +342,7 @@ module Dog
         # special case root
         name = '' if name == '@root'
 
-        symbols = self.bundle.packages[self.bundle.startup_package]["symbols"]
+        symbols = self.bundle.packages[self.bundle.startup_package].symbols
 
         for symbol, path in symbols do
           if symbol.start_with?(name) then
@@ -337,8 +354,16 @@ module Dog
               path.shift
 
               #node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-              node = self.bundle.node_for_symbol(symbol, self.bundle.startup_package)
-              type = self.typeof_node(node)
+              #node = self.bundle.node_for_symbol(symbol, self.bundle.startup_package)
+              #type = self.typeof_node(node)
+
+              if symbol == "@root" then
+                type = "function"
+              else
+                symbol_value = self.bundle.packages[self.bundle.startup_package].symbols[symbol]
+                symbol_value = symbol_value["value"]
+                type = typeof_symbol(symbol_value)
+              end
 
               if type then
                 descendants << self.to_hash_for_stream(symbol.split('.'), type)
@@ -362,13 +387,15 @@ module Dog
       #  return node
       #end
 
-      def typeof_node(node)
+      def typeof_symbol(symbol)
         return case
-        when node.class == ::Dog::Nodes::FunctionDefinition
-          "function"
-        when node.class == ::Dog::Nodes::OnEachDefinition
-          "oneach"
-        when node.class == ::Dog::Nodes::StructureDefinition
+        when symbol.type == "external_function" || symbol.type == "function"
+          if /^@each:/.match(symbol["name"].ruby_value) then
+            "oneach"
+          else
+            "function"
+          end
+        when symbol.type == "type"
           "structure"
         else
           nil

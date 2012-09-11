@@ -89,6 +89,28 @@ module Dog
         end
       end
       
+      
+      class Collection
+        attr_accessor :type_package
+        attr_accessor :type_name
+        
+        def initialize
+          self.type_package = ""
+          self.type_name = ""
+        end
+        
+        def type(name)
+          name = name.split(".")
+          
+          if name.size == 2 then
+            self.type_package = name[0]
+            self.type_name = name[1]
+          else
+            self.type_name = name[0]
+          end
+        end
+      end
+      
       class Helper
         attr_accessor :track
         
@@ -100,7 +122,7 @@ module Dog
           track.variables[name]
         end
         
-        def dog_return(value)
+        def dog_return(value = ::Dog::Value.null_value)
           # TODO - Handle multiple returns
           if value.kind_of? ::Dog::Value then
             track.stack.push(value)
@@ -128,6 +150,30 @@ module Dog
         self.package.pop_symbol
       end
       
+      def collection(symbol, &block)
+        c = Collection.new
+        c.instance_eval(&block)
+        
+        value = ::Dog::Value.new("collection", {})
+        value["name"] = ::Dog::Value.string_value(symbol)
+        value["package"] = ::Dog::Value.string_value(self.package.name)
+        
+        instructions = Proc.new do |track|
+          type = ::Dog::Value.new("type", {})
+          type["name"] = ::Dog::Value.string_value(c.type_name)
+          type["package"] = ::Dog::Value.string_value(c.type_package)
+          
+          track.stack.push(type)
+          track.finish
+        end
+        
+        self.package.push_symbol(symbol)
+        self.package.current_context["value"] = value
+        self.package.add_implementation
+        self.package.implementation["instructions"] = instructions
+        self.package.pop_symbol
+      end
+      
       def structure(symbol, &block)
         s = Structure.new
         s.instance_eval(&block)
@@ -136,8 +182,15 @@ module Dog
         value["name"] = ::Dog::Value.string_value(symbol)
         value["package"] = ::Dog::Value.string_value(self.package.name)
         
-        instructions = Proc.new do
-          # TODO - Build and return the structure
+        instructions = Proc.new do |track|
+          struct = ::Dog::Value.new("#{self.package.name}.#{symbol}", {})
+          for property in s.properties do
+            property_name = property["name"]
+            struct[property_name] = ::Dog::Value.null_value
+          end
+          
+          track.stack.push(struct)
+          track.finish
         end
         
         self.package.push_symbol(symbol)

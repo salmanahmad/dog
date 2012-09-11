@@ -37,6 +37,14 @@ module Dog
             for collection in temp_db.collections
               collection.drop rescue nil
             end
+          elsif options["clear_state"] then
+            temp_db = connection.db(database_name)
+            state_collections = [ StreamObject.collection_name, Track.collection_name, Future.collection_name ]
+            for collection in temp_db.collections
+              if state_collections.include? collection.name then
+                collection.drop rescue nil
+              end
+            end
           end
 
           ::Dog.database = connection.db(database_name)

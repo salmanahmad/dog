@@ -15,6 +15,7 @@ module Dog
     attr_accessor :pending
     attr_accessor :buffer_size
     attr_accessor :channel_mode
+    attr_accessor :person
     attr_accessor :type
     attr_accessor :value
     
@@ -33,12 +34,19 @@ module Dog
     end
     
     def to_hash
+      if !self.person.nil? then
+        person = self.person.to_hash
+      else
+        person = nil
+      end
+      
       if Value.primitive_types.include? self.type then
         return {
           "_id" => self._id,
           "pending" => self.pending,
           "buffer_size" => self.buffer_size,
           "channel_mode" => self.channel_mode,
+          "person" => person,
           "type" => self.type,
           "value" => self.value,
           "min_numeric_key" => self.min_numeric_key,
@@ -55,6 +63,7 @@ module Dog
           "pending" => self.pending,
           "buffer_size" => self.buffer_size,
           "channel_mode" => self.channel_mode,
+          "person" => person,
           "type" => self.type,
           "value" => processed_value,
           "min_numeric_key" => self.min_numeric_key,
@@ -63,14 +72,34 @@ module Dog
       end
     end
     
+    def keys
+      items = []
+      for key, v in self.value do
+        item = key[2, key.length]
+
+        if key[0,1] == "n" then
+          item = item.to_f
+        end
+
+        items << item
+      end
+
+      return items
+    end
+    
     def [](k)
       if k.kind_of? Numeric then
-        k = "n:#{k}"
+        k = "n:#{k.to_f}"
       else
         k = "s:#{k}"
       end
       
-      self.value[k]
+      i = self.value[k]
+      if i.nil? then
+        return ::Dog::Value.null_value
+      else
+        return i
+      end
     end
     
     def []=(k, v)
@@ -81,7 +110,7 @@ module Dog
         self.min_numeric_key = [k, self.min_numeric_key].min
         self.max_numeric_key = [k, self.max_numeric_key].max
         
-        k = "n:#{k}"
+        k = "n:#{k.to_f}"
       else
         k = "s:#{k}"
       end
@@ -95,10 +124,13 @@ module Dog
       value.pending = hash["pending"]
       value.buffer_size = hash["buffer_size"]
       value.channel_mode = hash["channel_mode"]
+      value.person = hash["person"]
       value.type = hash["type"]
       value.value = hash["value"]
       value.min_numeric_key = hash["min_numeric_key"]
       value.max_numeric_key = hash["max_numeric_key"]
+      
+      value.person = ::Dog::Value.from_hash(value.person) if value.person
       
       unless Value.primitive_types.include? value.type then
         real_value = {}
@@ -146,13 +178,49 @@ module Dog
     end
     
     def ruby_value
-      
       if self.primitive? then
         return self.value
+      elsif self.type == "array"
+        a = []
+        
+        for k, v in self.value do
+          a << v.ruby_value
+        end
+        
+        return a
       else
         h = {}
         for k, v in self.value do
-          h[k[2,k.length]] = v.ruby_value
+          if k[0,1] == "n" then
+            h[k[2,k.length].to_f] = v.ruby_value
+          else
+            h[k[2,k.length]] = v.ruby_value
+          end
+        end
+        
+        return h
+      end
+    end
+    
+    def mongo_value
+      if self.primitive? then
+        return self.value
+      elsif self.type == "array"
+        a = []
+        
+        for k, v in self.value do
+          a << v.mongo_value
+        end
+        
+        return a
+      else
+        h = {}
+        for k, v in self.value do
+          if k[0,1] == "n" then
+            h[k[2,k.length].to_i.to_s] = v.mongo_value
+          else
+            h[k[2,k.length]] = v.mongo_value
+          end
         end
         
         return h
@@ -162,7 +230,14 @@ module Dog
     def primitive?
       Value.primitive_types.include? self.type
     end
-    
+
+    def self.empty_array
+      value = Value.new
+      value.type = "array"
+      value.value = {}
+      return value
+    end
+
     def self.empty_structure
       value = Value.new
       value.type = "structure"

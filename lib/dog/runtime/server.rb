@@ -44,10 +44,26 @@ module Dog
       response['Content-Type'] = 'text/plain'
       return ''
     end
-    
+
     helpers do
       def layout(name)
         # Intentionally blank. Used by our template system.
+      end
+
+      def find_or_generate_current_user
+        person = Person.find_by_id(session[:current_user])
+
+        if person.nil? then
+          if session[:current_user_object] then
+            person = ::Dog::Person.from_hash(session[:current_user_object])
+          else
+            person = ::Dog::Person.new()
+            session[:current_user_object] = person.to_hash
+            #session[:current_user] = person.id
+          end
+        end
+
+        return person
       end
 
       def verify_current_user(message = "You need to be logged in when performing this operation")
@@ -76,14 +92,17 @@ module Dog
         return true
       end
 
-      def fetch_stream_items_for_track(track = ::Dog::Track.root)
+      def fetch_stream_items_for_track(track = ::Dog::Track.root, person = nil)
         # L 335
         stream_items = []
         # fetch StreamObjects
         items = ::Dog::StreamObject.find({"track_id" => track.id})
         items.each do |item|
           item = ::Dog::StreamObject.from_hash(item)
-          stream_items << item.to_hash_for_stream
+          
+          if ::Dog::Helper.person_matches_routing(person, item.routing) then
+            stream_items << item.to_hash_for_stream
+          end
         end
 
         return stream_items
@@ -156,7 +175,7 @@ module Dog
       def initialize
         return if @initialized
         @initialized = true
-
+        
         prefix = Config.get('dog_prefix')
 
         # TODO - I have to figure this out for production
@@ -255,7 +274,7 @@ module Dog
               person = Person.new
               person.email = params["email"]
               person.password = Digest::SHA1.hexdigest params["password"]
-              person.join_community_named(Config.get("default_community"))
+              #person.join_community_named(Config.get("default_community"))
               person.save
 
               session[:current_user] = person.id
@@ -321,8 +340,11 @@ module Dog
           if track.nil?
             return [400, {"success" => false, "errors" => ["The runtime id '#{id}' does not correspond to a valid runtime item."] }.to_json]
           end
+
+          current_user = find_or_generate_current_user
+
           stream["self"] = track.to_hash_for_stream
-          stream["runtime"] = fetch_stream_items_for_track(track)
+          stream["runtime"] = fetch_stream_items_for_track(track, current_user)
           stream["lexical"] = ::Dog::Runtime.symbol_descendants(track.function_name.split('.'), depth)
 
           content_type 'application/json'
@@ -349,7 +371,9 @@ module Dog
 
         post prefix + '/stream/object/:id' do |id|
           object = ::Dog::StreamObject.find_by_id(id)
-
+          output = nil
+          
+          
           if object.class == ::Dog::RoutedTask then
             task = object
             response = {}
@@ -366,12 +390,34 @@ module Dog
             task.responses << response
             task.save
 
+            argument = response
+
+            future = ::Dog::Future.find_one("value_id" => object.channel_id)
+            future = future.value
+
+            track = ::Dog::Track.new
+            track.variables["container"] = future
+
+            if argument.size == 1 and argument.keys.first == "*value" then
+              track.variables["value"] = ::Dog::Value.from_ruby_value(argument["*value"])
+            else
+              track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
+            end
+
+            track.variables["value"].person = find_or_generate_current_user.dog_value
+
+            proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+            proc.call(track)
+
             if task.completed? then
-              track = ::Dog::Track.find_by_id(task.track_id)
-              if track.asking_id == task.id.to_s then
-                track.state = ::Dog::Track::STATE::RUNNING
-                ::Dog::Runtime.run_track(track)
-              end
+              track = ::Dog::Track.new
+              track.variables["container"] = future
+              track.variables["value"] = ::Dog::Value.new("close", {})
+
+              proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+              proc.call(track)
+              
+              ::Dog::RoutedTask.remove({"_id" => object._id})
             end
 
           elsif object.class == ::Dog::RoutedEvent then
@@ -381,6 +427,7 @@ module Dog
             track.control_ancestors = [::Dog::Track.root.id]
 
             argument = {}
+            
             for property in object.properties do
               argument[property.identifier] = params[property.identifier]
               if property.required && argument[property.identifier].nil? then
@@ -388,20 +435,30 @@ module Dog
               end
             end
 
-            if object.handler_argument then
-              dog_value = ::Dog::Value.from_ruby_value(argument, object.name)
-              track.write_variable(object.handler_argument, dog_value)
+            future = ::Dog::Future.find_one("value_id" => object.channel_id)
+            future = future.value
+
+            track = ::Dog::Track.new
+            track.variables["container"] = future
+
+            if argument.size == 1 and argument.keys.first == "*value" then
+              track.variables["value"] = ::Dog::Value.from_ruby_value(argument["*value"])
+            else
+              track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
             end
 
-            track.listen_argument = object.handler_argument
-            track.save
+            track.variables["value"].person = find_or_generate_current_user.dog_value
 
-            ::Dog::Runtime.run_track(track)
+            proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+            proc.call(track)
+
+            output = track.stack.pop.ruby_value
           end
 
           content_type 'application/json'
           return {
-            "success" => true
+            "success" => true,
+            "response" => output
           }.to_json
 
         end
@@ -548,9 +605,10 @@ module Dog
 
       def run
         Server.initialize
+        return if @running
+        @running = true
         Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
-
     end
 
   end

@@ -9,7 +9,7 @@ module Dog
   module Language
 
     def self.singularize(word)
-      return word[0...-1]
+      return word.chop
     end
 
     def self.pluralize(word)
@@ -19,7 +19,25 @@ module Dog
   end
 
   module Helper
+    
+    def self.person_matches_routing(person, routing)
+      return true if routing.nil? or routing.size <= 0
 
+      if (person._id == routing["_id"]) then
+        return true
+      else
+        return false
+      end
+    end
+    
+    def self.routing_for_actor(routing = nil)
+      if routing.type == "people.person" then
+        return {"_id" => routing._id}
+      else
+        return nil
+      end
+    end
+    
     def self.underscore(string)
       string.gsub(/::/, '/').
       gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').

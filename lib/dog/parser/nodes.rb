@@ -151,9 +151,31 @@ module Dog::Nodes
       value["name"] = ::Dog::Value.string_value(@name)
       value["actor"] = ::Dog::Value.string_value(@actor)
       value["instructions"] = ::Dog::Value.string_value(@instructions)
-      value["arguments"] = ::Dog::Value.string_value(@arguments)
-      value["optional_arguments"] = ::Dog::Value.string_value(@optional_arguments)
-      value["output"] = ::Dog::Value.string_value(@output)
+      
+      value["arguments"] = ::Dog::Value.empty_structure
+      value["optional_arguments"] = ::Dog::Value.empty_structure
+      value["output"] = ::Dog::Value.empty_structure
+      
+      if @arguments then
+        @arguments.each_index do |index|
+          argument = @arguments[index]
+          value["arguments"][index] = ::Dog::Value.string_value(argument)
+        end
+      end
+      
+      if @optional_arguments then
+        @optional_arguments.each_index do |index|
+          optional_argument = @optional_arguments[index]
+          value["optional_arguments"][index] = ::Dog::Value.string_value(optional_argument)
+        end
+      end
+      
+      if @output then
+        @output.each_index do |index|
+          return_value = @output[index]
+          value["output"][index] = ::Dog::Value.string_value(return_value)
+        end
+      end
       
       package.current_context["value"] = value
       
@@ -559,8 +581,10 @@ module Dog::Nodes
     end
 
     def compile(package)
+      count = -1
       for item in path do
-        if item == path.first then
+        count += 1
+        if count == 0 then
           if item.kind_of? Node then
             # TODO - This is special cased for literals. This may be
             # something that should be fixed in the grammar.
@@ -704,6 +728,23 @@ module Dog::Nodes
     end
   end
 
+  class Wait < Node
+    attr_accessor :expression
+    
+    def initialize(expression)
+      @expression = expression
+    end
+    
+    def compile(package)
+      expression.compile(package)
+      
+      wait = ::Dog::Instructions::Wait.new
+      set_instruction_context(wait)
+      
+      package.add_to_instructions([wait])
+    end
+  end
+
   class Break < Node
     attr_accessor :expression
 
@@ -733,12 +774,14 @@ module Dog::Nodes
     attr_accessor :identifier
     attr_accessor :arguments
     attr_accessor :optional_arguments
+    attr_accessor :replication
     
-    def initialize(actor, identifier, arguments = nil, optional_arguments = nil)
+    def initialize(actor, identifier, arguments = nil, optional_arguments = nil, replication = 1)
       @actor = actor
       @identifier = identifier
       @arguments = arguments
       @optional_arguments = optional_arguments
+      @replication = replication || 1
     end
     
     def compile(package)
@@ -754,7 +797,7 @@ module Dog::Nodes
       
       @optional_arguments.compile(package) if @optional_arguments
       
-      call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?)
+      call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?, @replication)
       set_instruction_context(call)
       package.add_to_instructions([call])
     end

@@ -8,6 +8,10 @@
 #
 
 module Dog
+  class MailedTask
+    # TODO
+  end
+  
   class RoutedTask < StreamObject
     
     attr_accessor :replication

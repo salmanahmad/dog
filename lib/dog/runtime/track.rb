@@ -24,6 +24,7 @@ module Dog
     end
     
     attr_accessor :_id
+    attr_accessor :future_return_id
     
     attr_accessor :package_name
     attr_accessor :function_name
@@ -107,7 +108,7 @@ module Dog
         if item.kind_of? ::Dog::Value then
           item.to_hash
         else
-          raise "A non-value was present on the stack"
+          raise "A non-value was present on the stack: #{item.inspect}"
         end
       end
       
@@ -144,6 +145,7 @@ module Dog
       access_ancestors = []
       
       return {
+        "future_return_id" => self.future_return_id,
         "package_name" => self.package_name,
         "function_name" => self.function_name,
         "implementation_name" => self.implementation_name,
@@ -160,7 +162,7 @@ module Dog
         "control_ancestors" => control_ancestors,
         
         "has_listen" => self.has_listen,
-        "asking_id" => self.asking_id,
+        "asking_id" => self.asking_id
       }
     end
 
@@ -188,7 +190,8 @@ module Dog
       root = self.find_one({
         "control_ancestors" => {
           "$size" => 0
-        }
+        },
+        "function_name" => "@root"
       })
       
       if root then
@@ -199,7 +202,7 @@ module Dog
     end
     
     def is_root?
-      self.control_ancestors.empty?
+      return self.function_name == "@root" && self.package_name == ::Dog::Runtime.bundle.startup_package
     end
   end
 end
