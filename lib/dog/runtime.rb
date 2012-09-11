@@ -171,8 +171,13 @@ module Dog
           if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
             return_value = track.stack.last || ::Dog::Value.null_value
             return_track = track.control_ancestors.last
-
+            
             if return_track then
+              
+              if return_track.kind_of?(::BSON::ObjectId) then
+                return_track = Track.find_by_id(return_track)
+              end
+              
               for name, future in track.futures do
                 future = future.to_hash
                 future = ::Dog::Future.from_hash(future)
