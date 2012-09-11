@@ -172,11 +172,11 @@ grammar Dog
   end
   
   rule query_expression
-    primary_expression s predicate {
+    primary_expression s rest:(('FROM' s primary_expression s predicate) / ('FROM' s primary_expression) / (predicate)) {
       def transform
+        # Node should contain "container" and "predicate"
         node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
-          "container" => primary_expression.transform,
-          "predicate" => predicate.transform
+          "container" => primary_expression.transform
         })
         node.line = self.line
         
