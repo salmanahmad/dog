@@ -1,68 +1,81 @@
-# default rails environment to development
-ENV['RAILS_ENV'] ||= 'development'
-# require rails environment file which basically "boots" up rails for this script
-require File.join(File.dirname(__FILE__), '..', 'config', 'environment')
+#!/usr/bin/env ruby
+
 require 'net/imap'
 require 'net/http'
 require 'httparty'
+require 'json'
+require 'mail'
 
-# amount of time to sleep after each loop below
+def handle_message(message)
+  events = ::Dog::MailedEvent.find()
+  
+  subject = message.subject
+  body = message.text_part.body.to_s
+  
+  email = ::Dog::Value.new("dog.email", {})
+  email["subject"] = ::Dog::Value.string_value(subject)
+  email["body"] = ::Dog::Value.string_value(body)
+  
+  #attachment = message.attachments.first
+  #
+  #file = File.open("/users/salmanahmad/Desktop/" + attachment.filename, "w+") 
+  #file.write(message.attachments.first.read)
+  #file.close
+  #
+  #return
+  
+  for event in events do
+    future = ::Dog::Future.find_one("value_id" => event["channel_id"])
+    future = future.value
+
+    track = ::Dog::Track.new
+    track.variables["container"] = future
+    track.variables["value"] = email
+
+    proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+    proc.call(track)
+  end
+  
+end
+
+# Time to sleep between polls
 SLEEP_TIME = 5
 
-# mail.yml is the imap config for the email account (ie: username, host, etc.)
-config = YAML.load(File.read(File.join(::Rails.root.to_s, 'config', 'mail.yml')))
+config = ::Dog::Config.get("email")
+config = config["imap"]
+
+# TODO - Consider migrating everything to the mail gem:
+# http://rdoc.info/github/mikel/mail/Mail/IMAP
 
 # this script will continue running forever
 loop do
   begin
     # make a connection to imap account
     imap = Net::IMAP.new(config['host'], config['port'], true)
-    imap.login(config['username'], config['password'])
+    imap.login(config['user_name'], config['password'])
     
     # select inbox as our mailbox to process
     imap.select('Inbox')
     
     # get all emails that are in inbox that have not been deleted
-    imap.uid_search(["NOT", "DELETED"]).each do |uid|
+    imap.search(["NOT", "DELETED"]).each do |uid|
       # fetches the straight up source of the email for tmail to parse
       #source = imap.uid_fetch(uid, ['RFC822']).first.attr['RFC822']
       
-      message = imap.uid_fetch(uid, ['ENVELOPE', 'BODY[TEXT]']).first
-      body = message.attr["BODY[TEXT]"]
-      envelope = message.attr["ENVELOPE"]
-      
-      subject = envelope.subject
-      project_name = envelope.to.first.mailbox
-      user_email = envelope.from.first.mailbox + "@" + envelope.from.first.host
-      
-      if project_name != "app" then
-        user = User.where(:email => user_email).first
-        project = Project.where("lower(name) = ?", project_name).first
-        
-        if project && project.mail_callback && user then
-          
-          url = project.mail_callback.strip
-          url = "http://" + url unless url.match(%r|^http://|)
-          
-          payload = {}
-          payload["user"] = user.attributes
-          payload["subject"] = subject
-          payload["body"] = body
-          
-          HTTParty.post(url, :body => payload) rescue false
-        end
-      end
+      message = imap.fetch(uid, "RFC822")[0].attr["RFC822"]
+      message = Mail.new(message)
+      handle_message(message)
       
       # there isn't move in imap so we copy to new mailbox and then delete from inbox
-      imap.uid_copy(uid, "[Gmail]/All Mail")
-      imap.uid_store(uid, "+FLAGS", [:Deleted])
+      #imap.uid_copy(uid, "[Gmail]/All Mail")
+      #imap.uid_store(uid, "+FLAGS", [:Deleted])
     end
     
     # expunge removes the deleted emails
     imap.expunge
     imap.logout
     imap.disconnect
-
+    
   # NoResponseError and ByResponseError happen often when imap'ing
   rescue Net::IMAP::NoResponseError => e
     # send to log file, db, or email
