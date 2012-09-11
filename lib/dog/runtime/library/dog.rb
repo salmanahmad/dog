@@ -120,7 +120,11 @@ module Dog::Library
 
         if via.ruby_value == "email" then
           settings = ::Dog::Config.get("email")
-
+          
+          if settings.nil? then
+            dog_return
+          end
+          
           if query.type == "people.person" then
             address = query["email"]
             if address.nil? || address.is_null? then
@@ -154,7 +158,11 @@ module Dog::Library
           else
             body = value.ruby_value.inspect
           end
-
+          
+          if settings["smtp"] then
+            dog_return
+          end
+          
           via_options = {}
           for key, value in settings["smtp"] do
             via_options[key.intern] = value

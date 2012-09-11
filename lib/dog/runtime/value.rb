@@ -89,7 +89,11 @@ module Dog
     
     def [](k)
       if k.kind_of? Numeric then
-        k = "n:#{k.to_f}"
+        # TODO - THIS IS REALLY REALLY REALLY BAD - I NEED TO FIGURE OUT A BETTER
+        # WAY TO SUPPORT LOOKUPS HERE! THE PROBLEM IS THAT MONGO CANNOT SUPPORT
+        # '.' IN THE KEY NAME SO THIS IS A TEMPORARY FIX
+        #k = "n:#{k.to_f}"
+        k = "n:#{k.to_i}"
       else
         k = "s:#{k}"
       end
@@ -110,7 +114,11 @@ module Dog
         self.min_numeric_key = [k, self.min_numeric_key].min
         self.max_numeric_key = [k, self.max_numeric_key].max
         
-        k = "n:#{k.to_f}"
+        # TODO - THIS IS REALLY REALLY REALLY BAD - I NEED TO FIGURE OUT A BETTER
+        # WAY TO SUPPORT LOOKUPS HERE! THE PROBLEM IS THAT MONGO CANNOT SUPPORT
+        # '.' IN THE KEY NAME SO THIS IS A TEMPORARY FIX
+        #k = "n:#{k.to_f}"
+        k = "n:#{k.to_i}"
       else
         k = "s:#{k}"
       end
