@@ -13,7 +13,9 @@ module Dog
     end
 
     def add_facebook_profile(fb_id, optionals)
-      self.dog_value["facebook_profile"] ||= Value::empty_structure
+      if self.dog_value["facebook_profile"] && self.dog_value["facebook_profile"].is_null? then
+        self.dog_value["facebook_profile"] = Value::empty_structure
+      end
       self.dog_value["facebook_profile"]["id"] = Value::string_value fb_id
       optionals.each do |k, v|
         self.dog_value["facebook_profile"][k.to_s] = Value::string_value v
