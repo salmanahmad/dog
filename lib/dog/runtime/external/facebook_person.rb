@@ -8,7 +8,7 @@ module Dog
 
     module ClassMethods
       def find_by_facebook_id(fb_id)
-        find_one({"facebook.id" => fb_id})
+        find_one({"value.s:facebook_profile.value.s:id.value" => fb_id})
       end
     end
 
