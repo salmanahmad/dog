@@ -199,6 +199,18 @@ module Dog::Library
           properties << p
         end
         
+        
+        
+        if track.id == nil then
+          # TODO - Fix this. I need to do this here so I can get a track.id
+          # which is assigned when I call DatabaseObject#save. Instead, "id" 
+          # should be automatically generated as a UUID or ObjectID or something
+          # and DatabaseObject#save should be updated so it always does an upsert 
+          # rather than checking the _id itself like a retard...
+          track.save
+        end
+        
+        
         message.track_id = track.control_ancestors.last
         message.track_id = message.track_id._id if message.track_id.kind_of? ::Dog::Track
         

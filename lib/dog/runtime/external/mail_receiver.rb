@@ -10,7 +10,16 @@ def handle_message(message)
   events = ::Dog::MailedEvent.find()
   
   subject = message.subject
-  body = message.text_part.body.to_s rescue ""
+  
+  
+  
+  if message.multipart? then
+    body = message.text_part.body.to_s rescue ""
+  else
+    body = message.body.to_s
+  end
+  
+  puts body
   
   email = ::Dog::Value.new("dog.email", {})
   email["subject"] = ::Dog::Value.string_value(subject)
