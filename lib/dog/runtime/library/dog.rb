@@ -83,18 +83,26 @@ module Dog::Library
         channel.buffer_size = 0
         channel.channel_mode = true
 
-        event = ::Dog::RoutedEvent.new
-        event.name = structure_type
-        event.properties = properties
-        event.channel_id = channel._id
-        
-        event.track_id = original_track.control_ancestors.last
-        event.track_id = event.track_id._id if event.track_id.kind_of? ::Dog::Track
-        
-        #event.track_id = track.id # TODO
-        #event.routing = nil # TODO
-        event.created_at = Time.now.utc
-        event.save
+        if via.value == "email" then
+          event = ::Dog::MailedEvent.new
+          event.channel_id = channel._id
+          event.routing = nil # TODO
+          event.created_at = Time.now.utc
+          event.save
+        else
+          event = ::Dog::RoutedEvent.new
+          event.name = structure_type
+          event.properties = properties
+          event.channel_id = channel._id
+
+          event.track_id = original_track.control_ancestors.last
+          event.track_id = event.track_id._id if event.track_id.kind_of? ::Dog::Track
+
+          #event.track_id = track.id # TODO
+          #event.routing = nil # TODO
+          event.created_at = Time.now.utc
+          event.save
+        end
 
         dog_return(channel)
       end
@@ -141,12 +149,14 @@ module Dog::Library
               body = body.ruby_value.to_s
             end
 
+          elsif value.type == "string" then
+            body = value.ruby_value
           else
             body = value.ruby_value.inspect
           end
 
           via_options = {}
-          for key, value in settings do
+          for key, value in settings["smtp"] do
             via_options[key.intern] = value
           end
 

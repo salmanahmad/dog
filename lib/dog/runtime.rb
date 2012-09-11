@@ -99,6 +99,15 @@ module Dog
           raise "This program was compiled using a different version of Dog. It was compiled with #{bundle.dog_version}. I am Dog version #{VERSION::STRING}."
         end
         
+        if ::Dog::Config.get("email") then
+          pid = Process.fork
+          if pid.nil? then
+            require File.join(File.dirname(__FILE__), "runtime/external/mail_receiver.rb")
+          else
+            Process.detach(pid)
+          end
+        end
+        
         unless Track.root then
           root = Track.new("@root", bundle.startup_package)
           root.save
