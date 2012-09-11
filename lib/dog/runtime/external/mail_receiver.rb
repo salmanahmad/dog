@@ -10,7 +10,7 @@ def handle_message(message)
   events = ::Dog::MailedEvent.find()
   
   subject = message.subject
-  body = message.text_part.body.to_s
+  body = message.text_part.body.to_s rescue ""
   
   email = ::Dog::Value.new("dog.email", {})
   email["subject"] = ::Dog::Value.string_value(subject)
@@ -58,7 +58,7 @@ loop do
     imap.select('Inbox')
     
     # get all emails that are in inbox that have not been deleted
-    imap.search(["NOT", "DELETED"]).each do |uid|
+    imap.search(["NOT", "SEEN"]).each do |uid|
       # fetches the straight up source of the email for tmail to parse
       #source = imap.uid_fetch(uid, ['RFC822']).first.attr['RFC822']
       
@@ -66,7 +66,10 @@ loop do
       message = Mail.new(message)
       handle_message(message)
       
-      # there isn't move in imap so we copy to new mailbox and then delete from inbox
+      imap.store(uid, "+FLAGS", [:Seen])
+      
+      #imap.copy(uid, "[Gmail]/All Mail")
+      #imap.store(uid, "+FLAGS", [:Deleted])
       #imap.uid_copy(uid, "[Gmail]/All Mail")
       #imap.uid_store(uid, "+FLAGS", [:Deleted])
     end
