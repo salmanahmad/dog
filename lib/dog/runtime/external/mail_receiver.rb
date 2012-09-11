@@ -5,6 +5,7 @@ require 'net/http'
 require 'httparty'
 require 'json'
 require 'mail'
+require 'RMagick'
 
 def handle_message(message)
   events = ::Dog::MailedEvent.find()
@@ -29,6 +30,13 @@ def handle_message(message)
     file = File.open(path, "w+") 
     file.write(message.attachments.first.read)
     file.close
+
+    if extension == ".jpg" || extension == ".jpeg" then
+      image = Magick::Image.read(path).first
+      image = image.auto_orient
+      image.write(path)
+    end
+
   else
     body = message.body.to_s
   end
