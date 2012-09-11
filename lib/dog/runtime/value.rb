@@ -94,7 +94,12 @@ module Dog
         k = "s:#{k}"
       end
       
-      self.value[k]
+      i = self.value[k]
+      if i.nil? then
+        return ::Dog::Value.null_value
+      else
+        return i
+      end
     end
     
     def []=(k, v)
