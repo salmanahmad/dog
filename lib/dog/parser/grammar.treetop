@@ -1002,8 +1002,10 @@ grammar Dog
     }
   end
   
+  # TODO - Is this okay? I am making value: a primary_expression so that the
+  # parser does not get confused by the query_expression rule
   rule delete
-    'DELETE' s value:expression s 'FROM' s container:expression {
+    'DELETE' s value:primary_expression s 'FROM' s container:expression {
       def transform
         node = ::Dog::Nodes::Call.new(
           ::Dog::Nodes::Access.new(["dog", "delete"]),
@@ -1354,7 +1356,7 @@ grammar Dog
   rule inspect
     'INSPECT' space expression {
       def transform
-        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new(["system", "print"]), [expression.transform])
+        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new(["system", "inspect"]), [expression.transform])
         node.line = self.line
         
         return node

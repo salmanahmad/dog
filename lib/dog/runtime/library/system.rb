@@ -17,6 +17,14 @@ module Dog::Library
       argument "arg"
       
       body do |track|
+        puts variable("arg").ruby_value
+      end
+    end
+    
+    implementation "inspect" do
+      argument "arg"
+      
+      body do |track|
         puts variable("arg").ruby_value.inspect
       end
     end

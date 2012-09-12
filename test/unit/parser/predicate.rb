@@ -66,8 +66,20 @@ class ParserTests::PredicateTest < Test::Unit::TestCase
   def test_nested_expressions
     @parser.parse("user.i == i")
     @parser.parse("user.i == i[7]")
-    @parser.parse("user.i == i + 6")
-    @parser.parse("user.i == i ? x > 5")
+    
+    # Note: You can only include an access expression, so you may be forced to wrap it in parens
+    @parser.parse("user.i == (i + 6)")
+    @parser.parse("user.i == (i ? x > 5)")
+    
+    assert_raises ::Dog::ParseError do
+      @parser.parse("user.i == i + 6")
+    end
+    
+    assert_raises ::Dog::ParseError do
+      @parser.parse("user.i == i ? x > 5")
+    end
+    
+    
   end
   
   def test_predicate
