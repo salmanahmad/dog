@@ -19,18 +19,28 @@ class IntegrationTests::FindTest < Test::Unit::TestCase
       age
     }
 
+    i = FIND people.people FROM hogwarts
+    PRINT i
+    PRINT "---"
+
     snape = people.person {
       name = "Snape"
     }
 
-    # SAVE snape TO hogwarts
-    SAVE snape TO people.people
+    SAVE snape TO hogwarts
 
-    FIND people.people FROM hogwarts WHERE name == "Snape"
+    i = FIND people.people FROM hogwarts WHERE name == "Snape"
+    PRINT i
+    PRINT "---"
+    
+    
+    i = FIND people.people FROM hogwarts
+    PRINT i
+    PRINT "---"
 
     EOD
 
-    tracks = run_source(program)
+    tracks, output = run_source(program, true)
   end
 
 end

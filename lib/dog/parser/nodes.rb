@@ -408,20 +408,28 @@ module Dog::Nodes
     end
 
     def compile(package)
+      # TODO - Clean up this entire thing. StructureLiteral and ValueLiteral are really
+      # hacky at the moment and are in a need of a good clean up.
       if @type then
-        if @type.kind_of? Node then
-          @type.compile(package)
-        elsif @type.kind_of? ::Dog::Value
-          push = ::Dog::Nodes::Push.new(@type)
-          set_instruction_context(push)
-          package.add_to_instructions([push])
+        if @type.kind_of? String then
+          structure = ::Dog::Instructions::Push.new(::Dog::Value.new("array", {}))
+          set_instruction_context(structure)
+          package.add_to_instructions([structure])
         else
-          raise "Compilation error"
-        end
+          if @type.kind_of? Node then
+            @type.compile(package)
+          elsif @type.kind_of? ::Dog::Value
+            push = ::Dog::Nodes::Push.new(@type)
+            set_instruction_context(push)
+            package.add_to_instructions([push])
+          else
+            raise "Compilation error - Structure literal type: #{@type}"
+          end
 
-        build = ::Dog::Instructions::Build.new
-        set_instruction_context(build)
-        package.add_to_instructions([build])
+          build = ::Dog::Instructions::Build.new
+          set_instruction_context(build)
+          package.add_to_instructions([build])
+        end
       else
         structure = ::Dog::Instructions::PushStructure.new
         set_instruction_context(structure)

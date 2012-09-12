@@ -53,9 +53,17 @@ module Dog
           "max_numeric_key" => self.max_numeric_key
         }
       else
-        processed_value = {}
-        for k, v in self.value do
-          processed_value[k] = v.to_hash
+        
+        if self.type == "array" then
+          processed_value = []
+          for k, v in self.value do
+            processed_value << v.to_hash
+          end
+        else
+          processed_value = {}
+          for k, v in self.value do
+            processed_value[k] = v.to_hash
+          end
         end
         
         return {
@@ -141,13 +149,25 @@ module Dog
       value.person = ::Dog::Value.from_hash(value.person) if value.person
       
       unless Value.primitive_types.include? value.type then
-        real_value = {}
         
-        for k, v in value.value do
-          real_value[k] = Value.from_hash(v)
+        if value.value.kind_of? Array then
+          array = value.value
+          value.value = {}
+          
+          i = 0
+          for v in array do
+            value[i] = Value.from_hash(v)
+            i += 1
+          end
+        else
+          real_value = {}
+          
+          for k, v in value.value do
+            real_value[k] = Value.from_hash(v)
+          end
+          
+          value.value = real_value
         end
-        
-        value.value = real_value
       end
       
       return value
@@ -186,6 +206,7 @@ module Dog
     end
     
     def ruby_value
+      # TODO - property add a types package and add array and structure to them
       if self.primitive? then
         return self.value
       elsif self.type == "array"

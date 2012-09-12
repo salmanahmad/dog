@@ -172,11 +172,50 @@ grammar Dog
   end
   
   rule query_expression
-    primary_expression s rest:(('FROM' s primary_expression s predicate) / ('FROM' s primary_expression) / (predicate)) {
+    primary_expression s 'FROM' s community:(primary_expression) s predicate {
       def transform
-        # Node should contain "container" and "predicate"
+        
+        structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+          "$and" => ::Dog::Nodes::StructureLiteral.new("array", {
+            0 => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "value.s:communities.value.value" => ::Dog::Nodes::Access.new([community.transform, "name"])
+            }),
+            1 => predicate.transform,
+          })
+        })
+        
         node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
-          "container" => primary_expression.transform
+          "container" => primary_expression.transform,
+          "predicate" => structure
+        })
+        node.line = self.line
+        
+        return node
+      end
+    }
+    / 
+    primary_expression s 'FROM' s community:(primary_expression) {
+      def transform
+        
+        structure = ::Dog::Nodes::StructureLiteral.new(nil, {
+          "value.s:communities.value.value" => ::Dog::Nodes::Access.new([community.transform, "name"])
+        })
+        
+        node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
+          "container" => primary_expression.transform,
+          "predicate" => structure
+        })
+        node.line = self.line
+        
+        return node
+      end
+    }
+    / 
+    primary_expression s predicate {
+      def transform
+        node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
+          "container" => primary_expression.transform,
+          "predicate" => predicate.transform
         })
         node.line = self.line
         
@@ -793,7 +832,7 @@ grammar Dog
           raise "Parse error"
         end
 
-        node = ::Dog::Nodes::StructureLiteral.new(nil, structure)
+        node = structure #::Dog::Nodes::StructureLiteral.new(nil, structure)
         node.line = self.line
         
         return node
@@ -815,7 +854,7 @@ grammar Dog
   
   # This was 'access' before 'expression'
   rule predicate_conditional
-    key_paths s? relational_operator s? expression {
+    key_paths s? relational_operator s? expression:(access) {
       def transform
         operator = relational_operator.transform
 
@@ -1007,6 +1046,7 @@ grammar Dog
         node = ::Dog::Nodes::FunctionDefinition.new(function_name, function_body, function_mandatory_arguments, function_optional_arguments)
         node.line = self.line
         
+        # TODO - Why do I actually need a ValueLiteral here? Can't I get away with structure literal?
         type = ::Dog::Value.new("type", {})
         type["name"] = ::Dog::Value.string_value(function_name)
         type["package"] = ::Dog::Value.string_value(self.package)

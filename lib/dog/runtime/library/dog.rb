@@ -369,13 +369,13 @@ module Dog::Library
         if container.type == "collection" then
           results = ::Dog::database[container["name"].ruby_value].find(selector)
           value = ::Dog::Value.empty_array
-
+          
           i = 0
           for result in results do
             value[i] = ::Dog::Value.from_hash(result)
             i += 1
           end
-
+          
           dog_return(value)
         end
 
@@ -423,6 +423,28 @@ module Dog::Library
         
         if container.type == "collection" then
           ::Dog::database[container["name"].ruby_value].save(value.to_hash, {:safe => true, :upsert => true})
+        elsif container.type == "community" && value.type == "people.person"
+          # TODO - I need to add the community profile properties to the person object as a result of saving them TO a communtiy.
+          
+          community = container["name"]
+          
+          if value["communities"].is_null? then
+            # TODO - "array" - this should be updated with the new way to handle arrays
+            value["communities"] = ::Dog::Value.new("array", {})
+          end
+          
+          # TODO - Make it easier to call other dog functions
+          track = ::Dog::Track.new
+          track.variables["container"] = value["communities"]
+          track.variables["value"] = community
+          
+          proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+          proc.call(track)
+          
+          output = track.stack.last
+          value["communities"] = output
+          
+          ::Dog::database["people"].save(value.to_hash, {:safe => true, :upsert => true})
         end
         
         dog_return(value)
