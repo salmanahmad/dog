@@ -104,12 +104,12 @@ loop do
   # NoResponseError and ByResponseError happen often when imap'ing
   rescue Net::IMAP::NoResponseError => e
     # send to log file, db, or email
-    raise e
+    puts "The following error occured: #{e}" 
   rescue Net::IMAP::ByeResponseError => e
     # send to log file, db, or email
-    raise e
+    puts "The following error occured: #{e}"
   rescue => e
-    raise e
+    puts "The following error occured: #{e}"
     # send to log file, db, or email
   end
   
