@@ -159,7 +159,7 @@ module Dog::Library
             body = value.ruby_value.inspect
           end
           
-          if settings["smtp"] then
+          unless settings["smtp"] then
             dog_return
           end
           
@@ -167,7 +167,7 @@ module Dog::Library
           for key, value in settings["smtp"] do
             via_options[key.intern] = value
           end
-
+          
           envelope = {
             :to => address,
             :from => settings["from"],
@@ -176,9 +176,8 @@ module Dog::Library
             :via => :smtp,
             :via_options => via_options
           }
-
+          
           Pony.mail(envelope)
-
           dog_return
         end
 
