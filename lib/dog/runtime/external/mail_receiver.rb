@@ -5,46 +5,17 @@ require 'net/http'
 require 'httparty'
 require 'json'
 require 'mail'
-require 'RMagick'
+#require 'RMagick'
 
 def handle_message(message)
   events = ::Dog::MailedEvent.find()
   
   subject = message.subject
-  name = ""
-  
-  if message.multipart? then
-    body = message.text_part.body.to_s rescue ""
-        
-    attachment = message.attachments.first
-    
-    dirname = File.dirname(::Dog::Runtime.bundle_filename)
-    
-    name = UUID.new.generate
-    extension = File.extname(attachment.filename)
-    name = name + extension
-    
-    FileUtils.mkpath(File.join(dirname, "views", "data"))
-    path = File.join(dirname, "views", "data", name)
-    
-    file = File.open(path, "w+") 
-    file.write(message.attachments.first.read)
-    file.close
-
-    if extension == ".jpg" || extension == ".jpeg" then
-      image = Magick::Image.read(path).first
-      image = image.auto_orient
-      image.write(path)
-    end
-
-  else
-    body = message.body.to_s
-  end
+  body = message.body.to_s
   
   email = ::Dog::Value.new("dog.email", {})
   email["subject"] = ::Dog::Value.string_value(subject)
   email["body"] = ::Dog::Value.string_value(body)
-  email["attachment"] = ::Dog::Value.string_value(name)
   
   for event in events do
     future = ::Dog::Future.find_one("value_id" => event["channel_id"])
