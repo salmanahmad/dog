@@ -37,6 +37,10 @@ SLEEP_TIME = 5
 config = ::Dog::Config.get("email")
 config = config["imap"]
 
+if config.nil? then
+  exit
+end
+
 # TODO - Consider migrating everything to the mail gem:
 # http://rdoc.info/github/mikel/mail/Mail/IMAP
 
