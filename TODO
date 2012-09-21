@@ -1,5 +1,15 @@
 
+
+=== v0.3 Changes ===
+
+
+
 Embed an IMAP and an SMTP server just like Sinatra
+
+
+=== End ===
+
+
 
 PRINT should resolve futures
 fix $not, $and, $or with predicates
