@@ -173,7 +173,7 @@ module Dog
       return nil if community.nil?
 
       self.communities ||= []
-      self.communities = self.communities | [community.name]
+      self.communities = self.communities || [community.name]
 
       self.profile ||= {}
       self.profile[community.name] ||= {}
