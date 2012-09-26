@@ -559,10 +559,10 @@ grammar Dog
   # ===============
   
   rule ask
-    'ASK' sn ask_count:(ask_count)? expression via_clause:(via_clause)? ask_to_clause on_clause:(on_clause)? using_clause:(using_clause)? {
+    'ASK' sn expression sn 'TO' sn packaged_identifier parameters:(sn parameter_name sn expression)* {
       def transform
-        # TODO - Handle VIA
-        # TODO - Handle AskCount
+        # TODO - Update for v0.3
+        return
         
         actor = expression.transform
         via = via_clause.transform
@@ -581,25 +581,6 @@ grammar Dog
         node.line = self.line
         
         return node
-      end
-    }
-  end
-  
-  # TODO - Actually use this information
-  rule ask_count
-    integer sn {
-      def transform
-        return integer.text_value.to_f
-      end
-    }
-  end
-  
-  # TODO - Bring back - also for compute
-  #s 'TO' s (string / access)
-  rule ask_to_clause
-    s 'TO' s i:(packaged_identifier / string) {
-      def transform
-        return i.transform
       end
     }
   end

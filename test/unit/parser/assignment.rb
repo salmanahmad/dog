@@ -22,7 +22,7 @@ class ParserTests::AssignmentTest < Test::Unit::TestCase
   
   def test_assignment
     
-    @parser.parse("i = ASK me VIA email TO rank")
+    @parser.parse("i = ASK me TO rank")
     @parser.parse("i = j = k = 5")
     @parser.parse("i = 0")
     @parser.parse("i = 1")
