@@ -41,13 +41,6 @@ grammar Dog
     }
   end
   
-  # TODO - Perhaps add assignments to expressions. In ruby you can 
-  # technically do stuff like this: j = (i = 5) and j = i = 5
-  # Also, by combining them, we can add inline conditionals like:
-  # i = 5 if true and i = 5 unless true. Right now, we can only attach
-  # inline conditionals to statements, not expressions which means we can
-  # only have one per "line"
-  
   rule statement
     s? expression s? t {
       def transform
@@ -277,12 +270,6 @@ grammar Dog
     /
     delete
   end
-  
-  # TODO - Remove this. I am keeping it around for documentaiton purposes
-  # Mostly I am keep it around so that I can remember:
-  #    reply
-  #    config
-  
   
   # ==============
   # = Assignment =
@@ -544,8 +531,11 @@ grammar Dog
   # ===================
   
   rule compute
-    'COMPUTE' s packaged_identifier on_clause:(on_clause)? using_clause:(using_clause)? {
+    'COMPUTE' s packaged_identifier parameters:(s parameter_name s expression)* {
       def transform
+        # TODO - Update for v0.3
+        return
+        
         function = packaged_identifier.transform
         mandatory_arguments = on_clause.transform unless on_clause.empty?
         optional_arguments = using_clause.transform unless using_clause.empty?
@@ -736,15 +726,7 @@ grammar Dog
   # FIXME
   
   rule user
-    me / public / people / person
-  end
-  
-  rule me
-    'ME'
-  end
-  
-  rule public
-    'PUBLIC'
+    people / person
   end
   
   rule person
@@ -1898,6 +1880,10 @@ grammar Dog
   # = Building Blocks =
   # ===================
   
+  rule parameter_name
+    upper (upper / digit / '_')*
+  end
+
   rule identifier
     lower (lower / digit / '_')*
   end

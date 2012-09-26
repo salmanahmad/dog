@@ -17,8 +17,8 @@ class ParserTests::ListenTest < Test::Unit::TestCase
   end
   
   def test_listen_to_users
-    @parser.parse("LISTEN TO PUBLIC VIA chat FOR event")
-    @parser.parse("LISTEN TO ME VIA chat FOR event")
+    @parser.parse("LISTEN TO public VIA chat FOR event")
+    @parser.parse("LISTEN TO me VIA chat FOR event")
     @parser.parse("LISTEN TO students VIA email FOR event")
     @parser.parse("LISTEN TO students VIA sms FOR event")
     @parser.parse("LISTEN TO PEOPLE FROM mit VIA sms FOR event")
@@ -35,7 +35,7 @@ class ParserTests::ListenTest < Test::Unit::TestCase
     end
     
     assert_raise Dog::ParseError do 
-      @parser.parse("LISTEN TO ME")
+      @parser.parse("LISTEN TO me")
     end
   end
   

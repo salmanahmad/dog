@@ -17,13 +17,19 @@
 require File.expand_path(File.join(File.dirname(__FILE__), 'test_helper.rb'))
 
 class ScratchTest < Test::Unit::TestCase
-  
-  def setup
-    @parser = Dog::Parser.new
+  include RuntimeHelper
+
+  def test_simple
+    program = <<-EOD
+
+    i = j = 10
+
+    EOD
+
+    tracks = run_source(program)
+    puts tracks.last.variables
+
   end
-  
-  def test_assignment
-    pp @parser.parse("foo.bar")
-  end
+
   
 end

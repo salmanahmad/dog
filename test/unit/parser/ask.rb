@@ -18,8 +18,8 @@ class ParserTests::AskTest < Test::Unit::TestCase
   
   def test_simple
     @parser.parse("ASK users VIA email TO validate")
-    @parser.parse("ASK ME VIA email TO validate")
-    @parser.parse("ASK PUBLIC VIA email TO validate")
+    @parser.parse("ASK me VIA email TO validate")
+    @parser.parse("ASK public VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > 7 VIA email TO validate")
     @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age VIA email TO validate")
@@ -66,7 +66,7 @@ class ParserTests::AskTest < Test::Unit::TestCase
   
   def test_assignment
     @parser.parser.root = :program
-    @parser.parse('message = ASK PUBLIC VIA http_response TO provide_favorite_color')
+    @parser.parse('message = ASK public VIA http_response TO provide_favorite_color')
     
   end
   
