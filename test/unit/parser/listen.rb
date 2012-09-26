@@ -17,12 +17,12 @@ class ParserTests::ListenTest < Test::Unit::TestCase
   end
   
   def test_listen_to_users
-    @parser.parse("LISTEN TO public VIA chat FOR event")
-    @parser.parse("LISTEN TO me VIA chat FOR event")
-    @parser.parse("LISTEN TO students VIA email FOR event")
-    @parser.parse("LISTEN TO students VIA sms FOR event")
-    @parser.parse("LISTEN TO PEOPLE FROM mit VIA sms FOR event")
-    @parser.parse("LISTEN TO PEOPLE FROM mit WHERE age > 19 VIA sms FOR event")
+    @parser.parse("LISTEN TO public FOR event")
+    @parser.parse("LISTEN TO me FOR event")
+    @parser.parse("LISTEN TO students FOR event")
+    @parser.parse("LISTEN TO students FOR event")
+    @parser.parse("LISTEN TO PEOPLE FROM mit FOR event")
+    @parser.parse("LISTEN TO PEOPLE FROM mit WHERE age > 19 FOR event")
   end
   
   def test_for_required
@@ -41,7 +41,7 @@ class ParserTests::ListenTest < Test::Unit::TestCase
   
   def test_for_requires_identifier
     assert_raise Dog::ParseError do 
-      @parser.parse("LISTEN TO students VIA sms FOR 'happy'")
+      @parser.parse("LISTEN TO students FOR 'happy'")
     end
   end
   

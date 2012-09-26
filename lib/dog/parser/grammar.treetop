@@ -592,8 +592,11 @@ grammar Dog
   # ==================
   
   rule listen
-    'LISTEN' listen_to_clause via_clause:(via_clause)? listen_for_clause {
+    'LISTEN' sn 'TO' sn expression listen_for_clause {
       def transform
+        # TODO - Update for v0.3
+        return
+        
         query = listen_to_clause.transform
         for_clause = listen_for_clause.transform
         
@@ -640,15 +643,8 @@ grammar Dog
       end
     }
   end
-
-  rule listen_to_clause
-    s 'TO' s expression {
-      def transform
-        return expression.transform
-      end
-    }
-  end
   
+  # TODO - I need to support inline structure definitions here as well...
   rule listen_for_clause
     s 'FOR' s identifier listen_of_clause:(listen_of_clause)? {
       def transform
