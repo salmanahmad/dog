@@ -13,7 +13,6 @@ class ParserTests::OnTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :on
   end
   
   def test_simple
@@ -21,6 +20,42 @@ class ParserTests::OnTest < Test::Unit::TestCase
     
     ON EACH response DO
       PRINT 'hello, world!'
+    END
+    
+    EOD
+    
+    @parser.parse(program.strip)
+  end
+  
+  def test_blocking_on 
+    program = <<-EOD
+    
+    ON offer DO
+      PRINT 'hello, world!'
+    END
+    
+    EOD
+    
+    @parser.parse(program.strip)
+    
+    
+    program = <<-EOD
+    
+    ON value IN next_page DO
+      PRINT 'hello, world!'
+    END
+    
+    EOD
+    
+    @parser.parse(program.strip)
+    
+    
+    program = <<-EOD
+    
+    ON value IN next_page DO
+      PRINT 'hello, world!'
+    ELSE ON value IN prev_page DO
+      PRINT 'Previous Page!'
     END
     
     EOD

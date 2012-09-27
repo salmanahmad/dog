@@ -252,6 +252,8 @@ grammar Dog
     /
     wait
     /
+    on_each
+    /
     on
     /
     person
@@ -943,8 +945,6 @@ grammar Dog
     }
   end
   
-  # TODO - Is this okay? I am making value: a primary_expression so that the
-  # parser does not get confused by the query_expression rule
   rule delete
     'DELETE' s value:primary_expression s 'FROM' s container:expression {
       def transform
@@ -966,61 +966,27 @@ grammar Dog
   # ==============
   
   rule on
-    'ON' on_each in_clause 'DO' sn statements:(statements)? s? 'END' {
+    'ON' in_clause 'DO' sn statements:(statements)? on_else:(on_else)* s? 'END' {
       def transform
-        args = in_clause.transform
-        body = statements.transform unless statements.empty?
-        
-        variable_name = args.first
-        source_structure = args.last
-        
-        if source_structure.nil? then
-          source_structure = ::Dog::Nodes::Access.new([::Dog::Language::pluralize(variable_name)])
-        end
-        
-        # TODO - Detect duplicated ON EACH names somehow
-        # TODO - Handle nested ON EACH stuffs
-        function_name = "@each:#{variable_name}"
-        function_target = nil
-        function_mandatory_arguments = [variable_name]
-        function_optional_arguments = nil
-        function_body = body
-        
-        node = ::Dog::Nodes::FunctionDefinition.new(function_name, function_body, function_mandatory_arguments, function_optional_arguments)
-        node.line = self.line
-        
-        # TODO - Why do I actually need a ValueLiteral here? Can't I get away with structure literal?
-        type = ::Dog::Value.new("type", {})
-        type["name"] = ::Dog::Value.string_value(function_name)
-        type["package"] = ::Dog::Value.string_value(self.package)
-        
-        # TODO - This is another example of when I would want to have access to the package name
-        register = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "register_handler"]),
-          [source_structure, ::Dog::Nodes::ValueLiteral.new(type)]
-        )
-        register.line = self.line
-        
-        nodes = ::Dog::Nodes::Nodes.new([
-          node,
-          register
-        ])
-        nodes.line = self.line
-        
-        return nodes
+        # TODO - Update for v0.3
+        return
       end
     }
   end
   
+  rule on_else
+    sn? 'ELSE' s 'ON' in_clause 'DO' sn statements:(statements)? {
+     def transform
+       # TODO - Update for v0.3
+     end 
+    }
+  end
+  
   rule on_each
-    s 'EACH' on_each_count:(s integer)? {
+    'ON' sn 'EACH' in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform
-        # TODO - Support the count variable
-        if !on_each_count.empty? then
-          return on_each_count.integer.to_f
-        else
-          return 1
-        end
+        # TODO - Update for v0.3
+        return
       end
     }
   end
@@ -1270,11 +1236,12 @@ grammar Dog
     }
   end
   
-  # TODO
   rule import
-  # FIXME - Change to include
     'IMPORT' s string {
       def transform
+        # TODO - Update for v0.3
+        return
+        
         node = ::Dog::Nodes::Import.new
         node.line = self.line
         node.path = Shellwords::shellwords(string.text_value).first
