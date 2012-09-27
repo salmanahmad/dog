@@ -65,24 +65,23 @@ class ParserTests::LiteralTest < Test::Unit::TestCase
   end
   
   def test_array
-    ## TODO - Consider bringing this back
-    #@parser.parse("[]")
-    #@parser.parse("[1]")
-    #@parser.parse("[1,]")
-    #@parser.parse("[1,2,3]")
-    #@parser.parse("[1,2.0,-3]")
-    #@parser.parse("[1   ,    2.0, -3]")
-    #
-    #@parser.parse("[1,'Foo Bar']")
-    #@parser.parse("[1,'Foo Bar', true, false, YES]")
-    #
-    #@parser.parse("[[1],'Foo Bar', true, false, YES]")
-    #@parser.parse("[[[[[[3.14]]]]]]")
-    #@parser.parse("[{'key':5}]")
-    #
-    #assert_raise Dog::ParseError do
-    #  @parser.parse("[1items,]")
-    #end
+    @parser.parse("[]")
+    @parser.parse("[1]")
+    @parser.parse("[1,]")
+    @parser.parse("[1,2,3]")
+    @parser.parse("[1,2.0,-3]")
+    @parser.parse("[1   ,    2.0, -3]")
+    
+    @parser.parse("[1,'Foo Bar']")
+    @parser.parse("[1,'Foo Bar', true, false]")
+    
+    @parser.parse("[[1],'Foo Bar', true, false]")
+    @parser.parse("[[[[[[3.14]]]]]]")
+    @parser.parse("[{'key'=5}]")
+    
+    assert_raise Dog::ParseError do
+      @parser.parse("[1items,]")
+    end
   end
   
   def test_hash
@@ -97,9 +96,9 @@ class ParserTests::LiteralTest < Test::Unit::TestCase
     
     @parser.parse("{'key'=1, 'key2'='value'}")
     
-    #@parser.parse("{'key'=[1,2,3]}")
-    #@parser.parse("{'key'=[[1]]}")
-    #@parser.parse("{'key'=[[1,2,true]]}")
+    @parser.parse("{'key'=[1,2,3]}")
+    @parser.parse("{'key'=[[1]]}")
+    @parser.parse("{'key'=[[1,2,true]]}")
     
     @parser.parse("{'key'={'key'='value'}}")
     

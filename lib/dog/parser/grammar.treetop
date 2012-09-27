@@ -1504,26 +1504,21 @@ grammar Dog
   # ================
   
   rule literal
-    number / string / bool / null / structure
+    number / string / bool / null / array / structure
   end
   
-  # TODO - I am keep this for the future if I choose to include this syntactic sugar
-  #rule array 
-  #  '[' sn? items? sn? (',' sn?)? ']' <::Dog::Nodes::ArrayLiteral>
-  #end
-  #
-  #rule items
-  #  item+ <::Dog::Nodes::ArrayItems>
-  #end
-  #
-  #rule item
-  #  sn? expression ((sn? ',' &item) / ('' !item)) <::Dog::Nodes::ArrayItem>
-  #end
+  rule array
+    '[' sn? items:(first:expression rest:(sn? ',' sn? expression)*)? sn? (',' sn?)? ']' {
+      def transform
+        # TODO - Update for v0.3
+        return
+      end
+    }
+  end
   
   rule structure
     type:(packaged_identifier sn?)? '{' sn? associations:(first:association rest:(((sn? "," sn?)+ / "\n")  association)* )? (sn? ','* sn?) '}' {
       def transform
-        
         structure_type = nil
         structure_value = {}
         
@@ -1549,7 +1544,6 @@ grammar Dog
         return literal
       end
     }
-    #'{' s? association*  s? '}'
   end
 
   rule association
@@ -1558,11 +1552,8 @@ grammar Dog
         return [association_key.transform, expression.transform]
       end
     }
-    #sn? (identifier / string / number) s? '=' s? expression s? ( "," &association / '' !association)
   end
   
-  # TODO - Consider making the the key an expression instead of identifier / string / number. 
-  # In particular, does an identifier return an access node look up or not?
   rule association_key
     identifier {
       def transform
