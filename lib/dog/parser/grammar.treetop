@@ -254,7 +254,7 @@ grammar Dog
     /
     on
     /
-    user
+    person
     /
     predicate
     /
@@ -700,14 +700,7 @@ grammar Dog
   # = Predicates and Queries Command =
   # ==================================
   
-  # FIXME
-  
-  rule user
-    people / person
-  end
-  
   rule person
-    #'PERSON' people_from_clause? (people_where_clause)?
     'PERSON' people_from_clause {
       def transform
         node = ::Dog::Nodes::Call.new(
@@ -721,22 +714,12 @@ grammar Dog
     }
   end
   
-  rule people
-    'PEOPLE' people_from_clause? (people_where_clause)?
-  end
-  
-  # TODO - Add back community list. Right now, you can only access people from 
-  # one community at a time...
   rule people_from_clause
     sn 'FROM' sn expression {
       def transform
         expression.transform
       end
     }
-  end
-
-  rule people_where_clause
-    sn 'WHERE' sn predicate_expression
   end
   
   rule predicate

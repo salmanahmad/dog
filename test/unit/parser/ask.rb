@@ -20,23 +20,23 @@ class ParserTests::AskTest < Test::Unit::TestCase
     @parser.parse("ASK users TO validate")
     @parser.parse("ASK me TO validate")
     @parser.parse("ASK public TO validate")
-    @parser.parse("ASK PEOPLE FROM facebook TO validate")
-    @parser.parse("ASK PEOPLE FROM facebook WHERE age > 7 TO validate")
-    @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age TO validate")
-    @parser.parse("ASK PEOPLE FROM facebook WHERE age > target_age AND interests == 'cards' TO validate")
+    @parser.parse("ASK people FROM facebook TO validate")
+    @parser.parse("ASK people FROM facebook WHERE age > 7 TO validate")
+    @parser.parse("ASK people FROM facebook WHERE age > target_age TO validate")
+    @parser.parse("ASK people FROM facebook WHERE age > target_age AND interests == 'cards' TO validate")
   end
   
   def test_user_count
     @parser.parse("ASK users TO validate")
-    @parser.parse("ASK PEOPLE FROM mit TO validate")
-    @parser.parse("ASK PEOPLE FROM mit WHERE age > pi TO validate")
+    @parser.parse("ASK people FROM mit TO validate")
+    @parser.parse("ASK people FROM mit WHERE age > pi TO validate")
     
     assert_raises Dog::ParseError do
-      @parser.parse("ASK 3.1 PEOPLE FROM mit WHERE age > pi TO validate")
+      @parser.parse("ASK 3.1 people FROM mit WHERE age > pi TO validate")
     end
     
     assert_raises Dog::ParseError do
-      @parser.parse("ASK '3' PEOPLE FROM mit WHERE age > pi TO validate")
+      @parser.parse("ASK '3' people FROM mit WHERE age > pi TO validate")
     end
   end
   

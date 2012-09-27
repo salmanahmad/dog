@@ -21,8 +21,8 @@ class ParserTests::ListenTest < Test::Unit::TestCase
     @parser.parse("LISTEN TO me FOR event")
     @parser.parse("LISTEN TO students FOR event")
     @parser.parse("LISTEN TO students FOR event")
-    @parser.parse("LISTEN TO PEOPLE FROM mit FOR event")
-    @parser.parse("LISTEN TO PEOPLE FROM mit WHERE age > 19 FOR event")
+    @parser.parse("LISTEN TO people FROM mit FOR event")
+    @parser.parse("LISTEN TO people FROM mit WHERE age > 19 FOR event")
   end
   
   def test_for_required

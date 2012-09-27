@@ -19,8 +19,8 @@ class ParserTests::NotifyTest < Test::Unit::TestCase
   def test_users
     @parser.parse("NOTIFY me VIA email OF 'message'")
     @parser.parse("NOTIFY public VIA email OF 'message'")
-    @parser.parse("NOTIFY PEOPLE FROM mit VIA email OF 'message'")
-    @parser.parse("NOTIFY PEOPLE FROM mit WHERE major == 'CS' VIA email OF 'message'")
+    @parser.parse("NOTIFY people FROM mit VIA email OF 'message'")
+    @parser.parse("NOTIFY people FROM mit WHERE major == 'CS' VIA email OF 'message'")
   end
   
   def test_of_clause
