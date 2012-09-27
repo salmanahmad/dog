@@ -32,6 +32,7 @@ class ParserTests::PredicateTest < Test::Unit::TestCase
     @parser.parse("a == 1 AND (b < 2 OR c > 3)")
     @parser.parse("(a == 1 AND b < 2) OR c > 3")
     @parser.parse("(a == 1 AND (b < 2)) OR c > 3")
+    @parser.parse("(a == 1 AND (b < 2)) OR c > 3 AND d == (true OR false)")
   end
   
   def test_access_in_conditionals

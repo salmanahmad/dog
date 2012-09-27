@@ -644,10 +644,12 @@ grammar Dog
     }
   end
   
-  # TODO - I need to support inline structure definitions here as well...
+  
   rule listen_for_clause
     s 'FOR' s identifier listen_of_clause:(listen_of_clause)? {
       def transform
+        # TODO - I need to support inline structure definitions here as well...
+        
         if !listen_of_clause.empty?
           return [identifier.text_value, listen_of_clause.transform]
         else
@@ -751,8 +753,6 @@ grammar Dog
   rule predicate_binary
     first:predicate_primary s binary_operator:(and_operator / or_operator) s second:predicate_expression {
       def transform
-        # TODO - Fix the ambiguity between query AND and expression AND
-
         operator = binary_operator.transform
 
         case operator
@@ -785,7 +785,7 @@ grammar Dog
   rule predicate_primary 
     predicate_parenthesis / predicate_conditional
   end 
-  
+
   rule predicate_parenthesis 
     '(' s? predicate_expression s? ')' {
       def transform
@@ -793,8 +793,7 @@ grammar Dog
       end
     }
   end
-  
-  # This was 'access' before 'expression'
+
   rule predicate_conditional
     key_paths s? relational_operator s? expression:(access) {
       def transform
@@ -839,13 +838,13 @@ grammar Dog
 
         node = structure
         node.line = self.line
-        
+
         return node
       end
     }
   end
-  
-  
+
+
 
   # =========================
   # = Collection Operations =
