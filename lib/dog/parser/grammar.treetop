@@ -846,6 +846,23 @@ grammar Dog
     }
   end
 
+  rule key_paths
+    identifier rest:('.' identifier)* {
+      def transform
+        ids = []
+        ids << identifier.text_value
+        
+        if rest then
+          for i in rest.elements do
+            ids << i.identifier.text_value
+          end
+        end
+        
+        ("value.s:" + ids.join(".value.s:") + ".value")
+      end
+    }
+  end
+
 
 
   # =========================
@@ -1476,29 +1493,6 @@ grammar Dog
         else
           return [identifier.text_value, nil]
         end
-      end
-    }
-  end
-  
-  
-  
-  # =========
-  # = Lists =
-  # =========
-  
-  rule key_paths
-    identifier rest:('.' identifier)* {
-      def transform
-        ids = []
-        ids << identifier.text_value
-        
-        if rest then
-          for i in rest.elements do
-            ids << i.identifier.text_value
-          end
-        end
-        
-        ("value.s:" + ids.join(".value.s:") + ".value")
       end
     }
   end
