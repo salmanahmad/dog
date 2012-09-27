@@ -747,7 +747,8 @@ grammar Dog
   rule predicate_unary
     not_operator s? '(' s? predicate_primary s? ')' {
       def transform
-        # TODO
+        # TODO - Update for v0.3
+        return
       end
     }
   end
