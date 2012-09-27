@@ -1546,55 +1546,6 @@ grammar Dog
     }
   end
   
-  rule using_clause
-    s 'USING' s first:(identifier s? '=' s? expression) rest:(s? ',' s? identifier s? '=' s? expression)* {
-      def transform
-        args = {}
-        
-        args[first.identifier.text_value] = first.expression.transform
-        
-        for r in rest.elements do
-          args[r.identifier.text_value] = r.expression.transform
-        end
-        
-        node = ::Dog::Nodes::StructureLiteral.new(nil, args)
-        node.line = self.line
-        
-        return node
-      end
-    }
-  end
-  
-  rule on_clause
-  s 'ON' s first:expression rest:(s? ',' s? expression)* {
-    def transform
-      args = []
-      
-      args << first.transform
-      
-      for r in rest.elements do
-        args << r.expression.transform
-      end
-      
-      return args
-    end
-  }
-  /
-  s 'ON' s first:(identifier s? '=' s? expression) rest:(s? ',' s? identifier s? '=' s? expression)* {
-    def transform
-      args = {}
-      
-      args[first.identifier.text_value] = first.expression.transform
-      
-      for r in rest.elements do
-        args[r.identifier.text_value] = r.expression.transform
-      end
-      
-      return args
-    end
-  }
-  end
-  
   rule via_clause 
     s 'VIA' s identifier {
       def transform
