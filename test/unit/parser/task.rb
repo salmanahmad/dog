@@ -16,20 +16,6 @@ class ParserTests::TaskTest < Test::Unit::TestCase
     @parser.parser.root = :function_definition
   end
   
-  def test_wrong
-    program = <<-EOD
-DEFINE label FOR person ON image DO
-  PERFORM "Hello, World"
-  RETURN 5+5, foobar
-END
-EOD
-    
-    program.strip!
-    assert_raise RuntimeError do
-      @parser.parse(program)
-    end
-  end
-  
   def test_correct
     program = <<-EOD
 DEFINE label FOR person ON image DO

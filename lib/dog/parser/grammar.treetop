@@ -997,14 +997,13 @@ grammar Dog
   # = Definitions =
   # ===============
   
-  # TODO - This is a huge problem - I need to add type annotations to the function declaration and implement the multiple dispatch
-  
   rule function_definition
-  # TODO - How do I handle nested function names?
-    'DEFINE' s identifier function_for:(function_for)? function_on:(function_on)? function_using:(function_using)? s 'DO' sn statements:(statements)? s? 'END' {
+    'DEFINE' s identifier parameters:(s parameter_name s expression)* s 'DO' sn statements:(statements)? s? 'END' {
       def transform
         # TODO - Handle nested function definitions
-        
+        # TODO - Update for v0.3
+        return
+
         actor = function_for.transform unless function_for.empty?
 
         function_name = identifier.text_value
@@ -1035,57 +1034,7 @@ grammar Dog
       end
     }
   end
-  
-  rule function_for
-    s 'FOR' s identifier {
-      def transform
-        return identifier.text_value
-      end
-    }
-  end
-  
-  rule function_on
-    s 'ON' s first:identifier rest:(s? ',' s? identifier)* {
-      def transform
-        args = []
-        
-        args << first.text_value
-        
-        for r in rest.elements do
-          args << r.identifier.text_value
-        end
-        
-        return args
-      end
-    }
-  end
-  
-  rule function_using
-    s 'USING' s function_using_parameter rest:(s? ',' s? function_using_parameter)* {
-      def transform
-        args = {}
-        
-        parameter = function_using_parameter.transform
-        args[parameter.first] = parameter.last
-        
-        for r in rest.elements do
-          parameter = r.function_using_parameter.transform
-          args[parameter.first] = parameter.last
-        end
-        
-        return args
-      end
-    }
-  end
-  
-  rule function_using_parameter
-    identifier s? '=' s? expression {
-      def transform
-        return [identifier.text_value, expression.transform]
-      end
-    }
-  end
-  
+
   rule structure_definition
     'DEFINE' s identifier sn? structure_properties {
       def transform

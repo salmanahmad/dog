@@ -67,7 +67,7 @@ EOD
     @parser.parse(program)
     
     program = <<-EOD
-DEFINE function ON input USING config1 = false,config2 = false DO 
+DEFINE function ON input USING config DO 
 
 
 
