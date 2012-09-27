@@ -1173,14 +1173,10 @@ grammar Dog
   end
   
   rule perform 
-    'PERFORM' s string {
-      def external_instructions
-        # Return a ruby string object, not a Dog string literal
-        return string.transform.value
-      end
-      
+    'PERFORM' s string sn 'RETURN' (sn first:identifier rest:(sn? ',' sn? identifier)*)? {
       def transform
-        raise "Parser error: perform must only be present in an external function definition."
+        # TODO - Update for v0.3
+        return
       end
     }
   end
@@ -1420,46 +1416,15 @@ grammar Dog
   end
   
   rule return
-    'RETURN' expressions:(s first:expression rest:(s? ',' s? expression)*)? {
-      def external_output
-        # TODO - I am duplicating this for now until I add proper multiple returns.
-        # See the transform method for additional context. Down the road I should just
-        # call self.transform directly
-        
-        output = []
-        es = []
-        if !self.expressions.empty? then
-          es << self.expressions.first.transform
-          
-          for r in self.expressions.rest.elements do
-            es << r.expression.transform
-          end
-        end
-        
-        for e in es do
-          if e.class == ::Dog::Nodes::Access && e.path.size == 1 then
-            output << e.path.first
-          else
-            raise "Parser error: return statements in external functions can only return expressions"
-          end
-        end
-        
-        return output
-      end
-      
+    'RETURN' e:(s expression)? {
       def transform
-        # TODO - Handle multiple return values - Build a structure and just return that?
+        ret_value = nil
         
-        es = []
-        if !self.expressions.empty? then
-          es << self.expressions.first.transform
-          
-          for r in self.expressions.rest.elements do
-            es << r.expression.transform
-          end
+        if !e.empty? then
+          ret_value = e.expression.transform
         end
         
-        node = ::Dog::Nodes::Return.new es.first
+        node = ::Dog::Nodes::Return.new ret_value
         node.line = self.line
         
         return node
