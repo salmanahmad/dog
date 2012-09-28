@@ -9,32 +9,6 @@
 
 module Dog::Nodes
   class Treetop::Runtime::SyntaxNode
-    def external_instructions
-      instructions = nil
-      
-      if elements then
-        for element in elements do
-          instructions = element.external_instructions
-          break unless instructions.nil?
-        end
-      end
-      
-      return instructions
-    end
-    
-    def external_output
-      output = nil
-      
-      if elements then
-        for element in elements do
-          output = element.external_output
-          break unless output.nil?
-        end
-      end
-      
-      return output
-    end
-    
     def root
       pointer = self
       while pointer.parent do
@@ -125,69 +99,7 @@ module Dog::Nodes
       nil
     end
   end
-
-  class ExternalFunctionDefinition < Node
-    attr_accessor :name
-    attr_accessor :actor
-    attr_accessor :instructions
-    attr_accessor :arguments
-    attr_accessor :optional_arguments
-    attr_accessor :output
-
-    def initialize(name, actor, instructions = nil, arguments = nil, optional_arguments = nil, output = nil)
-      @name = name
-      @actor = actor
-      @instructions = instructions
-      @arguments = arguments
-      @optional_arguments = optional_arguments
-      @output = output
-    end
-    
-    def compile(package)
-      package.push_symbol(@name)
-      
-      value = ::Dog::Value.new("external_function", {})
-      value["package"] = ::Dog::Value.string_value(package.name)
-      value["name"] = ::Dog::Value.string_value(@name)
-      value["actor"] = ::Dog::Value.string_value(@actor)
-      value["instructions"] = ::Dog::Value.string_value(@instructions)
-      
-      value["arguments"] = ::Dog::Value.empty_structure
-      value["optional_arguments"] = ::Dog::Value.empty_structure
-      value["output"] = ::Dog::Value.empty_structure
-      
-      if @arguments then
-        @arguments.each_index do |index|
-          argument = @arguments[index]
-          value["arguments"][index] = ::Dog::Value.string_value(argument)
-        end
-      end
-      
-      if @optional_arguments then
-        @optional_arguments.each_index do |index|
-          optional_argument = @optional_arguments[index]
-          value["optional_arguments"][index] = ::Dog::Value.string_value(optional_argument)
-        end
-      end
-      
-      if @output then
-        @output.each_index do |index|
-          return_value = @output[index]
-          value["output"][index] = ::Dog::Value.string_value(return_value)
-        end
-      end
-      
-      package.current_context["value"] = value
-      
-      package.pop_symbol
-      
-      # TODO - Push.new(value) instead of PushNull?
-      null = ::Dog::Instructions::PushNull.new
-      set_instruction_context(null)
-      package.add_to_instructions([null])
-    end
-  end
-
+  
   class FunctionDefinition < Node
     attr_accessor :name
     attr_accessor :implementation
@@ -861,42 +773,5 @@ module Dog::Nodes
       package.add_to_instructions([r])
     end
   end
-  
-#  Missing:
-#  
-#  Package
-#  FunctionDefinition
-#  RemoteCall
-# 
-#  SystemCalls:
-#  
-#  Listen
-#  Notify
-#  Import(?)
-#  
-#  ReWrite:
-#  
-#  If
-#  While
-#  For
-#  Break
-#  
-#  OnEachDefinition - Create a function and rewrite as a system call that sets the call back
-#  
-#  StructureDefinition - Rewrite to a function definition that creates the structure and returns it
-#  StructureDefinitionProperty
-#  
-#  CommunityDefinition - Rewrite to a function definition that houses a system call that create a community if it does not exists and returns a meta structure...
-#  CollectionDefinition
-#  
-#  ExternalDefinitions - Rewrite this as a function definition that returns a external function meta structure
-#  
-#  Remove:
-#  
-#  Inspect
-#  Perform
-#  StructureInstantiation
-  
-  
-  
+
 end
