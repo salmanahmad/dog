@@ -228,6 +228,8 @@ grammar Dog
     /
     listen
     /
+    display
+    /
     notify
     /
     function_definition
@@ -253,6 +255,8 @@ grammar Dog
     wait
     /
     spawn
+    /
+    time_construct
     /
     on_each
     /
@@ -671,6 +675,16 @@ grammar Dog
     }
   end
   
+  
+  
+  rule display
+    'DISPLAY' sn identifier sn 'TO' sn expression {
+      def transform
+        # TODO - Update for v0.3
+        return
+      end
+    }
+  end
   
   
   # ==========
@@ -1186,6 +1200,36 @@ grammar Dog
   }
   end
   
+  rule time_construct
+    pause / stop / exit
+  end
+  
+  rule pause
+    'PAUSE' {
+      def transform
+        # TODO - Update for v0.3
+        return
+      end
+    }
+  end
+  
+  rule stop
+    'STOP' {
+      def transform
+        # TODO - Update for v0.3
+        return
+      end
+    }
+  end
+  
+  rule exit
+    'EXIT' {
+      def transform
+        # TODO - Update for v0.3
+        return
+      end
+    }
+  end
   
   
   rule package 

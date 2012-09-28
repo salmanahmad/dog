@@ -9,24 +9,20 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
-class ParserTests::WaitTest < Test::Unit::TestCase
+class ParserTests::DisplayTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
   end
   
-  def test_simple
-    @parser.parse("WAIT ON 5")
-    @parser.parse("SPAWN COMPUTE matrix HEIGHT 500 WIDTH 500")
-    
-    assert_raise ::Dog::ParseError do
-      @parser.parse("SPAWN 5 + 5")
-    end
-    
-    @parser.parse("STOP")
-    @parser.parse("PAUSE")
-    @parser.parse("EXIT")
-    
+  def test_display
+    @parser.parse("DISPLAY message TO public")
+    @parser.parse("DISPLAY message TO user")
+    @parser.parse("DISPLAY message TO package.global")
+    @parser.parse("DISPLAY message TO people FROM mit WHERE gpa > 8 ")
+    @parser.parse("DISPLAY message TO external package.global")
+    @parser.parse("DISPLAY message TO internal package.global")
+
   end
   
   
