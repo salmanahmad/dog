@@ -1242,11 +1242,11 @@ grammar Dog
   # ======================
   
   rule control_structure
-    if / for / while / break / return
+    if / for / while / repeat / forever / break / return
   end
   
   rule if
-    'IF' s expression s 'THEN' sn statements:(statements)? else_if_clause:(else_if_clause)* else_clause:(else_clause)? s? 'END' {
+    'IF' s expression s ('THEN' / 'DO') sn statements:(statements)? else_if_clause:(else_if_clause)* else_clause:(else_clause)? s? 'END' {
       def transform
         node = ::Dog::Nodes::Branch.new(expression.transform)
         node.line = self.line
@@ -1279,7 +1279,7 @@ grammar Dog
   end
   
   rule else_if_clause
-    sn? 'ELSE' s 'IF' s expression s 'THEN' sn statements:(statements)? {
+    sn? 'ELSE' s 'IF' s expression s ('THEN' / 'DO') sn statements:(statements)? {
       def transform
         if !statements.empty? then
           return [expression.transform, statements.transform]
@@ -1413,6 +1413,24 @@ grammar Dog
         node.line = self.line
         
         return node
+      end
+    }
+  end
+  
+  rule repeat
+    'REPEAT' sn expression sn ('TIMES' / 'DO') sn statements:(statements)? s? 'END' {
+      def transform
+        # TODO - Update for v0.3
+        return
+      end
+    }
+  end
+  
+  rule forever
+    'FOREVER' sn 'DO' sn statements:(statements)? s? 'END' {
+      def transform
+        # TODO - Update for v0.3
+        return
       end
     }
   end
