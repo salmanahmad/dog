@@ -252,6 +252,8 @@ grammar Dog
     /
     wait
     /
+    spawn
+    /
     on_each
     /
     on
@@ -1174,6 +1176,17 @@ grammar Dog
     end
   }
   end
+  
+  rule spawn
+  'SPAWN' s compute {
+    def transform
+      # TODO - Update for v0.3
+      return
+    end
+  }
+  end
+  
+  
   
   rule package 
     'PACKAGE' s identifier {
