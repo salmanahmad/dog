@@ -393,6 +393,8 @@ grammar Dog
   
   rule relational_operator
     equality_operator
+    /
+    identity_operator
     / 
     inequality_operator
     / 
@@ -455,6 +457,15 @@ grammar Dog
   
   rule equality_operator
     '==' {
+      def transform
+        return self.text_value
+      end
+    }
+  end
+  
+  
+  rule identity_operator
+    '===' {
       def transform
         return self.text_value
       end
