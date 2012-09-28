@@ -1095,7 +1095,7 @@ grammar Dog
   end
   
   rule structure_properties 
-    '{' sn? properties:(first:structure_property rest:(((sn? "," sn?)+ / "\n") structure_property)* )? sn? '}' {
+    '{' sn? properties:(first:structure_property rest:(((sn? "," sn?)+ / "\n") structure_property)* )? (sn? ','* sn?) '}' {
       def transform
         props = []
         
@@ -1114,8 +1114,11 @@ grammar Dog
   end
   
   rule structure_property
-    sn? type:(identifier s) structure_property_key value:(s? '=' s? expression)? s? {
+    sn? association_key value:(s? '=' s? expression)? s? {
       def transform
+        # TODO - Update for v0.3
+        return
+        
         property = {}
         
         property["type"] = type.identifier.text_value unless type.empty?
@@ -1123,37 +1126,6 @@ grammar Dog
         property["default"] = value.expression.transform unless value.empty?
         
         return property
-      end
-    }
-    /
-    sn? structure_property_key value:(s? '=' s? expression)? s? {
-      def transform
-        property = {}
-        
-        property["name"] = structure_property_key.transform
-        property["default"] = value.expression.transform unless value.empty?
-        
-        return property
-      end
-    }
-  end
-  
-  rule structure_property_key
-    identifier {
-      def transform
-        return self.text_value
-      end
-    }
-    / 
-    string {
-      def transform
-        return Shellwords::shellwords(self.text_value).first
-      end
-    }
-    / 
-    number {
-      def transform
-        return self.text_value.to_f
       end
     }
   end
