@@ -1058,7 +1058,7 @@ grammar Dog
         if !parameters.empty? then
           for p in parameters.elements do
             name << p.parameter_name.text_value.downcase
-            arguments << identifier
+            arguments << p.identifier.text_value
           end
         end
 

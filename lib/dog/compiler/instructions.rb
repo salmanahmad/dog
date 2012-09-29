@@ -506,7 +506,7 @@ module Dog::Instructions
       arguments = track.stack.pop(arg_count)
       function = track.stack.pop
       
-      if function.type == "function" then
+      if function.type == "dog.function" then
         package = function["package"].value
         name = function["name"].value
         implementation = 0
@@ -518,14 +518,14 @@ module Dog::Instructions
         new_track = ::Dog::Track.new
         new_track.control_ancestors = track.control_ancestors.clone
         new_track.control_ancestors << track
-        
+
         new_track.package_name = package
         new_track.function_name = name
         new_track.implementation_name = implementation
-        
+
         symbol = ::Dog::Runtime.bundle.packages[package].symbols[name]["implementations"][implementation]
         symbol_arguments = symbol["arguments"]
-        
+
         arguments.each_index do |index|
           argument = arguments[index]
           variable_name = symbol_arguments[index]

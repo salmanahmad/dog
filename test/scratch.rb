@@ -22,10 +22,16 @@ class ScratchTest < Test::Unit::TestCase
   def test_simple
     program = <<-EOD
 
-    i = j = 10
+    DEFINE print MESSAGE message DO
+      PRINT message
+    END
+    
+    COMPUTE print MESSAGE "Hello!"
 
     EOD
 
+    
+    
     tracks = run_source(program)
     puts tracks.last.variables
 

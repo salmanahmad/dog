@@ -207,7 +207,7 @@ module Dog
         i = Implementation.new
         i.instance_eval(&block)
         
-        value = ::Dog::Value.new("function", {})
+        value = ::Dog::Value.new("dog.function", {})
         value["name"] = ::Dog::Value.string_value(symbol)
         value["package"] = ::Dog::Value.string_value(self.package.name)
         
