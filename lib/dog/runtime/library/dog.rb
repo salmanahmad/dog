@@ -23,7 +23,7 @@ module Dog::Library
       property "body"
     end
 
-    implementation "id" do
+    implementation "id:on" do
       argument "value"
       
       body do |track|
@@ -153,7 +153,7 @@ module Dog::Library
               body = body.ruby_value.to_s
             end
 
-          elsif value.type == "string" then
+          elsif value.type == "dog.string" then
             body = value.ruby_value
           else
             body = value.ruby_value.inspect
@@ -236,7 +236,7 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
 
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           collection = container["name"].ruby_value
 
           value._id = UUID.new.generate
@@ -247,7 +247,7 @@ module Dog::Library
           if container.pending then
             future = ::Dog::Future.find_one("value_id" => container._id)
 
-            if value.type == "close" then
+            if value.type == "dog.close" then
               ::Dog::Future.remove("value_id" => container._id)
               
               future.value.pending = false
@@ -344,8 +344,8 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
         
-        if container.type == "collection" then
-          if value.type == "string" then
+        if container.type == "dog.collection" then
+          if value.type == "dog.string" then
             value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value.ruby_value})
           else
             value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value._id})
@@ -365,7 +365,7 @@ module Dog::Library
         container = query["container"]
         selector = query["predicate"].ruby_value
 
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           results = ::Dog::database[container["name"].ruby_value].find(selector)
           value = ::Dog::Value.empty_array
           
@@ -389,7 +389,7 @@ module Dog::Library
         container = query["container"]
         selector = query["predicate"].ruby_value
 
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           results = ::Dog::database[container["name"].ruby_value].remove(selector)
           dog_return(::Dog::Value.true_value)
         end
@@ -404,7 +404,7 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
 
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           ::Dog::database[container["name"].ruby_value].update({"_id" => value._id}, value.to_hash, {:safe => true})
         end
 
@@ -420,9 +420,9 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
         
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           ::Dog::database[container["name"].ruby_value].save(value.to_hash, {:safe => true, :upsert => true})
-        elsif container.type == "community" && value.type == "people.person"
+        elsif container.type == "dog.community" && value.type == "people.person"
           # TODO - I need to add the community profile properties to the person object as a result of saving them TO a communtiy.
           
           community = container["name"]
@@ -458,7 +458,7 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
 
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           ::Dog::database[container["name"].ruby_value].remove({"_id" => value._id}, {:safe => true})
         end
 
@@ -497,9 +497,9 @@ module Dog::Library
         size = variable("buffer_size").ruby_value
         channel = variable("channel_mode").ruby_value
 
-        if type.value == "structure" then
-          value = ::Dog::Value.new("structure", {})
-        elsif type.type == "type" then
+        if type.value == "dog.structure" then
+          value = ::Dog::Value.new("dog.structure", {})
+        elsif type.type == "dog.type" then
           track = ::Dog::Track.new(type["name"], type["package"])
           ::Dog::Runtime.run_track(track)
           value = track.stack.pop

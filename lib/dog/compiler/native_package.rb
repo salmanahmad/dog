@@ -154,12 +154,12 @@ module Dog
         c = Collection.new
         c.instance_eval(&block)
         
-        value = ::Dog::Value.new("collection", {})
+        value = ::Dog::Value.new("dog.collection", {})
         value["name"] = ::Dog::Value.string_value(symbol)
         value["package"] = ::Dog::Value.string_value(self.package.name)
         
         instructions = Proc.new do |track|
-          type = ::Dog::Value.new("type", {})
+          type = ::Dog::Value.new("dog.type", {})
           type["name"] = ::Dog::Value.string_value(c.type_name)
           type["package"] = ::Dog::Value.string_value(c.type_package)
           
@@ -178,7 +178,7 @@ module Dog
         s = Structure.new
         s.instance_eval(&block)
         
-        value = ::Dog::Value.new("type", {})
+        value = ::Dog::Value.new("dog.type", {})
         value["name"] = ::Dog::Value.string_value(symbol)
         value["package"] = ::Dog::Value.string_value(self.package.name)
         

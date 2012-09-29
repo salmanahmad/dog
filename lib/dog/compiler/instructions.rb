@@ -681,7 +681,7 @@ module Dog::Instructions
     def execute(track)
       type = track.stack.pop
       
-      if type.type != "type" then
+      if type.type != "dog.type" then
         raise "I don't know how to build a non-type"
       end
       
