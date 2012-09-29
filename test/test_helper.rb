@@ -47,6 +47,20 @@ module RuntimeHelper
     ast = parser.parse(source)
     return ast
   end
+
+  def compile_source(source)
+    nodes = parse_source(source)
+    nodes = [nodes] unless nodes.kind_of? Array
+
+    compiler = ::Dog::Compiler.new
+
+    for node in nodes do
+      compiler.compile(node)
+    end
+
+    bundle = compiler.finalize
+    bundle.packages
+  end
   
   def run_source(source, include_stdout = false)
     parser = ::Dog::Parser.new

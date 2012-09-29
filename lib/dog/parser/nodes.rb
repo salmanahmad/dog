@@ -367,8 +367,10 @@ module Dog::Nodes
     end
 
     def compile(package)
+      count = -1
       for item in path do
-        if item == path.first then
+        count += 1
+        if count == 0 then
           read_variable = ::Dog::Instructions::ReadVariable.new(item)
           set_instruction_context(read_variable)
           package.add_to_instructions([read_variable])
@@ -417,8 +419,10 @@ module Dog::Nodes
     end
 
     def compile(package)
+      count = -1
       for item in path do
-        if item == path.first then
+        count += 1
+        if count == 0 then
           if item.kind_of? Node then
             item.compile(package)
           else

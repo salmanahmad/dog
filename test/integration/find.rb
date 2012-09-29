@@ -20,7 +20,7 @@ class IntegrationTests::FindTest < Test::Unit::TestCase
     }
 
     i = FIND people.people FROM hogwarts
-    PRINT i
+    INSPECT i
     PRINT "---"
 
     snape = people.person {
@@ -30,12 +30,12 @@ class IntegrationTests::FindTest < Test::Unit::TestCase
     SAVE snape TO hogwarts
 
     i = FIND people.people FROM hogwarts WHERE name == "Snape"
-    PRINT i
+    INSPECT i
     PRINT "---"
     
     
     i = FIND people.people FROM hogwarts
-    PRINT i
+    INSPECT i
     PRINT "---"
 
     EOD

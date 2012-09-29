@@ -209,7 +209,7 @@ module Dog
       # TODO - property add a types package and add array and structure to them
       if self.primitive? then
         return self.value
-      elsif self.type == "array"
+      elsif self.type == "dog.array"
         a = []
         
         for k, v in self.value do
