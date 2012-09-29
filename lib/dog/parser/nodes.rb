@@ -363,7 +363,7 @@ module Dog::Nodes
     attr_accessor :path
     attr_accessor :value
 
-    def initialize(path, value, scope)
+    def initialize(path, value)
       @path = path
       @value = value
     end

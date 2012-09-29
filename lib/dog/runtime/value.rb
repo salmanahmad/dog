@@ -30,7 +30,7 @@ module Dog
     end
     
     def self.primitive_types
-      ["string", "number", "boolean", "null"]
+      ["dog.string", "dog.number", "dog.boolean", "dog.null"]
     end
     
     def to_hash
@@ -260,45 +260,52 @@ module Dog
       Value.primitive_types.include? self.type
     end
 
-    def self.empty_array
+    def self.empty_structure
       value = Value.new
-      value.type = "array"
+      value.type = "dog.structure"
       value.value = {}
       return value
     end
 
-    def self.empty_structure
+    def self.empty_array
       value = Value.new
-      value.type = "structure"
+      value.type = "dog.array"
       value.value = {}
       return value
     end
     
     def self.string_value(string)
       value = Value.new
-      value.type = "string"
+      value.type = "dog.string"
       value.value = string
       return value
     end
     
     def self.number_value(number)
       value = Value.new
-      value.type = "number"
+      value.type = "dog.number"
       value.value = number
       return value
     end
     
     def self.true_value
       value = Value.new
-      value.type = "boolean"
+      value.type = "dog.boolean"
       value.value = true
       return value
     end
     
     def self.false_value
       value = Value.new
-      value.type = "boolean"
+      value.type = "dog.boolean"
       value.value = false
+      return value
+    end
+    
+    def self.null_value
+      value = Value.new
+      value.type = "dog.null"
+      value.value = nil
       return value
     end
     
@@ -307,14 +314,7 @@ module Dog
     end
     
     def is_false?
-      self.type == "boolean" && self.value == false
-    end
-    
-    def self.null_value
-      value = Value.new
-      value.type = "null"
-      value.value = nil
-      return value
+      self.type == "system.boolean" && self.value == false
     end
     
   end

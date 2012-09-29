@@ -775,6 +775,7 @@ grammar Dog
     not_operator s? '(' s? predicate_primary s? ')' {
       def transform
         # TODO - Update for v0.3
+        # TODO - The problem here is that I may have to re-write the mongo query...
         return
       end
     }
@@ -1043,39 +1044,28 @@ grammar Dog
   # ===============
   
   rule function_definition
-    'DEFINE' s identifier parameters:(s parameter_name s expression)* s 'DO' sn statements:(statements)? s? 'END' {
+    'DEFINE' s identifier parameters:(s parameter_name s identifier)* s 'DO' sn statements:(statements)? s? 'END' {
       def transform
-        # TODO - Handle nested function definitions
-        # TODO - Update for v0.3
-        return
+        name = [identifier.text_value]
+        arguments = []
 
-        actor = function_for.transform unless function_for.empty?
-
-        function_name = identifier.text_value
-        function_mandatory_arguments = function_on.transform unless function_on.empty?
-        function_optional_arguments = function_using.transform unless function_using.empty?
-
-        if actor then
-          instructions = nil
-          output = nil
-
-          if !statements.empty? then
-            instructions = statements.external_instructions
-            output = statements.external_output
+        if !parameters.empty? then
+          for p in parameters.elements do
+            name << p.parameter_name.text_value.downcase
+            arguments << identifier
           end
-
-          node = ::Dog::Nodes::ExternalFunctionDefinition.new(function_name, actor, instructions, function_mandatory_arguments, function_optional_arguments, output)
-          node.line = self.line
-
-          return node
-        else
-          function_body = statements.transform unless statements.empty?
-
-          node = ::Dog::Nodes::FunctionDefinition.new(function_name, function_body, function_mandatory_arguments, function_optional_arguments)
-          node.line = self.line
-
-          return node
         end
+
+        if !statements.empty? then
+          body = statements.transform
+        else
+          body = ::Dog::Nodes::Nodes.new([])
+        end
+
+        node = ::Dog::Nodes::FunctionDefinition.new(name.join(":"), arguments, body)
+        node.line = self.line
+
+        return node
       end
     }
   end
@@ -1116,13 +1106,9 @@ grammar Dog
   rule structure_property
     sn? association_key value:(s? '=' s? expression)? s? {
       def transform
-        # TODO - Update for v0.3
-        return
-        
         property = {}
         
-        property["type"] = type.identifier.text_value unless type.empty?
-        property["name"] = structure_property_key.transform
+        property["name"] = association_key.transform
         property["default"] = value.expression.transform unless value.empty?
         
         return property
@@ -1148,6 +1134,9 @@ grammar Dog
   rule community_definition
     'DEFINE' s 'COMMUNITY' s name:identifier s 'USING' s profile_name:identifier sn? structure_properties {
       def transform
+        # TODO - Update for v0.3
+        return
+        
         value = ::Dog::Value.new("dog.community", {})
         value["name"] = ::Dog::Value.string_value(name.text_value)
         value["profile"] = ::Dog::Value.string_value(profile_name.text_value)
@@ -1482,8 +1471,16 @@ grammar Dog
   rule forever
     'FOREVER' sn 'DO' sn statements:(statements)? s? 'END' {
       def transform
-        # TODO - Update for v0.3
-        return
+        if !statements.empty? then
+          body = statements.transform
+        else
+          body = ::Dog::Nodes::Nodes.new([])
+        end
+        
+        node = ::Dog::Nodes::Loop.new body
+        node.line = self.line
+        
+        return node
       end
     }
   end
@@ -1540,9 +1537,8 @@ grammar Dog
           path = [symbol.text_value]
         end
         
-        node = ::Dog::Nodes::Access.new(path)
+        node = ::Dog::Nodes::Access.new(path, scope)
         node.line = self.line
-        node.scope = scope
         
         return node
       end
@@ -1582,8 +1578,25 @@ grammar Dog
   rule array
     '[' sn? items:(first:expression rest:(sn? ',' sn? expression)*)? sn? (',' sn?)? ']' {
       def transform
-        # TODO - Update for v0.3
-        return
+        type = ::Dog::Nodes::Access.new(["dog", "array"], "external")
+        value = {}
+        
+        if !items.empty? then
+          index = 0
+          value[0] = self.items.first.transform
+          
+          if self.items.rest then
+            for item in self.items.rest.elements do
+              index += 1
+              value[index] = item.expression.transform
+            end
+          end
+        end
+        
+        literal = ::Dog::Nodes::StructureLiteral.new(type, value)
+        literal.line = self.line
+        
+        return literal
       end
     }
   end
