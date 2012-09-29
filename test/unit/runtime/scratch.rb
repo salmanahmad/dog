@@ -15,7 +15,7 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
 
   def print_helper(expression)
     ::Dog::Nodes::Call.new(
-      ::Dog::Nodes::Access.new(["system", "print"]),
+      ::Dog::Nodes::Access.new(["system", "print:on"]),
       [expression]
     )
   end

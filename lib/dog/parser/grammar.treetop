@@ -1262,7 +1262,7 @@ grammar Dog
   rule print
     'PRINT' space expression {
       def transform
-        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new(["system", "print"]), [expression.transform])
+        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new(["system", "print:on"]), [expression.transform])
         node.line = self.line
         
         return node
@@ -1273,7 +1273,7 @@ grammar Dog
   rule inspect
     'INSPECT' space expression {
       def transform
-        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new(["system", "inspect"]), [expression.transform])
+        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new(["system", "inspect:on"]), [expression.transform])
         node.line = self.line
         
         return node

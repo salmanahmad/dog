@@ -13,7 +13,7 @@ module Dog::Library
     
     name "system"
     
-    implementation "print" do
+    implementation "print:on" do
       argument "arg"
       
       body do |track|
@@ -21,7 +21,7 @@ module Dog::Library
       end
     end
     
-    implementation "inspect" do
+    implementation "inspect:on" do
       argument "arg"
       
       body do |track|
