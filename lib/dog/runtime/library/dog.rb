@@ -13,6 +13,10 @@ module Dog::Library
 
     name "dog"
 
+    structure "array" do
+      
+    end
+
     structure "query" do
       property "container"
       property "predicate"

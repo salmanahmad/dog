@@ -142,4 +142,24 @@ class IntegrationTests::StructureTest < Test::Unit::TestCase
     assert_equal(9, civic.max_numeric_key)
     
   end
+  
+  
+  def test_array
+    program = <<-EOD
+    
+    list = ["Hello", "World!"]
+    list[0] = 7
+    EOD
+    
+    tracks = run_source(program)
+    
+    list = tracks.last.variables["list"]
+    
+    assert_equal(0, list.min_numeric_key)
+    assert_equal(1, list.max_numeric_key)
+    assert_equal(7, list[0].value)
+    assert_equal("World!", list[1].value)
+    
+  end
+  
 end

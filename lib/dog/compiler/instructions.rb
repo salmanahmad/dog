@@ -239,7 +239,7 @@ module Dog::Instructions
           elsif item_value.kind_of? Numeric then
             key = item_value.to_f
           else
-            raise "Runtime error"
+            raise "Access error - #{item_value.inspect}"
           end
 
           if pointer.pending then

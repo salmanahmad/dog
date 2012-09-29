@@ -169,7 +169,7 @@ grammar Dog
       def transform
         
         structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-          "$and" => ::Dog::Nodes::StructureLiteral.new("array", {
+          "$and" => ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "array"]), {
             0 => ::Dog::Nodes::StructureLiteral.new(nil, {
               "value.s:communities.value.value" => ::Dog::Nodes::Access.new([community.transform, "name"])
             }),
@@ -795,14 +795,14 @@ grammar Dog
         case operator
         when "AND"
           structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            "$and" => ::Dog::Nodes::StructureLiteral.new("array", {
+            "$and" => ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "array"]), {
               0 => first.transform,
               1 => second.transform,
             })
           })
         when "OR"
           structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            "$or" => ::Dog::Nodes::StructureLiteral.new("array", {
+            "$or" => ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "array"]), {
               0 => first.transform,
               1 => second.transform,
             })
