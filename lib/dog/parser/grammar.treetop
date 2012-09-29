@@ -629,7 +629,7 @@ grammar Dog
         type = for_clause.last
         
         if type.nil? then
-          string_value = ::Dog::Value.new("type", {})
+          string_value = ::Dog::Value.new("dog.type", {})
           string_value["name"] = ::Dog::Value.string_value("string")
           string_value["package"] = ::Dog::Value.string_value("system")
           string_value = ::Dog::Nodes::ValueLiteral.new(string_value)
@@ -1133,7 +1133,7 @@ grammar Dog
   rule collection_definition
     'DEFINE' s name:identifier s 'OF' s structure_name:packaged_identifier {
       def transform
-        value = ::Dog::Value.new("collection", {})
+        value = ::Dog::Value.new("dog.collection", {})
         value["name"] = ::Dog::Value.string_value(name.text_value)
         value["package"] = ::Dog::Value.string_value(self.package)
         

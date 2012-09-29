@@ -116,7 +116,7 @@ module Dog::Nodes
     def compile(package)
       package.push_symbol(@name)
       
-      value = ::Dog::Value.new("function", {})
+      value = ::Dog::Value.new("dog.function", {})
       value["name"] = ::Dog::Value.string_value(@name)
       value["package"] = ::Dog::Value.string_value(package.name)
       
@@ -150,7 +150,7 @@ module Dog::Nodes
     def compile(package)
       package.push_symbol(@name)
       
-      value = ::Dog::Value.new("type", {})
+      value = ::Dog::Value.new("dog.type", {})
       value["name"] = ::Dog::Value.string_value(name)
       value["package"] = ::Dog::Value.string_value(package.name)
       
@@ -218,7 +218,7 @@ module Dog::Nodes
       # TODO - Abstract this with structure definition
       package.push_symbol(@name)
       
-      value = ::Dog::Value.new("community", {})
+      value = ::Dog::Value.new("dog.community", {})
       value["name"] = ::Dog::Value.string_value(@name)
       value["profile"] = ::Dog::Value.string_value(@profile_name)
       value["package"] = ::Dog::Value.string_value(package.name)
@@ -227,7 +227,7 @@ module Dog::Nodes
       
       package.add_implementation
       
-      value = ::Dog::Value.new("profile", {})
+      value = ::Dog::Value.new("dog.profile", {})
       structure = ::Dog::Instructions::Push.new(value)
       set_instruction_context(structure)
       package.add_to_instructions([structure])
@@ -320,28 +320,20 @@ module Dog::Nodes
     end
 
     def compile(package)
-      # TODO - Clean up this entire thing. StructureLiteral and ValueLiteral are really
-      # hacky at the moment and are in a need of a good clean up.
       if @type then
-        if @type.kind_of? String then
-          structure = ::Dog::Instructions::Push.new(::Dog::Value.new("array", {}))
-          set_instruction_context(structure)
-          package.add_to_instructions([structure])
+        if @type.kind_of? Node then
+          @type.compile(package)
+        elsif @type.kind_of? ::Dog::Value
+          push = ::Dog::Nodes::Push.new(@type)
+          set_instruction_context(push)
+          package.add_to_instructions([push])
         else
-          if @type.kind_of? Node then
-            @type.compile(package)
-          elsif @type.kind_of? ::Dog::Value
-            push = ::Dog::Nodes::Push.new(@type)
-            set_instruction_context(push)
-            package.add_to_instructions([push])
-          else
-            raise "Compilation error - Structure literal type: #{@type}"
-          end
-
-          build = ::Dog::Instructions::Build.new
-          set_instruction_context(build)
-          package.add_to_instructions([build])
+          raise "Compilation error - Structure literal type: #{@type}"
         end
+
+        build = ::Dog::Instructions::Build.new
+        set_instruction_context(build)
+        package.add_to_instructions([build])
       else
         structure = ::Dog::Instructions::PushStructure.new
         set_instruction_context(structure)

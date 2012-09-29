@@ -339,7 +339,7 @@ module Dog::Instructions
         else
           package = ::Dog::Runtime.bundle.packages[@variable_name]
           if package then
-            value = ::Dog::Value.new("package", {})
+            value = ::Dog::Value.new("dog.package", {})
             
             for name, symbol in package.symbols do
               if symbol["value"] then
@@ -609,7 +609,7 @@ module Dog::Instructions
       function = track.stack.pop
       actor = track.stack.pop
       
-      future = ::Dog::Value.new("structure", {})
+      future = ::Dog::Value.new("dog.structure", {})
       future.pending = true
       future.buffer_size = 0
       future.channel_mode = true
