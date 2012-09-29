@@ -232,9 +232,10 @@ module Dog::Library
       end
     end
 
-    implementation "add" do
-      argument "container"
+    implementation "add:value:to" do
       argument "value"
+      argument "container"
+      
 
       body do |current_track|
         container = variable("container")
@@ -441,7 +442,7 @@ module Dog::Library
           track.variables["container"] = value["communities"]
           track.variables["value"] = community
           
-          proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+          proc = ::Dog::Library::Dog.package.symbols["add:value:to"]["implementations"][0]["instructions"]
           proc.call(track)
           
           output = track.stack.last
@@ -489,7 +490,7 @@ module Dog::Library
       end
     end
 
-    implementation "pending_structure" do
+    implementation "pending_structure:type:buffer:channel" do
       argument "type"
       argument "buffer_size"
       argument "channel_mode"

@@ -81,7 +81,7 @@ module Dog::Library
       end
     end
     
-    implementation "type_of" do
+    implementation "type:of" do
       argument "value"
       
       body do

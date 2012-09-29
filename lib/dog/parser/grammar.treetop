@@ -912,14 +912,14 @@ grammar Dog
           node = ::Dog::Nodes::Assign.new(
             value.path,
             ::Dog::Nodes::Call.new(
-              ::Dog::Nodes::Access.new(["dog", "add"]), 
-              [container.transform, value]
+              ::Dog::Nodes::Access.new(["dog", "add:value:to"]), 
+              [value, container.transform]
             )
           )
         else
           node = ::Dog::Nodes::Call.new(
-            ::Dog::Nodes::Access.new(["dog", "add"]),
-            [container.transform, value]
+            ::Dog::Nodes::Access.new(["dog", "add:value:to"]),
+            [value, container.transform]
           )
         end
         

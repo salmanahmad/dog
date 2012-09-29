@@ -15,7 +15,7 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
   def test_simple
     program = <<-EOD
 
-    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+    foo = COMPUTE dog.pending_structure TYPE "dog.structure" BUFFER -1 CHANNEL false
     PRINT foo
     PRINT foo.hi
 
@@ -29,7 +29,7 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
   def test_no_block
     program = <<-EOD
 
-    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+    foo = COMPUTE dog.pending_structure TYPE "dog.structure" BUFFER -1 CHANNEL false
 
     EOD
 
@@ -41,8 +41,8 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
     program = <<-EOD
 
     foo = {}
-    foo = COMPUTE dog.add ON foo, 5
-    foo = COMPUTE dog.add ON foo, "Hello"
+    foo = COMPUTE dog.add VALUE 5 TO foo
+    foo = COMPUTE dog.add VALUE "Hello" TO foo
     
     EOD
     
@@ -60,15 +60,15 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
   def test_add
     program = <<-EOD
 
-    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+    foo = COMPUTE dog.pending_structure TYPE "dog.structure" BUFFER -1 CHANNEL false
 
     ON EACH i IN foo DO
       PRINT i
     END
 
-    COMPUTE dog.add ON foo, "3"
-    COMPUTE dog.add ON foo, "2"
-    COMPUTE dog.add ON foo, "1"
+    COMPUTE dog.add VALUE "3" TO foo
+    COMPUTE dog.add VALUE "2" TO foo
+    COMPUTE dog.add VALUE "1" TO foo
     EOD
 
     tracks, output = run_source(program, true)
@@ -89,13 +89,13 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
   def test_on_each_returns
     program = <<-EOD
 
-    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+    foo = COMPUTE dog.pending_structure TYPE "dog.structure" BUFFER -1 CHANNEL false
 
     ON EACH i IN foo DO
       RETURN i + 5
     END
 
-    output = COMPUTE dog.add ON foo, 5
+    output = COMPUTE dog.add VALUE 5 TO foo
     EOD
 
     tracks, output = run_source(program, true)
@@ -106,7 +106,7 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
   def test_multiple_on_each_returns
     program = <<-EOD
 
-    foo = COMPUTE dog.pending_structure ON "structure", -1, false
+    foo = COMPUTE dog.pending_structure TYPE "dog.structure" BUFFER -1 CHANNEL false
 
     ON EACH i IN foo DO
       RETURN i + 5
@@ -116,7 +116,7 @@ class IntegrationTests::PendingTest < Test::Unit::TestCase
       RETURN x - 5
     END
 
-    output = COMPUTE dog.add ON foo, 5
+    output = COMPUTE dog.add VALUE 5 TO foo
     EOD
 
     tracks, output = run_source(program, true)

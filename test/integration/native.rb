@@ -37,7 +37,7 @@ class IntegrationTests::NativeTest < Test::Unit::TestCase
       age = 5
     }
 
-    type = COMPUTE system.type_of ON civic
+    type = COMPUTE system.type OF civic
 
     EOD
 
