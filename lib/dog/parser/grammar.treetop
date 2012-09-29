@@ -1129,7 +1129,7 @@ grammar Dog
         value["name"] = ::Dog::Value.string_value(name.text_value)
         value["package"] = ::Dog::Value.string_value(self.package)
         
-        node = ::Dog::Nodes::Definition.new(name.text_value, value, structure_name.transform)
+        node = ::Dog::Nodes::Definition.new(name.text_value, value, [], structure_name.transform)
         node.line = self.line
         
         return node
@@ -1541,6 +1541,7 @@ grammar Dog
           scope = "external"
         else
           path = [symbol.text_value]
+          scope = "internal"
         end
         
         node = ::Dog::Nodes::Access.new(path, scope)
