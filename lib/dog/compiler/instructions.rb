@@ -322,9 +322,11 @@ module Dog::Instructions
 
   class ReadVariable < Instruction
     attribute :variable_name
+    attribute :scope
 
-    def initialize(variable_name)
+    def initialize(variable_name, scope = "cascade")
       @variable_name = variable_name
+      @scope = scope
     end
 
     def execute(track)

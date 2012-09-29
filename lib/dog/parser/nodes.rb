@@ -362,11 +362,8 @@ module Dog::Nodes
   class Assign < Node
     attr_accessor :path
     attr_accessor :value
-    attr_accessor :scope
 
-    # TODO - Handle scope
-
-    def initialize(path, value)
+    def initialize(path, value, scope)
       @path = path
       @value = value
     end
@@ -410,23 +407,24 @@ module Dog::Nodes
     attr_accessor :path
     attr_accessor :scope
 
-    # TODO - Handle scope
-
-    def initialize(path)
+    # Options for scope:
+    # - cascade
+    # - local
+    # - external
+    # - internal
+    
+    def initialize(path, scope = "cascade")
       @path = path
+      @scope = scope
     end
 
     def compile(package)
-      count = -1
       for item in path do
-        count += 1
-        if count == 0 then
+        if item == path.first then
           if item.kind_of? Node then
-            # TODO - This is special cased for literals. This may be
-            # something that should be fixed in the grammar.
             item.compile(package)
           else
-            read_variable = ::Dog::Instructions::ReadVariable.new(item)
+            read_variable = ::Dog::Instructions::ReadVariable.new(item, scope)
             set_instruction_context(read_variable)
             package.add_to_instructions([read_variable])
           end
@@ -606,6 +604,8 @@ module Dog::Nodes
   end
 
   class AsyncCall < Node
+    # TODO - Implement Spawn...
+    
     attr_accessor :actor
     attr_accessor :identifier
     attr_accessor :arguments
@@ -621,8 +621,6 @@ module Dog::Nodes
     end
     
     def compile(package)
-      # TODO - check if identifier is not an access and create a function type automatically
-      # This would be similar to StructureLiteral in many ways
       @actor.compile(package)
       @identifier.compile(package)
       
@@ -651,8 +649,6 @@ module Dog::Nodes
     end
     
     def compile(package)
-      # TODO - check if identifier is not an access and create a function type automatically
-      # This would be similar to StructureLiteral in many ways
       @identifier.compile(package)
       
       @arguments ||= []
