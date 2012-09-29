@@ -102,15 +102,13 @@ module Dog::Nodes
   
   class FunctionDefinition < Node
     attr_accessor :name
-    attr_accessor :implementation
     attr_accessor :arguments
-    attr_accessor :optional_arguments
+    attr_accessor :implementation
     
-    def initialize(name, implementation = nil, arguments = nil, optional_arguments = nil)
+    def initialize(name, arguments = nil, implementation = nil)
       @name = name
-      @implementation = implementation
       @arguments = arguments
-      @optional_arguments = optional_arguments
+      @implementation = implementation
     end
     
     def compile(package)
@@ -131,7 +129,6 @@ module Dog::Nodes
       
       package.pop_symbol
       
-      # TODO - Push.new(value) instead of PushNull?
       null = ::Dog::Instructions::PushNull.new
       set_instruction_context(null)
       package.add_to_instructions([null])
@@ -165,7 +162,6 @@ module Dog::Nodes
       
       if @properties then
         for property in @properties do
-          # TODO - Handle "type"
           name = property["name"]
           default = property["default"]
           
@@ -202,89 +198,18 @@ module Dog::Nodes
       package.add_to_instructions([null])
     end
   end
-  
-  class CommunityDefinition < Node
-    attr_accessor :name
-    attr_accessor :profile_name
-    attr_accessor :properties
-    
-    def initialize(name, profile_name, properties = [])
-      @name = name
-      @profile_name = profile_name
-      @properties = properties
-    end
-    
-    def compile(package)
-      # TODO - Abstract this with structure definition
-      package.push_symbol(@name)
-      
-      value = ::Dog::Value.new("dog.community", {})
-      value["name"] = ::Dog::Value.string_value(@name)
-      value["profile"] = ::Dog::Value.string_value(@profile_name)
-      value["package"] = ::Dog::Value.string_value(package.name)
-      
-      package.current_context["value"] = value
-      
-      package.add_implementation
-      
-      value = ::Dog::Value.new("dog.profile", {})
-      structure = ::Dog::Instructions::Push.new(value)
-      set_instruction_context(structure)
-      package.add_to_instructions([structure])
-      
-      if @properties then
-        for property in @properties do
-          # TODO - Handle "type"
-          name = property["name"]
-          default = property["default"]
-          
-          if name.kind_of? String then
-            push_string = ::Dog::Instructions::PushString.new(name)
-            set_instruction_context(push_string)
-            package.add_to_instructions([push_string])
-          elsif name.kind_of? Numeric then
-            push_number = ::Dog::Instructions::PushNumber.new(name)
-            set_instruction_context(push_number)
-            package.add_to_instructions([push_number])
-          else
-            raise "Compilation error"
-          end
-          
-          if default then
-            default.compile(package)
-          else
-            null = ::Dog::Instructions::PushNull.new
-            set_instruction_context(null)
-            package.add_to_instructions([null])
-          end
-          
-          assign = ::Dog::Instructions::Assign.new(2)
-          set_instruction_context(assign)
-          package.add_to_instructions([assign])
-        end
-      end
-      
-      package.pop_symbol
-      
-      null = ::Dog::Instructions::PushNull.new
-      set_instruction_context(null)
-      package.add_to_instructions([null])
-    end
-  end
-  
+
   class Definition < Node
     attr_accessor :name
     attr_accessor :value
-    attr_accessor :implementation
     attr_accessor :arguments
-    attr_accessor :optional_arguments
+    attr_accessor :implementation
     
-    def initialize(name, value = nil, implementation = nil, arguments = nil, optional_arguments = nil)
+    def initialize(name, value = nil, arguments = nil, implementation = nil)
       @name = name
       @value = value
-      @implementation = implementation
       @arguments = arguments
-      @optional_arguments = optional_arguments
+      @implementation = implementation
     end
     
     def compile(package)
@@ -303,7 +228,6 @@ module Dog::Nodes
       
       package.pop_symbol
       
-      # TODO - Push.new(value) instead of PushNull?
       null = ::Dog::Instructions::PushNull.new
       set_instruction_context(null)
       package.add_to_instructions([null])
