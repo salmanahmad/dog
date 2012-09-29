@@ -1140,26 +1140,24 @@ grammar Dog
   rule community_definition
     'DEFINE' s 'COMMUNITY' s name:identifier s 'USING' s profile_name:identifier sn? structure_properties {
       def transform
-        # TODO - Update for v0.3
-        return
-        
         value = ::Dog::Value.new("dog.community", {})
         value["name"] = ::Dog::Value.string_value(name.text_value)
         value["profile"] = ::Dog::Value.string_value(profile_name.text_value)
         value["package"] = ::Dog::Value.string_value(self.package)
         
-        # THis should not be a profile...something else...
-        value = ::Dog::Value.new("dog.profile", {})
-        structure = ::Dog::Instructions::Push.new(value)
-        set_instruction_context(structure)
-        package.add_to_instructions([structure])
+        profile_definition = ::Dog::Nodes::StructureDefinition.new(profile_name.text_value, structure_properties.transform)
+        profile_definition.line = self.line
         
-        
-        
-        node = ::Dog::Nodes::CommunityDefinition.new(name.text_value, profile_name.text_value, structure_properties.transform)
+        node = ::Dog::Nodes::Definition.new(name.text_value, value)
         node.line = self.line
         
-        return node
+        nodes = ::Dog::Nodes::Nodes.new([
+          node,
+          profile_definition
+        ])
+        nodes.line = self.line
+        
+        return nodes
       end
     }
   end
