@@ -310,11 +310,11 @@ module Dog
     end
     
     def is_null?
-      self.type == "null"
+      self.type == "dog.null"
     end
     
     def is_false?
-      self.type == "system.boolean" && self.value == false
+      self.type == "dog.boolean" && self.value == false
     end
     
   end
