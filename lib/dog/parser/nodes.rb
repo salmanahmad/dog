@@ -640,12 +640,10 @@ module Dog::Nodes
   class Call < Node
     attr_accessor :identifier
     attr_accessor :arguments
-    attr_accessor :optional_arguments
     
-    def initialize(identifier, arguments = nil, optional_arguments = nil)
+    def initialize(identifier, arguments = nil)
       @identifier = identifier
       @arguments = arguments
-      @optional_arguments = optional_arguments
     end
     
     def compile(package)
@@ -656,9 +654,7 @@ module Dog::Nodes
         argument.compile(package)
       end
       
-      @optional_arguments.compile(package) if @optional_arguments
-      
-      call = ::Dog::Instructions::Call.new(@arguments.count, !@optional_arguments.nil?)
+      call = ::Dog::Instructions::Call.new(@arguments.count)
       set_instruction_context(call)
       package.add_to_instructions([call])
     end

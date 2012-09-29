@@ -497,17 +497,12 @@ module Dog::Instructions
 
   class Call < Instruction
     attribute :arg_count
-    attribute :has_optionals
 
-    def initialize(arg_count, has_optionals)
+    def initialize(arg_count)
       @arg_count = arg_count
-      @has_optionals = has_optionals
     end
     
     def execute(track)
-      optionals = nil
-      optionals = track.stack.pop if has_optionals
-      
       arguments = track.stack.pop(arg_count)
       function = track.stack.pop
       
@@ -539,53 +534,6 @@ module Dog::Instructions
         
         track.state = ::Dog::Track::STATE::CALLING
         track.next_track = new_track
-      elsif function.type == "external_function"
-        actor = function["actor"].ruby_value
-        if actor == "shell"
-          
-          input = {
-            "argv" => [],
-            "kwargs" => {},
-            "name" => function["name"].ruby_value
-          }
-          
-          arguments.each_index do |index|
-            argument = arguments[index]
-            input["argv"] << argument.ruby_value
-          end
-          
-          if optionals then
-            for key in optionals.keys do
-              optional = optionals[key].ruby_value
-              input["argv"][key] << argument.ruby_value
-            end
-          end
-          
-          output = {}
-          
-          Open3.popen3(function["instructions"].ruby_value) { |stdin, stdout, stderr, process|
-            stdin.puts(input.to_json) if input
-            stdin.close
-                
-            exit_status = process.value
-            shell_output = stdout.read
-                
-            begin
-              output = JSON.parse(shell_output)
-              output = output["output"]
-            rescue
-              output = shell_output
-            end
-                
-            stdout.close
-            stderr.close
-          }
-              
-          output = ::Dog::Value.from_ruby_value(output)
-          track.stack.push(output)
-        else
-          raise "I cannot synchronously call an external function for '#{actor}'"
-        end
       else
         raise "I don't know how to call a non-function"
       end

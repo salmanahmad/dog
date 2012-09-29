@@ -552,17 +552,23 @@ grammar Dog
   rule compute
     'COMPUTE' s packaged_identifier parameters:(s parameter_name s expression)* {
       def transform
-        # TODO - Update for v0.3
-        return
-        
         function = packaged_identifier.transform
-        mandatory_arguments = on_clause.transform unless on_clause.empty?
-        optional_arguments = using_clause.transform unless using_clause.empty?
+        
+        function_name = [function.path.pop]
+        arguments = []
+        
+        if !parameters.empty? then
+          for parameter in parameters.elements do
+            function_name << parameter.parameter_name.text_value.downcase
+            arguments << parameter.expression.transform
+          end
+        end
+        
+        function.path << function_name.join(":")
         
         node = ::Dog::Nodes::Call.new(
           function,
-          mandatory_arguments,
-          optional_arguments
+          arguments
         )
         node.line = self.line
         
