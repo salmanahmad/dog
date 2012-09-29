@@ -13,7 +13,7 @@ module Dog::Library
 
     name "collection"
 
-    implementation "type" do
+    implementation "type:on" do
       argument "collection"
       
       body do
@@ -31,7 +31,7 @@ module Dog::Library
     end
     
     
-    implementation "size" do
+    implementation "size:on" do
       argument "collection"
       
       body do |track|

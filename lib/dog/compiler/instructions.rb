@@ -330,30 +330,39 @@ module Dog::Instructions
     end
 
     def execute(track)
-      # TODO - Handle scope modifiers: internal, external, local
-      if track.variables.include? @variable_name then
-        value = track.variables[@variable_name]
-      else
+      value = nil
+      
+      if value.nil? && ["cascade", "local"].include?(scope) then
+        if track.variables.include? @variable_name then
+          value = track.variables[@variable_name]
+        end
+      end
+      
+      if value.nil? && ["cascade", "internal"].include?(scope) then
         package = track.package_name
         symbol = ::Dog::Runtime.bundle.packages[package].symbols[@variable_name]
         if symbol && !symbol["value"].nil? then
           value = symbol["value"]
-        else
-          package = ::Dog::Runtime.bundle.packages[@variable_name]
-          if package then
-            value = ::Dog::Value.new("dog.package", {})
-            
-            for name, symbol in package.symbols do
-              if symbol["value"] then
-                value[name] = symbol["value"]
-              else
-                value[name] = ::Dog::Value.null_value
-              end
+        end
+      end
+      
+      if value.nil? && ["cascade", "external"].include?(scope) then
+        package = ::Dog::Runtime.bundle.packages[@variable_name]
+        if package then
+          value = ::Dog::Value.new("dog.package", {})
+          
+          for name, symbol in package.symbols do
+            if symbol["value"] then
+              value[name] = symbol["value"]
+            else
+              value[name] = ::Dog::Value.null_value
             end
-          else
-            value = ::Dog::Value.null_value
           end
         end
+      end
+      
+      if value.nil? then
+        value = ::Dog::Value.null_value
       end
       
       if value.pending then
