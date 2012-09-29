@@ -123,7 +123,6 @@ module Dog::Nodes
       if @implementation then
         package.add_implementation
         package.implementation["arguments"] = @arguments
-        package.implementation["optional_arguments"] = @optional_arguments
         @implementation.compile(package)
       end
       
@@ -222,7 +221,6 @@ module Dog::Nodes
       if @implementation then
         package.add_implementation
         package.implementation["arguments"] = @arguments
-        package.implementation["optional_arguments"] = @optional_arguments
         @implementation.compile(package)
       end
       
