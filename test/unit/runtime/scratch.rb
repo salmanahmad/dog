@@ -33,7 +33,7 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
 
   def test_function_call
     program = Nodes::Nodes.new([
-      Nodes::FunctionDefinition.new("foo", Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("foo", [], Nodes::Nodes.new([
         print_helper(Nodes::StringLiteral.new("Foo Called!"))
       ])),
       Nodes::Call.new(Nodes::Access.new(["foo"]))
@@ -45,7 +45,7 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
   
   def test_function_returns
     program = Nodes::Nodes.new([
-      Nodes::FunctionDefinition.new("foo", Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("foo", [], Nodes::Nodes.new([
         print_helper(Nodes::StringLiteral.new("Foo Called!")),
         Nodes::Return.new(Nodes::NumberLiteral.new(3.14))
       ])),
