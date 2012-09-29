@@ -501,20 +501,16 @@ module Dog::Instructions
     def initialize(arg_count)
       @arg_count = arg_count
     end
-    
+
     def execute(track)
       arguments = track.stack.pop(arg_count)
       function = track.stack.pop
-      
+
       if function.type == "dog.function" then
         package = function["package"].value
         name = function["name"].value
         implementation = 0
-        
-        # TODO - Handle default values
-        # Perhaps the default values for optional args are handled
-        # by the runtime libraries and not the VM
-        
+
         new_track = ::Dog::Track.new
         new_track.control_ancestors = track.control_ancestors.clone
         new_track.control_ancestors << track
