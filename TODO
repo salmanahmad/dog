@@ -17,6 +17,10 @@ ON EACH DO
 
 Collections should be package scoped
 
+Pople.public should be a DEFINEd value, not a type
+
+Add support for DEFINEd values (and channels)
+
 Value format
 
 Package format
