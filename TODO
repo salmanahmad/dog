@@ -1,4 +1,33 @@
 
+Things to be done and dependencies:
+
+Implement ASK
+
+Listen / Display
+
+PERFORM
+
+Spawn
+
+Figure out futures with new stuff
+
+WAIT
+ON DO
+ON EACH DO
+
+Collections should be package scoped
+
+Value format
+
+Package format
+
+Client API
+
+Build system libraries
+  Date
+  Array
+  File
+  etc.
 
 === v0.3 Changes ===
 

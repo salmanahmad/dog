@@ -586,22 +586,23 @@ grammar Dog
   rule ask
     'ASK' sn expression sn 'TO' sn packaged_identifier parameters:(sn parameter_name sn expression)* {
       def transform
-        # TODO - Update for v0.3
-        return
+        function = packaged_identifier.transform
         
-        actor = expression.transform
-        via = via_clause.transform
-        function = ask_to_clause.transform
-        mandatory_arguments = on_clause.transform unless on_clause.empty?
-        optional_arguments = using_clause.transform unless using_clause.empty?
-        count = ask_count.transform unless ask_count.empty?
+        function_name = [function.path.pop, "for"]
+        arguments = [expression.transform]
         
-        node = ::Dog::Nodes::AsyncCall.new(
-          actor,
+        if !parameters.empty? then
+          for parameter in parameters.elements do
+            function_name << parameter.parameter_name.text_value.downcase
+            arguments << parameter.expression.transform
+          end
+        end
+        
+        function.path << function_name.join(":")
+        
+        node = ::Dog::Nodes::Call.new(
           function,
-          mandatory_arguments,
-          optional_arguments,
-          count
+          arguments
         )
         node.line = self.line
         
