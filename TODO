@@ -1,7 +1,39 @@
 
+
+
+
+Spawn schedules a thread to run.
+
+The current thread must finish or must "wait" (or yield) and then the spawned thread will start.
+
+Threads will yield whenever their state switches to "waiting". There are two important cases. (1) WAIT or ON ... DO (2) System calls. Technically, whenever you call a system call (even like PRINT or TIME) it will yield the thread and allow another a slice to run. (3) Yield -- see below. This will cause me to have to think about system calls and how they are performed.
+
+It will not run in parallel as of v0.3. We may introduce a PROC_COUNT in the future that will automatically schedule the threads to run immediately and truly in parallel but for now, they are just an abstraction and execute single threadedly.
+
+When we address PROC_COUNT we will also want to address or CLUSTER notion where threads can run on another machine completely.
+
+We will also have a YIELD (perhaps COMPUTE system.yield) that will say, "stop running me, and run something else." It basically tells the scheduler to skip me for now and come back. If there is no other threads running, then the current thread will resume naturally.
+
+
+
+How do channels work?
+
+How is this different from Go?
+
+
+
+
+
+
+
+
+
+
+
+
+
 Things to be done and dependencies:
 
-Implement ASK
 
 Listen / Display
 
@@ -20,6 +52,8 @@ Collections should be package scoped
 Pople.public should be a DEFINEd value, not a type
 
 Add support for DEFINEd values (and channels)
+
+Change the default package from "" to "default" and have an error message restricting "default" from being used...?
 
 Value format
 
