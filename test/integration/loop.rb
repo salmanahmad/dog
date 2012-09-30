@@ -99,6 +99,52 @@ class IntegrationTests::LoopTest < Test::Unit::TestCase
     assert_equal("Hi", output)
   end
   
+  def test_forever 
+    program = <<-EOD
+
+    i = 0
+    x = FOREVER DO
+      i = i + 1
+      IF i == 10 THEN
+        BREAK i
+      END
+    END
+    EOD
+
+    tracks = run_source(program)
+    track = tracks.last
+    assert_equal(10, track.variables["x"].ruby_value)
+    assert_equal(10, track.variables["i"].ruby_value)
+    
+  end
+  
+  def test_repeat
+    program = <<-EOD
+
+    x = 5
+    i = 0
+
+    REPEAT 5 TIMES
+      i = i + 1
+    END
+    
+    REPEAT x DO
+      i = i + 1
+    END
+    
+    i = REPEAT 1000 TIMES
+      i = i + 1
+      BREAK i
+    END
+    
+    EOD
+
+    tracks = run_source(program)
+    track = tracks.last
+    assert_equal(11, track.variables["i"].ruby_value)
+
+  end
+  
   def test_for
     program = <<-EOD
 

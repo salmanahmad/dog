@@ -1123,6 +1123,16 @@ grammar Dog
     }
   end
   
+  rule value_definition
+    'DEFINE' s name:identifier s '=' s literal {
+      def transform
+        # TODO - Keep in mind that this must be constants that build to a value right now. 
+        # I cannot build structures or compute functions
+        return 
+      end
+    }
+  end
+  
   rule collection_definition
     'DEFINE' s name:identifier s 'OF' s structure_name:packaged_identifier {
       def transform
@@ -1467,8 +1477,47 @@ grammar Dog
   rule repeat
     'REPEAT' sn expression sn ('TIMES' / 'DO') sn statements:(statements)? s? 'END' {
       def transform
-        # TODO - Update for v0.3
-        return
+        unique_number = ::Dog::Helper.unique_number
+        counter_variable_name = "@counter_#{unique_number}"
+        
+        if !statements.empty? then
+          body = statements.transform
+        else
+          body = ::Dog::Nodes::Nodes.new([])
+        end
+        
+        node = ::Dog::Nodes::Nodes.new([
+          ::Dog::Nodes::Assign.new([counter_variable_name], ::Dog::Nodes::NumberLiteral.new(0)),
+          ::Dog::Nodes::Loop.new(::Dog::Nodes::Nodes.new([
+            ::Dog::Nodes::Branch.new(
+              ::Dog::Nodes::Operation.new(
+                ::Dog::Nodes::Access.new([counter_variable_name]),
+                expression.transform,
+                "<"
+              ),
+              ::Dog::Nodes::Nodes.new([
+                ::Dog::Nodes::Assign.new(
+                  [counter_variable_name],
+                  ::Dog::Nodes::Operation.new(
+                    ::Dog::Nodes::Access.new([counter_variable_name]),
+                    ::Dog::Nodes::NumberLiteral.new(1),
+                    "+"
+                  )
+                )
+              ]), 
+              ::Dog::Nodes::Nodes.new([
+                ::Dog::Nodes::Break.new
+              ])
+            ),
+            body
+          ]))
+        ])
+        
+        node.line = self.line
+        
+        return node
+        
+        
       end
     }
   end
