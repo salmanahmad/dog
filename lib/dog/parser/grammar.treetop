@@ -1194,8 +1194,10 @@ grammar Dog
   rule spawn
   'SPAWN' s compute {
     def transform
-      # TODO - Update for v0.3
-      return
+      node = compute.transform
+      node.async = true
+      
+      return node
     end
   }
   end

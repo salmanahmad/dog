@@ -26,6 +26,8 @@ class ScratchTest < Test::Unit::TestCase
       PRINT message
     END
     
+    SPAWN COMPUTE print MESSAGE "Hello!"
+    SPAWN COMPUTE print MESSAGE "Hello!"
     COMPUTE print MESSAGE "Hello!"
 
     EOD

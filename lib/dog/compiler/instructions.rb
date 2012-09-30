@@ -506,9 +506,11 @@ module Dog::Instructions
 
   class Call < Instruction
     attribute :arg_count
+    attribute :async
 
-    def initialize(arg_count)
+    def initialize(arg_count, async = false)
       @arg_count = arg_count
+      @async = async
     end
 
     def execute(track)
@@ -519,6 +521,8 @@ module Dog::Instructions
         package = function["package"].value
         name = function["name"].value
         implementation = 0
+
+        puts "Async call" if @async
 
         new_track = ::Dog::Track.new
         new_track.control_ancestors = track.control_ancestors.clone
@@ -542,138 +546,6 @@ module Dog::Instructions
       else
         raise "I don't know how to call a non-function"
       end
-    end
-  end
-
-  class AsyncCall < Instruction
-    attribute :arg_count
-    attribute :has_optionals
-    attribute :replication
-    
-    def initialize(arg_count, has_optionals, replication = 1)
-      @arg_count = arg_count
-      @has_optionals = has_optionals
-      @replication = replication || 1
-    end
-    
-    def execute(track)
-      optionals = nil
-      optionals = track.stack.pop if has_optionals
-      
-      arguments = track.stack.pop(arg_count)
-      function = track.stack.pop
-      actor = track.stack.pop
-      
-      future = ::Dog::Value.new("dog.structure", {})
-      future.pending = true
-      future.buffer_size = 0
-      future.channel_mode = true
-      
-      if function.type == "function" then
-        # TODO
-      elsif function.type == "external_function" || function.type == "string" then
-        # TODO - Propertly handle string literals rather than hard coding results here. It should be possible to call a shell command as well.
-        function_actor = function["actor"].ruby_value rescue nil
-        
-        if function_actor == "shell" then
-          # TODO
-        elsif function_actor == "people" || function_actor == "person" || function.type == "string" then
-          properties = []
-          
-          if function.type == "string" then
-            property = ::Dog::Property.new
-            property.identifier = "instructions"
-            property.direction = "output"
-            property.required = true
-            property.value = function.ruby_value
-            properties << property
-            
-            property = ::Dog::Property.new
-            property.identifier = "*value"
-            property.direction = "input"
-            property.required = true
-            property.value = nil
-            properties << property
-          else
-            property = ::Dog::Property.new
-            property.identifier = "instructions"
-            property.direction = "output"
-            property.required = true
-            property.value = function["instructions"].ruby_value
-            properties << property
-          
-            arguments.each_index do |index|
-              argument = arguments[index]
-              variable_name = function["arguments"][index].ruby_value
-            
-              property = ::Dog::Property.new
-              property.identifier = variable_name
-              property.direction = "output"
-              property.required = true
-              property.value = argument.ruby_value
-              properties << property
-            end
-          
-            if optionals then
-              for key in optionals.keys do
-                optional = optionals[key].ruby_value
-                
-                property = ::Dog::Property.new
-                property.identifier = key
-                property.direction = "output"
-                property.required = false
-                property.value = optional
-                properties << property
-              end
-            end
-            
-            return_values = function["output"]
-            return_values.value.keys.each_index do |index|
-              return_value = return_values[index].ruby_value
-              
-              property = ::Dog::Property.new
-              property.identifier = return_value
-              property.direction = "input"
-              property.required = true
-              property.value = nil
-              properties << property
-            end
-          end
-          
-          task = ::Dog::RoutedTask.new
-          # TODO - This rescue is here because of inline - string functions for ASKs. Deal with it at some point. Okay?
-          task.name = function["name"].ruby_value rescue "@inline_code"
-          task.replication = @replication
-          task.duplication = 1
-          task.properties = properties
-          task.channel_id = future._id
-          
-          if track.id == nil then
-            # TODO - Fix this. I need to do this here so I can get a track.id
-            # which is assigned when I call DatabaseObject#save. Instead, "id" 
-            # should be automatically generated as a UUID or ObjectID or something
-            # and DatabaseObject#save should be updated so it always does an upsert 
-            # rather than checking the _id itself like a retard...
-            track.save
-          end
-          task.track_id = track.id
-          
-          
-          #task.track_id = track.control_ancestors.last
-          #task.routing = nil
-          
-          
-          task.routing = ::Dog::Helper.routing_for_actor(actor)
-          task.created_at = Time.now.utc
-          task.save
-        else
-          raise "I cannot asynchronously call an external function for '#{function_actor}'"
-        end
-      else
-        raise "Unable to perform an async call on type '#{function.type}'"
-      end
-      
-      track.stack.push(future)
     end
   end
   

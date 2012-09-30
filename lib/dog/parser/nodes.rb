@@ -604,48 +604,16 @@ module Dog::Nodes
       package.add_to_instructions([t])
     end
   end
-
-  class AsyncCall < Node
-    # TODO - Implement Spawn...
-    
-    attr_accessor :actor
-    attr_accessor :identifier
-    attr_accessor :arguments
-    attr_accessor :optional_arguments
-    attr_accessor :replication
-    
-    def initialize(actor, identifier, arguments = nil, optional_arguments = nil, replication = 1)
-      @actor = actor
-      @identifier = identifier
-      @arguments = arguments
-      @optional_arguments = optional_arguments
-      @replication = replication || 1
-    end
-    
-    def compile(package)
-      @actor.compile(package)
-      @identifier.compile(package)
-      
-      @arguments ||= []
-      for argument in @arguments do
-        argument.compile(package)
-      end
-      
-      @optional_arguments.compile(package) if @optional_arguments
-      
-      call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?, @replication)
-      set_instruction_context(call)
-      package.add_to_instructions([call])
-    end
-  end
   
   class Call < Node
     attr_accessor :identifier
     attr_accessor :arguments
+    attr_accessor :async
     
-    def initialize(identifier, arguments = nil)
+    def initialize(identifier, arguments = nil, async = false)
       @identifier = identifier
       @arguments = arguments
+      @async = async
     end
     
     def compile(package)
@@ -656,7 +624,7 @@ module Dog::Nodes
         argument.compile(package)
       end
       
-      call = ::Dog::Instructions::Call.new(@arguments.count)
+      call = ::Dog::Instructions::Call.new(@arguments.count, @async)
       set_instruction_context(call)
       package.add_to_instructions([call])
     end
