@@ -47,6 +47,35 @@ module Dog
     attr_accessor :has_listen
     attr_accessor :asking_id
     
+    def self.invoke(function, package, arguments = [], parent = nil)
+      # TODO - This should be largely unnecssary. I should update the parser / compiler
+      # so that it assigns the function arguments by immediately poping the values off
+      # of the stack. Now only is that more performant, it also makes this code largely
+      # disappear.
+      implementation = 0
+      
+      new_track = ::Dog::Track.new
+      new_track.package_name = package
+      new_track.function_name = function
+      new_track.implementation_name = implementation
+
+      symbol = ::Dog::Runtime.bundle.packages[package].symbols[function]["implementations"][implementation]
+      symbol_arguments = symbol["arguments"]
+
+      arguments.each_index do |index|
+        argument = arguments[index]
+        variable_name = symbol_arguments[index]
+        new_track.variables[variable_name] = argument
+      end
+      
+      if parent then
+        new_track.control_ancestors = parent.control_ancestors.clone
+        new_track.control_ancestors << parent
+      end
+      
+      return new_track
+    end
+    
     def initialize(function_name = nil, package_name = "", implementation_name = 0)
       self.package_name = package_name
       self.function_name = function_name

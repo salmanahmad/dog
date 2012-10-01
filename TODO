@@ -14,10 +14,15 @@ When we address PROC_COUNT we will also want to address or CLUSTER notion where 
 
 We will also have a YIELD (perhaps COMPUTE system.yield) that will say, "stop running me, and run something else." It basically tells the scheduler to skip me for now and come back. If there is no other threads running, then the current thread will resume naturally.
 
+
+
+
+
+
 How do channels work?
 
 
-
+Obvious idea - Optional parameters can be passed on the stack by simply counting how large the stack and allocating unused parameters to whatever is leftover on the stack...
 
 
 
@@ -49,6 +54,8 @@ Change the default package from "" to "default" and have an error message restri
 Value format
 
 Package format
+
+Native libraries
 
 Client API
 

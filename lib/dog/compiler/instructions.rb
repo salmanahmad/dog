@@ -520,33 +520,18 @@ module Dog::Instructions
       if function.type == "dog.function" then
         package = function["package"].value
         name = function["name"].value
-        implementation = 0
-
-        new_track = ::Dog::Track.new
-        new_track.package_name = package
-        new_track.function_name = name
-        new_track.implementation_name = implementation
-
-        symbol = ::Dog::Runtime.bundle.packages[package].symbols[name]["implementations"][implementation]
-        symbol_arguments = symbol["arguments"]
-
-        arguments.each_index do |index|
-          argument = arguments[index]
-          variable_name = symbol_arguments[index]
-          new_track.variables[variable_name] = argument
-        end
-
+        
         signal = ::Dog::Signal.new
         
         if @async then
           # TODO - Handle the return value as a future
+          new_track = ::Dog::Track.invoke(name, package, arguments)
           signal.schedule_track = new_track
         else
-          new_track.control_ancestors = track.control_ancestors.clone
-          new_track.control_ancestors << track
-          track.state = ::Dog::Track::STATE::CALLING
-          
+          new_track = ::Dog::Track.invoke(name, package, arguments, track)
           signal.call_track = new_track
+          
+          track.state = ::Dog::Track::STATE::CALLING
         end
         
         return signal

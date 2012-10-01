@@ -17,16 +17,15 @@ module Dog::Library
       argument "community"
 
       body do
-        community = variable("community").ruby_value
+        checkpoint do
+          community = variable("community").ruby_value
+          dog_call(community["profile"], community["package"])
+        end
         
-        # TODO - Have a better way to call Dog functions which handles checkpoints, etc.
-        # Currenlty this is really really unsafe. I have no idea how this will work and it
-        # very well may crash and burn
-        track = ::Dog::Track.new(community["profile"], community["package"])
-        ::Dog::Runtime.run_track(track)
-        type = track.stack.pop
-        
-        dog_return(type)
+        checkpoint do
+          type = track.stack.pop
+          dog_return(type)
+        end
       end
     end
   end

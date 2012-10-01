@@ -127,6 +127,12 @@ module Dog
         return tracks
       end
 
+      def invoke(function, package, args, track)
+        # TODO - Implement this convenience function that allows you to 
+        # easily create a track, schedule the track and resume the runtime
+        # Although, perhaps this is not necessary as far as an API goes.
+      end
+
       def schedule(track)
         self.scheduled_tracks.add(track)
       end
