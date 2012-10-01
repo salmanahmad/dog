@@ -26,18 +26,13 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 
 
-Things to be done and dependencies:
+- TODO
 
+Figure out futures with new stuff
 
 Listen / Display
 
 PERFORM
-
-Spawn
-
-Spawned-from information (for debugging purposes, I guess?)
-
-Figure out futures with new stuff
 
 WAIT
 ON DO
@@ -55,8 +50,6 @@ Value format
 
 Package format
 
-Native libraries
-
 Client API
 
 Build system libraries
@@ -64,6 +57,15 @@ Build system libraries
   Array
   File
   etc.
+
+
+- DONE
+
+Spawn
+
+Spawned-from information (for debugging purposes, I guess?)
+
+Native libraries
 
 === v0.3 Changes ===
 

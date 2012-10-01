@@ -224,6 +224,21 @@ module Dog
         return resumed_tracks.to_a
       end
       
+      def start_stop_server
+        tracks = Track.find({"state" => Track::STATE::WAITING}, :sort => ["created_at", Mongo::DESCENDING])
+        
+        # TODO - Check if the root track has a listen or not
+        root_has_listen = false
+        
+        if tracks.count > 0 || root_has_listen then
+          Server.run
+        end
+      end
+      
+      
+      
+      
+=begin TODO - Remove this code block once everything stabilizes.
       def run_track(track)
         # TODO - I need to know when I need to save
         
@@ -307,36 +322,25 @@ module Dog
       end
       
       def start_stop_server
-        tracks = Track.find({"state" => Track::STATE::WAITING}, :sort => ["created_at", Mongo::DESCENDING])
+        tracks = Track.find({"state" => { 
+          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
+          }
+        }, :sort => ["created_at", Mongo::DESCENDING])
         
-        # TODO - Check if the root track has a listen or not
-        root_has_listen = false
-        
-        if tracks.count > 0 || root_has_listen then
+        if tracks.count != 0 then
           Server.run
+        else
+          futures = ::Dog::Future.find()
+          if futures.count != 0 then
+            Server.run
+          else
+            EM.next_tick do
+              Process.kill('INT', Process.pid)
+            end
+          end
         end
       end
-      
-      #def start_stop_server
-      #  tracks = Track.find({"state" => { 
-      #    "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
-      #    }
-      #  }, :sort => ["created_at", Mongo::DESCENDING])
-      #  
-      #  if tracks.count != 0 then
-      #    Server.run
-      #  else
-      #    futures = ::Dog::Future.find()
-      #    if futures.count != 0 then
-      #      Server.run
-      #    else
-      #      EM.next_tick do
-      #        Process.kill('INT', Process.pid)
-      #      end
-      #    end
-      #  end
-      #end
-      
+=end
       
       
       
