@@ -30,13 +30,26 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 Figure out futures with new stuff
 
-Listen / Display
-
-PERFORM
+Spawn returns a future...
 
 WAIT
 ON DO
 ON EACH DO
+
+PERFORM
+
+Listen / Display
+
+Client API
+
+Value format
+
+Package format
+
+Import / Package
+
+
+
 
 Collections should be package scoped
 
@@ -45,12 +58,6 @@ Pople.public should be a DEFINEd value, not a type
 Add support for DEFINEd values (and channels)
 
 Change the default package from "" to "default" and have an error message restricting "default" from being used...?
-
-Value format
-
-Package format
-
-Client API
 
 Build system libraries
   Date
