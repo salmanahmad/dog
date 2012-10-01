@@ -15,10 +15,12 @@ module Dog
     module STATE
       RUNNING = "running"
       CALLING = "calling"
-      ASKING = "asking"
       WAITING = "waiting"
-      LISTENING = "listening"
       FINISHED = "finished"
+      
+      # TODO - Remove the following from the code base
+      ASKING = "asking"
+      LISTENING = "listening"
       ERROR = "error"
       DELETED = "deleted"
     end
