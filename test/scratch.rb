@@ -22,12 +22,19 @@ class ScratchTest < Test::Unit::TestCase
   def test_simple
     program = <<-EOD
 
+    DEFINE secret DO
+      PRINT "heheh - I am a secret!"
+    END
+
     DEFINE print MESSAGE message DO
+      IF message == "!" THEN
+        SPAWN COMPUTE secret
+      END
       PRINT message
     END
     
     SPAWN COMPUTE print MESSAGE "Hello!"
-    SPAWN COMPUTE print MESSAGE "Hello!"
+    SPAWN COMPUTE print MESSAGE "!"
     COMPUTE print MESSAGE "Foobarz!!"
 
     EOD
