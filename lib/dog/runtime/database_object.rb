@@ -85,6 +85,12 @@ module Dog
       end
     end
     
+    def remove
+      if self._id then
+        self.class.remove({"_id" => self._id})
+      end
+    end
+    
     def save
       if self._id then
         # TODO - Consider using Collection#find_and_modify for atomic semantics.

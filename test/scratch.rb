@@ -28,14 +28,12 @@ class ScratchTest < Test::Unit::TestCase
     
     SPAWN COMPUTE print MESSAGE "Hello!"
     SPAWN COMPUTE print MESSAGE "Hello!"
-    COMPUTE print MESSAGE "Hello!"
+    COMPUTE print MESSAGE "Foobarz!!"
 
     EOD
 
-    
-    
     tracks = run_source(program)
-    puts tracks.last.variables
+    puts tracks.first.variables
 
   end
 

@@ -43,6 +43,7 @@ require File.join(File.dirname(__FILE__), 'runtime/message.rb')
 require File.join(File.dirname(__FILE__), 'runtime/person.rb')
 require File.join(File.dirname(__FILE__), 'runtime/property.rb')
 require File.join(File.dirname(__FILE__), 'runtime/server.rb')
+require File.join(File.dirname(__FILE__), 'runtime/signal.rb')
 require File.join(File.dirname(__FILE__), 'runtime/task.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track.rb')
 require File.join(File.dirname(__FILE__), 'runtime/value.rb')
@@ -53,16 +54,12 @@ Dir[File.join(File.dirname(__FILE__), "runtime/library", "*.rb")].each { |file| 
 module Dog
   class Runtime
     class << self
-      
-      # TODO - Do I need this anymore?
-      attr_accessor :save_set
-      
       attr_accessor :bundle
       attr_accessor :bundle_filename
       attr_accessor :bundle_directory
+      attr_accessor :scheduled_tracks
       
       def initialize(bundle, bundle_filename = nil, options = {})
-        self.save_set = Set.new
         self.bundle = bundle
         self.bundle_filename = File.expand_path(bundle_filename) rescue nil
         self.bundle_directory = File.dirname(File.expand_path(bundle_filename)) rescue Dir.pwd
@@ -72,6 +69,8 @@ module Dog
         self.bundle.link(::Dog::Library::Community)
         self.bundle.link(::Dog::Library::People)
         self.bundle.link(::Dog::Library::Dog)
+        
+        self.scheduled_tracks = Set.new
         
         options = {
           "config_file" => nil,
@@ -114,17 +113,109 @@ module Dog
         end
         
         tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
-        
         tracks = tracks.to_a.map do |track|
           track = Track.from_hash(track)
         end
         
         for track in tracks do
-          run_track(track)
+          self.schedule(track)
         end
         
+        tracks = self.resume
         start_stop_server
+        
         return tracks
+      end
+
+      def schedule(track)
+        self.scheduled_tracks.add(track)
+      end
+      
+      def resume
+        resumed_tracks = Set.new
+        
+        loop do
+          resumed_tracks.merge(scheduled_tracks)
+          tracks = self.scheduled_tracks.to_a
+          break if tracks.size == 0
+          
+          self.scheduled_tracks = Set.new
+          
+          for track in tracks do
+            next if track.state != Track::STATE::RUNNING
+            
+            loop do
+              instructions = track.context["instructions"]
+              track.next_instruction = nil
+              
+              if instructions.kind_of? Proc then
+                signal = instructions.call(track)
+              else
+                instruction = instructions[track.current_instruction]
+                
+                if instruction.nil? then
+                  track.finish
+                else
+                  begin
+                    signal = instruction.execute(track)
+                  rescue Exception => e
+                    exception = Exception.new("Dog error on line: #{instruction.line} in file: #{instruction.file}.\n\nThe ruby error was: #{e.to_s}")
+                    exception.set_backtrace(e.backtrace)
+                    raise exception
+                  end
+                  
+                  if track.next_instruction then
+                    track.current_instruction = track.next_instruction
+                  else
+                    track.current_instruction += 1
+                  end
+                end
+              end
+              
+              if signal.kind_of?(Signal) && signal.call_track then
+                track = signal.call_track
+              end
+                  
+              if signal.kind_of?(Signal) && signal.schedule_track then
+                self.schedule(signal.schedule_track)
+              end
+                  
+              if track.state == Track::STATE::WAITING then
+                track.save
+                break
+              end
+                  
+              if track.state == Track::STATE::FINISHED then
+                return_value = track.stack.last || ::Dog::Value.null_value
+                return_track = track.control_ancestors.last
+                
+                if return_track then
+                  if return_track.kind_of?(::BSON::ObjectId) then
+                    return_track = Track.find_by_id(return_track)
+                  end
+                  
+                  for name, future in track.futures do
+                    # TODO - What the crapper is going on here?
+                    future = future.to_hash
+                    future = ::Dog::Future.from_hash(future)
+                    return_track.futures[name] = future
+                  end
+                  
+                  return_track.stack.push(return_value)
+                  return_track.state = Track::STATE::RUNNING
+                  
+                  track.remove
+                  track = return_track
+                else
+                  # If this was a spawned track, then I should notify anyone that is waiting on my future...
+                  break
+                end
+              end
+            end
+          end
+        end
+        
+        return resumed_tracks.to_a
       end
       
       def run_track(track)
@@ -210,24 +301,35 @@ module Dog
       end
       
       def start_stop_server
-        tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
-          }
-        }, :sort => ["created_at", Mongo::DESCENDING])
+        tracks = Track.find({"state" => Track::STATE::WAITING}, :sort => ["created_at", Mongo::DESCENDING])
         
-        if tracks.count != 0 then
+        # TODO - Check if the root track has a listen or not
+        root_has_listen = false
+        
+        if tracks.count > 0 || root_has_listen then
           Server.run
-        else
-          futures = ::Dog::Future.find()
-          if futures.count != 0 then
-            Server.run
-          else
-            EM.next_tick do
-              Process.kill('INT', Process.pid)
-            end
-          end
         end
       end
+      
+      #def start_stop_server
+      #  tracks = Track.find({"state" => { 
+      #    "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
+      #    }
+      #  }, :sort => ["created_at", Mongo::DESCENDING])
+      #  
+      #  if tracks.count != 0 then
+      #    Server.run
+      #  else
+      #    futures = ::Dog::Future.find()
+      #    if futures.count != 0 then
+      #      Server.run
+      #    else
+      #      EM.next_tick do
+      #        Process.kill('INT', Process.pid)
+      #      end
+      #    end
+      #  end
+      #end
       
       
       

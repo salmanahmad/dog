@@ -522,12 +522,7 @@ module Dog::Instructions
         name = function["name"].value
         implementation = 0
 
-        puts "Async call" if @async
-
         new_track = ::Dog::Track.new
-        new_track.control_ancestors = track.control_ancestors.clone
-        new_track.control_ancestors << track
-
         new_track.package_name = package
         new_track.function_name = name
         new_track.implementation_name = implementation
@@ -540,9 +535,21 @@ module Dog::Instructions
           variable_name = symbol_arguments[index]
           new_track.variables[variable_name] = argument
         end
+
+        signal = ::Dog::Signal.new
         
-        track.state = ::Dog::Track::STATE::CALLING
-        track.next_track = new_track
+        if @async then
+          # TODO - Handle the return value as a future
+          signal.schedule_track = new_track
+        else
+          new_track.control_ancestors = track.control_ancestors.clone
+          new_track.control_ancestors << track
+          track.state = ::Dog::Track::STATE::CALLING
+          
+          signal.call_track = new_track
+        end
+        
+        return signal
       else
         raise "I don't know how to call a non-function"
       end
@@ -566,7 +573,10 @@ module Dog::Instructions
       new_track.implementation_name = 0
       
       track.state = ::Dog::Track::STATE::CALLING
-      track.next_track = new_track
+      
+      signal = ::Dog::Signal.new
+      signal.call_track = new_track
+      return signal
     end
   end
 

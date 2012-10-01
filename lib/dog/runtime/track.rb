@@ -32,7 +32,6 @@ module Dog
     
     attr_accessor :current_instruction
     attr_accessor :next_instruction
-    attr_accessor :next_track
     
     attr_accessor :stack
     attr_accessor :variables
@@ -72,11 +71,7 @@ module Dog
     end
     
     def finish
-      if self.has_listen then
-        self.state = ::Dog::Track::STATE::LISTENING
-      else
-        self.state = ::Dog::Track::STATE::FINISHED
-      end
+      self.state = ::Dog::Track::STATE::FINISHED
     end
     
     def self.from_hash(hash)

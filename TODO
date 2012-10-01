@@ -22,11 +22,43 @@ How is this different from Go?
 
 
 
+swap current track with this one
+schedule this track to execute at some point
+
+Return an object that bundle "next_track" and "scheduled_track"
+
+Pass next_track, scheduled_track as optional parameters
+
+Use multiple return values
+
+Encode it into the current track
+
+
+RuntimeSignal
 
 
 
 
 
+(1) Introduce a trace and change instructions to operate on a trace
+
+(2) Introduce an return a Instructions::Reply
+  next_instruction
+  spawned_track
+  called_track
+
+(3) I need to change the "run_track" function to be Runtime#schedule(track) and Runtime#resume
+
+
+    calling --> I am calling another function. I am not an active point of execution.
+    
+    waiting --> it is an active point of execution it is waiting for input to resume.
+    
+    running --> it is an active point and it is running...
+    
+    finished --> it is done...
+
+    Note: waiting means waiting in userspace. It does not mean anything about system calls.
 
 
 
@@ -40,6 +72,8 @@ Listen / Display
 PERFORM
 
 Spawn
+
+Spawned-from information (for debugging purposes, I guess?)
 
 Figure out futures with new stuff
 
