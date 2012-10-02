@@ -21,26 +21,43 @@ class ScratchTest < Test::Unit::TestCase
 
   def test_simple
     program = <<-EOD
-
-    DEFINE secret DO
-      PRINT "heheh - I am a secret!"
-    END
-
-    DEFINE print MESSAGE message DO
-      IF message == "!" THEN
-        SPAWN COMPUTE secret
+    
+    
+    DEFINE ponger READS input WRITES output DO
+      i = 0
+      FOREVER DO
+        i = i + 1
+        IF i == 10 THEN
+          message = WAIT ON input
+          COMPUTE future.send TO output VALUE "stop"
+        ELSE
+          message = WAIT ON input
+          message = "Pong: " + message
+          COMPUTE future.send TO output VALUE message
+        END
       END
-      PRINT message
     END
     
-    SPAWN COMPUTE print MESSAGE "Hello!"
-    SPAWN COMPUTE print MESSAGE "!"
-    COMPUTE print MESSAGE "Foobarz!!"
+    input = COMPUTE future.channel BUFFER 1
+    output = COMPUTE future.channel BUFFER 1
+    
+    SPAWN COMPUTE ponger READS output WRITES input
+    
+    FOREVER DO
+      COMPUTE future.send TO output VALUE "Hi"
+      message = WAIT ON input
+      PRINT "I Got '" + message + "'"
+      IF message == "stop" THEN
+        BREAK
+      END
+    END
+    
+    
 
     EOD
 
     tracks = run_source(program)
-    puts tracks.first.variables
+    #puts tracks.first.variables
 
   end
 

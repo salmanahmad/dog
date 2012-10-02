@@ -1,6 +1,9 @@
 
 
 
+Look into why printing is so slow
+
+
 
 Spawn schedules a thread to run.
 
@@ -15,6 +18,29 @@ When we address PROC_COUNT we will also want to address or CLUSTER notion where 
 We will also have a YIELD (perhaps COMPUTE system.yield) that will say, "stop running me, and run something else." It basically tells the scheduler to skip me for now and come back. If there is no other threads running, then the current thread will resume naturally.
 
 
+
+== Futures and Garbage Collection ==
+
+When you create a future, a record is always created in the futures table. Whenever you access a future, this future table is consulated either for queued up messages or for the actual value itself.
+
+Access algorithm is to: Check for queued messages. If none, check value. If nil, wait.
+
+The trick now, is when to remove the record from the futures table. We remove this record when no one else has that future in scope. How do we do this? We track assignments. DogValue's have another property called "futures_inside". For an actual future, this array is of size 1 (contains itself). Whenever you assign a value to another value in a structure you remove the old "futures_inside" and add the new "futures_inside". Keep in mind that futures_inside is an array, not a set so duplicates are okay and removing value is fine because if someone else has that same value we are okay. 
+
+Then, whenever a track returns it check to see if any of it is the "last" holder of any future and then remove that future accordingly. To check, we search all of the tracks to see if "futures_inside" in any of the variables or the stack contain the future we are looking for.
+
+Alternatively, we run the garbage collector once every couple of hours to clear this up.
+
+Note: When returning from a function, the "returner" should only attempt to reap the futures that it has but it is not returning. (for obvious reasons). 
+
+Note: We may want to use a "futures_inside" field in tracks that write_variable and stack/push/pop operate on to make things a bit easier.
+
+== Channel Functionality == 
+
+Channels behave like Publisher / Subscriber when multiple people are listening and Producer / Consumer when you are going back and forth with one person. You Acheieve a worker queue and gauaranteed Producer / Consumer model by having a broker in the middle.
+
+
+== Done ==
 
 
 

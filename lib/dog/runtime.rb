@@ -66,6 +66,7 @@ module Dog
         
         self.bundle.link(::Dog::Library::System)
         self.bundle.link(::Dog::Library::Collection)
+        self.bundle.link(::Dog::Library::Future)
         self.bundle.link(::Dog::Library::Community)
         self.bundle.link(::Dog::Library::People)
         self.bundle.link(::Dog::Library::Dog)
@@ -141,9 +142,11 @@ module Dog
         resumed_tracks = Set.new
         
         loop do
-          resumed_tracks.merge(scheduled_tracks)
+          resumed_tracks.merge(self.scheduled_tracks)
           tracks = self.scheduled_tracks.to_a
-          break if tracks.size == 0
+          if tracks.size == 0
+            break 
+          end
           
           self.scheduled_tracks = Set.new
           
@@ -182,8 +185,10 @@ module Dog
                 track = signal.call_track
               end
                   
-              if signal.kind_of?(Signal) && signal.schedule_track then
-                self.schedule(signal.schedule_track)
+              if signal.kind_of?(Signal) && signal.schedule_tracks then
+                for t in signal.schedule_tracks do
+                  self.schedule(t)
+                end
               end
                   
               if track.state == Track::STATE::WAITING then

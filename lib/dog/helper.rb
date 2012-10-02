@@ -20,6 +20,10 @@ module Dog
 
   module Helper
     
+    def self.warn(message)
+      puts "Warning: #{message}"
+    end
+    
     def self.person_matches_routing(person, routing)
       return true if routing.nil? or routing.size <= 0
 

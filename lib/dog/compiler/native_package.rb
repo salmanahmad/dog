@@ -154,6 +154,10 @@ module Dog
           throw :signal
         end
         
+        def set_signal(signal)
+          self.signal = signal
+        end
+        
         def dog_return(value = ::Dog::Value.null_value)
           
           if value.kind_of? ::Dog::Value then
@@ -257,8 +261,9 @@ module Dog
               helper.instance_exec(track, &i.instructions)
               track.stack.push(::Dog::Value.null_value)
             end
+
             track.finish
-            return nil
+            return helper.signal
           end
           return helper.signal
         end

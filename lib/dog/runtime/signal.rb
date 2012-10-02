@@ -10,7 +10,7 @@
 module Dog
   class Signal
     attr_accessor :call_track
-    attr_accessor :schedule_track
+    attr_accessor :schedule_tracks
     attr_accessor :pause
     attr_accessor :stop
     attr_accessor :exit

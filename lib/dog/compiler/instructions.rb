@@ -176,11 +176,19 @@ module Dog::Instructions
 
           future = ::Dog::Future.find_one({"value_id" => value._id})
           future = ::Dog::Future.new(value._id, value) if future.nil?
-          future.tracks << track
-          future.save
-
-          track.next_instruction = track.current_instruction
-          track.state = ::Dog::Track::STATE::WAITING
+          
+          if future.queue.kind_of?(Array) && future.queue.size > 0 then
+            value = future.queue.shift
+            future.save
+            
+            track.stack.push(value)
+          else
+            future.tracks << track
+            future.save
+            
+            track.state = ::Dog::Track::STATE::WAITING
+          end
+          
           return
         end
       end
@@ -308,6 +316,7 @@ module Dog::Instructions
             raise "Runtime error"
           end
 
+          # TODO - THis is a bug here... I need to count...
           if item == path.last then
             pointer[key] = value
           else
@@ -348,6 +357,7 @@ module Dog::Instructions
       
       if value.nil? && ["cascade", "external"].include?(scope) then
         package = ::Dog::Runtime.bundle.packages[@variable_name]
+        
         if package then
           value = ::Dog::Value.new("dog.package", {})
           
@@ -526,7 +536,7 @@ module Dog::Instructions
         if @async then
           # TODO - Handle the return value as a future
           new_track = ::Dog::Track.invoke(name, package, arguments)
-          signal.schedule_track = new_track
+          signal.schedule_tracks = [new_track]
         else
           new_track = ::Dog::Track.invoke(name, package, arguments, track)
           signal.call_track = new_track

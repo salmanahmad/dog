@@ -14,12 +14,14 @@ module Dog
     attr_accessor :_id
     attr_accessor :value_id
     attr_accessor :value
+    attr_accessor :queue
     attr_accessor :tracks
     attr_accessor :handlers
     
     def initialize(id = nil, value = nil)
       self.value_id = id
       self.value = value
+      self.queue = []
       self.tracks = []
       self.handlers = []
     end
@@ -40,9 +42,14 @@ module Dog
         handler.to_hash
       end
       
+      queue = self.queue.map do |value|
+        value.to_hash
+      end
+      
       hash = {
         "value_id" => self.value_id,
         "value" => self.value.to_hash,
+        "queue" => queue,
         "tracks" => tracks,
         "handlers" => handlers
       }
@@ -53,6 +60,10 @@ module Dog
     def self.from_hash(hash)
       object = super
       object.value = ::Dog::Value.from_hash(object.value)
+      
+      object.queue = object.queue.map do |item|
+        ::Dog::Value.from_hash(item)
+      end
       
       return object
     end
