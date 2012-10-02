@@ -36,7 +36,7 @@ module Dog::Library
         value.channel_mode = true
 
         # TODO - Implement the garbage collection for futures
-        future = ::Dog::Future.new(value._id, value)
+        future = ::Dog::Future.new(value._id)
         future.save
 
         dog_return(value)
@@ -55,14 +55,14 @@ module Dog::Library
           future = ::Dog::Future.find_one({"value_id" => channel._id})
           
           if future then
-            if future.tracks.empty? && future.handlers.empty? then
+            if future.broadcast_tracks.empty? && future.handlers.empty? then
               future.queue << value
               future.save
             else
               signal = ::Dog::Signal.new
               signal.schedule_tracks = []
               
-              for track_id in future.tracks do
+              for track_id in future.broadcast_tracks do
                 do_not_schedule = false
                 
                 ::Dog::Runtime.scheduled_tracks.each do |t|
@@ -83,7 +83,7 @@ module Dog::Library
                 # TODO - Handle ON EACH
               end
               
-              future.tracks = []
+              future.broadcast_tracks = []
               future.save
               set_signal(signal)
             end

@@ -168,32 +168,28 @@ module Dog::Instructions
       value = track.stack.pop
 
       if value.pending then
-        if track.futures[value._id] then
-          value = track.futures[value._id]
-          track.state = ::Dog::Track::STATE::RUNNING
-        else
-          track.stack.push(value)
-
-          future = ::Dog::Future.find_one({"value_id" => value._id})
-          future = ::Dog::Future.new(value._id, value) if future.nil?
-          
-          if future.queue.kind_of?(Array) && future.queue.size > 0 then
-            value = future.queue.shift
-            future.save
-            
-            track.stack.push(value)
-          else
-            future.tracks << track
-            future.save
-            
-            track.state = ::Dog::Track::STATE::WAITING
-          end
-          
-          return
+        future = ::Dog::Future.find_one({"value_id" => value._id})
+        
+        if future.nil?
+          raise "Runtime error: Could not find the future"
         end
+        
+        if future.queue.kind_of?(Array) && future.queue.size > 0 then
+          value = future.queue.shift
+          future.save
+          track.stack.push(value)
+        elsif !future.value.nil? then
+          value = future.value
+          track.stack.push(value)
+        else
+          future.broadcast_tracks << track
+          future.save
+          
+          track.state = ::Dog::Track::STATE::WAITING
+        end
+      else
+        track.stack.push(value)
       end
-      
-      track.stack.push(value)
     end
   end
   
