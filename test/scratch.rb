@@ -19,14 +19,29 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'test_helper.rb'))
 class ScratchTest < Test::Unit::TestCase
   include RuntimeHelper
 
-  def test_simple
+  def test_on_each
+    
     program = <<-EOD
+
+    DEFINE write TO channel MESSAGE m DO
+      COMPUTE future.send TO channel VALUE m
+    END
+
+    messages = COMPUTE future.channel BUFFER 1
+    
+    ON EACH message DO
+      PRINT message
+    END
+    
+    COMPUTE future.send TO messages VALUE 1
     
     
     EOD
 
     tracks = run_source(program)
+    
   end
+
 
   
 end

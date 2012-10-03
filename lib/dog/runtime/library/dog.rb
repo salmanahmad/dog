@@ -14,7 +14,19 @@ module Dog::Library
     name "dog"
 
     structure "array" do
-      
+
+    end
+
+    structure "structure" do
+
+    end
+
+    structure "function" do
+
+    end
+
+    structure "type" do
+
     end
 
     structure "query" do

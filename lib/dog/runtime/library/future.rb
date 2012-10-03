@@ -47,6 +47,40 @@ module Dog::Library
       end
     end
 
+    implementation "is:value:from_future" do
+      argument "value"
+      argument "future"
+      
+      body do |track|
+        value = variable("value")
+        future = variable("future")
+        
+        if value.from_future == future._id || value._id == future._id then
+          dog_return(::Dog::Value.true_value)
+        else
+          dog_return(::Dog::Value.false_value)
+        end
+        
+      end
+    end
+    
+    implementation "register:handler:for" do
+      argument "handler"
+      argument "future"
+      
+      body do |track|
+        handler = variable("handler")
+        future = variable("future")
+        
+        if future.pending then
+          future = ::Dog::Future.find_one({"value_id" => future._id})
+          
+          future.handlers << ("#{handler["package"].value}.#{handler["name"].value}")
+          future.save
+        end
+      end
+    end
+
     implementation "complete:future:with" do
       argument "future"
       argument "value"
@@ -90,7 +124,10 @@ module Dog::Library
           end
 
           for handler in future.handlers do
-            # TODO - Handle ON EACH
+            handler = handler.split(".")
+            track_to_schedule = ::Dog::Track.invoke(handler[1], handler[0], [value])
+            track_to_schedule.state = ::Dog::Track::STATE::RUNNING
+            signal.schedule_tracks << track_to_schedule
           end
 
           future.blocking_tracks = []
@@ -99,23 +136,6 @@ module Dog::Library
           future.save
           set_signal(signal)
         end
-      end
-    end
-
-    implementation "is:value:from_future" do
-      argument "value"
-      argument "future"
-      
-      body do |track|
-        value = variable("value")
-        future = variable("future")
-        
-        if value.from_future == future._id || value._id == future._id then
-          dog_return(::Dog::Value.true_value)
-        else
-          dog_return(::Dog::Value.false_value)
-        end
-        
       end
     end
 
@@ -160,7 +180,10 @@ module Dog::Library
               end
               
               for handler in future.handlers do
-                # TODO - Handle ON EACH
+                handler = handler.split(".")
+                track_to_schedule = ::Dog::Track.invoke(handler[1], handler[0], [value])
+                track_to_schedule.state = ::Dog::Track::STATE::RUNNING
+                signal.schedule_tracks << track_to_schedule
               end
               
               future.broadcast_tracks = []

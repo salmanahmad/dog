@@ -1105,8 +1105,38 @@ grammar Dog
   rule on_each
     'ON' sn 'EACH' in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform
-        # TODO - Update for v0.3
-        return
+        in_args = in_clause.transform
+
+        if !statements.empty? then
+          body = statements.transform
+        else
+          body = ::Dog::Nodes::Nodes.new([])
+        end
+
+        if in_args[1].nil? then
+          in_args[1] = ::Dog::Nodes::Access.new([::Dog::Language.pluralize(in_args[0])])
+        end
+
+        function_name = "@anonymous_function_#{::Dog::Helper.unique_number}"
+        function = ::Dog::Nodes::FunctionDefinition.new(function_name, [in_args[0]], body)
+        function.line = self.line
+
+        function_pointer = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "function"]), {
+          "name" => ::Dog::Nodes::StringLiteral.new(function_name),
+          "package" => ::Dog::Nodes::StringLiteral.new(self.package)
+        })
+        function_pointer.line = self.line
+
+        function_call = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["future", "register:handler:for"]),
+          [function_pointer, in_args[1]]
+        )
+        function_call.line = self.line
+
+        nodes = ::Dog::Nodes::Nodes.new([function, function_call])
+        nodes.line = self.line
+
+        return nodes
       end
     }
   end

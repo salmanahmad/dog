@@ -63,10 +63,6 @@ module Dog
         end
       end
       
-      handlers = self.handlers.map do |handler|
-        handler.to_hash
-      end
-      
       queue = self.queue.map do |value|
         value.to_hash
       end

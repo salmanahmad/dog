@@ -185,9 +185,34 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
   end
   
   
+  def test_on_each
+    
+    program = <<-EOD
+
+    DEFINE write TO channel MESSAGE m DO
+      COMPUTE future.send TO channel VALUE m
+    END
+
+    messages = COMPUTE future.channel BUFFER 1
+    
+    ON EACH message DO
+      PRINT message
+    END
+    
+    COMPUTE future.send TO messages VALUE "1"
+    COMPUTE future.send TO messages VALUE "2"
+    
+    
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("1\n2", output)
+
+    
+  end
+  
+  
   def test_on_single_in
-    
-    
     program = <<-EOD
 
     DEFINE write TO channel MESSAGE m DO
