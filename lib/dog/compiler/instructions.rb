@@ -234,6 +234,7 @@ module Dog::Instructions
             break
           else
             if pointer.pending then
+              # TODO - Refactor this with Perform and Wait and Access
               future = ::Dog::Future.find_one({"value_id" => pointer._id})
 
               if future.nil? then
@@ -384,6 +385,47 @@ module Dog::Instructions
     end
 
     def execute(track)
+      operands = []
+
+      if @operation == "!"
+        operands << track.stack.pop
+      else
+        operands << track.stack.pop
+        operands << track.stack.pop
+      end
+
+      new_operands = []
+
+      for operand in operands do
+        if operand.pending then
+          # TODO - Refactor this with Perform and Wait and Access
+          future = ::Dog::Future.find_one({"value_id" => operand._id})
+
+          if future.nil? then
+            raise "Runtime error: Could not find the future"
+          end
+
+          if !future.value.nil? then
+            new_operands << future.value
+          else
+            future.blocking_tracks << track
+            future.save
+
+            track.stack.concat(operands)
+            track.next_instruction = track.current_instruction
+            track.state = ::Dog::Track::STATE::WAITING
+            return
+          end
+        else
+          new_operands << operand
+        end
+
+      end
+
+      track.stack.concat(new_operands)
+
+
+
       case @operation
       when "OR"
         arg2 = track.stack.pop.ruby_value
