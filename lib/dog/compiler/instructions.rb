@@ -411,7 +411,7 @@ module Dog::Instructions
             future.blocking_tracks << track
             future.save
 
-            track.stack.concat(operands)
+            track.stack.concat(operands.reverse)
             track.next_instruction = track.current_instruction
             track.state = ::Dog::Track::STATE::WAITING
             return
@@ -422,7 +422,7 @@ module Dog::Instructions
 
       end
 
-      track.stack.concat(new_operands)
+      track.stack.concat(new_operands.reverse)
 
 
 

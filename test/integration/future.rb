@@ -40,7 +40,7 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
     program = <<-EOD
     
     DEFINE write TO i DO
-      COMPUTE future.complete FUTURE i WITH {name = "hi"}
+      COMPUTE future.complete FUTURE i WITH {name = {foo = "hi"}}
     END
     
     DEFINE read DO
@@ -51,7 +51,7 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
     
     i = COMPUTE read
 
-    x = i.name
+    x = i.name.foo
     
     EOD
 
