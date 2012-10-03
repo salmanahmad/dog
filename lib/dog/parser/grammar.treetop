@@ -1021,20 +1021,87 @@ grammar Dog
   rule on
     'ON' in_clause 'DO' sn statements:(statements)? on_else:(on_else)* s? 'END' {
       def transform
-        # TODO - Update for v0.3
-        return
+        
+        main_branch = [self.line, in_clause.transform]
+        
+        if statements.empty? then
+          main_branch << nil
+        else
+          main_branch << statements.transform
+        end
+        
+        branches = [main_branch]
+        
+        if !on_else.empty? then
+          for e in on_else.elements do
+            branches << e.transform
+          end
+        end
+        
+        wait_variable = "wait_on_#{::Dog::Helper.unique_number}"
+        wait_expressions = []
+        
+        for branch in branches do
+          if branch[1][1].nil? then
+            branch[1][1] = ::Dog::Nodes::Access.new([::Dog::Language.pluralize(branch[1][0])])
+          end
+          
+          wait_expressions << branch[1][1]
+        end
+        
+        instructions = []
+        
+        wait = ::Dog::Nodes::Wait.new(wait_expressions)
+        wait.line = self.line
+        
+        wait_assignment = ::Dog::Nodes::Assign.new([wait_variable], wait)
+        wait_assignment.line = self.line
+        
+        instructions << wait_assignment
+        
+        for branch in branches do
+          b = ::Dog::Nodes::Branch.new(
+            ::Dog::Nodes::Call.new(
+              ::Dog::Nodes::Access.new(["future", "is:value:from_future"]), 
+              [::Dog::Nodes::Access.new([wait_variable]), branch[1][1]]
+            ),
+            ::Dog::Nodes::Nodes.new([
+              ::Dog::Nodes::Assign.new(
+                [branch[1][0]],
+                ::Dog::Nodes::Access.new([wait_variable])
+              ),
+              branch[2]
+            ])
+          )
+          b.line = branch[0]
+
+          instructions << b
+        end
+
+        node = ::Dog::Nodes::Nodes.new(instructions)
+        node.line = self.line
+        
+        return node
       end
     }
   end
-  
+
   rule on_else
     sn? 'ELSE' s 'ON' in_clause 'DO' sn statements:(statements)? {
      def transform
-       # TODO - Update for v0.3
+       output = [self.line, in_clause.transform]
+
+       if statements.empty? then
+         output << nil
+       else
+         output << statements.transform
+       end
+
+       return output
      end 
     }
   end
-  
+
   rule on_each
     'ON' sn 'EACH' in_clause 'DO' sn statements:(statements)? s? 'END' {
       def transform

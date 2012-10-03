@@ -54,48 +54,67 @@ module Dog::Library
       body do |track|
         future = variable("future")
         value = variable("value")
-        
-        future = ::Dog::Future.find_one({"value_id" => future._id})
-        future.value = value
-        
-        signal = ::Dog::Signal.new
-        signal.schedule_tracks = []
-        
-        for track_id in future.blocking_tracks do
-          track_to_schedule = ::Dog::Track.find_by_id(track_id)
-          track_to_schedule.state = ::Dog::Track::STATE::RUNNING
-          signal.schedule_tracks << track_to_schedule
-        end
-        
-        for track_id in future.broadcast_tracks do
-          do_not_schedule = false
-                
-          ::Dog::Runtime.scheduled_tracks.each do |t|
-            if t._id == track_id then
-              do_not_schedule = true
-            end
-          end
+
+        if future.pending
+          value.from_future = future._id
           
-          unless do_not_schedule then
-            Future.remove_broadcast_track_from_all(track_id)
-            
+          future = ::Dog::Future.find_one({"value_id" => future._id})
+          future.value = value
+
+          signal = ::Dog::Signal.new
+          signal.schedule_tracks = []
+
+          for track_id in future.blocking_tracks do
             track_to_schedule = ::Dog::Track.find_by_id(track_id)
-            track_to_schedule.stack.push(value)
             track_to_schedule.state = ::Dog::Track::STATE::RUNNING
             signal.schedule_tracks << track_to_schedule
           end
+
+          for track_id in future.broadcast_tracks do
+            do_not_schedule = false
+
+            ::Dog::Runtime.scheduled_tracks.each do |t|
+              if t._id == track_id then
+                do_not_schedule = true
+              end
+            end
+
+            unless do_not_schedule then
+              Future.remove_broadcast_track_from_all(track_id)
+
+              track_to_schedule = ::Dog::Track.find_by_id(track_id)
+              track_to_schedule.stack.push(value)
+              track_to_schedule.state = ::Dog::Track::STATE::RUNNING
+              signal.schedule_tracks << track_to_schedule
+            end
+          end
+
+          for handler in future.handlers do
+            # TODO - Handle ON EACH
+          end
+
+          future.blocking_tracks = []
+          future.broadcast_tracks = []
+
+          future.save
+          set_signal(signal)
         end
+      end
+    end
+
+    implementation "is:value:from_future" do
+      argument "value"
+      argument "future"
+      
+      body do |track|
+        value = variable("value")
+        future = variable("future")
         
-        for handler in future.handlers do
-          # TODO - Handle ON EACH
+        if value.from_future == future._id || value._id == future._id then
+          dog_return(::Dog::Value.true_value)
+        else
+          dog_return(::Dog::Value.false_value)
         end
-        
-        future.blocking_tracks = []
-        future.broadcast_tracks = []
-        
-        future.save
-        set_signal(signal)
-        
         
       end
     end
@@ -109,6 +128,8 @@ module Dog::Library
         value = variable("value")
 
         if channel.pending then
+          value.from_future = channel._id
+          
           future = ::Dog::Future.find_one({"value_id" => channel._id})
           
           if future then

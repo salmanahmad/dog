@@ -127,4 +127,88 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
   end
   
   
+  
+  def test_value_from_future
+    program = <<-EOD
+
+    DEFINE write TO channel MESSAGE m DO
+      COMPUTE future.send TO channel VALUE m
+    END
+
+    ch1 = COMPUTE future.channel BUFFER 1
+    ch2 = COMPUTE future.channel BUFFER 1
+
+    SPAWN COMPUTE write TO ch1 MESSAGE "1"
+    SPAWN COMPUTE write TO ch2 MESSAGE "2"
+
+    i = WAIT ON ch1, ch2
+    
+    IF (COMPUTE future.is VALUE i FROM_FUTURE ch1) THEN
+      PRINT "Okay!"
+    END
+    
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("Okay!", output)
+  end
+  
+  
+  def test_on
+    
+    
+    program = <<-EOD
+
+    DEFINE write TO channel MESSAGE m DO
+      COMPUTE future.send TO channel VALUE m
+    END
+
+    ch1 = COMPUTE future.channel BUFFER 1
+    ch2 = COMPUTE future.channel BUFFER 1
+
+    SPAWN COMPUTE write TO ch1 MESSAGE "1"
+    SPAWN COMPUTE write TO ch2 MESSAGE "2"
+    
+    REPEAT 2 DO
+      ON message IN ch1 DO
+        PRINT "From ch1"
+      ELSE ON message IN ch2 DO
+        PRINT "From ch2"
+      END
+    END
+    
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("From ch1\nFrom ch2", output)
+
+  end
+  
+  
+  def test_on_single_in
+    
+    
+    program = <<-EOD
+
+    DEFINE write TO channel MESSAGE m DO
+      COMPUTE future.send TO channel VALUE m
+    END
+
+    messages = COMPUTE future.channel BUFFER 1
+
+    SPAWN COMPUTE write TO messages MESSAGE "Hello"
+    
+    ON message DO
+      PRINT message
+    END
+    
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("Hello", output)
+
+  end
+  
+  
+  
 end

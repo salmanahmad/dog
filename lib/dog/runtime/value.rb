@@ -13,6 +13,7 @@ module Dog
     # TODO - The type in a value should be scoped to the package as well. Otherwise, we could have two 'people' structs
     attr_accessor :_id
     attr_accessor :pending
+    attr_accessor :from_future
     attr_accessor :buffer_size
     attr_accessor :channel_mode
     attr_accessor :person
@@ -27,6 +28,7 @@ module Dog
       self.type = type
       self.value = value
       self.pending = false
+      self.from_future = nil
     end
     
     def self.primitive_types
@@ -44,6 +46,7 @@ module Dog
         return {
           "_id" => self._id,
           "pending" => self.pending,
+          "from_future" => self.from_future,
           "buffer_size" => self.buffer_size,
           "channel_mode" => self.channel_mode,
           "person" => person,
@@ -69,6 +72,7 @@ module Dog
         return {
           "_id" => self._id,
           "pending" => self.pending,
+          "from_future" => self.from_future,
           "buffer_size" => self.buffer_size,
           "channel_mode" => self.channel_mode,
           "person" => person,
@@ -138,6 +142,7 @@ module Dog
       value = Value.new
       value._id = hash["_id"]
       value.pending = hash["pending"]
+      value.from_future = hash["from_future"]
       value.buffer_size = hash["buffer_size"]
       value.channel_mode = hash["channel_mode"]
       value.person = hash["person"]

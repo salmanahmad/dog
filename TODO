@@ -56,15 +56,13 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 Spawn returns a future...
 
-WAIT
-ON DO
 ON EACH DO
-
-PERFORM
 
 Listen / Display
 
 Client API
+
+PERFORM
 
 Value format
 
@@ -73,7 +71,7 @@ Package format
 Import / Package
 
 
-
+Are native functions being passed by reference or value? It should be value...I think...maybe...
 
 Collections should be package scoped
 
@@ -93,6 +91,10 @@ Build system libraries
 
 
 - DONE
+
+WAIT
+
+ON DO
 
 Figure out futures with new stuff
 
