@@ -24,18 +24,16 @@ class ScratchTest < Test::Unit::TestCase
     
     
     DEFINE ponger READS input WRITES output DO
-      i = 0
-      FOREVER DO
-        i = i + 1
-        IF i == 10 THEN
-          message = WAIT ON input
-          COMPUTE future.send TO output VALUE "stop"
-        ELSE
-          message = WAIT ON input
-          message = "Pong: " + message
-          COMPUTE future.send TO output VALUE message
-        END
+      REPEAT 10 TIMES 
+        message = WAIT ON input
+        message = "Pong: " + message
+        COMPUTE future.send TO output VALUE message
       END
+      
+      message = WAIT ON input
+      COMPUTE future.send TO output VALUE "stop"
+      
+      RETURN
     END
     
     input = COMPUTE future.channel BUFFER 1
@@ -46,7 +44,9 @@ class ScratchTest < Test::Unit::TestCase
     FOREVER DO
       COMPUTE future.send TO output VALUE "Hi"
       message = WAIT ON input
+      
       PRINT "I Got '" + message + "'"
+      
       IF message == "stop" THEN
         BREAK
       END
