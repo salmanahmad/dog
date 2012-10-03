@@ -565,18 +565,20 @@ module Dog::Nodes
   end
 
   class Wait < Node
-    attr_accessor :expression
-    
-    def initialize(expression)
-      @expression = expression
+    attr_accessor :expressions
+
+    def initialize(expressions)
+      @expressions = expressions
     end
-    
+
     def compile(package)
-      expression.compile(package)
-      
-      wait = ::Dog::Instructions::Wait.new
+      for expression in @expressions do
+        expression.compile(package)
+      end
+
+      wait = ::Dog::Instructions::Wait.new(@expressions.size)
       set_instruction_context(wait)
-      
+
       package.add_to_instructions([wait])
     end
   end

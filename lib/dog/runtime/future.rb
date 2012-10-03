@@ -28,6 +28,18 @@ module Dog
       self.handlers = []
     end
     
+    def self.remove_broadcast_track_from_all(track_id)
+      self.update({
+        "broadcast_tracks" => track_id
+      }, { 
+        "$pull" => { 
+          "broadcast_tracks" => track_id 
+        } 
+      }, {
+        :multi => true
+      })
+    end
+    
     def to_hash
       blocking_tracks = self.blocking_tracks.map do |item|
         if item.kind_of? Track then

@@ -77,6 +77,8 @@ module Dog::Library
           end
           
           unless do_not_schedule then
+            Future.remove_broadcast_track_from_all(track_id)
+            
             track_to_schedule = ::Dog::Track.find_by_id(track_id)
             track_to_schedule.stack.push(value)
             track_to_schedule.state = ::Dog::Track::STATE::RUNNING
@@ -127,6 +129,8 @@ module Dog::Library
                 end
                 
                 unless do_not_schedule then
+                  ::Dog::Future.remove_broadcast_track_from_all(track_id)
+                  
                   track_to_schedule = ::Dog::Track.find_by_id(track_id)
                   track_to_schedule.stack.push(value)
                   track_to_schedule.state = ::Dog::Track::STATE::RUNNING

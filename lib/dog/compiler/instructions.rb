@@ -162,33 +162,50 @@ module Dog::Instructions
       track.stack.push(::Dog::Value.empty_structure())
     end
   end
-  
-  class Wait < Instruction
-    def execute(track)
-      value = track.stack.pop
 
-      if value.pending then
-        future = ::Dog::Future.find_one({"value_id" => value._id})
-        
-        if future.nil?
-          raise "Runtime error: Could not find the future"
-        end
-        
-        if future.queue.kind_of?(Array) && future.queue.size > 0 then
-          value = future.queue.shift
-          future.save
-          track.stack.push(value)
-        elsif !future.value.nil? then
-          value = future.value
-          track.stack.push(value)
-        else
-          future.broadcast_tracks << track
-          future.save
+  class Wait < Instruction
+    attribute :future_count
+
+    def initialize(future_count)
+      @future_count = future_count
+    end
+
+    def execute(track)
+      futures = track.stack.pop(@future_count)
+
+      for value in futures do
+        if value.pending then
+          future = ::Dog::Future.find_one({"value_id" => value._id})
           
-          track.state = ::Dog::Track::STATE::WAITING
+          if future.nil?
+            raise "Runtime error: Could not find the future"
+          end
+          
+          if future.queue.kind_of?(Array) && future.queue.size > 0 then
+            value = future.queue.shift
+            future.save
+            track.stack.push(value)
+            
+            track.state = ::Dog::Track::STATE::RUNNING
+            return
+          elsif !future.value.nil? then
+            value = future.value
+            track.stack.push(value)
+            
+            track.state = ::Dog::Track::STATE::RUNNING
+            return
+          else
+            future.broadcast_tracks << track
+            future.save
+            
+            track.state = ::Dog::Track::STATE::WAITING
+          end
+        else
+          track.stack.push(value)
+          
+          track.state = ::Dog::Track::STATE::RUNNING
+          return
         end
-      else
-        track.stack.push(value)
       end
     end
   end

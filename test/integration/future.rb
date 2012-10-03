@@ -58,4 +58,73 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
     tracks = run_source(program)
     assert_equal("hi", tracks.last.variables["x"].ruby_value)
   end
+  
+  def test_channels
+    program = <<-EOD
+
+    DEFINE ponger READS input WRITES output DO
+      REPEAT 3 TIMES 
+        message = WAIT ON input
+        message = "Pong: " + message
+        COMPUTE future.send TO output VALUE message
+      END
+
+      message = WAIT ON input
+      COMPUTE future.send TO output VALUE "stop"
+
+      RETURN
+    END
+
+    input = COMPUTE future.channel BUFFER 1
+    output = COMPUTE future.channel BUFFER 1
+
+    SPAWN COMPUTE ponger READS output WRITES input
+
+    FOREVER DO
+      COMPUTE future.send TO output VALUE "Hi"
+      message = WAIT ON input
+
+      PRINT "I Got '" + message + "'"
+
+      IF message == "stop" THEN
+        BREAK
+      END
+    END
+
+    EOD
+
+    the_output = "I Got 'Pong: Hi'\nI Got 'Pong: Hi'\nI Got 'Pong: Hi'\nI Got 'stop'"
+    tracks, output = run_source(program, true)
+    assert_equal(the_output, output)
+  end
+  
+  
+  def test_wait_multiple
+    program = <<-EOD
+
+    DEFINE write TO channel MESSAGE m DO
+      COMPUTE future.send TO channel VALUE m
+    END
+
+    ch1 = COMPUTE future.channel BUFFER 1
+    ch2 = COMPUTE future.channel BUFFER 1
+    ch3 = COMPUTE future.channel BUFFER 1
+
+    SPAWN COMPUTE write TO ch1 MESSAGE "1"
+    SPAWN COMPUTE write TO ch2 MESSAGE "2"
+    SPAWN COMPUTE write TO ch3 MESSAGE "3"
+
+    REPEAT 3 TIMES 
+      i = WAIT ON ch1, ch2, ch3
+
+      PRINT i
+    END
+
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal([1,2,3].join("\n"), output)
+  end
+  
+  
 end

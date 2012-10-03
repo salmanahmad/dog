@@ -39,6 +39,10 @@ module Dog
       return object
     end
     
+    def self.update(selector, document, opts = {})
+      ::Dog::database[self.collection_name].update(selector, document, opts)
+    end
+    
     def self.remove(selector = {}, opts = {})
       ::Dog::database[self.collection_name].remove(selector, opts)
     end

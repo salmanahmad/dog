@@ -1181,9 +1181,16 @@ grammar Dog
   # ===================
   
   rule wait
-  'WAIT' s 'ON' s expression {
+  'WAIT' s 'ON' s first:expression rest:(s? ',' s? expression)* {
     def transform
-      node = ::Dog::Nodes::Wait.new(expression.transform)
+      
+      expressions = [first.transform]
+      
+      for e in rest.elements do
+        expressions << e.expression.transform
+      end
+      
+      node = ::Dog::Nodes::Wait.new(expressions)
       node.line = self.line
       
       return node
