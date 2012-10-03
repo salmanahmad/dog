@@ -204,73 +204,54 @@ module Dog::Instructions
       if @path_size > 1 then
         path = track.stack.pop(@path_size)
 
-        if path.first.pending then
-          id = path.first._id
-          if track.futures[id] then
-            new_value = track.futures[id].to_hash
-            new_value = ::Dog::Value.from_hash(new_value)
+        pointer = nil
 
-            path.shift
-            path.unshift(new_value)
+        count = -1
+        for item in path do
+          count += 1
 
-            track.state = ::Dog::Track::STATE::RUNNING
+          if count == 0 then
+            pointer = item
           else
-            track.stack.concat(path)
+            key = ""
 
-            value = path.first
+            item_value = item
+            item_value = item.value if item.kind_of? ::Dog::Value
 
-            future = ::Dog::Future.find_one({"value_id" => value._id})
-            future = ::Dog::Future.new(value._id, value) if future.nil?
-            future.tracks << track
-            future.save
-
-            track.next_instruction = track.current_instruction
-            track.state = ::Dog::Track::STATE::WAITING
-            return
-          end
-        end
-
-        pointer = path.first
-
-        for item in path[1, path.size - 1] do
-          key = ""
-
-          item_value = item
-          item_value = item.value if item.kind_of? ::Dog::Value
-
-          if item_value.kind_of? String then
-            key = item_value.to_s
-          elsif item_value.kind_of? Numeric then
-            key = item_value.to_f
-          else
-            raise "Access error"
-          end
-
-          if pointer.pending then
-            if track.futures[pointer._id] then
-              pointer = track.futures[pointer._id]
-              track.state = ::Dog::Track::STATE::RUNNING
+            if item_value.kind_of? String then
+              key = item_value.to_s
+            elsif item_value.kind_of? Numeric then
+              key = item_value.to_f
             else
-              track.stack.concat(path)
-
-              future = ::Dog::Future.find_one({"value_id" => pointer._id})
-              future = ::Dog::Future.new(pointer._id, pointer) if future.nil?
-              future.tracks << track
-              future.save
-
-              track.next_instruction = track.current_instruction
-              track.state = ::Dog::Track::STATE::WAITING
-              return
+              raise "Access error"
             end
+
+            pointer = pointer[key]
+            pointer = ::Dog::Value.null_value if pointer.nil?
           end
 
-          pointer = pointer[key]
-          pointer = ::Dog::Value.null_value if pointer.nil?
-        end
+          if count >= path.size - 1 then
+            break
+          else
+            if pointer.pending then
+              future = ::Dog::Future.find_one({"value_id" => pointer._id})
 
-        if pointer.pending then
-          if track.futures[pointer._id] then
-            pointer = track.futures[pointer._id]
+              if future.nil? then
+                raise "Runtime error: Could not find the future"
+              end
+
+              if !future.value.nil? then
+                pointer = future.value
+              else
+                future.blocking_tracks << track
+                future.save
+
+                track.stack.concat(path)
+                track.next_instruction = track.current_instruction
+                track.state = ::Dog::Track::STATE::WAITING
+                return
+              end
+            end
           end
         end
 
