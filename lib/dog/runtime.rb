@@ -218,7 +218,7 @@ module Dog
                   track.remove
                   track = return_track
                 else
-                  # If this was a spawned track, then I should notify anyone that is waiting on my future...
+                  # TODO - If this was a spawned track, then I should notify anyone that is waiting on my future...
                   break
                 end
               end
@@ -239,203 +239,17 @@ module Dog
           Server.run
         end
       end
-      
-      
-      
-      
-=begin TODO - Remove this code block once everything stabilizes.
-      def run_track(track)
-        # TODO - I need to know when I need to save
-        
-        return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
-        
-        instructions = track.context["instructions"]
-        
-        loop do
-          track.next_instruction = nil
-          track.next_track = nil
-          
-          if instructions.kind_of? Proc then
-            instructions.call(track)
-          else
-            instruction = instructions[track.current_instruction]
-            
-            if instruction.nil? then
-              track.finish
-            else
-              
-              begin
-                instruction.execute(track)
-              rescue Exception => e
-                exception = Exception.new("Dog error on line: #{instruction.line} in file: #{instruction.file}.\n\nThe ruby error was: #{e.to_s}")
-                exception.set_backtrace(e.backtrace)
-                raise exception
-              end
-              
-              if track.next_instruction then
-                track.current_instruction = track.next_instruction
-              else
-                track.current_instruction += 1
-              end
-            end
-          end
 
-          if track.state == Track::STATE::WAITING then
-            track.save
-            break
-          end
 
-          if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
-            return_value = track.stack.last || ::Dog::Value.null_value
-            return_track = track.control_ancestors.last
-            
-            if return_track then
-              
-              if return_track.kind_of?(::BSON::ObjectId) then
-                return_track = Track.find_by_id(return_track)
-              end
-              
-              for name, future in track.futures do
-                future = future.to_hash
-                future = ::Dog::Future.from_hash(future)
-                return_track.futures[name] = future
-              end
 
-              return_track.stack.push(return_value)
-              return_track.state = Track::STATE::RUNNING
 
-              run_track(return_track)
-              return
-            else
-              track.save
-              break
-            end
-          end
 
-          if track.next_track then
-            next_track = track.next_track
-            track.next_track = nil
 
-            run_track(next_track)
-            return
-          end
-        end
-        
-        if track.is_root? && track.state == ::Dog::Track::STATE::FINISHED then
-          start_stop_server
-        end
-      end
-      
-      def start_stop_server
-        tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
-          }
-        }, :sort => ["created_at", Mongo::DESCENDING])
-        
-        if tracks.count != 0 then
-          Server.run
-        else
-          futures = ::Dog::Future.find()
-          if futures.count != 0 then
-            Server.run
-          else
-            EM.next_tick do
-              Process.kill('INT', Process.pid)
-            end
-          end
-        end
-      end
-=end
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      # TODO - Consider removing below this line:
-      
-=begin
-      def run_track(track)
-        # TODO - check for state first
-        # TODO - Right now I have poor support for tail recursion. I may run out of stack space before too long
-        # TODO - When do I queue up the tracks that I should save?
-        # TODO - When do I delete old tracks?
-        
-        next_track = nil
-        
-        return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
-        
-        loop do
-          node = Runtime.bundle.node_at_path(track.current_node_path, track.function_package)
-          next_track = node.visit(track)
-          
-          self.save_set.add(track)
-          
-          if track.state == Track::STATE::ASKING then
-            break
-          end
-          
-          if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
-            # TODO - Strongly consider moving this logic into track.finish and just return the parent node to be
-            # executed through next_track. This will simplify this logic here and keep it cleaner...
-            parent_track = Track.find_by_id(track.control_ancestors.last)
-            
-            if parent_track && !(parent_track.state == Track::STATE::FINISHED || parent_track.state == Track::STATE::LISTENING) then
-              
-              parent_current_node = Runtime.bundle.node_at_path(parent_track.current_node_path, parent_track.function_package)
-              parent_track.write_stack(parent_current_node.path, track.read_return_value)
-              
-              parent_track.current_node_path = parent_current_node.parent.path
-              parent_track.state = Track::STATE::RUNNING
-              
-              run_track(parent_track)
-              return
-            else
-              break
-            end
-          end
-          
-          if next_track && next_track.class == Track then
-            run_track(next_track)
-            return
-          end
-        end
-        
-        for t in self.save_set do
-          t.save
-        end
-        
-        if track.is_root? && track.state == Track::STATE::FINISHED then
-          start_stop_server
-        end
-        
-      end
-=end
 
-      
+
+
+
+
       def symbol_exists?(name = [])
         self.bundle.packages[self.bundle.startup_package].symbols.include? name.join(".")
       end
@@ -531,6 +345,18 @@ module Dog
         # end
         return bag
       end
+
+
+
+
+
+
+
+
+
+
+
+
 
     end
 
