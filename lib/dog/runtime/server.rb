@@ -102,7 +102,6 @@ module Dog
       apost(path, opts, &block)
     end
 
-
     # If I remember correctly, I was having problems with
     # sinatra async and the default cookie-based sessions
     # I used this to address some of the concerns.

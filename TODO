@@ -65,13 +65,11 @@ Note: We may want to use a "futures_inside" field in tracks that write_variable 
 
 Channels behave like Publisher / Subscriber when multiple people are listening and Producer / Consumer when you are going back and forth with one person. You Acheieve a worker queue and gauaranteed Producer / Consumer model by having a broker in the middle.
 
+We will have an API that will allow you to ADD to a channel and have various compensation actions if the buffer is full - blocking - block for timeout - ignore.
 
 == Done ==
 
 
-
-
-How do channels work?
 
 
 Obvious idea - Optional parameters can be passed on the stack by simply counting how large the stack and allocating unused parameters to whatever is leftover on the stack...
@@ -84,7 +82,7 @@ Spawn returns a future...
 
 Client API
 
-PERFORM
+Clean up the Dog CLI
 
 Value format
 
@@ -92,6 +90,18 @@ Package format
 
 Import / Package
 
+PERFORM
+
+Better error reporting 
+  stack traces
+  Special case "no function found" and "could not access path"
+  "Undefined operation"
+
+Build system libraries
+  Date
+  Array
+  File
+  etc.
 
 Are native functions being passed by reference or value? It should be value...I think...maybe...
 
@@ -101,15 +111,18 @@ Pople.public should be a DEFINEd value, not a type
 
 Add support for DEFINEd values (and channels)
 
+== and === semantics (possibly include === in the predicate format to make it easier to find structures)
+
+Implement the '?' operator
+
+Pause, Stop, Exit
+
+Stream with NOTIFY
+
 Change the default package from "" to "default" and have an error message restricting "default" from being used...?
 
 Implement garbage collection for the futures.
 
-Build system libraries
-  Date
-  Array
-  File
-  etc.
 
 
 - DONE
