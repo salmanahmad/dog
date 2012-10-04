@@ -5,7 +5,7 @@ require 'net/http'
 require 'httparty'
 require 'json'
 require 'mail'
-require 'RMagick'
+#require 'RMagick'
 
 def handle_message(message)
   events = ::Dog::MailedEvent.find()
