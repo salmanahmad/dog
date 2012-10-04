@@ -620,51 +620,17 @@ grammar Dog
   rule listen
     'LISTEN' sn 'TO' sn expression listen_for_clause {
       def transform
-        # TODO - Update for v0.3
-        return
-        
-        query = listen_to_clause.transform
         for_clause = listen_for_clause.transform
+        variable_name = for_clause[0]
         
-        if via_clause.empty?
-          via = ::Dog::Nodes::NullLiteral.new
-        else
-          via = via_clause.transform
-        end
-        
-        variable_name = for_clause.first
-        type = for_clause.last
-        
-        if type.nil? then
-          string_value = ::Dog::Value.new("dog.type", {})
-          string_value["name"] = ::Dog::Value.string_value("string")
-          string_value["package"] = ::Dog::Value.string_value("system")
-          string_value = ::Dog::Nodes::ValueLiteral.new(string_value)
-          structure_value = ::Dog::Nodes::Access.new([::Dog::Language::singularize(variable_name)])
-          type = ::Dog::Nodes::Branch.new(
-            ::Dog::Nodes::Operation.new(
-              structure_value,
-              ::Dog::Nodes::NullLiteral.new,
-              "=="
-            ),
-            ::Dog::Nodes::Nodes.new([
-              string_value
-            ]),
-            ::Dog::Nodes::Nodes.new([
-              structure_value
-            ])
-          )
-        end
-        
-        node = ::Dog::Nodes::Assign.new(
-          [variable_name],
+        node = ::Dog::Nodes::Assign.new([variable_name],
           ::Dog::Nodes::Call.new(
-            ::Dog::Nodes::Access.new(["dog", "listen"]),
-            [type, query, via]
+            ::Dog::Nodes::Access.new(["dog", "listen:to:for"]),
+            [expression.transform, ::Dog::Nodes::StringLiteral.new(variable_name)]
           )
         )
-        node.line = self.line
         
+        node.line = self.line
         return node
       end
     }

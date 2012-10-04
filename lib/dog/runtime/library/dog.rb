@@ -49,20 +49,32 @@ module Dog::Library
     end
 
     implementation "listen:to:for" do
+      # TODO - Support type information for sub-keys, etc.
       argument "routing"
       argument "identifier"
-      
+
       body do |track|
         identifier = variable("identifier")
         routing = variable("routing")
-        
-        current_track = track.control_ancestors.last
-        
+
+        checkpoint do
+          dog_call("channel:buffer", "future", [::Dog::Value.number_value(0)])
+        end
+
+        checkpoint do
+          value = track.stack.pop
+          current_track = track.control_ancestors.last
+
+          current_track.listens[identifier.ruby_value] = {
+            "value" => value,
+            "routing" => routing
+          }
+
+          dog_return(value)
+        end
       end
-      
     end
-    
-    
+
     implementation "display:value:as:to" do
       argument "value"
       argument "identifier"

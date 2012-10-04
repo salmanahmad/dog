@@ -22,31 +22,14 @@ class IntegrationTests::ListenTest < Test::Unit::TestCase
     tracks = run_source(program)
 
     variable = tracks.last.variables["events"]
-    event = ::Dog::RoutedEvent.find().to_a.first
 
     assert_equal(true, variable.pending)
-    assert_equal(0, variable.buffer_size)
-    assert_equal(true, variable.channel_mode)
-    assert_equal(event["channel_id"], variable._id)
-  end
-  
-  def test_structure
-    program = <<-EOD
-    
-    DEFINE event {
-      title
-      body
-      description
-    }
 
-    LISTEN TO people.public FOR events
+    assert_equal(1, tracks.last.listens.keys.count)
+    assert_equal(2, tracks.last.listens["events"].keys.count)
+    assert_equal(true, tracks.last.listens["events"]["value"].pending)
 
-    EOD
+    assert_equal(variable._id, tracks.last.listens["events"]["value"]._id)
 
-    tracks = run_source(program)
-
-    variable = tracks.last.variables["events"]
-    event = ::Dog::RoutedEvent.find().to_a.first
-    assert_equal(3, event["properties"].size)
   end
 end
