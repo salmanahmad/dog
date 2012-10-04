@@ -1714,10 +1714,13 @@ grammar Dog
   # =========
   
   rule key_paths
-    identifier rest:('.' identifier)* {
+    underscore:('_')? identifier rest:('.' identifier)* {
       def transform
         ids = []
-        ids << identifier.text_value
+        
+        if underscore.empty? then
+          ids << identifier.text_value
+        end
         
         if rest then
           for i in rest.elements do
@@ -1725,7 +1728,15 @@ grammar Dog
           end
         end
         
-        ("value.s:" + ids.join(".value.s:") + ".value")
+        if underscore.empty? then
+          return ("value.s:" + ids.join(".value.s:") + ".value")
+        else
+          if rest && rest.elements.size != 0 then
+            return ("_#{identifier.text_value}.value.s:" + ids.join(".value.s:") + ".value")
+          else
+            return "_#{identifier.text_value}"
+          end
+        end
       end
     }
   end
