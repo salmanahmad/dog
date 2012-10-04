@@ -73,8 +73,6 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 Spawn returns a future...
 
-Listen / Display
-
 Client API
 
 PERFORM
@@ -106,6 +104,8 @@ Build system libraries
 
 
 - DONE
+
+Listen / Display
 
 WAIT
 
