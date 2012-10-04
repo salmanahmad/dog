@@ -53,7 +53,31 @@ module Dog::Library
       argument "identifier"
       
       body do |track|
+        identifier = variable("identifier")
+        routing = variable("routing")
         
+        current_track = track.control_ancestors.last
+        
+      end
+      
+    end
+    
+    
+    implementation "display:value:as:to" do
+      argument "value"
+      argument "identifier"
+      argument "routing"
+      
+      body do |track|
+        value = variable("value")
+        identifier = variable("identifier")
+        routing = variable("routing")
+        
+        current_track = track.control_ancestors.last
+        current_track.displays[identifier.ruby_value] = {
+          "value" => value,
+          "routing" => routing
+        }
       end
       
     end

@@ -23,23 +23,14 @@ class ScratchTest < Test::Unit::TestCase
     
     program = <<-EOD
 
-    DEFINE write TO channel MESSAGE m DO
-      COMPUTE future.send TO channel VALUE m
-    END
-
-    messages = COMPUTE future.channel BUFFER 1
+    message = "Welcome!"
     
-    ON EACH message DO
-      PRINT message
-    END
-    
-    COMPUTE future.send TO messages VALUE 1
-    
-    
+    DISPLAY message TO people.people
+      
     EOD
 
     tracks = run_source(program)
-    
+    pp tracks.last.displays
   end
 
 

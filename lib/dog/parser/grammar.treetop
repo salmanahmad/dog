@@ -698,8 +698,13 @@ grammar Dog
   rule display
     'DISPLAY' sn identifier sn 'TO' sn expression {
       def transform
-        # TODO - Update for v0.3
-        return
+        node = ::Dog::Nodes::Call.new(
+          ::Dog::Nodes::Access.new(["dog", "display:value:as:to"]),
+          [::Dog::Nodes::Access.new([identifier.text_value]), ::Dog::Nodes::StringLiteral.new(identifier.text_value), expression.transform]
+        )
+        
+        node.line = self.line
+        return node
       end
     }
   end

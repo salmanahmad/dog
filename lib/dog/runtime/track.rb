@@ -40,6 +40,9 @@ module Dog
     attr_accessor :futures
     attr_accessor :state
     
+    attr_accessor :displays
+    attr_accessor :listens
+    
     attr_accessor :access_ancestors
     attr_accessor :control_ancestors
     
@@ -89,6 +92,9 @@ module Dog
       self.futures = {}
       self.state = STATE::RUNNING
       
+      self.displays = {}
+      self.listens = {}
+      
       self.access_ancestors = []
       self.control_ancestors = []
     end
@@ -122,8 +128,26 @@ module Dog
         futures[key] = ::Dog::Value.from_hash(value)
       end
       
+      displays = {}
+      for key, value in object.displays do
+        displays[key] = {
+          "value" => ::Dog::Value.from_hash(value["value"]),
+          "routing" => ::Dog::Value.from_hash(value["routing"])
+        }
+      end
+      
+      listens = {}
+      for key, value in object.listens do
+        listens[key] = {
+          "value" => ::Dog::Value.from_hash(value["value"]),
+          "routing" => ::Dog::Value.from_hash(value["routing"])
+        }
+      end
+      
       object.stack = stack
       object.variables = variables
+      object.displays = displays
+      object.listens = listens
       object.futures = futures
       
       return object
@@ -143,8 +167,24 @@ module Dog
         if value.kind_of? ::Dog::Value then
           variables[key] = value.to_hash
         else
-          raise "A non-value was present on the stack"
+          raise "A non-value was present in the variables"
         end
+      end
+      
+      displays = {}
+      for key, value in self.displays do
+        displays[key] = {
+          "value" => value["value"].to_hash,
+          "routing" => value["routing"].to_hash
+        }
+      end
+      
+      listens = {}
+      for key, value in self.listens do
+        listens[key] = {
+          "value" => value["value"].to_hash,
+          "routing" => value["routing"].to_hash
+        }
       end
       
       futures = {}
@@ -183,6 +223,9 @@ module Dog
         "stack" => stack,
         "variables" => variables,
         "futures" => futures,
+        
+        "displays" => displays,
+        "listens" => listens,
         
         "access_ancestors" => access_ancestors,
         "control_ancestors" => control_ancestors,
