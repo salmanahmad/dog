@@ -48,6 +48,16 @@ module Dog::Library
       end
     end
 
+    implementation "listen:to:for" do
+      argument "routing"
+      argument "identifier"
+      
+      body do |track|
+        
+      end
+      
+    end
+
 
     implementation "ask" do
       # TODO - Right now, this is implemented directly inside the AsyncCall

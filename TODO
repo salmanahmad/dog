@@ -56,8 +56,6 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 Spawn returns a future...
 
-ON EACH DO
-
 Listen / Display
 
 Client API
@@ -93,6 +91,8 @@ Build system libraries
 - DONE
 
 WAIT
+
+ON EACH DO
 
 ON DO
 
