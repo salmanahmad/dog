@@ -94,82 +94,6 @@ module Dog::Library
       
     end
 
-
-    implementation "ask" do
-      # TODO - Right now, this is implemented directly inside the AsyncCall
-      # isntruction. Do I want to keep it there or can I actually move it
-      # over here?
-    end
-
-    implementation "listen" do
-      argument "type"
-      argument "query"
-      argument "via"
-
-      body do |original_track|
-        # TODO
-        type = variable("type")
-        query = variable("query")
-        via = variable("via")
-        
-        
-        structure_type = nil
-        properties = []
-
-        unless type["name"].value == "string" && type["package"].value == "system"
-          track = ::Dog::Track.new(type["name"].ruby_value, type["package"].ruby_value)
-          
-          ::Dog::Runtime.run_track(track)
-          value = track.stack.pop
-
-          structure_type = value.type
-
-          properties = value.keys
-          properties.map! do |name|
-            p = ::Dog::Property.new
-            p.identifier = name
-            p.direction = "input"
-            p
-          end
-        else
-          property = ::Dog::Property.new
-          property.identifier = "*value"
-          property.direction = "input"
-
-          structure_type = "string"
-          properties = [property]
-        end
-
-        channel = ::Dog::Value.new("structure", {})
-        channel.pending = true
-        channel.buffer_size = 0
-        channel.channel_mode = true
-
-        if via.value == "email" then
-          event = ::Dog::MailedEvent.new
-          event.channel_id = channel._id
-          event.routing = nil # TODO
-          event.created_at = Time.now.utc
-          event.save
-        else
-          event = ::Dog::RoutedEvent.new
-          event.name = structure_type
-          event.properties = properties
-          event.channel_id = channel._id
-
-          event.track_id = original_track.control_ancestors.last
-          event.track_id = event.track_id._id if event.track_id.kind_of? ::Dog::Track
-
-          #event.track_id = track.id # TODO
-          #event.routing = nil # TODO
-          event.created_at = Time.now.utc
-          event.save
-        end
-
-        dog_return(channel)
-      end
-    end
-
     implementation "notify" do
       argument "value"
       argument "query"
@@ -524,55 +448,6 @@ module Dog::Library
         if container.type == "dog.collection" then
           ::Dog::database[container["name"].ruby_value].remove({"_id" => value._id}, {:safe => true})
         end
-
-        dog_return(value)
-      end
-    end
-
-    implementation "register_handler" do
-      argument "structure"
-      argument "type"
-
-      body do |track|
-        structure = variable("structure")
-        type = variable("type")
-
-        future = ::Dog::Future.find_one("value_id" => structure._id)
-
-        if future.nil? then
-          future = ::Dog::Future.new(structure._id, structure)
-        end
-
-        future.handlers << type
-        future.save
-      end
-    end
-
-    implementation "pending_structure:type:buffer:channel" do
-      argument "type"
-      argument "buffer_size"
-      argument "channel_mode"
-
-      body do |track|
-        value = nil
-
-        type = variable("type")
-        size = variable("buffer_size").ruby_value
-        channel = variable("channel_mode").ruby_value
-
-        if type.value == "dog.structure" then
-          value = ::Dog::Value.new("dog.structure", {})
-        elsif type.type == "dog.type" then
-          track = ::Dog::Track.new(type["name"], type["package"])
-          ::Dog::Runtime.run_track(track)
-          value = track.stack.pop
-        else
-          raise "Invalid type for pending structure"
-        end
-
-        value.pending = true
-        value.buffer_size = size
-        value.channel_mode = channel
 
         dog_return(value)
       end
