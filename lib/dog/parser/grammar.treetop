@@ -1823,13 +1823,19 @@ grammar Dog
     '\'' ('\\\'' / !'\'' .)* '\''
     ) {
       def transform
-        literal = ::Dog::Nodes::StringLiteral.new Shellwords::shellwords(self.text_value).first
+        new_value = self.text_value[1, self.text_value.size - 2]
+        new_value = new_value.gsub('\"', '"')
+        new_value = new_value.gsub('\'', "'")
+        new_value = new_value.gsub('\n', "\n")
+        
+        literal = ::Dog::Nodes::StringLiteral.new new_value
         literal.line = self.line
         
         return literal
       end
     }
   end
+
   
   rule number
     float / integer
