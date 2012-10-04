@@ -3,6 +3,15 @@
 
 Look into why printing is so slow
 
+
+== Mounting Packages and Dog Middleware ==
+
+We also may want to consider and explore the idea of "mounting" packages. So we move all of
+the standard API end points into a Dog package that are provided by the Dog standard libraries. If
+the developer wants to, they can add in the packages to their configuration file, much like
+include Rack or Java middleware.
+
+
 == Concurrency ==
 
 Spawn schedules a thread to run.

@@ -11,21 +11,6 @@ module Dog
 
   class Server < Sinatra::Base
 
-    # Automatically parse JSON
-
-    before do
-      if request.media_type == 'application/json' then
-        parameters = nil
-        begin
-          parameters = JSON.parse(request.body)
-        rescue
-          parameters = {}
-        end
-
-        params.merge!(parameters)
-      end
-    end
-
     # CORS Supports
     # TODO - Support JSONP
     # TODO - Host dog.js from Dog to avoid any XSS
@@ -43,6 +28,19 @@ module Dog
       response['Access-Control-Max-Age'] = '1728000'
       response['Content-Type'] = 'text/plain'
       return ''
+    end
+
+    before do
+      if request.media_type == 'application/json' then
+        parameters = nil
+        begin
+          parameters = JSON.parse(request.body)
+        rescue
+          parameters = {}
+        end
+
+        params.merge!(parameters)
+      end
     end
 
     helpers do
@@ -68,59 +66,43 @@ module Dog
 
       def verify_current_user(message = "You need to be logged in when performing this operation")
         @output = {}
-        
+
         unless session[:current_user]
           @output["success"] = false
           @output["errors"] = [message]
           body @output.to_json
           return false
         end
-        
+
         return true
       end
-      
+
       def verify_not_current_user(message = "You cannot be logged in when performing this operation.")
         @output = {}
-        
+
         if session[:current_user]
           @output["success"] = false
           @output["errors"] = [message]
           body @output.to_json
           return false
         end
-        
+
         return true
       end
 
-      def fetch_stream_items_for_track(track = ::Dog::Track.root, person = nil)
-        # L 335
-        stream_items = []
-        # fetch StreamObjects
-        items = ::Dog::StreamObject.find({"track_id" => track.id})
-        items.each do |item|
-          item = ::Dog::StreamObject.from_hash(item)
-          
-          if ::Dog::Helper.person_matches_routing(person, item.routing) then
-            stream_items << item.to_hash_for_stream
-          end
-        end
-
-        return stream_items
-      end
-
     end
-    
+
     def self.get_or_post(path, opts={}, &block)
       get(path, opts, &block)
       post(path, opts, &block)
     end
-    
+
     def self.aget_or_post(path, opts={}, &block)
       aget(path, opts, &block)
       apost(path, opts, &block)
     end
-    
-    
+
+
     # If I remember correctly, I was having problems with
     # sinatra async and the default cookie-based sessions
     # I used this to address some of the concerns.
@@ -131,44 +113,6 @@ module Dog
     enable :logging
     #enable :sessions
     #enable :raise_errors
-    
-    def process_incoming_event(event)
-      input = nil
-      begin
-        input = event.import(params) 
-      rescue => e
-        
-      end
-      
-      if input.nil?
-        # TODO - Better error reporting...
-        status 400
-        body "Invalid event"
-        raise
-      end
-      
-      return input
-    end
-    
-    def process_outgoing_event
-      # TODO - Figure out how to update sucecess if the export fails...
-      content_type 'application/json'
-      
-      output = @event.export
-      if output.nil? then
-        # Raise Error for Dog?
-        @event.success = false
-        output = {}
-      end
-      
-      if @event.success == false
-        status 403
-      else
-        status 200
-      end
-      
-      body output.to_json
-    end
 
     class << self
 
@@ -183,6 +127,12 @@ module Dog
         set :public_folder, Proc.new { File.join(Runtime.bundle_directory, "views") }
 
         self.initialize_vet
+
+        # TODO - Some stream endpoint for push notifications
+
+        # TODO - Add an OAuth API out of the box
+
+        # TODO - Add some ability to get basic user information. Perhaps their handle and their name?
 
         get prefix + '/account/status' do
           @output = {}
@@ -285,186 +235,6 @@ module Dog
           @output.to_json
         end
 
-        get prefix + '/stream' do
-          return redirect prefix + '/stream/runtime/root'
-        end
-
-        get prefix + '/stream/lexical/:id' do |id|
-          stream = {}
-          stream["self"] = {}
-          stream["lexical"] = []
-          stream["runtime"] = []
-
-          depth = (params["depth"] || 1).to_i
-          limit = (params["limit"] || 0).to_i
-          offset = (params["offset"] || 0).to_i
-          after = (params["after"])
-
-          symbol = id.split(".")
-
-          unless ::Dog::Runtime.symbol_exists?(symbol)
-            return [404, {}, "The lexical symbol you are looking up does not exist."]
-          end
-
-          runtime = []
-          tracks = ::Dog::Track.find({"function_name" => id})
-          for track in tracks do
-            runtime << Track.from_hash(track).to_hash_for_stream
-          end
-
-          stream["self"] = ::Dog::Runtime.symbol_info(symbol)
-          stream["lexical"] = ::Dog::Runtime.symbol_descendants(symbol, depth)
-          stream["runtime"] = runtime
-
-          content_type "application/json"
-          return stream.to_json
-        end
-
-        get prefix + '/stream/runtime/:id' do |id|
-          stream = {}
-          stream["self"] = {}
-          stream["lexical"] = []
-          stream["runtime"] = []
-
-          depth = (params["depth"] || 1).to_i
-          limit = (params["limit"] || 0).to_i
-          offset = (params["offset"] || 0).to_i
-          after = (params["after"])
-
-          track = case id
-          when 'root'
-            ::Dog::Track.root
-          else
-            ::Dog::Track.find_by_id(id)
-          end
-          if track.nil?
-            return [400, {"success" => false, "errors" => ["The runtime id '#{id}' does not correspond to a valid runtime item."] }.to_json]
-          end
-
-          current_user = find_or_generate_current_user
-
-          stream["self"] = track.to_hash_for_stream
-          stream["runtime"] = fetch_stream_items_for_track(track, current_user)
-          stream["lexical"] = ::Dog::Runtime.symbol_descendants(track.function_name.split('.'), depth)
-
-          content_type 'application/json'
-          return stream.to_json
-        end
-
-        get prefix + '/stream/object/:id' do |id|
-          stream = {}
-          stream["self"] = {}
-          stream["lexical"] = []
-          stream["runtime"] = []
-
-          depth = (params["depth"] || 1).to_i
-          limit = (params["limit"] || 0).to_i
-          offset = (params["offset"] || 0).to_i
-          after = (params["after"])
-
-          object = ::Dog::StreamObject.find_by_id(id)
-          stream["self"] = object.to_hash_for_stream
-
-          content_type 'application/json'
-          return stream.to_json
-        end
-
-        post prefix + '/stream/object/:id' do |id|
-          object = ::Dog::StreamObject.find_by_id(id)
-          output = nil
-          
-          
-          if object.class == ::Dog::RoutedTask then
-            task = object
-            response = {}
-
-            for property in task.properties do
-              if property.direction == "input" then
-                response[property.identifier] = params[property.identifier]
-                if property.required && response[property.identifier].nil? then
-                  return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
-                end
-              end
-            end
-
-            task.responses << response
-            task.save
-
-            argument = response
-
-            future = ::Dog::Future.find_one("value_id" => object.channel_id)
-            future = future.value
-
-            track = ::Dog::Track.new
-            track.variables["container"] = future
-
-            if argument.size == 1 and argument.keys.first == "*value" then
-              track.variables["value"] = ::Dog::Value.from_ruby_value(argument["*value"])
-            else
-              track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
-            end
-
-            track.variables["value"].person = find_or_generate_current_user.dog_value
-
-            proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
-            proc.call(track)
-
-            if task.completed? then
-              track = ::Dog::Track.new
-              track.variables["container"] = future
-              track.variables["value"] = ::Dog::Value.new("close", {})
-
-              proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
-              proc.call(track)
-              
-              ::Dog::RoutedTask.remove({"_id" => object._id})
-            end
-
-          elsif object.class == ::Dog::RoutedEvent then
-
-            # TODO - Handle the package here
-            track = ::Dog::Track.new(object.handler)
-            track.control_ancestors = [::Dog::Track.root.id]
-
-            argument = {}
-            
-            for property in object.properties do
-              argument[property.identifier] = params[property.identifier]
-              if property.required && argument[property.identifier].nil? then
-                return [400, {"success" => false, "errors" => ["The required property '#{property.identifier}' was missing."] }.to_json]
-              end
-            end
-
-            future = ::Dog::Future.find_one("value_id" => object.channel_id)
-            future = future.value
-
-            track = ::Dog::Track.new
-            track.variables["container"] = future
-
-            if argument.size == 1 and argument.keys.first == "*value" then
-              track.variables["value"] = ::Dog::Value.from_ruby_value(argument["*value"])
-            else
-              track.variables["value"] = ::Dog::Value.from_ruby_value(argument)
-            end
-
-            track.variables["value"].person = find_or_generate_current_user.dog_value
-
-            proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
-            proc.call(track)
-
-            output = track.stack.pop.ruby_value
-          end
-
-          content_type 'application/json'
-          return {
-            "success" => true,
-            "response" => output
-          }.to_json
-
-        end
-
-
-
         get '*' do
           path = params['splat'].first
           path = "/index.html" if path == "/"
@@ -490,114 +260,6 @@ module Dog
             404
           end
         end
-
-
-
-
-
-        # TODO - I am keep these around in case we want to enable these through a configuration flag
-        # Obviously there are pretty big privacy concerns that can take part here.
-        # We also may want to consider and explore the idea of "mounting" packages. So we move all of
-        # these API end points into a Dog package that are provided by the Dog standard libraries. If
-        # the developer wants to, they can add in the packages to their configuration file, much like
-        # include Rack or Java middleware.
-
-        unless ::Dog::Config.get("profile_editing") == true then
-          get prefix + '/profile/view' do
-            return unless verify_current_user("You have to be logged in to view your profile.")
-
-            @output = {}
-
-            person = Person.find_by_id(session[:current_user])
-            @output["value"] = person.to_hash_for_event
-            @output["success"] = true
-
-            @output.to_json
-          end
-
-          post prefix + '/profile/write' do
-            return unless verify_current_user("You have to be logged in to write to your profile.")
-
-            @output = {}
-
-            person = Person.find_by_id(session[:current_user])
-            success = person.write_profile(params["value"])
-            person.save if success
-            @output["success"] = success
-
-            @output.to_json
-          end
-
-          post prefix + '/profile/update' do
-            return unless verify_current_user("You have to be logged in to update your profile.")
-
-            @output = {}
-
-            person = Person.find_by_id(session[:current_user])
-            success = person.update_profile(params["value"])
-            person.save if success
-            @output["success"] = success
-
-            @output.to_json
-          end
-        end
-
-        unless ::Dog::Config.get("people_search") == true then
-          get prefix + '/people/search' do
-            @output = {}
-
-            @output["results"] = Person.search(params["query"])
-            @output["success"] = true
-
-            @output.to_json
-          end
-
-          get prefix + '/people/:id' do
-            @output = {}
-
-            person = Person.find_by_id(params["id"])
-            if person then
-              @output["person"] = person.to_hash_for_event
-              @output["success"] = true
-            else
-              @output["success"] = false
-              @output["errors"] ||= []
-              @output["errors"] << "Could not find the user with that identifier."
-            end
-
-            @output.to_json
-          end
-        end
-
-        unless ::Dog::Config.get("community_joining") == true then
-          post prefix + '/community/:name/join' do
-            return unless verify_current_user("You have to be logged in to join a community.")
-
-            @output = {}
-
-            person = Person.find_by_id(session[:current_user])
-            success = person.join_community_named(params["name"])
-            @output["success"] = success
-
-            @output.to_json
-          end
-
-          post prefix + '/community/:name/leave' do
-            return unless verify_current_user("You have to be logged in to leave a community.")
-
-            @output = {}
-
-            person = Person.find_by_id(session[:current_user])
-            success = person.leave_community_named(params["name"])
-            @output["success"] = success
-
-            @output.to_json
-          end
-        end
-
-
-
-
 
         # This is very important. Do not remove this or testing will not work
         return self
