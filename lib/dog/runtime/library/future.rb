@@ -22,6 +22,7 @@ module Dog::Library
 
         # TODO - Implement the garbage collection for futures
         future = ::Dog::Future.new(value._id)
+        future.queue_size = 0
         future.save
         
         dog_return(value)
@@ -41,6 +42,7 @@ module Dog::Library
 
         # TODO - Implement the garbage collection for futures
         future = ::Dog::Future.new(value._id)
+        future.queue_size = size
         future.save
 
         dog_return(value)
@@ -144,6 +146,11 @@ module Dog::Library
       argument "value"
 
       body do |track|
+        # TODO - Respect the queue_size if it is full. We need several backoff strategies
+        # - Block
+        # - Ignore
+        # - Timeout
+
         channel = variable("channel")
         value = variable("value")
 
@@ -154,8 +161,10 @@ module Dog::Library
           
           if future then
             if future.broadcast_tracks.empty? && future.handlers.empty? then
-              future.queue << value
-              future.save
+              if future.queue_size > 0 then
+                future.queue << value
+                future.save
+              end
             else
               signal = ::Dog::Signal.new
               signal.schedule_tracks = []

@@ -208,6 +208,32 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
     tracks, output = run_source(program, true)
     assert_equal("1\n2", output)
 
+  end
+  
+  def test_multiple_on_each
+    program = <<-EOD
+
+    messages = COMPUTE future.channel BUFFER 0
+    
+    ON EACH message DO
+      PRINT message
+    END
+    
+    ON EACH message DO
+      PRINT message
+    END
+    
+    ON EACH x IN messages DO
+      PRINT x
+    END
+    
+    COMPUTE future.send TO messages VALUE "1"
+    
+    
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("1\n1\n1", output)
     
   end
   
@@ -233,6 +259,66 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
     assert_equal("Hello", output)
 
   end
+  
+  
+  def test_buffer_size
+    program = <<-EOD
+
+    DEFINE wait ON channel DO
+      message = WAIT ON channel
+      PRINT message
+    END
+
+    messages = COMPUTE future.channel BUFFER 0
+    COMPUTE future.send TO messages VALUE "Test"
+
+    SPAWN COMPUTE wait ON messages
+    
+    
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("", output)
+
+    program = <<-EOD
+
+    DEFINE wait ON channel DO
+      message = WAIT ON channel
+      PRINT message
+    END
+
+    messages = COMPUTE future.channel BUFFER 1
+    COMPUTE future.send TO messages VALUE "Test"
+
+    SPAWN COMPUTE wait ON messages
+    
+    
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("Test", output)
+    
+    
+    
+    
+    program = <<-EOD
+
+    messages = COMPUTE future.channel BUFFER 0
+
+    ON EACH message DO
+      PRINT message
+    END
+
+    COMPUTE future.send TO messages VALUE "Test"
+
+    EOD
+
+    tracks, output = run_source(program, true)
+    assert_equal("Test", output)
+
+  end
+  
+  
   
   
   

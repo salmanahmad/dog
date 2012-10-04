@@ -15,6 +15,7 @@ module Dog
     attr_accessor :value_id
     attr_accessor :value
     attr_accessor :queue
+    attr_accessor :queue_size
     attr_accessor :blocking_tracks
     attr_accessor :broadcast_tracks
     attr_accessor :handlers
@@ -23,6 +24,7 @@ module Dog
       self.value_id = id
       self.value = value
       self.queue = []
+      self.queue_size = 0
       self.blocking_tracks = []
       self.broadcast_tracks = []
       self.handlers = []
@@ -78,6 +80,7 @@ module Dog
         "value_id" => self.value_id,
         "value" => value,
         "queue" => queue,
+        "queue_size" => queue_size,
         "blocking_tracks" => blocking_tracks,
         "broadcast_tracks" => broadcast_tracks,
         "handlers" => handlers
