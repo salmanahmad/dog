@@ -620,6 +620,9 @@ grammar Dog
   rule listen
     'LISTEN' sn 'TO' sn expression listen_for_clause {
       def transform
+        # TODO - I need to support the other half of the listen_for_clause and use the
+        # type information that it will provide for me.
+        
         for_clause = listen_for_clause.transform
         variable_name = for_clause[0]
         
