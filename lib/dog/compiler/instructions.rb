@@ -550,6 +550,28 @@ module Dog::Instructions
     end
   end
 
+  class Signal < Instruction
+    attribute :symbol
+    
+    def initialize(symbol)
+      @symbol = symbol
+    end
+    
+    def execute(track)
+      signal = ::Dog::Signal.new
+      
+      # TODO - Add more support for "pause" and "skip" (tells the scheduler to do something else) and "exit"
+      if symbol == "stop" then
+        signal.stop = true
+        return signal
+      else
+        return nil
+      end
+      
+    end
+    
+  end
+
   class Call < Instruction
     attribute :arg_count
     attribute :async

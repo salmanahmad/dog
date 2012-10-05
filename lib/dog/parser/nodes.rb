@@ -606,7 +606,17 @@ module Dog::Nodes
       package.add_to_instructions([t])
     end
   end
-  
+
+  class Stop < Node
+    def compile(package)
+      # TODO - I rushed this in. Is this okay?
+      s = ::Dog::Instructions::Signal.new("stop")
+      set_instruction_context(s)
+
+      package.add_to_instructions([s])
+    end
+  end
+
   class Call < Node
     attr_accessor :identifier
     attr_accessor :arguments

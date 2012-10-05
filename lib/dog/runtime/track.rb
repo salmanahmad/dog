@@ -247,12 +247,19 @@ module Dog
         listens[key] = {}
       end
       
+      returns = nil
+      if self.state == ::Dog::Track::STATE::FINISHED then
+        returns = self.stack.last.ruby_value
+      end
+      
       hash = {
         "_id" => self._id.to_s,
+        "state" => self.state,
         "function_name" => self.function_name,
         "package_name" => self.package_name,
         "displays" => displays,
-        "listens" => listens
+        "listens" => listens,
+        "returns" => returns
       }
       
       return hash

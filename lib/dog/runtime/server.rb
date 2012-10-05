@@ -90,6 +90,64 @@ module Dog
         return true
       end
 
+      def build_spawn_traces(tracks, ignores = [])
+        output = {}
+        ignores = ignores.to_set
+
+        for track in tracks do
+          if track.state == ::Dog::Track::STATE::FINISHED then
+            if track.control_ancestors.size > 0 then
+              next
+            end
+          end
+
+          if ignores.include?(track._id) then
+            next
+          end
+
+          for parent in track.control_ancestors do
+            if parent.kind_of? ::Dog::Track then
+              parent = parent._id
+            end
+
+            if ignores.include?(parent) then
+              next
+            end
+          end
+
+          for parent in track.control_ancestors do
+            if parent.kind_of? ::Dog::Track then
+              parent = parent._id
+            end
+            
+            if output[parent] then
+              output.delete(parent)
+            end
+          end
+          
+          if track.state == ::Dog::Track::STATE::CALLING then
+            children = ::Dog::Track.find({
+              "control_ancestors" => track._id,
+              "state" => ::Dog::Track::STATE::WAITING
+            })
+            
+            if children.count > 0 then
+              child = children.next
+              track = ::Dog::Track.from_hash(child)
+            end
+          end
+          
+          output[track._id] = track
+        end
+        
+        heads = []
+        for track in output.values do
+          heads << track.to_hash_for_api_user()
+        end
+        
+        return heads
+      end
+
     end
 
     def self.get_or_post(path, opts={}, &block)
@@ -244,7 +302,9 @@ module Dog
             return 404
           else
             content_type 'application/json'
-            return track.to_hash_for_api_user().to_json
+            return {
+              "track" => track.to_hash_for_api_user()
+            }.to_json
           end
         end
 
@@ -264,12 +324,21 @@ module Dog
             request.body.rewind
             data = JSON.parse(request.body.read) rescue nil
 
-            ::Dog::Runtime.invoke("send:to:value", "future", [value, ::Dog::Value.from_ruby_value(data)])
+            submitted_value = ::Dog::Value.from_ruby_value(data)
+            submitted_value.person = find_or_generate_current_user()
 
+            tracks = ::Dog::Runtime.invoke("send:to:value", "future", [value, submitted_value])
             track = ::Dog::Track.find_by_id(track._id)
 
+            spawns = build_spawn_traces(tracks, [track._id])
+
+            output = {
+              "track" => track.to_hash_for_api_user(),
+              "spawns" => spawns
+            }
+
             content_type 'application/json'
-            return track.to_hash_for_api_user().to_json
+            return output.to_json
           end
         end
 

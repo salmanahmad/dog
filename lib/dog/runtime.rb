@@ -190,6 +190,15 @@ module Dog
                   self.schedule(t)
                 end
               end
+              
+              if signal.kind_of?(Signal) && signal.stop then
+                # TODO - Will this cause simple programs to hang and deadlock?
+                # Perhaps that is okay because it is used with a stop command 
+                # which means it is always used with a running server app
+                track.state = Track::STATE::WAITING
+                track.save
+                break
+              end
 
               if track.state == Track::STATE::WAITING then
                 track.save

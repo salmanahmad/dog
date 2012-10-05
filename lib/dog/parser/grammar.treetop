@@ -1296,8 +1296,10 @@ grammar Dog
   rule stop
     'STOP' {
       def transform
-        # TODO - Update for v0.3
-        return
+        node = ::Dog::Nodes::Stop.new
+        node.line = self.line
+        
+        return node
       end
     }
   end
