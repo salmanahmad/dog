@@ -319,7 +319,7 @@ module Dog
     end
     
     def is_false?
-      self.type == "dog.boolean" && self.value == false
+      (self.type == "dog.boolean" && self.value == false) || self.is_null?
     end
     
   end

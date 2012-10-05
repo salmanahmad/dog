@@ -223,7 +223,6 @@ module Dog
               person = Person.new
               person.email = params["email"]
               person.password = Digest::SHA1.hexdigest params["password"]
-              #person.join_community_named(Config.get("default_community"))
               person.save
 
               session[:current_user] = person.id
@@ -232,6 +231,46 @@ module Dog
 
           content_type 'application/json'
           @output.to_json
+        end
+
+        get prefix + '/track/:id' do |id|
+          if id == "root" then
+            track = ::Dog::Track.root
+          else
+            track = ::Dog::Track.find_by_id(id)
+          end
+
+          if track.nil? || (!track.is_root? && track.state == ::Dog::Track::STATE::FINISHED) then
+            return 404
+          else
+            content_type 'application/json'
+            return track.to_hash_for_api_user().to_json
+          end
+        end
+
+        post prefix + '/track/:id/:variable' do |id, variable|
+          if id == "root" then
+            track = ::Dog::Track.root
+          else
+            track = ::Dog::Track.find_by_id(id)
+          end
+
+          if track.nil? || (!track.is_root? && track.state == ::Dog::Track::STATE::FINISHED) then
+            return 404
+          else
+            value = track.listens[variable]
+            value = value["value"] if value
+
+            request.body.rewind
+            data = JSON.parse(request.body.read) rescue nil
+
+            ::Dog::Runtime.invoke("send:to:value", "future", [value, ::Dog::Value.from_ruby_value(data)])
+
+            track = ::Dog::Track.find_by_id(track._id)
+
+            content_type 'application/json'
+            return track.to_hash_for_api_user().to_json
+          end
         end
 
         get '*' do

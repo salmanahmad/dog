@@ -56,6 +56,12 @@ module Dog::Library
       body do |track|
         identifier = variable("identifier")
         routing = variable("routing")
+        current_track = track.control_ancestors.last
+
+        if routing.is_null? then
+          current_track.listens.delete(identifier.ruby_value)
+          dog_return(::Dog::Value.null_value)
+        end
 
         checkpoint do
           dog_call("channel:buffer", "future", [::Dog::Value.number_value(0)])
@@ -63,7 +69,6 @@ module Dog::Library
 
         checkpoint do
           value = track.stack.pop
-          current_track = track.control_ancestors.last
 
           current_track.listens[identifier.ruby_value] = {
             "value" => value,

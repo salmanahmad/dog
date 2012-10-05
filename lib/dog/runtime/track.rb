@@ -235,26 +235,30 @@ module Dog
       }
     end
 
-    def to_hash_for_stream
-      api_state = case self.state
-      when ::Dog::Track::STATE::FINISHED,
-        ::Dog::Track::STATE::ERROR,
-        ::Dog::Track::STATE::DELETED
-        'closed'
-      when ::Dog::Track::STATE::LISTENING
-        'listening'
-      else
-        'open'
+    def to_hash_for_api_user(user = nil)
+      displays = {}
+      for key, value in self.displays do
+        displays[key] = value["value"].ruby_value
       end
-      stream_hash = {
-        "id" => self._id.to_s,
-        "name" => self.function_name.split('.'),
-        "type" => "track",
-        "state" => api_state
+      
+      listens = {}
+      for key, value in self.listens do
+        # TODO - Handle the schema for listens
+        listens[key] = {}
+      end
+      
+      hash = {
+        "_id" => self._id.to_s,
+        "function_name" => self.function_name,
+        "package_name" => self.package_name,
+        "displays" => displays,
+        "listens" => listens
       }
-      return stream_hash
+      
+      return hash
+      
     end
-    
+
     def self.root
       root = self.find_one({
         "control_ancestors" => {

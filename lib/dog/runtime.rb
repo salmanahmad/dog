@@ -117,51 +117,51 @@ module Dog
         tracks = tracks.to_a.map do |track|
           track = Track.from_hash(track)
         end
-        
+
         for track in tracks do
           self.schedule(track)
         end
-        
+
         tracks = self.resume
         start_stop_server
-        
+
         return tracks
       end
 
-      def invoke(function, package, args, track)
-        # TODO - Implement this convenience function that allows you to 
-        # easily create a track, schedule the track and resume the runtime
-        # Although, perhaps this is not necessary as far as an API goes.
+      def invoke(function, package, args, track = nil)
+        track = ::Dog::Track.invoke(function, package, args, track)
+        self.schedule(track)
+        self.resume
       end
 
       def schedule(track)
         self.scheduled_tracks.add(track)
       end
-      
+
       def resume
         resumed_tracks = Set.new
-        
+
         loop do
           resumed_tracks.merge(self.scheduled_tracks)
           tracks = self.scheduled_tracks.to_a
           if tracks.size == 0
-            break 
+            break
           end
-          
+
           self.scheduled_tracks = Set.new
-          
+
           for track in tracks do
             next if track.state != Track::STATE::RUNNING
-            
+
             loop do
               instructions = track.context["instructions"]
               track.next_instruction = nil
-              
+
               if instructions.kind_of? Proc then
                 signal = instructions.call(track)
               else
                 instruction = instructions[track.current_instruction]
-                
+
                 if instruction.nil? then
                   track.finish
                 else
@@ -172,7 +172,7 @@ module Dog
                     exception.set_backtrace(e.backtrace)
                     raise exception
                   end
-                  
+
                   if track.next_instruction then
                     track.current_instruction = track.next_instruction
                   else
@@ -180,61 +180,69 @@ module Dog
                   end
                 end
               end
-              
+
               if signal.kind_of?(Signal) && signal.call_track then
                 track = signal.call_track
               end
-                  
+
               if signal.kind_of?(Signal) && signal.schedule_tracks then
                 for t in signal.schedule_tracks do
                   self.schedule(t)
                 end
               end
-                  
+
               if track.state == Track::STATE::WAITING then
                 track.save
                 break
               end
-                  
+
               if track.state == Track::STATE::FINISHED then
                 return_value = track.stack.last || ::Dog::Value.null_value
                 return_track = track.control_ancestors.last
-                
+
                 if return_track then
                   if return_track.kind_of?(::BSON::ObjectId) then
                     return_track = Track.find_by_id(return_track)
                   end
-                  
+
                   for name, future in track.futures do
                     # TODO - What the crapper is going on here?
                     future = future.to_hash
                     future = ::Dog::Future.from_hash(future)
                     return_track.futures[name] = future
                   end
-                  
+
                   return_track.stack.push(return_value)
                   return_track.state = Track::STATE::RUNNING
-                  
+
                   track.remove
                   track = return_track
                 else
-                  # TODO - If this was a spawned track, then I should notify anyone that is waiting on my future...
+                  # TODO - If this was a spawned track, then I should notify anyone that is waiting on my future since spawn should return a future...
+                  if track.is_root? then
+                    track.save
+                  end
+
                   break
                 end
               end
             end
           end
         end
-        
+
         return resumed_tracks.to_a
       end
-      
+
       def start_stop_server
         tracks = Track.find({"state" => Track::STATE::WAITING}, :sort => ["created_at", Mongo::DESCENDING])
-        
-        # TODO - Check if the root track has a listen or not
-        root_has_listen = false
-        
+
+        root_track = Track.root
+        if root_track.displays.keys.count > 0 || root_track.listens.keys.count > 0 then
+          root_has_listen = true
+        else
+          root_has_listen = false
+        end
+
         if tracks.count > 0 || root_has_listen then
           Server.run
         end
