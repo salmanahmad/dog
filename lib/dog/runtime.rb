@@ -230,6 +230,8 @@ module Dog
                   # TODO - If this was a spawned track, then I should notify anyone that is waiting on my future since spawn should return a future...
                   if track.is_root? then
                     track.save
+                  else
+                    track.remove
                   end
 
                   break
@@ -244,7 +246,7 @@ module Dog
 
       def start_stop_server
         tracks = Track.find({"state" => Track::STATE::WAITING}, :sort => ["created_at", Mongo::DESCENDING])
-
+        
         root_track = Track.root
         if root_track.displays.keys.count > 0 || root_track.listens.keys.count > 0 then
           root_has_listen = true

@@ -92,7 +92,7 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
     END
 
     EOD
-
+    
     the_output = "I Got 'Pong: Hi'\nI Got 'Pong: Hi'\nI Got 'Pong: Hi'\nI Got 'stop'"
     tracks, output = run_source(program, true)
     assert_equal(the_output, output)
