@@ -96,7 +96,7 @@ module Dog
         # L 335
         stream_items = []
         # fetch StreamObjects
-        items = ::Dog::StreamObject.find({"track_id" => track.id})
+        items = ::Dog::StreamObject.find({"track_id" => track.id}, {:sort => ["created_at", Mongo::DESCENDING]})
         items.each do |item|
           item = ::Dog::StreamObject.from_hash(item)
           
