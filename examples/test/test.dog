@@ -1,9 +1,0 @@
-
-
-LISTEN TO people.public FOR events
-
-ON EACH event DO
-  PRINT event
-  RETURN 5 + 5
-END
-

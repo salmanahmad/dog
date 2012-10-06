@@ -26,25 +26,18 @@ require 'json'
 #require 'blather/client/client'
 
 require File.join(File.dirname(__FILE__), 'runtime/database_object.rb')
-require File.join(File.dirname(__FILE__), 'runtime/routability.rb')
-require File.join(File.dirname(__FILE__), 'runtime/stream_object.rb')
 
 require File.join(File.dirname(__FILE__), 'runtime/external/facebook_helpers.rb')
 require File.join(File.dirname(__FILE__), 'runtime/external/facebook_person.rb')
 
-require File.join(File.dirname(__FILE__), 'runtime/community.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
 require File.join(File.dirname(__FILE__), 'runtime/database.rb')
-require File.join(File.dirname(__FILE__), 'runtime/event.rb')
 require File.join(File.dirname(__FILE__), 'runtime/future.rb')
 require File.join(File.dirname(__FILE__), 'runtime/kernel_ext.rb')
 require File.join(File.dirname(__FILE__), 'runtime/library.rb')
-require File.join(File.dirname(__FILE__), 'runtime/message.rb')
 require File.join(File.dirname(__FILE__), 'runtime/person.rb')
-require File.join(File.dirname(__FILE__), 'runtime/property.rb')
 require File.join(File.dirname(__FILE__), 'runtime/server.rb')
 require File.join(File.dirname(__FILE__), 'runtime/signal.rb')
-require File.join(File.dirname(__FILE__), 'runtime/task.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track.rb')
 require File.join(File.dirname(__FILE__), 'runtime/value.rb')
 require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
@@ -258,124 +251,6 @@ module Dog
           Server.run
         end
       end
-
-
-
-
-
-
-
-
-
-
-
-      def symbol_exists?(name = [])
-        self.bundle.packages[self.bundle.startup_package].symbols.include? name.join(".")
-      end
-
-      def symbol_info(name = [])
-        symbol_value = self.bundle.packages[self.bundle.startup_package].symbols[name.join(".")]
-        symbol_value = symbol_value["value"]
-        type = self.typeof_symbol(symbol_value)
-
-        if type then
-          return self.to_hash_for_stream(name, type)
-        else
-          return nil
-        end
-      end
-
-      def symbol_descendants(name = [], depth = 1)
-        descendants = []
-        name = name.join(".")
-
-        # special case root
-        name = '' if name == '@root'
-
-        symbols = self.bundle.packages[self.bundle.startup_package].symbols
-
-        for symbol, path in symbols do
-          if symbol.start_with?(name) then
-            level = symbol[name.length, symbol.length].count(".")
-            level += 1 if name == '' # implied root. in every name
-
-            if level > 0 && (depth == -1 || level <= depth) then
-              path = path.clone
-              path.shift
-
-              #node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-              #node = self.bundle.node_for_symbol(symbol, self.bundle.startup_package)
-              #type = self.typeof_node(node)
-
-              if symbol == "@root" then
-                type = "function"
-              else
-                symbol_value = self.bundle.packages[self.bundle.startup_package].symbols[symbol]
-                symbol_value = symbol_value["value"]
-                type = typeof_symbol(symbol_value)
-              end
-
-              if type then
-                descendants << self.to_hash_for_stream(symbol.split('.'), type)
-              end
-            end
-          end
-        end
-
-        return descendants
-      end
-      
-      # TODO - Remove this
-      #def node_at_path_for_filename(path, file)
-      #  # TODO - I need to raise an error if the node is not found.
-      #  node = self.bite_code["code"][file]
-      #  
-      #  for index in path do
-      #    node = node[index]
-      #  end
-      #  
-      #  return node
-      #end
-
-      def typeof_symbol(symbol)
-        return case
-        when symbol.type == "external_function" || symbol.type == "function"
-          if /^@each:/.match(symbol["name"].ruby_value) then
-            "oneach"
-          else
-            "function"
-          end
-        when symbol.type == "type"
-          "structure"
-        else
-          nil
-        end
-      end
-
-      def to_hash_for_stream(name, type)
-        bag = {
-          "id" => name.join("."),
-          "name" => name,
-          "type" => type
-        }
-        # TODO - Fixme - hack to get name right
-        # if type == 'oneach'
-        #   bag["name"] = bag["name"]["@each:".length, bag["name"].length]
-        # end
-        return bag
-      end
-
-
-
-
-
-
-
-
-
-
-
-
 
     end
 

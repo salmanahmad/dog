@@ -170,52 +170,10 @@ module Dog::Library
           
           Pony.mail(envelope)
           dog_return
-        end
-
-        ruby_value = value.mongo_value
-
-        message = ::Dog::RoutedMessage.new
-        properties = []
-
-        if ruby_value.kind_of? Hash then
-          message.name = value.type
-
-          for k, v in ruby_value do
-            p = ::Dog::Property.new
-            p.direction = "output"
-            p.identifier = k
-            p.value = v
-            properties << p
-          end
         else
-          message.name = "primitive"
-
-          p = ::Dog::Property.new
-          p.direction = "output"
-          p.identifier = "*value"
-          p.value = ruby_value
-          properties << p
+          # TODO - I need to implement the push channel via stream. Right now, only email is working
         end
         
-        
-        
-        if track.id == nil then
-          # TODO - Fix this. I need to do this here so I can get a track.id
-          # which is assigned when I call DatabaseObject#save. Instead, "id" 
-          # should be automatically generated as a UUID or ObjectID or something
-          # and DatabaseObject#save should be updated so it always does an upsert 
-          # rather than checking the _id itself like a retard...
-          track.save
-        end
-        
-        
-        message.track_id = track.control_ancestors.last
-        message.track_id = message.track_id._id if message.track_id.kind_of? ::Dog::Track
-        
-        message.routing = nil # TODO
-        message.created_at = Time.now.utc
-        message.properties = properties
-        message.save
       end
     end
 

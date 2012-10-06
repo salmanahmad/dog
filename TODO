@@ -86,6 +86,8 @@ Pause, Stop, Exit
 
 Spawn returns a future...
 
+Return from ON EACH
+
 PERFORM
 
 Clean up the Dog CLI

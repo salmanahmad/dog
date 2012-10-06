@@ -11,32 +11,6 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test_helper.rb
 
 class IntegrationTests::RoutingTest < Test::Unit::TestCase
   include RuntimeHelper
-
-  def test_simple
-    program = <<-EOD
-    
-    DEFINE do_laundry FOR people DO
-      PERFORM "do laundry"
-      RETURN confirmation
-    END
-    
-    salman = people.person {
-      first_name = "salman"
-    }
-    
-    ASK salman TO do_laundry
-    
-    EOD
-    
-    tracks = run_source(program)
-    track = tracks.last
-    
-    assert_equal(1, ::Dog::RoutedTask.find().count)
-    
-    person = track.variables["salman"]
-    task = ::Dog::RoutedTask.find().to_a.first
-    
-    assert_equal(person._id, task["routing"]["_id"])
-    
-  end
+  
+  # TODO - Test this with my displays / listens in the track
 end

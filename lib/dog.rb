@@ -8,6 +8,7 @@
 #
 
 require File.join(File.dirname(__FILE__), 'dog/version.rb')
+require File.join(File.dirname(__FILE__), 'dog/helper.rb')
 require File.join(File.dirname(__FILE__), 'dog/compiler.rb')
 require File.join(File.dirname(__FILE__), 'dog/parser.rb')
 require File.join(File.dirname(__FILE__), 'dog/runtime.rb')

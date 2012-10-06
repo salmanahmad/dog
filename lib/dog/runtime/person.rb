@@ -8,6 +8,10 @@
 #
 
 module Dog
+  # TODO - Strongly consider removing this. I am not removing it now
+  # because it has a lot of utilities and helpful methods that I may
+  # want to repurpose in the future. In particular "accepts_routing"
+  
   class Person < DatabaseObject
     include Dog::FacebookPerson
 
