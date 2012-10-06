@@ -23,14 +23,15 @@ class ScratchTest < Test::Unit::TestCase
     
     program = <<-EOD
 
-    message = "Welcome!"
-    
-    DISPLAY message TO people.people
+    PRINT "Hello"
+    EXIT
+    PRINT "World"
+
       
     EOD
 
     tracks = run_source(program)
-    pp tracks.last.displays
+
   end
 
 

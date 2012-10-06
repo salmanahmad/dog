@@ -21,6 +21,8 @@ module Dog
     attr_accessor :handlers
     
     def initialize(id = nil, value = nil)
+      self._id = ::BSON::ObjectId.new
+      
       self.value_id = id
       self.value = value
       self.queue = []

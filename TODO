@@ -78,8 +78,6 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 - TODO
 
-Pause, Stop, Exit
-
 == and === semantics
 
 Spawn returns a future...
@@ -127,9 +125,16 @@ Stream with NOTIFY
 
 Implement garbage collection for the futures.
 
+Atomic Semantics for tracks and Collections (perhaps find_and_modify)
+
+Use ObjectIds instead of UUIDs
+
+
 
 
 - DONE
+
+Pause, Stop, Exit
 
 Listen / Display
 

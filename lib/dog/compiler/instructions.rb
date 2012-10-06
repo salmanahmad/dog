@@ -560,9 +560,14 @@ module Dog::Instructions
     def execute(track)
       signal = ::Dog::Signal.new
       
-      # TODO - Add more support for "pause" and "skip" (tells the scheduler to do something else) and "exit"
       if symbol == "stop" then
         signal.stop = true
+        return signal
+      elsif symbol == "pause" then
+        signal.pause = true
+        return signal
+      elsif symbol == "exit" then
+        signal.exit = true
         return signal
       else
         return nil

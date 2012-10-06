@@ -607,10 +607,27 @@ module Dog::Nodes
     end
   end
 
+  class Pause < Node
+    def compile(package)
+      s = ::Dog::Instructions::Signal.new("pause")
+      set_instruction_context(s)
+
+      package.add_to_instructions([s])
+    end
+  end
+  
   class Stop < Node
     def compile(package)
-      # TODO - I rushed this in. Is this okay?
       s = ::Dog::Instructions::Signal.new("stop")
+      set_instruction_context(s)
+
+      package.add_to_instructions([s])
+    end
+  end
+
+  class Exit < Node
+    def compile(package)
+      s = ::Dog::Instructions::Signal.new("exit")
       set_instruction_context(s)
 
       package.add_to_instructions([s])

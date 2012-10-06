@@ -99,7 +99,7 @@ module Dog::Library
 
           signal = ::Dog::Signal.new
           signal.schedule_tracks = []
-
+          
           for track_id in future.blocking_tracks do
             track_to_schedule = ::Dog::Track.find_by_id(track_id)
             track_to_schedule.state = ::Dog::Track::STATE::RUNNING

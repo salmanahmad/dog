@@ -80,6 +80,8 @@ module Dog
     end
     
     def initialize(function_name = nil, package_name = "", implementation_name = 0)
+      self._id = ::BSON::ObjectId.new
+      
       self.package_name = package_name
       self.function_name = function_name
       self.implementation_name = implementation_name

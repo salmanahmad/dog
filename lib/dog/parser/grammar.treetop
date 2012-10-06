@@ -1287,8 +1287,10 @@ grammar Dog
   rule pause
     'PAUSE' {
       def transform
-        # TODO - Update for v0.3
-        return
+        node = ::Dog::Nodes::Pause.new
+        node.line = self.line
+        
+        return node
       end
     }
   end
@@ -1307,12 +1309,13 @@ grammar Dog
   rule exit
     'EXIT' {
       def transform
-        # TODO - Update for v0.3
-        return
+        node = ::Dog::Nodes::Exit.new
+        node.line = self.line
+        
+        return node
       end
     }
   end
-  
   
   rule package 
     'PACKAGE' s identifier {

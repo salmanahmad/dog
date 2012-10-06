@@ -128,6 +128,10 @@ module Dog
       end
 
       def schedule(track)
+        for t in self.scheduled_tracks do
+          return if t._id == track._id
+        end
+        
         self.scheduled_tracks.add(track)
       end
 
@@ -142,8 +146,10 @@ module Dog
           end
 
           self.scheduled_tracks = Set.new
+          tracks_remaining = Set.new(tracks.clone)
 
           for track in tracks do
+            tracks_remaining.delete(track)
             next if track.state != Track::STATE::RUNNING
 
             loop do
@@ -183,14 +189,56 @@ module Dog
                   self.schedule(t)
                 end
               end
-              
+
               if signal.kind_of?(Signal) && signal.stop then
-                # TODO - Will this cause simple programs to hang and deadlock?
-                # Perhaps that is okay because it is used with a stop command 
-                # which means it is always used with a running server app
                 track.state = Track::STATE::WAITING
                 track.save
                 break
+              end
+
+              if signal.kind_of?(Signal) && signal.pause then
+                track.save
+                self.schedule(track)
+                break
+              end
+
+              if signal.kind_of?(Signal) && signal.exit then
+                tracks_to_save = []
+
+                for t in self.scheduled_tracks do
+                  add_to_set = true
+                  for t2 in tracks_to_save do
+                    if t2._id == t._id then
+                      add_to_set = false
+                      break
+                    end
+                  end
+
+                  tracks_to_save << t if add_to_set
+                end
+
+                for t in tracks_remaining do
+                  add_to_set = true
+                  for t2 in tracks_to_save do
+                    if t2._id == t._id then
+                      add_to_set = false
+                      break
+                    end
+                  end
+
+                  tracks_to_save << t if add_to_set
+                end
+
+                for t in tracks_to_save do
+                  t.save
+                end
+
+                track.save
+
+                EM.next_tick do
+                  Process.kill('INT', Process.pid)
+                end
+                return
               end
 
               if track.state == Track::STATE::WAITING then
