@@ -78,8 +78,6 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 - TODO
 
-Clean up routed events, test cases, etc.
-
 Pause, Stop, Exit
 
 == and === semantics
