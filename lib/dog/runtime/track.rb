@@ -37,8 +37,12 @@ module Dog
     
     attr_accessor :stack
     attr_accessor :variables
-    attr_accessor :futures
     attr_accessor :state
+    
+    # TODO - Do I actually need this? I don't think that I am using
+    # Track#futures at all at this point. I need to add my garbage collection
+    # but that is a seperate issue.
+    attr_accessor :futures
     
     attr_accessor :displays
     attr_accessor :listens
@@ -81,6 +85,7 @@ module Dog
     
     def initialize(function_name = nil, package_name = "", implementation_name = 0)
       self._id = ::BSON::ObjectId.new
+      self.future_return_id = nil
       
       self.package_name = package_name
       self.function_name = function_name

@@ -268,10 +268,18 @@ module Dog
                   track.remove
                   track = return_track
                 else
-                  # TODO - If this was a spawned track, then I should notify anyone that is waiting on my future since spawn should return a future...
                   if track.is_root? then
                     track.save
                   else
+                    if track.future_return_id then
+                      value = ::Dog::Value.empty_structure
+                      value._id = track.future_return_id
+                      value.pending = true
+
+                      resume_track = ::Dog::Track.invoke("complete:future:with", "future", [value, return_value])
+                      self.schedule(resume_track)
+                    end
+
                     track.remove
                   end
 

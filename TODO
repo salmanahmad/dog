@@ -78,8 +78,6 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 - TODO
 
-Spawn returns a future...
-
 Return from ON EACH
 
 PERFORM
@@ -131,6 +129,8 @@ Use ObjectIds instead of UUIDs
 
 
 - DONE
+
+Spawn returns a future
 
 == and === semantics
 

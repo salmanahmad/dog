@@ -372,6 +372,9 @@ module Dog::Instructions
         value = ::Dog::Value.null_value
       end
       
+      # TODO - Do I actually need this? I don't think that I am using
+      # Track#futures at all at this point. I need to add my garbage collection
+      # but that is a seperate issue
       if value.pending then
         if track.futures[value._id] then
           value = track.futures[value._id]
@@ -641,9 +644,23 @@ module Dog::Instructions
         signal = ::Dog::Signal.new
         
         if @async then
-          # TODO - Handle the return value as a future
+          # TODO - Refactor this block and reuse it between here and 
+          # the future.future function
+          value = ::Dog::Value.empty_structure
+          value.pending = true
+          value.buffer_size = 0
+          value.channel_mode = false
+          
+          # TODO - Implement the garbage collection for futures
+          future = ::Dog::Future.new(value._id)
+          future.queue_size = 0
+          future.save
+          
           new_track = ::Dog::Track.invoke(name, package, arguments)
+          new_track.future_return_id = value._id
           signal.schedule_tracks = [new_track]
+          
+          track.stack.push(value)
         else
           new_track = ::Dog::Track.invoke(name, package, arguments, track)
           signal.call_track = new_track
