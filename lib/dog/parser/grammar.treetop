@@ -392,18 +392,20 @@ grammar Dog
   end
   
   rule relational_operator
+    identity_operator
+    /
+    inidentity_operator
+    /
     equality_operator
     /
-    identity_operator
-    / 
     inequality_operator
-    / 
+    /
     greater_than_equal_operator
-    / 
+    /
     less_than_equal_operator
-    / 
+    /
     greater_than_operator
-    / 
+    /
     less_than_operator
   end
   
@@ -474,6 +476,14 @@ grammar Dog
   
   rule inequality_operator
     '!=' {
+      def transform
+        return self.text_value
+      end
+    }
+  end
+  
+  rule inidentity_operator
+    '!==' {
       def transform
         return self.text_value
       end

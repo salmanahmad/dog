@@ -35,6 +35,11 @@ module Dog
       ["dog.string", "dog.number", "dog.boolean", "dog.null"]
     end
     
+    def clone
+      hash = self.to_hash
+      ::Dog::Value.from_hash(hash)
+    end
+    
     def to_hash
       if !self.person.nil? then
         person = self.person.to_hash

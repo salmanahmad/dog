@@ -290,7 +290,9 @@ module Dog::Instructions
       path = track.stack.pop(@path_size)
 
       if @path_size == 1 then
-        track.stack.push(value)
+        # TODO - I need to make sure that the values are always
+        # cloned when they are pushed onto the stack
+        track.stack.push(value.clone)
       else
         variable = path.shift
         pointer = variable
@@ -441,23 +443,65 @@ module Dog::Instructions
 
       track.stack.concat(new_operands.reverse)
 
-
-
       case @operation
       when "OR"
         arg2 = track.stack.pop.ruby_value
         arg1 = track.stack.pop.ruby_value
-        
+
         value = arg1 || arg2
         value = ::Dog::Value.from_ruby_value(value)
         track.stack.push(value)
       when "AND"
         arg2 = track.stack.pop.ruby_value
         arg1 = track.stack.pop.ruby_value
-        
+
         value = arg1 && arg2
         value = ::Dog::Value.from_ruby_value(value)
         track.stack.push(value)
+      when "==", "!="
+        inverse = @operation == "!="
+
+        arg2 = track.stack.pop
+        arg1 = track.stack.pop
+
+        if arg1.primitive? && arg2.primitive? then
+          equal = (arg1.value == arg2.value)
+          equal = !equal if inverse
+          value = ::Dog::Value.from_ruby_value(equal)
+          track.stack.push(value)
+        elsif (arg1.primitive? && !arg2.primitive?) || (!arg1.primitive? && arg2.primitive?)
+          if inverse then
+            equal = ::Dog::Value.true_value
+          else
+            equal = ::Dog::Value.false_value
+          end
+
+          track.stack.push(equal)
+        else
+          equal = ::Dog::Helper.structures_equal?(arg1, arg2)
+          equal = !equal if inverse
+          value = ::Dog::Value.from_ruby_value(equal)
+          track.stack.push(value)
+        end
+      when "===", "!=="
+        inverse = @operation == "!=="
+
+        arg2 = track.stack.pop
+        arg1 = track.stack.pop
+        
+        if inverse then
+          if arg1._id == arg2._id then
+            track.stack.push(::Dog::Value.false_value)
+          else
+            track.stack.push(::Dog::Value.true_value)
+          end
+        else
+          if arg1._id == arg2._id then
+            track.stack.push(::Dog::Value.true_value)
+          else
+            track.stack.push(::Dog::Value.false_value)
+          end
+        end
       when "!"
         arg1 = track.stack.pop
 
