@@ -49,6 +49,10 @@ module Dog
       end
 
       def find_or_generate_current_user
+        # TODO - Clear this up.
+        value = ::Dog::Value.new("dog.person", {})
+        return value
+
         person = Person.find_by_id(session[:current_user])
 
         if person.nil? then
@@ -94,7 +98,11 @@ module Dog
         output = {}
         ignores = ignores.to_set
 
+
+
         for track in tracks do
+          
+          
           if track.state == ::Dog::Track::STATE::FINISHED then
             if track.control_ancestors.size > 0 then
               next
