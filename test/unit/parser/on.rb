@@ -58,6 +58,12 @@ class ParserTests::OnTest < Test::Unit::TestCase
       PRINT 'Previous Page!'
     END
     
+    ON value IN next_page DO
+      PRINT 'hello, world!'
+    ELSE ON value IN prev_page DO
+      PRINT 'Previous Page!'
+    END
+    
     EOD
     
     @parser.parse(program.strip)
@@ -81,6 +87,13 @@ class ParserTests::OnTest < Test::Unit::TestCase
     ON EACH request IN dog.account.signin DO
       PRINT 'hello, world!'
     END
+    
+    ON EACH request IN dog.account.signin DO
+      PRINT 'hello, world!'
+    END
+    
+    
+    
     
     EOD
     
