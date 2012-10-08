@@ -594,7 +594,7 @@ grammar Dog
   # ===============
   
   rule ask
-    'ASK' sn expression sn 'TO' sn packaged_identifier parameters:(sn parameter_name sn expression)* {
+    'ASK' s expression s 'TO' s packaged_identifier parameters:(s parameter_name s expression)* {
       def transform
         function = packaged_identifier.transform
         
