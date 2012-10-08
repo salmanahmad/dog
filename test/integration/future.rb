@@ -32,7 +32,17 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
     EOD
 
     tracks = run_source(program)
-    assert_equal(10, tracks.last.variables["x"].ruby_value)
+    
+    track = nil
+    for t in tracks do
+      if t.is_root? then
+        track = ::Dog::Track.find_by_id(t._id)
+        break
+      end
+    end
+    
+    assert_equal(10, track.variables["x"].ruby_value)
+
   end
   
   
@@ -56,7 +66,16 @@ class IntegrationTests::FutureTest < Test::Unit::TestCase
     EOD
 
     tracks = run_source(program)
-    assert_equal("hi", tracks.last.variables["x"].ruby_value)
+    
+    track = nil
+    for t in tracks do
+      if t.is_root? then
+        track = ::Dog::Track.find_by_id(t._id)
+        break
+      end
+    end
+
+    assert_equal("hi", track.variables["x"].ruby_value)
   end
   
   def test_channels

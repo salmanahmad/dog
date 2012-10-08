@@ -275,7 +275,7 @@ module Dog
                       value = ::Dog::Value.empty_structure
                       value._id = track.future_return_id
                       value.pending = true
-
+                      
                       resume_track = ::Dog::Track.invoke("complete:future:with", "future", [value, return_value])
                       self.schedule(resume_track)
                     end

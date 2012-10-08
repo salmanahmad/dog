@@ -90,7 +90,7 @@ module Dog::Library
       body do |track|
         future = variable("future")
         value = variable("value")
-
+        
         if future.pending
           value.from_future = future._id
           
