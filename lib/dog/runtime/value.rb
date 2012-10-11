@@ -24,7 +24,7 @@ module Dog
     attr_accessor :max_numeric_key
     
     def initialize(type = nil, value = nil)
-      self._id = UUID.new.generate
+      self._id = BSON::ObjectId.new
       self.type = type
       self.value = value
       self.pending = false

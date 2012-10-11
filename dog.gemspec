@@ -32,7 +32,6 @@ spec = Gem::Specification.new do |s|
   s.add_dependency 'sinatra', '~> 1.3.2'
   s.add_dependency 'async_sinatra', '~> 1.0.0'
   s.add_dependency 'tilt', '~> 1.3.3'
-  s.add_dependency 'uuid', '~> 2.3.5'
   s.add_dependency 'rack-test', '~> 0.6.1'
   s.add_dependency 'httparty', '~> 0.8.3'
 

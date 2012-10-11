@@ -80,8 +80,6 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 Import / Package
 
-UUID to Object Ids
-
 Return from ON EACH
 
 PERFORM
@@ -125,12 +123,12 @@ Implement garbage collection for the futures.
 
 Atomic Semantics for tracks and Collections (perhaps find_and_modify)
 
-Use ObjectIds instead of UUIDs
-
 
 
 
 - DONE
+
+UUID to Object Ids
 
 Spawn returns a future
 

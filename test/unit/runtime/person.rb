@@ -62,7 +62,7 @@ class RuntimeTests::PersonTest < Test::Unit::TestCase
     p2 = ::Dog::Person.find_by_email("salman@example.com")
     
     id = p2.id
-    assert_equal(String, id.class)
+    assert_equal(BSON::ObjectId, id.class)
     
     p3 = ::Dog::Person.find_by_id(id)
     assert_equal(p3.id, p2.id)

@@ -91,7 +91,7 @@ module Dog::Instructions
     end
     
     def execute(track)
-      @value._id = UUID.new.generate
+      @value._id = BSON::ObjectId.new
       track.stack.push(@value)
     end
     

@@ -189,7 +189,7 @@ module Dog::Library
         if container.type == "dog.collection" then
           collection = container["name"].ruby_value
 
-          value._id = UUID.new.generate
+          value._id = BSON::ObjectId.new
           ::Dog.database[collection].insert(value.to_hash)
           dog_return(value)
         else
