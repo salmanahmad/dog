@@ -84,8 +84,6 @@ Return from ON EACH
 
 PERFORM
 
-Clean up the Dog CLI
-
 Client API
 
 Value format
@@ -127,6 +125,8 @@ Atomic Semantics for tracks and Collections (perhaps find_and_modify)
 
 
 - DONE
+
+Clean up the Dog CLI
 
 UUID to Object Ids
 

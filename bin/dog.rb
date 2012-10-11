@@ -8,25 +8,12 @@
 # above copyright notice is included.
 #
 
-
-#
-# General Compilation Pipeline: 
-#
-# Parse the dog code into an AST (called a bark)
-# => bark = Dog::Parser.parse(dog_code)
-#
-# Compute the AST into a vm byte code (called bite code)
-# => bite = Dog::Compiler.compile(bark)
-#
-# Execute the byte code. This may save state as an execution graph (called a track)
-# => Dog::Runtime.run(bite)
-#
-
-
 #ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
 
 require 'rubygems'
+require 'fileutils'
 require 'pp'
+
 #require 'bundler/setup'
 require File.join(File.dirname(__FILE__), '../lib/dog/version.rb')
 
@@ -96,12 +83,18 @@ class Init < Command
     puts
     puts "Usage: dog init [DIRECTORY]"
     puts
-    puts "  WARNING: This command is not yet implemented."
+    puts "  Create a new Dog application directory with an application file."
     puts
   end
   
   def run(args)
-    usage
+    directory = args.shift
+    file = File.basename(directory) + ".dog"
+    
+    FileUtils.mkpath(directory)
+    File.open(File.join(directory, file), 'w') do |f|
+      f.write("")
+    end
   end  
 end
 
@@ -109,13 +102,15 @@ class Parse < Command
   Command.register(self)
   
   def description
-    "Parse a Dog source file and return the resulting syntax tree."
+    "Parse a Dog source file and return the resulting syntax tree"
   end
   
   def usage
     super
     puts
-    puts "Usage: dog parse [FILE.dog]"
+    puts "Usage: dog parse [FILE]"
+    puts
+    puts "  Parse a Dog source file and return the resulting syntax tree."
     puts
   end
   
@@ -151,13 +146,19 @@ class Compile < Command
   def usage
     super
     puts
-    puts "Usage: dog compile [FILE.dog]"
+    puts "Usage: dog compile [FILE] [options]"
+    puts
+    puts "  Will compile the file named FILE.dog into FILE.bundle. The bundle"
+    puts "  can then be executed with 'dog run', 'dog start', or 'dog restart'."
+    puts
+    puts "Options include:"
+    puts "  --show-byte-code    # Show the compiled byte code instead. Useful for debugging purposes."
     puts
   end
   
   def run(args)
     
-    if args.first == "-asm" then
+    if args.first == "--show-byte-code" then
       dump = true
       args.shift
     else
@@ -206,11 +207,44 @@ class Compile < Command
   end
 end
 
+
 class Run < Command
   Command.register(self)
   
   def description
-    "Execute a Dog source file or application"
+    "Compile and execute a dog program and clears the database if needed"
+  end
+  
+  def usage
+    super
+    puts
+    puts "Usage: dog run [FILE] [options]"
+    puts
+    puts "  Compile FILE.dog if it has not been compiled before (FILE.bundle is missing) or if the the"
+    puts "  FILE.dog has been modified after FILE.bundle. After compiling as necessary, start the Dog"
+    puts "  application. This command takes the same options as 'dog start'."
+    puts
+  end
+  
+  def run(args)
+    source_filename = args.first + ".dog"
+    bundle_filename = args.first + ".bundle"
+    
+    if File.exists?(source_filename) && File.exist?(bundle_filename) && (File.mtime(source_filename) > File.mtime(bundle_filename)) then
+      restart_command = Restart.new
+      restart_command.run(args)
+    else
+      run_command = Start.new
+      run_command.run(args)
+    end
+  end
+end
+
+class Start < Command
+  Command.register(self)
+  
+  def description
+    "Resume executing a Dog source file or application"
   end
   
   def parse_options(args)
@@ -246,11 +280,11 @@ class Run < Command
   def usage
     super
     puts
-    puts "Usage: dog run [FILE.bite] [options]"
+    puts "Usage: dog start [FILE] [options]"
     puts
-    puts "  Execute the Dog bite code in FILE.bite. If no file is provided, Dog will first check 'config.json'"
+    puts "  Resume executing the Dog bite code in FILE.bundle. If no file is provided, Dog will first check 'config.json'"
     puts "  for the name of the main application file in the current directory. If 'config.json' does not exist"
-    puts "  then Dog will default to the first .bite file it finds in the current directory. If there is no .bite"
+    puts "  then Dog will default to the first .bundle file it finds in the current directory. If there is no .bundle"
     puts "  file Dog will return an error."
     puts
     puts "Options include: "
@@ -272,51 +306,21 @@ class Run < Command
   end
 end
 
-class Start < Command
-  Command.register(self)
-  
-  def description
-    "Compile and execute a dog program and clears the database if needed"
-  end
-  
-  def usage
-    super
-    puts
-    puts "Usage: dog start [FILE.dog] [options]"
-    puts
-    puts "  TODO"
-    puts
-  end
-  
-  def run(args)
-    source_filename = args.first + ".dog"
-    bundle_filename = args.first + ".bundle"
-    
-    if File.exists?(source_filename) && File.exist?(bundle_filename) && (File.mtime(source_filename) > File.mtime(bundle_filename)) then
-      restart_command = Restart.new
-      restart_command.run(args)
-    else
-      run_command = Run.new
-      run_command.run(args)
-    end
-  end
-end
-
 class Restart < Command
   Command.register(self)
   
   def description
-    "Compile and execute a dog program after clearing the database."
+    "Compile and execute a dog program after clearing the database"
   end
   
   def usage
     super
     puts
-    puts "Usage: dog restart [FILE.dog] [options]"
+    puts "Usage: dog restart [FILE] [options]"
     puts
     puts "  Compile a Dog program and execute the resulting bite code. If this program has already been executed"
     puts "  previously, 'restart' will clear that database so the code is run from a 'clean slate'. This command "
-    puts "  takes the same options as the 'run' command."
+    puts "  takes the same options as the 'start' command."
     puts
   end
   
@@ -328,7 +332,7 @@ class Restart < Command
       exit
     end
     
-    run_command = Run.new
+    run_command = Start.new
     options = run_command.parse_options(args)
     options["database"] = {
       "clear_state" => true
@@ -347,7 +351,7 @@ class Reset < Command
   Command.register(self)
   
   def description
-    "Clears the database associated with the dog application."
+    "Clears the database associated with the dog application"
   end
   
   def usage
@@ -366,7 +370,7 @@ class Reset < Command
     bundle = ::Dog::Bundle.from_hash(hash)
     
     
-    run_command = Run.new
+    run_command = Start.new
     
     options = run_command.parse_options(args)
     options["database"] = {
