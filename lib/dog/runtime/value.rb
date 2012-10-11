@@ -10,7 +10,6 @@
 module Dog
   
   class Value
-    # TODO - The type in a value should be scoped to the package as well. Otherwise, we could have two 'people' structs
     attr_accessor :_id
     attr_accessor :pending
     attr_accessor :from_future
@@ -240,35 +239,6 @@ module Dog
         return h
       end
     end
-    
-    def mongo_value
-      if self.primitive? then
-        return self.value
-      elsif self.type == "array"
-        a = []
-        
-        for k, v in self.value do
-          a << v.mongo_value
-        end
-        
-        return a
-      else
-        h = {}
-        for k, v in self.value do
-          if k[0,1] == "n" then
-            h[k[2,k.length].to_i.to_s] = v.mongo_value
-          else
-            h[k[2,k.length]] = v.mongo_value
-          end
-        end
-        
-        return h
-      end
-    end
-    
-    def primitive?
-      Value.primitive_types.include? self.type
-    end
 
     def self.empty_structure
       value = Value.new
@@ -317,6 +287,10 @@ module Dog
       value.type = "dog.null"
       value.value = nil
       return value
+    end
+    
+    def primitive?
+      Value.primitive_types.include? self.type
     end
     
     def is_null?
