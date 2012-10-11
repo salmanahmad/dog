@@ -321,7 +321,9 @@ module Dog::Library
           
           i = 0
           for result in results do
-            value[i] = ::Dog::Value.from_hash(result)
+            result = ::Dog::Value.from_hash(result)
+            result["_id"] = ::Dog::Value.string_value(result._id)
+            value[i] = result
             i += 1
           end
           

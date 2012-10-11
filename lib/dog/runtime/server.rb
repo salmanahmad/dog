@@ -339,9 +339,11 @@ module Dog
             track = ::Dog::Track.find_by_id(track._id)
 
             spawns = build_spawn_traces(tracks, [track._id])
+            progress_track = build_spawn_traces([track]).first
 
             output = {
-              "track" => track.to_hash_for_api_user(),
+              "original_track" => track.to_hash_for_api_user(),
+              "track" => progress_track,
               "spawns" => spawns
             }
 
