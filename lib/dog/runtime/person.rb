@@ -140,7 +140,10 @@ module Dog
     end
 
     def self.find_by_email(email)
-      self.find_one({"value.s:email.value" => email})
+      self.find_one({"value" => {"$elemMatch" => {
+        "key" => "email",
+        "value.value" => email
+      }}})
     end
 
     def self.find_ids_for_predicate(conditions)

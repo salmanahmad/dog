@@ -821,44 +821,85 @@ grammar Dog
       def transform
         operator = relational_operator.transform
 
+        items = key_paths.transform
+
+        predicate = ::Dog::Nodes::StructureLiteral.new(nil, { 
+          "value" => ::Dog::Nodes::StructureLiteral.new(nil, {})
+        })
+        pointer = predicate.value["value"]
+        
+        count = -1
+        for item in items do
+          count += 1
+          next unless count < (items.size - 1)
+          
+          point = ::Dog::Nodes::StructureLiteral.new(nil, {})
+          pointer.value = {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new(item),
+              "value.value" => point
+            })
+          }
+          
+          pointer = point
+        end
+        
         case operator
         when "!="
-          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "$ne" => expression.transform
+          pointer.value = {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+                "$ne" => expression.transform
+              })
             })
-          })
+          }
         when ">="
-          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "$gte" => expression.transform
+          pointer.value = {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+                "$gte" => expression.transform
+              })
             })
-          })
+          }
         when "<="
-          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "$lte" => expression.transform
+          pointer.value = {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+                "$lte" => expression.transform
+              })
             })
-          })
+          }
         when ">"
-          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "$gt" => expression.transform
+          pointer.value = {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+                "$gt" => expression.transform
+              })
             })
-          })
+          }
         when "<"
-          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            key_paths.transform => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "$lt" => expression.transform
+          pointer.value = {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+                "$lt" => expression.transform
+              })
             })
-          })
+          }
         else
-          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            key_paths.transform => expression.transform
-          })
+          pointer.value = {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
+              "value.value" => expression.transform
+            })
+          }
         end
 
-        node = structure
+        node = predicate
         node.line = self.line
 
         return node
@@ -873,6 +914,8 @@ grammar Dog
         
         if underscore.empty? then
           ids << identifier.text_value
+        else
+          ids << ("_" + identifier.text_value)
         end
         
         if rest then
@@ -881,15 +924,7 @@ grammar Dog
           end
         end
         
-        if underscore.empty? then
-          return ("value.s:" + ids.join(".value.s:") + ".value")
-        else
-          if rest && rest.elements.size != 0 then
-            return ("_#{identifier.text_value}.value.s:" + ids.join(".value.s:") + ".value")
-          else
-            return "_#{identifier.text_value}"
-          end
-        end
+        return ids
       end
     }
   end
@@ -1743,8 +1778,8 @@ grammar Dog
         value = {}
         
         if !items.empty? then
-          index = 0
-          value[0] = self.items.first.transform
+          index = 0.0
+          value[index] = self.items.first.transform
           
           if self.items.rest then
             for item in self.items.rest.elements do

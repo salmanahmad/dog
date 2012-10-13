@@ -86,8 +86,6 @@ PERFORM
 
 Client API
 
-Value format
-
 Package format
 
 Change the default package from "" to "default" and have an error message restricting "default" from being used...?
@@ -125,6 +123,8 @@ Atomic Semantics for tracks and Collections (perhaps find_and_modify)
 
 
 - DONE
+
+Value format
 
 Clean up the Dog CLI
 

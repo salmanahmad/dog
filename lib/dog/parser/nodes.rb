@@ -319,7 +319,7 @@ module Dog::Nodes
     attr_accessor :value
 
     def initialize(value)
-      @value = value
+      @value = value.to_f
     end
 
     def compile(package)

@@ -166,10 +166,10 @@ class IntegrationTests::LoopTest < Test::Unit::TestCase
     track = tracks.last
     
     assert_equal(4, track.variables["new_cars"].keys.size)
-    assert_equal("a", track.variables["new_cars"][0].ruby_value)
-    assert_equal("a", track.variables["new_cars"][1].ruby_value)
-    assert_equal("a", track.variables["new_cars"][2].ruby_value)
-    assert_equal("a", track.variables["new_cars"][3].ruby_value)
+    assert_equal("a", track.variables["new_cars"][0.0].ruby_value)
+    assert_equal("a", track.variables["new_cars"][1.0].ruby_value)
+    assert_equal("a", track.variables["new_cars"][2.0].ruby_value)
+    assert_equal("a", track.variables["new_cars"][3.0].ruby_value)
     
     
   end

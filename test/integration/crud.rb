@@ -294,7 +294,7 @@ class IntegrationTests::CrudTest < Test::Unit::TestCase
     EOD
 
     tracks, output = run_source(program, true)
-    assert_equal("4\n0", output)
+    assert_equal("4.0\n0.0", output)
 
   end
 

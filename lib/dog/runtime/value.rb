@@ -22,16 +22,16 @@ module Dog
     attr_accessor :min_numeric_key
     attr_accessor :max_numeric_key
     
+    def self.primitive_types
+      ["dog.string", "dog.number", "dog.boolean", "dog.null"]
+    end
+    
     def initialize(type = nil, value = nil)
       self._id = BSON::ObjectId.new
       self.type = type
       self.value = value
       self.pending = false
       self.from_future = nil
-    end
-    
-    def self.primitive_types
-      ["dog.string", "dog.number", "dog.boolean", "dog.null"]
     end
     
     def clone
@@ -46,79 +46,45 @@ module Dog
         person = nil
       end
       
-      if Value.primitive_types.include? self.type then
-        return {
-          "_id" => self._id,
-          "pending" => self.pending,
-          "from_future" => self.from_future,
-          "buffer_size" => self.buffer_size,
-          "channel_mode" => self.channel_mode,
-          "person" => person,
-          "type" => self.type,
-          "value" => self.value,
-          "min_numeric_key" => self.min_numeric_key,
-          "max_numeric_key" => self.max_numeric_key
-        }
+      if self.value.nil? then
+        processed_value = value
+      elsif self.primitive? then
+        processed_value = value
       else
-        
-        if self.type == "array" then
-          processed_value = []
-          for k, v in self.value do
-            processed_value << v.to_hash
-          end
-        else
-          processed_value = {}
-          for k, v in self.value do
-            processed_value[k] = v.to_hash
-          end
+        processed_value = []
+        for k, v in value do
+          processed_value << {
+            "key" => k,
+            "value" => v.to_hash
+          }
         end
-        
-        return {
-          "_id" => self._id,
-          "pending" => self.pending,
-          "from_future" => self.from_future,
-          "buffer_size" => self.buffer_size,
-          "channel_mode" => self.channel_mode,
-          "person" => person,
-          "type" => self.type,
-          "value" => processed_value,
-          "min_numeric_key" => self.min_numeric_key,
-          "max_numeric_key" => self.max_numeric_key
-        }
       end
+      
+      return {
+        "_id" => self._id,
+        "pending" => self.pending,
+        "from_future" => self.from_future,
+        "buffer_size" => self.buffer_size,
+        "channel_mode" => self.channel_mode,
+        "person" => person,
+        "type" => self.type,
+        "value" => processed_value,
+        "min_numeric_key" => self.min_numeric_key,
+        "max_numeric_key" => self.max_numeric_key
+      }
     end
     
     def keys
-      items = []
-      for key, v in self.value do
-        item = key[2, key.length]
-
-        if key[0,1] == "n" then
-          item = item.to_f
-        end
-
-        items << item
-      end
-
-      return items
+      self.value.keys
     end
     
     def [](k)
-      if k.kind_of? Numeric then
-        # TODO - THIS IS REALLY REALLY REALLY BAD - I NEED TO FIGURE OUT A BETTER
-        # WAY TO SUPPORT LOOKUPS HERE! THE PROBLEM IS THAT MONGO CANNOT SUPPORT
-        # '.' IN THE KEY NAME SO THIS IS A TEMPORARY FIX
-        #k = "n:#{k.to_f}"
-        k = "n:#{k.to_i}"
-      else
-        k = "s:#{k}"
-      end
+      v = self.value[k]
       
-      i = self.value[k]
-      if i.nil? then
+      if v.nil? then
         return ::Dog::Value.null_value
       else
-        return i
+        return v
       end
     end
     
@@ -130,13 +96,7 @@ module Dog
         self.min_numeric_key = [k, self.min_numeric_key].min
         self.max_numeric_key = [k, self.max_numeric_key].max
         
-        # TODO - THIS IS REALLY REALLY REALLY BAD - I NEED TO FIGURE OUT A BETTER
-        # WAY TO SUPPORT LOOKUPS HERE! THE PROBLEM IS THAT MONGO CANNOT SUPPORT
-        # '.' IN THE KEY NAME SO THIS IS A TEMPORARY FIX
-        #k = "n:#{k.to_f}"
-        k = "n:#{k.to_i}"
-      else
-        k = "s:#{k}"
+        k = k.to_f
       end
       
       self.value[k] = v
@@ -157,36 +117,24 @@ module Dog
       
       value.person = ::Dog::Value.from_hash(value.person) if value.person
       
-      unless Value.primitive_types.include? value.type then
+      unless value.primitive? then
+        real_value = {}
         
-        if value.value.kind_of? Array then
-          array = value.value
-          value.value = {}
-          
-          i = 0
-          for v in array do
-            value[i] = Value.from_hash(v)
-            i += 1
-          end
-        else
-          real_value = {}
-          
-          for k, v in value.value do
-            real_value[k] = Value.from_hash(v)
-          end
-          
-          value.value = real_value
+        for item in value.value do
+          k = item["key"]
+          v = item["value"]
+          real_value[k] = Value.from_hash(v)
         end
+        
+        value.value = real_value
       end
       
       return value
     end
     
-    # TODO - I need to add type safety here
     def self.from_ruby_value(ruby_value, type = nil)
-      
       if ruby_value.kind_of? Hash then
-        type ||= "structure"
+        type ||= "dog.structure"
         
         value = Value.new
         value.type = type
@@ -198,7 +146,13 @@ module Dog
         
         return value
       elsif ruby_value.kind_of? Array then
-        # TODO
+        value = Value.empty_array
+        
+        ruby_value.each_index do |index|
+          value[index] = self.from_ruby_value(ruby_value[index])
+        end
+        
+        return value
       else
         if ruby_value.kind_of? String then
           return self.string_value(ruby_value)
@@ -215,7 +169,6 @@ module Dog
     end
     
     def ruby_value
-      # TODO - property add a types package and add array and structure to them
       if self.primitive? then
         return self.value
       elsif self.type == "dog.array"
@@ -229,11 +182,7 @@ module Dog
       else
         h = {}
         for k, v in self.value do
-          if k[0,1] == "n" then
-            h[k[2,k.length].to_f] = v.ruby_value
-          else
-            h[k[2,k.length]] = v.ruby_value
-          end
+          h[k] = v.ruby_value
         end
         
         return h
@@ -264,7 +213,7 @@ module Dog
     def self.number_value(number)
       value = Value.new
       value.type = "dog.number"
-      value.value = number
+      value.value = number.to_f
       return value
     end
     

@@ -131,7 +131,7 @@ module Dog::Instructions
     attribute :value
 
     def initialize(value)
-      @value = value
+      @value = value.to_f
     end
 
     def execute(track)

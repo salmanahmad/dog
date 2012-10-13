@@ -26,8 +26,8 @@ class IntegrationTests::AddTest < Test::Unit::TestCase
 
     tracks = run_source(program)
     track = tracks.last
-    assert_equal(track.variables["car"]["messages"][0].ruby_value, "hi")
-    assert_equal(track.variables["car"]["messages"][1].ruby_value, "hello")
+    assert_equal(track.variables["car"]["messages"][0.0].ruby_value, "hi")
+    assert_equal(track.variables["car"]["messages"][1.0].ruby_value, "hello")
 
   end
 
