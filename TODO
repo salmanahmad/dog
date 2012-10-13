@@ -98,6 +98,7 @@ Better error reporting
 Build system libraries
   Date
   Array
+  String
   File
   etc.
 

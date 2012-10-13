@@ -174,4 +174,19 @@ class IntegrationTests::LoopTest < Test::Unit::TestCase
     
   end
   
+  
+  def test_for_literal
+    program = <<-EOD
+
+    FOR EACH i IN [1,2,3,4,5] DO
+      PRINT i
+    END
+
+    EOD
+
+    tracks, output = run_source(program, true)
+
+    assert_equal("1.0\n2.0\n3.0\n4.0\n5.0", output)
+  end
+  
 end

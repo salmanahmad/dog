@@ -255,7 +255,11 @@ module Dog
                   end
 
                   for name, future in track.futures do
-                    # TODO - What the crapper is going on here?
+                    # TODO
+                    # Question: What the crapper is going on here?
+                    # Answer: This was the old way I used to pass future
+                    # around. It is not needed anymore but I don't want to
+                    # remove it until I implement my future "garbage collector"
                     future = future.to_hash
                     future = ::Dog::Future.from_hash(future)
                     return_track.futures[name] = future

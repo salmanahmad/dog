@@ -7,10 +7,6 @@
 # above copyright notice is included.
 #
 
-# TODO - This file is no longer necessary. It is being kept because
-# it has an interesting scaffolding on how to test a RACK-based app.
-# The actual test cases need to be updated in the future.
-
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
 class RuntimeTests::FutureTest < Test::Unit::TestCase  

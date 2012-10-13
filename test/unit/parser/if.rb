@@ -71,10 +71,6 @@ END
 
   end
   
-  def test_else
-    # TODO - Add a test case for else statements
-  end
-  
   def test_operator
     
     program = <<-EOD
@@ -99,7 +95,6 @@ END
     END
     EOD
     
-    # TODO Add tests to ensure that ELSE is working correctly...
     @parser.parse(program.strip)
   end
   
@@ -114,7 +109,6 @@ ELSE
 END
 EOD
     
-    # TODO Add tests to ensure that ELSE is working correctly...
     @parser.parse(program.strip)
   end
   
@@ -129,7 +123,6 @@ ELSE
 END
 EOD
     
-    # TODO Add tests to ensure that ELSE is working correctly...
     @parser.parse(program.strip)
   end
   

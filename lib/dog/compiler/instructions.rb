@@ -296,8 +296,11 @@ module Dog::Instructions
       else
         variable = path.shift
         pointer = variable
-
+        
+        count = -1
         for item in path do
+          count += 1
+          
           key = ""
           
           item_value = item
@@ -305,16 +308,13 @@ module Dog::Instructions
           
           if item_value.kind_of? String then
             key = item_value
-            #key = item_value.to_s
           elsif item_value.kind_of? Numeric then
             key = item_value
-            #key = item_value.to_s
           else
             raise "Runtime error"
           end
 
-          # TODO - THis is a bug here... I need to count...
-          if item == path.last then
+          if count == path.size - 1 then
             pointer[key] = value
           else
             pointer = pointer[key]

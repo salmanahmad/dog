@@ -92,24 +92,9 @@ class ParserTests::OnTest < Test::Unit::TestCase
       PRINT 'hello, world!'
     END
     
-    
-    
-    
     EOD
     
     @parser.parse(program.strip)
-    
-    # TODO - This syntax no longer works - is that okay?
-    #
-    #program = <<-EOD
-    #
-    #ON EACH dog.account.create DO
-    #  PRINT 'hello, world!'
-    #END
-    #
-    #EOD
-    #
-    #@parser.parse(program.strip)
     
   end
   
