@@ -335,10 +335,14 @@ module Dog
             submitted_value = ::Dog::Value.from_ruby_value(data)
             submitted_value.person = find_or_generate_current_user()
 
-            tracks = ::Dog::Runtime.invoke("send:to:value", "future", [value, submitted_value])
+            submission_track = ::Dog::Track.invoke("send:to:value", "future", [value, submitted_value])
+            
+            ::Dog::Runtime.schedule(submission_track)
+            tracks = ::Dog::Runtime.resume
+            
             track = ::Dog::Track.find_by_id(track._id)
 
-            spawns = build_spawn_traces(tracks, [track._id])
+            spawns = build_spawn_traces(tracks, [track._id, submission_track._id])
             progress_track = build_spawn_traces([track]).first
 
             output = {

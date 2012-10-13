@@ -206,7 +206,7 @@ module Dog
     def self.string_value(string)
       value = Value.new
       value.type = "dog.string"
-      value.value = string
+      value.value = string.to_s
       return value
     end
     

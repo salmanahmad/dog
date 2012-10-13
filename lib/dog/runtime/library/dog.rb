@@ -312,9 +312,23 @@ module Dog::Library
 
       body do |track|
         query = variable("query")
-        container = query["container"]
-        selector = query["predicate"].ruby_value
-
+        
+        if query.type == "dog.collection" then
+          container = query
+          selector = {}
+        else
+          container = query["container"]
+          selector = query["predicate"].ruby_value
+        end
+        
+        if selector.nil? then
+          selector = {}
+        end
+        
+        if selector["_id"] && selector["_id"].kind_of?(String) then
+          selector["_id"] = BSON::ObjectId.from_string(selector["_id"])
+        end
+        
         if container.type == "dog.collection" then
           results = ::Dog::database[container["name"].ruby_value].find(selector)
           value = ::Dog::Value.empty_array
@@ -340,7 +354,23 @@ module Dog::Library
         query = variable("query")
         container = query["container"]
         selector = query["predicate"].ruby_value
-
+        
+        if query.type == "dog.collection" then
+          container = query
+          selector = {}
+        else
+          container = query["container"]
+          selector = query["predicate"].ruby_value
+        end
+        
+        if selector.nil? then
+          selector = {}
+        end
+        
+        if selector["_id"] && selector["_id"].kind_of?(String) then
+          selector["_id"] = BSON::ObjectId.from_string(selector["_id"])
+        end
+        
         if container.type == "dog.collection" then
           results = ::Dog::database[container["name"].ruby_value].remove(selector)
           dog_return(::Dog::Value.true_value)

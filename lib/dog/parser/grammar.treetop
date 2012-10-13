@@ -823,6 +823,31 @@ grammar Dog
 
         items = key_paths.transform
 
+        if (items.size == 1 && items.first == "_id") then
+          operator_mapping = {
+            "!=" => "$ne",
+            ">=" => "$gte",
+            "<=" => "$lte",
+            ">" => "$gt",
+            "<" => "$lt",
+          }
+          
+          if (operator_mapping[operator]) then
+            predicate = ::Dog::Nodes::StructureLiteral.new(nil, { 
+              "_id" => ::Dog::Nodes::StructureLiteral.new(nil, { 
+                operator_mapping[operator] => expression.transform
+              })
+            })
+          else
+            predicate = ::Dog::Nodes::StructureLiteral.new(nil, { 
+              "_id" => expression.transform
+            })
+          end
+          
+          predicate.line = self.line
+          return predicate
+        end
+        
         predicate = ::Dog::Nodes::StructureLiteral.new(nil, { 
           "value" => ::Dog::Nodes::StructureLiteral.new(nil, {})
         })
