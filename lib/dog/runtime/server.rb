@@ -13,7 +13,6 @@ module Dog
 
     # CORS Supports
     # TODO - Support JSONP
-    # TODO - Host dog.js from Dog to avoid any XSS
 
     after do
       response['Access-Control-Allow-Origin'] = '*'
@@ -178,6 +177,9 @@ module Dog
     enable :logging
     #enable :sessions
     #enable :raise_errors
+
+    set :assets, Sprockets::Environment.new
+    settings.assets.append_path (File.join(File.dirname(__FILE__), "resources/javascripts"))
 
     class << self
 
@@ -354,6 +356,10 @@ module Dog
             content_type 'application/json'
             return output.to_json
           end
+        end
+
+        get prefix + '/dog.js' do
+          settings.assets["dog.js"]
         end
 
         get '*' do
