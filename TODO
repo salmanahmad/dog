@@ -80,8 +80,6 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 Client API (Authentication and account creation)
 
-Host dog.js in the dog server itself.
-
 Import / Package
 
 Return from ON EACH
