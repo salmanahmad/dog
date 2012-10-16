@@ -1093,7 +1093,7 @@ grammar Dog
           end
         end
         
-        wait_variable = "wait_on_#{::Dog::Helper.unique_number}"
+        wait_variable = "@wait_on_#{::Dog::Helper.unique_number}"
         wait_expressions = []
         
         for branch in branches do
