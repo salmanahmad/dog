@@ -1,0 +1,99 @@
+<head>
+	<style type="text/css">
+
+	#content-body {
+		margin:25px;
+	}
+
+	#toolbar-left {
+		float:left;
+		position:relative;
+		width:48%;
+	}
+
+	#toolbar-right {
+		position:absolute;
+		right:5px;
+		top:7px;
+		padding:0px;
+		text-align:right;
+	}
+
+	#content-body th {
+		width:33%;
+	}
+
+	.space {
+		margin-left:70px;
+	}
+	
+	#obj-search-field {
+		width:575px;
+	}
+
+	#obj-search-btn {
+		position:absolute;
+		right:25px;
+	}
+	
+	#stats-area {
+		padding-top:50px;
+	}
+
+	</style>
+	
+	<script type="text/javascript">
+	
+		$(document).ready(function() {
+			$("#obj-search-field").focus(function() {
+				$(this).val("")
+			})
+		})
+		
+	</script>
+</head>
+<body>
+	<div class="columns">
+		<div class="content-toolbar">
+			<div id="toolbar-left">
+				Object Browser
+			</div>
+			<div id="toolbar-right">
+				<button type="button">Add Object</button>
+				<button type="button">Remove Objects</button>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+
+	<div id="content-body">
+		<div id="query-area">
+			<form id="obj-search-form">
+				<div class="page-header">Search Current Objects <br /> <br /></div>
+				<input type="text" id="obj-search-field" value="Enter Search Query..."></input>
+				<input type="submit" value="Search Objects" id="obj-search-btn"></input>
+			</form>
+		</div>
+
+		<div id="stats-area">
+			<div class="page-header">
+				Statistics
+			</div><br />
+			<table border="1">
+				<th>Communities</th>
+				<th>Object Types</th>
+				<th>Number of Objects</th>
+				<tr>
+					<td>Cambridge Bicycle Club</td>
+					<td>People</td>
+					<td>37</td>
+				</tr>
+				<tr class="alt">
+					<td>Boston Book Club</td>
+					<td>People</td>
+					<td>24</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>

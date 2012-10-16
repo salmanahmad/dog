@@ -1290,6 +1290,24 @@ module Dog::Nodes
     end
   end
   
+  class Exunless < Node
+    attribute :conditions
+    
+    def visit(track)
+      for condition in self.conditions do
+        if condition.first then
+          if track.has_visited?(condition.first) then
+            value = track.read_stack(condition.first.path)
+            
+            if !(value.type == "null") || (value.type == "boolean" && value.value == false) then
+              
+            end
+          end
+        end
+      end
+    end
+  end
+  
   class While < Node
     attribute :condition
     attribute :statements

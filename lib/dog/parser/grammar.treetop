@@ -1025,6 +1025,26 @@ grammar Dog
     }
   end
 
+	rule experimental_unless
+		'EXUNLESS'  s expression s 'THEN' sn statements:(statements)? s? 'END' {
+			def compile
+				node = ::Dog::Nodes::Exunless.new
+				node.line = self.line
+				
+				node.conditions = []
+				
+				if !statements.empty? then
+					node.conditions << [expression.compile, statements.compile]
+				else
+					node.conditions << [expression.compile, nil]
+				end
+				
+				return node
+				
+			end
+		}
+	end
+
   rule for
     'FOR' s 'EACH' in_clause 'DO' sn statements:(statements)? s? 'END' {
       def compile

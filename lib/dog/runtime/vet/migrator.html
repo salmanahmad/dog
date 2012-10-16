@@ -1,0 +1,60 @@
+<head>
+	<style type="text/css">
+
+	#content-body {
+		margin:25px;
+	}
+	
+	#toolbar-left {
+		float:left;
+		position:relative;
+		width:48%;
+	}
+
+	#toolbar-right {
+		position:absolute;
+		right:5px;
+		top:7px;
+		padding:0px;
+		text-align:right;
+	}
+	
+	#content-body th {
+		width:33%;
+	}
+	
+	</style>
+</head>
+<body>
+	<div class="columns">
+		<div class="content-toolbar">
+			<div id="toolbar-left">
+				Migrator
+			</div>
+			<div id="toolbar-right">
+				<button type="button">Add Migration</button>
+				<button type="button">Run Migrations</button>
+			</div>
+			<div class="clear"></div>
+		</div>
+
+	</div>
+	<div id="content-body">
+		<div class="page-header">Previous Migrations <br /><br /></div>
+		<table border="1">
+			<th>Migration</th>
+			<th>Authorizer</th>
+			<th>Time</th>
+			<tr>
+				<td>Add Column</td>
+				<td>John Smith</td>
+				<td>Monday 7/30/2012 9:56 PM</td>
+			</tr>
+			<tr class="alt">
+				<td>Add Join Table</td>
+				<td>Jane Smith</td>
+				<td>Friday 7/27/2012 10:42 AM</td>
+			</tr>
+		</table>
+	</div>
+</body>
