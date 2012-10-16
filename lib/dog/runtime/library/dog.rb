@@ -296,7 +296,7 @@ module Dog::Library
         
         if container.type == "dog.collection" then
           if value.type == "dog.string" then
-            value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value.ruby_value})
+            value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => BSON::ObjectId.from_string(value.ruby_value)})
           else
             value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value._id})
           end

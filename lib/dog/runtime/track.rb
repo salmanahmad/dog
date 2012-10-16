@@ -105,7 +105,11 @@ module Dog
       self.access_ancestors = []
       self.control_ancestors = []
     end
-    
+
+    def context=(c)
+      @context = c
+    end
+
     def context
       return @context if @context
       

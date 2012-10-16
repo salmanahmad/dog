@@ -35,6 +35,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency 'tilt', '~> 1.3.3'
   s.add_dependency 'rack-test', '~> 0.6.1'
   s.add_dependency 'httparty', '~> 0.8.3'
+  s.add_dependency 'rb-readline', '~> 0.4.2'
 
   s.add_dependency 'blather', '~> 0.8.0'
 

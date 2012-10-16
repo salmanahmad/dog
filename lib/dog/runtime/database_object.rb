@@ -85,7 +85,7 @@ module Dog
     def reload
       if self._id then
         document = ::Dog::database[self.collection_name].find_one({"_id" => self._id})
-        self.from_hash(document)
+        return self.class.from_hash(document)
       end
     end
     
