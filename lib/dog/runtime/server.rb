@@ -93,70 +93,6 @@ module Dog
         return true
       end
 
-      def build_spawn_traces(tracks, ignores = [])
-        output = {}
-        ignores = ignores.to_set
-
-
-
-        for track in tracks do
-          
-          
-          if track.state == ::Dog::Track::STATE::FINISHED then
-            if track.control_ancestors.size > 0 then
-              next
-            end
-          end
-
-          if ignores.include?(track._id) then
-            next
-          end
-
-          for parent in track.control_ancestors do
-            if parent.kind_of? ::Dog::Track then
-              parent = parent._id
-            end
-
-            if ignores.include?(parent) then
-              next
-            end
-          end
-
-          for parent in track.control_ancestors do
-            if parent.kind_of? ::Dog::Track then
-              parent = parent._id
-            end
-            
-            if output[parent] then
-              output.delete(parent)
-            end
-          end
-          
-          if track.state == ::Dog::Track::STATE::CALLING then
-            children = ::Dog::Track.find({
-              "control_ancestors" => track._id,
-              "state" => ::Dog::Track::STATE::WAITING
-            })
-            
-            if children.count > 0 then
-              child = children.next
-              track = ::Dog::Track.from_hash(child)
-            end
-          end
-          
-          output[track._id] = track
-        end
-        
-        heads = []
-        for track in output.values do
-          heads << track.to_hash_for_api_user()
-        end
-        
-        return heads
-      end
-
-    end
-
     def self.get_or_post(path, opts={}, &block)
       get(path, opts, &block)
       post(path, opts, &block)
@@ -313,6 +249,7 @@ module Dog
           else
             content_type 'application/json'
             return {
+              "original_track" => track.to_hash_for_api_user(),
               "track" => track.to_hash_for_api_user()
             }.to_json
           end
@@ -341,18 +278,19 @@ module Dog
             
             ::Dog::Runtime.schedule(submission_track)
             tracks = ::Dog::Runtime.resume
+
+            spawns = []
+            progress_track = track.to_hash_for_api_user()
             
             for t in tracks do
-              if t._id == track._id then
-                track = t
-                break
+              if t.same_trace_as?(track) then
+                progress_track = t.to_hash_for_api_user()
+              elsif submission_track._id == t._id then
+                next
+              else
+                spawns << t.to_hash_for_api_user()
               end
             end
-            
-            #track = ::Dog::Track.find_by_id(track._id)
-
-            spawns = build_spawn_traces(tracks, [track._id, submission_track._id])
-            progress_track = build_spawn_traces([track]).first
 
             output = {
               "original_track" => track.to_hash_for_api_user(),

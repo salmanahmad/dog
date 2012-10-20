@@ -122,6 +122,30 @@ module Dog
       self.state = ::Dog::Track::STATE::FINISHED
     end
     
+    def same_trace_as?(other)
+      for track in self.control_ancestors do
+        if track.kind_of? ::Dog::Track then
+          track = track._id
+        end
+        
+        if other._id == track then
+          return true
+        end
+      end
+      
+      for track in other.control_ancestors do
+        if track.kind_of? ::Dog::Track then
+          track = track._id
+        end
+        
+        if self._id == track then
+          return true
+        end
+      end
+      
+      return false
+    end
+    
     def self.from_hash(hash)
       object = super
       

@@ -136,10 +136,9 @@ module Dog
       end
 
       def resume
-        resumed_tracks = Set.new
+        trace_heads = {}
 
         loop do
-          resumed_tracks.merge(self.scheduled_tracks)
           tracks = self.scheduled_tracks.to_a
           if tracks.size == 0
             break
@@ -149,6 +148,7 @@ module Dog
           tracks_remaining = Set.new(tracks.clone)
 
           for track in tracks do
+            trace_heads.delete(track._id)
             tracks_remaining.delete(track)
             next if track.state != Track::STATE::RUNNING
 
@@ -192,6 +192,7 @@ module Dog
 
               if signal.kind_of?(Signal) && signal.stop then
                 track.state = Track::STATE::WAITING
+                trace_heads[track._id] = track
                 track.save
                 break
               end
@@ -242,6 +243,7 @@ module Dog
               end
 
               if track.state == Track::STATE::WAITING then
+                trace_heads[track._id] = track
                 track.save
                 break
               end
@@ -272,6 +274,8 @@ module Dog
                   track.remove
                   track = return_track
                 else
+                  trace_heads[track._id] = track
+
                   if track.is_root? then
                     track.save
                   else
@@ -294,7 +298,7 @@ module Dog
           end
         end
 
-        return resumed_tracks.to_a
+        return trace_heads.values
       end
 
       def start_stop_server
