@@ -12,6 +12,8 @@ the developer wants to, they can add in the packages to their configuration file
 include Rack or Java middleware.
 
 
+
+
 == Concurrency ==
 
 Spawn schedules a thread to run.
@@ -27,6 +29,8 @@ When we address PROC_COUNT we will also want to address or CLUSTER notion where 
 We will also have a YIELD (perhaps COMPUTE system.yield) that will say, "stop running me, and run something else." It basically tells the scheduler to skip me for now and come back. If there is no other threads running, then the current thread will resume naturally.
 
 
+
+
 == Type system ==
 
 Type type
@@ -40,6 +44,9 @@ Array Type
 Symbol table can hold anything, but definitely holds Type types for many cases.
 
 It may not hold 
+
+
+
 
 == Futures and Garbage Collection ==
 
@@ -61,11 +68,50 @@ Note: We may want to use a "futures_inside" field in tracks that write_variable 
 
 
 
+
 == Channel Functionality == 
 
 Channels behave like Publisher / Subscriber when multiple people are listening and Producer / Consumer when you are going back and forth with one person. You Acheieve a worker queue and gauaranteed Producer / Consumer model by having a broker in the middle.
 
 We will have an API that will allow you to ADD to a channel and have various compensation actions if the buffer is full - blocking - block for timeout - ignore.
+
+
+
+
+== Track Expiration ==
+
+Right now, tracks never expire and they never go away. A couple of ways to deal with storing tracks (continuations) in a scalable manner. 
+
+Think about scalability with continuation passing. How does that work? If I wait to click submit, do I risk losing the stuff if it expires?
+
+An open question right now is - can it be possible to store these track indefinitely??? I'm not sure right now.
+
+* Exponential back off for when to delete tracks. This will reduce the amount of data that is needed to be stored on disk
+
+* Use Redis to store the tracks so that it is faster and never hits disk
+
+* Use a memory pool with a consistent hashing load balancer to send the same request to the same machine
+
+* Use client-side storage to store tracks up to a certain size (512kb). And then use server-side storage. This is similar to VIEWSTATE. I will need to encrypt the data and pad it with random data so they cannot decrypt it. THIS WILL NOT WORK. I AM SUCEPTIBLE TO REPLAY ATTACKS. I may need to implement a "nonce" server side. Whenever I use a nonce I store it. I remove it once I use that nonce once. If it is not in the table then I don't trust it. I can still then, store the nonce server side without a problem. 
+
+The problem is that I could still get DDoS because they script a path that creates server-side storage and not client side. I could solve this problem by supporting tail recursion to compress the stack size.
+
+
+
+
+== Track API ==
+
+Many times you want to model a long running collaborative workflow in which one person does something and then it is handed off to someone else working on it. We have two ways to do this:
+
+(1) The old way of storing a state-field in the database and model the state machine similar to "acts_as_statemachine" plugin in rails
+
+(2) Actually saving the stack trace. And resuming the tracks. 
+
+
+deal with client-side stored tracks
+
+
+
 
 == Done ==
 
@@ -100,6 +146,7 @@ Build system libraries
   Array
   String
   File
+  Location API
   etc.
 
 Are native functions being passed by reference or value? It should be value...I think...maybe...
@@ -118,9 +165,11 @@ Stream with NOTIFY
 
 Implement garbage collection for the futures.
 
+Track expiration
+
 Atomic Semantics for tracks and Collections (perhaps find_and_modify)
 
-
+Add client side caching capabilities to API. At what point so I just create my own protocol instead of HTTP and just tunnel for Web apps?
 
 
 - DONE

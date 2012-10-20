@@ -342,7 +342,14 @@ module Dog
             ::Dog::Runtime.schedule(submission_track)
             tracks = ::Dog::Runtime.resume
             
-            track = ::Dog::Track.find_by_id(track._id)
+            for t in tracks do
+              if t._id == track._id then
+                track = t
+                break
+              end
+            end
+            
+            #track = ::Dog::Track.find_by_id(track._id)
 
             spawns = build_spawn_traces(tracks, [track._id, submission_track._id])
             progress_track = build_spawn_traces([track]).first

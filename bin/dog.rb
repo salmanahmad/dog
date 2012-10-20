@@ -235,6 +235,11 @@ class Run < Command
       restart_command = Restart.new
       restart_command.run(args)
     else
+      unless File.exist?(bundle_filename) then
+        compile_command = Compile.new
+        compile_command.run([args.first])
+      end
+      
       run_command = Start.new
       run_command.run(args)
     end

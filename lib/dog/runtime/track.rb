@@ -260,7 +260,7 @@ module Dog
       
       returns = nil
       if self.state == ::Dog::Track::STATE::FINISHED then
-        returns = self.stack.last.ruby_value
+        returns = self.stack.last.ruby_value rescue nil
       end
       
       hash = {
