@@ -169,7 +169,10 @@ Track expiration
 
 Atomic Semantics for tracks and Collections (perhaps find_and_modify)
 
-Add client side caching capabilities to API. At what point so I just create my own protocol instead of HTTP and just tunnel for Web apps?
+Add client side caching capabilities to API. That way instead of sending new requests i can just use cached values. This is useful for iPhone applications to minimze network usage. At what point so I just create my own protocol instead of HTTP and just tunnel for Web apps?
+
+Explore GCC front ends
+
 
 
 - DONE
