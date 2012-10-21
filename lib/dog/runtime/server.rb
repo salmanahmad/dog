@@ -93,6 +93,8 @@ module Dog
         return true
       end
 
+    end
+
     def self.get_or_post(path, opts={}, &block)
       get(path, opts, &block)
       post(path, opts, &block)
