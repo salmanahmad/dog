@@ -46,7 +46,21 @@ module Dog
       def layout(name)
         # Intentionally blank. Used by our template system.
       end
-
+      
+      def account_status
+        if session[:current_user]
+          return {
+            "authenticated" => true,
+            "email" => nil,
+            "name" => nil
+          }
+        else
+          return {
+            "authenticated" => false
+          }
+        end
+      end
+      
       def find_or_generate_current_user
         # TODO - Clear this up.
         value = ::Dog::Value.new("dog.person", {})
@@ -140,18 +154,8 @@ module Dog
         # TODO - Add some ability to get basic user information. Perhaps their handle and their name?
 
         get prefix + '/account/status' do
-          @output = {}
-
-          if session[:current_user]
-            @output["success"] = true
-            @output["authentication"] = true
-          else
-            @output["success"] = true
-            @output["authentication"] = false
-          end
-
           content_type 'application/json'
-          @output.to_json
+          {"account_status" => account_status}.to_json
         end
 
         get prefix + '/account/login' do
@@ -239,6 +243,8 @@ module Dog
           @output.to_json
         end
 
+        # TODO - I don't think that I need to include the original_track at all, actually...
+
         get prefix + '/track/:id' do |id|
           if id == "root" then
             track = ::Dog::Track.root
@@ -252,7 +258,8 @@ module Dog
             content_type 'application/json'
             return {
               "original_track" => track.to_hash_for_api_user(),
-              "track" => track.to_hash_for_api_user()
+              "track" => track.to_hash_for_api_user(),
+              "account_status" => account_status
             }.to_json
           end
         end
@@ -297,7 +304,8 @@ module Dog
             output = {
               "original_track" => track.to_hash_for_api_user(),
               "track" => progress_track,
-              "spawns" => spawns
+              "spawns" => spawns,
+              "account_status" => account_status
             }
 
             content_type 'application/json'

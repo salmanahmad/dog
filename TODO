@@ -173,6 +173,7 @@ Add client side caching capabilities to API. That way instead of sending new req
 
 Explore GCC front ends
 
+Explore re-working channels by incorporating the following techniques and the following models: http://www.mongodb.org/display/DOCS/Tailable+Cursors, http://www.mongodb.org/display/DOCS/Capped+Collections, http://blog.mongodb.org/post/29495793738/pub-sub-with-mongodb. I think the model is pretty similar to what I already have i the sense that channels have a maximum queue size that is enforced - is that similar to capped collections? Perhaps not - "Once the limit is reached, items roll out on a least recently inserted basis." - so this only supports a single use case required by Dog channels.
 
 
 - DONE
