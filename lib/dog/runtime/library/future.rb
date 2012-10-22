@@ -150,6 +150,7 @@ module Dog::Library
         # - Block
         # - Ignore
         # - Timeout
+        # - Rollover least recently inserted (?) <- this may be problematic
 
         channel = variable("channel")
         value = variable("value")
