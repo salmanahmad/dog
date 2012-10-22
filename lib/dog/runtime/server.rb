@@ -175,6 +175,17 @@ module Dog
           @output.to_json
         end
 
+        get prefix + '/account/logout' do
+          session.clear
+          
+          if params['redirect_uri'] then
+            redirect params['redirect_uri'] || '/'
+          else
+            content_type 'application/json'
+            {"account_status" => account_status}.to_json
+          end
+        end
+
         get prefix + '/account/:provider/login' do |provider|
           if session[:current_user] then
             content_type 'application/json'
@@ -201,11 +212,6 @@ module Dog
             return @output.to_json
           end
           redirect to(session[:oauth_redirect] || '/')
-        end
-
-        get prefix + '/account/logout' do
-          session.clear
-          redirect params['redirect_uri'] || '/'
         end
 
         post prefix + '/account/create' do
