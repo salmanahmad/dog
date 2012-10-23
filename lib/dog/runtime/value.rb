@@ -9,6 +9,8 @@
 
 module Dog
   
+  # TODO - Compact the serialization by using a "header" field that stores all of the things in a array instead of storing with key value pairs
+  
   class Value
     attr_accessor :_id
     attr_accessor :pending
