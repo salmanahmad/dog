@@ -62,9 +62,8 @@ module Dog
       end
       
       def find_or_generate_current_user
-        # TODO - Clear this up.
-        value = ::Dog::Value.new("dog.person", {})
-        return value
+        # TODO - Facebook will not work until you refactor this
+
 
         person = Person.find_by_id(session[:current_user])
 
@@ -78,7 +77,11 @@ module Dog
           end
         end
 
-        return person
+
+
+        return person.dog_value
+        
+
       end
 
       def verify_current_user(message = "You need to be logged in when performing this operation")
