@@ -170,8 +170,17 @@ module Dog::Library
           
           Pony.mail(envelope)
           dog_return
-        else
-          # TODO - I need to implement the push channel via stream. Right now, only email is working
+        elsif via.ruby_value == "stream"
+          
+          if query.type == "dog.string" then
+            channel = query.ruby_value
+            if channel[0,1] != "/" then
+              channel = "/" + channel
+            end
+            
+            client = ::Dog::Server.stream_client
+            client.publish(channel, "value" => value.ruby_value)
+          end
         end
         
       end
