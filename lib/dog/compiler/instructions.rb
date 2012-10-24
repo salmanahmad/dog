@@ -513,7 +513,12 @@ module Dog::Instructions
         arg2 = track.stack.pop.ruby_value
         arg1 = track.stack.pop.ruby_value
 
-        value = arg1.send(@operation, arg2)
+        if @operation == "+" && arg1.class == String || arg2.class == String 
+          value = arg1.to_s + arg2.to_s
+        else
+          value = arg1.send(@operation, arg2)
+        end
+
         value = ::Dog::Value.from_ruby_value(value)
         track.stack.push(value)
       end
