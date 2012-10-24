@@ -144,6 +144,8 @@ module Dog
         
         prefix = Config.get('dog_prefix')
 
+        use Faye::RackAdapter, :mount => (prefix + '/stream'), :timeout => 25, :extensions => []
+
         # TODO - I have to figure this out for production
         set :static, false
         set :public_folder, Proc.new { File.join(Runtime.bundle_directory, "views") }
@@ -356,10 +358,16 @@ module Dog
         return self
       end
 
+      def stream_client
+        @stream_client ||= Faye::Client.new("http://0.0.0.0:#{Config.get('port')}#{Config.get('dog_prefix')}/stream")
+        return @stream_client
+      end
+
       def run
         Server.initialize
         return if @running
         @running = true
+        
         Thin::Server.start '0.0.0.0', Config.get('port'), Server
       end
     end
