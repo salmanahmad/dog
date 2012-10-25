@@ -54,7 +54,7 @@ module Dog::Library
       end
     end
     
-    implementation "size" do
+    implementation "size:on" do
       argument "value"
       
       body do
