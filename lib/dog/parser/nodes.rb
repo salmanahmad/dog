@@ -57,7 +57,8 @@ module Dog::Nodes
   class Node
     attr_accessor :line
     attr_accessor :file
-
+    attr_accessor :package
+    
     def compile(package)
       raise "Node#compile must be overridden by a subclass."
     end
@@ -95,8 +96,22 @@ module Dog::Nodes
       @name = name
     end
     
-    def compile
-      nil
+    def compile(package)
+      package.name = name
+    end
+  end
+  
+  class Import < Node
+    attr_accessor :name
+    
+    def initialize(name)
+      @name = name
+    end
+    
+    def compile(package)
+      unless package.imports.include? @name then
+        package.imports << @name
+      end
     end
   end
   

@@ -161,8 +161,6 @@ Pople.public should be a DEFINEd value, not a type
 
 Add support for DEFINEd values (and channels)
 
-Stream with NOTIFY
-
 Implement garbage collection for the futures.
 
 Track expiration
@@ -183,6 +181,8 @@ Support ON EACH message WITH arg, arg3, arg3 DO ... END
 
 
 - DONE
+
+Stream with NOTIFY
 
 Value format
 

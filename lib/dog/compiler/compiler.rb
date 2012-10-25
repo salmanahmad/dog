@@ -35,7 +35,12 @@ module Dog
     end
 
     def compile(node, filename = "")
-      package_name = ""
+      if node && node.package then
+        package_name = node.package
+      else
+        package_name = ""
+      end
+      
 
       # TODO - Fix this
       #::Dog::Nodes::Node.each_descendant(node) do |d|

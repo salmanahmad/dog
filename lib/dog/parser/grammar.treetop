@@ -1407,7 +1407,16 @@ grammar Dog
       def transform
         node = ::Dog::Nodes::Package.new(identifier.text_value)
         node.line = self.line
-        
+        return node
+      end
+    }
+  end
+  
+  rule import
+    'IMPORT' s identifier {
+      def transform
+        node = ::Dog::Nodes::Import.new(identifier.text_value)
+        node.line = self.line
         return node
       end
     }
@@ -1418,20 +1427,6 @@ grammar Dog
       def transform
         # TODO - Update for v0.3
         return
-      end
-    }
-  end
-  
-  rule import
-    'IMPORT' s string {
-      def transform
-        # TODO - Update for v0.3
-        return
-        
-        node = ::Dog::Nodes::Import.new
-        node.line = self.line
-        node.path = Shellwords::shellwords(string.text_value).first
-        return node
       end
     }
   end

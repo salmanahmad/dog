@@ -53,7 +53,13 @@ module Dog
         raise error
       end
 
-      return tree.transform
+      ast = tree.transform
+      
+      unless ast.nil? then
+        ast.package = tree.package
+      end
+
+      return ast
     end
 
   end
