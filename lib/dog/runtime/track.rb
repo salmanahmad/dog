@@ -118,6 +118,12 @@ module Dog
       @context = symbol["implementations"][implementation_name]
     end
     
+    def filename
+      package = ::Dog::Runtime.bundle.packages[self.package_name]
+      symbol = package.symbols[self.function_name]
+      symbol["filename"]
+    end
+    
     def finish
       self.state = ::Dog::Track::STATE::FINISHED
     end

@@ -168,7 +168,7 @@ module Dog
                   begin
                     signal = instruction.execute(track)
                   rescue Exception => e
-                    exception = Exception.new("Dog error on line: #{instruction.line} in file: #{instruction.file}.\n\nThe ruby error was: #{e.to_s}")
+                    exception = Exception.new("Dog error on line: #{instruction.line} in file: #{track.filename}.\n\nThe ruby error was: #{e.to_s}")
                     exception.set_backtrace(e.backtrace)
                     raise exception
                   end
