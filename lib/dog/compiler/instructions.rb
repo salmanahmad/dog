@@ -352,6 +352,21 @@ module Dog::Instructions
         end
       end
       
+      if value.nil? && ["cascade", "internal"].include?(scope) then
+        package = track.package_name
+        imports = ::Dog::Runtime.bundle.packages[package].imports
+        for import in imports do
+          package = ::Dog::Runtime.bundle.packages[import]
+          if package then
+            symbol = package.symbols[@variable_name]
+            if symbol && !symbol["value"].nil? then
+              value = symbol["value"]
+              break
+            end
+          end
+        end
+      end
+      
       if value.nil? && ["cascade", "external"].include?(scope) then
         package = ::Dog::Runtime.bundle.packages[@variable_name]
         
