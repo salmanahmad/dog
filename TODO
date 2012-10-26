@@ -141,7 +141,6 @@ GridFS
 Change the default package from "" to "default" and have an error message restricting "default" from being used...?
 
 Better error reporting 
-  stack traces
   Special case "no function found" and "could not access path"
   "Undefined operation"
 
