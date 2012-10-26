@@ -166,24 +166,50 @@ class Compile < Command
       dump = false
     end
     
-    source_filename = args.first
-    source_code = ""
-    source_filename += ".dog"
-    
     begin
-      source_code = File.open(source_filename).read
-    rescue
-      puts "Error: Could not read '#{source_filename}'"
-      exit
-    end
-    
-    begin
-      # TODO - Update this to handle multiple files
+      if args.size == 0 then
+        puts "Error: Must include at least a single file to compile"
+        exit
+      end
       
-      bark = Dog::Parser.parse(source_code, source_filename)
-      bundle = Dog::Compiler.compile([[bark, source_filename]])
+      compiler = ::Dog::Compiler.new
+      first_source_filename = ""
       
-      bundle_filename = File.basename(source_filename, ".dog") + ".bundle"
+      args.each_index do |index|
+        arg = args[index]
+        
+        source_filename = arg
+        source_code = ""
+        source_filename += ".dog"
+        
+        if index == 0 then
+          first_source_filename = source_filename
+        end
+        
+        begin
+          source_code = File.open(source_filename).read
+        rescue
+          puts "Error: Could not read '#{source_filename}'"
+          exit
+        end
+        
+        begin
+          nodes = Dog::Parser.parse(source_code, source_filename)
+          bundle = compiler.compile(nodes, source_filename)
+          
+          if index == 0 then
+            compiler.startup_package(nodes.package)
+          end
+        rescue Dog::CompilationError => error
+          puts error
+        rescue Dog::ParseError => error
+          puts error
+        end
+      end
+      
+      bundle = compiler.finalize
+      bundle_filename = File.basename(first_source_filename, ".dog") + ".bundle"
+      
       bundle_file = File.open(bundle_filename, "w")
       
       bundle_file.write(JSON.dump(bundle.to_hash))
@@ -193,10 +219,6 @@ class Compile < Command
       puts bundle.dump_bytecode if dump
       
       return true
-    rescue Dog::CompilationError => error
-      puts error
-    rescue Dog::ParseError => error
-      puts error
     rescue Exception => error
       puts "Error: An unknown compilation error occured: "
       puts
