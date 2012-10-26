@@ -59,6 +59,7 @@ module Dog::Library
         current_track = track.control_ancestors.last
 
         if routing.is_null? then
+          ::Dog::Helper.warn("I was told to listen to 'null'. Is this what you wanted?")
           current_track.listens.delete(identifier.ruby_value)
           dog_return(::Dog::Value.null_value)
         end
