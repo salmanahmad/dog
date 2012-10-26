@@ -124,9 +124,9 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 - TODO
 
-Fix line numbers
-
 Logger / Debugger log
+
+Default template generation for dogjs
 
 Client API (Authentication and account creation)
 
@@ -220,12 +220,13 @@ Native libraries
 
 === v0.3 Changes ===
 
-
-
 Embed an IMAP and an SMTP server just like Sinatra
 
-
 === End ===
+
+
+
+
 
 
 
@@ -617,13 +618,10 @@ Add a package-level configuration functionality that also breaks out side effect
 
 
 
-
-
-
 Ruby API (similar to the C api for ruby)
 	Perhaps an "Init_MODULE_NAME" function that manipulates the AST (or perhaps just manipulates the function map...)
 
-How do you "require" a C module in ruby and what woudl that look like for Dog???
+How do you "require" a C module in ruby and what would that look like for Dog???
 	Do these do what we expect: "require 'hello'" vs "require 'hello.so'" vs "require 'hello.rb'"
 	Should we have the similar approach???
 

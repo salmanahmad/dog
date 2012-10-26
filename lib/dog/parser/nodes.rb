@@ -59,6 +59,12 @@ module Dog::Nodes
     attr_accessor :file
     attr_accessor :package
     
+    def self.new_with_context(line, *args)
+      node = self.new(*args)
+      node.line = line
+      return node
+    end
+    
     def compile(package)
       raise "Node#compile must be overridden by a subclass."
     end

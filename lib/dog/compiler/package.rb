@@ -12,7 +12,9 @@ module Dog
     attr_accessor :name
     attr_accessor :imports
     attr_accessor :symbols
+
     attr_accessor :symbols_stack
+    attr_accessor :current_filename
 
     def initialize(name = nil)
       self.name = name
@@ -118,6 +120,7 @@ module Dog
 
     def push_symbol(symbol)
       self.symbols[symbol] ||= {
+        "filename" => self.current_filename,
         "name" => symbol,
         "value" => nil,
         "implementations" => [],

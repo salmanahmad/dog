@@ -168,16 +168,16 @@ grammar Dog
     primary_expression s 'FROM' s community:(primary_expression) s predicate {
       def transform
         
-        structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-          "$and" => ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "array"]), {
-            0 => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "value.s:communities.value.value" => ::Dog::Nodes::Access.new([community.transform, "name"])
+        structure = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+          "$and" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "array"]), {
+            0 => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+              "value.s:communities.value.value" => ::Dog::Nodes::Access.new_with_context(self.line, [community.transform, "name"])
             }),
             1 => predicate.transform,
           })
         })
         
-        node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
+        node = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "query"]), {
           "container" => primary_expression.transform,
           "predicate" => structure
         })
@@ -190,11 +190,11 @@ grammar Dog
     primary_expression s 'FROM' s community:(primary_expression) {
       def transform
         
-        structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-          "value.s:communities.value.value" => ::Dog::Nodes::Access.new([community.transform, "name"])
+        structure = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+          "value.s:communities.value.value" => ::Dog::Nodes::Access.new_with_context(self.line, [community.transform, "name"])
         })
         
-        node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
+        node = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "query"]), {
           "container" => primary_expression.transform,
           "predicate" => structure
         })
@@ -206,7 +206,7 @@ grammar Dog
     / 
     primary_expression s predicate {
       def transform
-        node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "query"]), {
+        node = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new_with_context(self.line, ["dog", "query"]), {
           "container" => primary_expression.transform,
           "predicate" => predicate.transform
         })
@@ -637,9 +637,9 @@ grammar Dog
         variable_name = for_clause[0]
         
         node = ::Dog::Nodes::Assign.new([variable_name],
-          ::Dog::Nodes::Call.new(
-            ::Dog::Nodes::Access.new(["dog", "listen:to:for"]),
-            [expression.transform, ::Dog::Nodes::StringLiteral.new(variable_name)]
+          ::Dog::Nodes::Call.new_with_context(self.line,
+            ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "listen:to:for"]),
+            [expression.transform, ::Dog::Nodes::StringLiteral.new_with_context(self.line, variable_name)]
           )
         )
         
@@ -677,9 +677,9 @@ grammar Dog
   rule display
     'DISPLAY' s identifier s 'TO' s expression {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "display:value:as:to"]),
-          [::Dog::Nodes::Access.new([identifier.text_value]), ::Dog::Nodes::StringLiteral.new(identifier.text_value), expression.transform]
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "display:value:as:to"]),
+          [::Dog::Nodes::Access.new_with_context(self.line, [identifier.text_value]), ::Dog::Nodes::StringLiteral.new_with_context(self.line, identifier.text_value), expression.transform]
         )
         
         node.line = self.line
@@ -696,8 +696,8 @@ grammar Dog
   rule notify
     'NOTIFY' s expression via_clause notify_of_clause {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "notify"]),
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "notify"]),
           [notify_of_clause.transform, expression.transform, via_clause.transform]
         )
         node.line = self.line
@@ -725,8 +725,8 @@ grammar Dog
   rule person
     'PERSON' people_from_clause {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["system", "person_from_value"]),
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["system", "person_from_value"]),
           [people_from_clause.transform]
         )
         node.line = self.line
@@ -779,15 +779,15 @@ grammar Dog
 
         case operator
         when "AND"
-          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            "$and" => ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "array"]), {
+          structure = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+            "$and" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, ::Dog::Nodes::Access.new_with_context(self.line,["dog", "array"]), {
               0 => first.transform,
               1 => second.transform,
             })
           })
         when "OR"
-          structure = ::Dog::Nodes::StructureLiteral.new(nil, {
-            "$or" => ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "array"]), {
+          structure = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+            "$or" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "array"]), {
               0 => first.transform,
               1 => second.transform,
             })
@@ -796,7 +796,7 @@ grammar Dog
           raise "Parse error"
         end
 
-        node = structure #::Dog::Nodes::StructureLiteral.new(nil, structure)
+        node = structure
         node.line = self.line
         
         return node
@@ -833,13 +833,13 @@ grammar Dog
           }
           
           if (operator_mapping[operator]) then
-            predicate = ::Dog::Nodes::StructureLiteral.new(nil, { 
-              "_id" => ::Dog::Nodes::StructureLiteral.new(nil, { 
+            predicate = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, { 
+              "_id" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, { 
                 operator_mapping[operator] => expression.transform
               })
             })
           else
-            predicate = ::Dog::Nodes::StructureLiteral.new(nil, { 
+            predicate = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, { 
               "_id" => expression.transform
             })
           end
@@ -848,8 +848,8 @@ grammar Dog
           return predicate
         end
         
-        predicate = ::Dog::Nodes::StructureLiteral.new(nil, { 
-          "value" => ::Dog::Nodes::StructureLiteral.new(nil, {})
+        predicate = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, { 
+          "value" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {})
         })
         pointer = predicate.value["value"]
         
@@ -858,10 +858,10 @@ grammar Dog
           count += 1
           next unless count < (items.size - 1)
           
-          point = ::Dog::Nodes::StructureLiteral.new(nil, {})
+          point = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {})
           pointer.value = {
-            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "key" => ::Dog::Nodes::StringLiteral.new(item),
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, item),
               "value.value" => point
             })
           }
@@ -872,53 +872,53 @@ grammar Dog
         case operator
         when "!="
           pointer.value = {
-            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
-              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
                 "$ne" => expression.transform
               })
             })
           }
         when ">="
           pointer.value = {
-            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
-              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
                 "$gte" => expression.transform
               })
             })
           }
         when "<="
           pointer.value = {
-            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
-              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
                 "$lte" => expression.transform
               })
             })
           }
         when ">"
           pointer.value = {
-            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
-              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
                 "$gt" => expression.transform
               })
             })
           }
         when "<"
           pointer.value = {
-            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
-              "value.value" => ::Dog::Nodes::StructureLiteral.new(nil, {
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, items.last),
+              "value.value" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
                 "$lt" => expression.transform
               })
             })
           }
         else
           pointer.value = {
-            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new(nil, {
-              "key" => ::Dog::Nodes::StringLiteral.new(items.last),
+            "$elemMatch" => ::Dog::Nodes::StructureLiteral.new_with_context(self.line, nil, {
+              "key" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, items.last),
               "value.value" => expression.transform
             })
           }
@@ -965,16 +965,16 @@ grammar Dog
       def transform
         value = value_expression.transform
         if value.class == ::Dog::Nodes::Access && value.path.first.kind_of?(String) then
-          node = ::Dog::Nodes::Assign.new(
+          node = ::Dog::Nodes::Assign.new_with_context(self.line,
             value.path,
-            ::Dog::Nodes::Call.new(
-              ::Dog::Nodes::Access.new(["dog", "add:value:to"]), 
+            ::Dog::Nodes::Call.new_with_context(self.line,
+              ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "add:value:to"]), 
               [value, container.transform]
             )
           )
         else
-          node = ::Dog::Nodes::Call.new(
-            ::Dog::Nodes::Access.new(["dog", "add:value:to"]),
+          node = ::Dog::Nodes::Call.new_with_context(self.line,
+            ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "add:value:to"]),
             [value, container.transform]
           )
         end
@@ -988,8 +988,8 @@ grammar Dog
   rule find
     'FIND' s value:expression s 'IN' s container:expression {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "find_by_id"]),
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "find_by_id"]),
           [container.transform, value.transform]
         )
         node.line = self.line
@@ -1000,8 +1000,8 @@ grammar Dog
     /
     'FIND' s query_expression {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "find"]),
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "find"]),
           [query_expression.transform]
         )
         node.line = self.line
@@ -1014,8 +1014,8 @@ grammar Dog
   rule remove
     'REMOVE' s query_expression {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "remove"]),
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "remove"]),
           [query_expression.transform]
         )
         node.line = self.line
@@ -1028,8 +1028,8 @@ grammar Dog
   rule update
     'UPDATE' s value:expression s 'IN' s container:expression {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "update"]),
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "update"]),
           [container.transform, value.transform]
         )
         node.line = self.line
@@ -1042,8 +1042,8 @@ grammar Dog
   rule save
     'SAVE' s value:expression s 'TO' s container:expression {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "save"]),
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "save"]),
           [container.transform, value.transform]
         )
         node.line = self.line
@@ -1056,8 +1056,8 @@ grammar Dog
   rule delete
     'DELETE' s value:primary_expression s 'FROM' s container:expression {
       def transform
-        node = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["dog", "delete"]),
+        node = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "delete"]),
           [container.transform, value.transform]
         )
         node.line = self.line
@@ -1098,7 +1098,7 @@ grammar Dog
         
         for branch in branches do
           if branch[1][1].nil? then
-            branch[1][1] = ::Dog::Nodes::Access.new([::Dog::Language.pluralize(branch[1][0])])
+            branch[1][1] = ::Dog::Nodes::Access.new_with_context(self.line, [::Dog::Language.pluralize(branch[1][0])])
           end
           
           wait_expressions << branch[1][1]
@@ -1106,24 +1106,24 @@ grammar Dog
         
         instructions = []
         
-        wait = ::Dog::Nodes::Wait.new(wait_expressions)
+        wait = ::Dog::Nodes::Wait.new_with_context(self.line, wait_expressions)
         wait.line = self.line
         
-        wait_assignment = ::Dog::Nodes::Assign.new([wait_variable], wait)
+        wait_assignment = ::Dog::Nodes::Assign.new_with_context(self.line, [wait_variable], wait)
         wait_assignment.line = self.line
         
         instructions << wait_assignment
         
         for branch in branches do
-          b = ::Dog::Nodes::Branch.new(
-            ::Dog::Nodes::Call.new(
-              ::Dog::Nodes::Access.new(["future", "is:value:from_future"]), 
-              [::Dog::Nodes::Access.new([wait_variable]), branch[1][1]]
+          b = ::Dog::Nodes::Branch.new_with_context(self.line,
+            ::Dog::Nodes::Call.new_with_context(self.line,
+              ::Dog::Nodes::Access.new_with_context(self.line,["future", "is:value:from_future"]), 
+              [::Dog::Nodes::Access.new_with_context(self.line,[wait_variable]), branch[1][1]]
             ),
-            ::Dog::Nodes::Nodes.new([
-              ::Dog::Nodes::Assign.new(
+            ::Dog::Nodes::Nodes.new_with_context(self.line,[
+              ::Dog::Nodes::Assign.new_with_context(self.line,
                 [branch[1][0]],
-                ::Dog::Nodes::Access.new([wait_variable])
+                ::Dog::Nodes::Access.new_with_context(self.line, [wait_variable])
               ),
               branch[2]
             ])
@@ -1133,7 +1133,7 @@ grammar Dog
           instructions << b
         end
 
-        node = ::Dog::Nodes::Nodes.new(instructions)
+        node = ::Dog::Nodes::Nodes.new_with_context(self.line, instructions)
         node.line = self.line
         
         return node
@@ -1165,30 +1165,30 @@ grammar Dog
         if !statements.empty? then
           body = statements.transform
         else
-          body = ::Dog::Nodes::Nodes.new([])
+          body = ::Dog::Nodes::Nodes.new_with_context(self.line, [])
         end
 
         if in_args[1].nil? then
-          in_args[1] = ::Dog::Nodes::Access.new([::Dog::Language.pluralize(in_args[0])])
+          in_args[1] = ::Dog::Nodes::Access.new_with_context(self.line, [::Dog::Language.pluralize(in_args[0])])
         end
 
         function_name = "@anonymous_function_#{::Dog::Helper.unique_number}"
-        function = ::Dog::Nodes::FunctionDefinition.new(function_name, [in_args[0]], body)
+        function = ::Dog::Nodes::FunctionDefinition.new_with_context(self.line, function_name, [in_args[0]], body)
         function.line = self.line
 
-        function_pointer = ::Dog::Nodes::StructureLiteral.new(::Dog::Nodes::Access.new(["dog", "function"]), {
-          "name" => ::Dog::Nodes::StringLiteral.new(function_name),
-          "package" => ::Dog::Nodes::StringLiteral.new(self.package)
+        function_pointer = ::Dog::Nodes::StructureLiteral.new_with_context(self.line, ::Dog::Nodes::Access.new_with_context(self.line, ["dog", "function"]), {
+          "name" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, function_name),
+          "package" => ::Dog::Nodes::StringLiteral.new_with_context(self.line, self.package)
         })
         function_pointer.line = self.line
 
-        function_call = ::Dog::Nodes::Call.new(
-          ::Dog::Nodes::Access.new(["future", "register:handler:for"]),
+        function_call = ::Dog::Nodes::Call.new_with_context(self.line,
+          ::Dog::Nodes::Access.new_with_context(self.line, ["future", "register:handler:for"]),
           [function_pointer, in_args[1]]
         )
         function_call.line = self.line
 
-        nodes = ::Dog::Nodes::Nodes.new([function, function_call])
+        nodes = ::Dog::Nodes::Nodes.new_with_context(self.line, [function, function_call])
         nodes.line = self.line
 
         return nodes
@@ -1218,10 +1218,10 @@ grammar Dog
         if !statements.empty? then
           body = statements.transform
         else
-          body = ::Dog::Nodes::Nodes.new([])
+          body = ::Dog::Nodes::Nodes.new_with_context(self.line, [])
         end
 
-        node = ::Dog::Nodes::FunctionDefinition.new(name.join(":"), arguments, body)
+        node = ::Dog::Nodes::FunctionDefinition.new_with_context(self.line, name.join(":"), arguments, body)
         node.line = self.line
 
         return node
@@ -1235,7 +1235,7 @@ grammar Dog
         name = identifier.text_value
         properties = structure_properties.transform
         
-        node = ::Dog::Nodes::StructureDefinition.new(name, properties)
+        node = ::Dog::Nodes::StructureDefinition.new_with_context(self.line, name, properties)
         node.line = self.line
         
         return node
@@ -1434,7 +1434,7 @@ grammar Dog
   rule print
     'PRINT' space expression {
       def transform
-        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new(["system", "print:on"]), [expression.transform])
+        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new_with_context(self.line, ["system", "print:on"]), [expression.transform])
         node.line = self.line
         
         return node
@@ -1445,7 +1445,7 @@ grammar Dog
   rule inspect
     'INSPECT' space expression {
       def transform
-        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new(["system", "inspect:on"]), [expression.transform])
+        node = ::Dog::Nodes::Call.new(::Dog::Nodes::Access.new_with_context(self.line, ["system", "inspect:on"]), [expression.transform])
         node.line = self.line
         
         return node
@@ -1478,8 +1478,8 @@ grammar Dog
         for clause in else_if_clause.elements
           clause = clause.transform
           
-          new_branch = ::Dog::Nodes::Branch.new(clause.first, clause.last)
-          new_branch_nodes = ::Dog::Nodes::Nodes.new([
+          new_branch = ::Dog::Nodes::Branch.new_with_context(self.line, clause.first, clause.last)
+          new_branch_nodes = ::Dog::Nodes::Nodes.new_with_context(self.line, [
             new_branch
           ])
           
@@ -1530,7 +1530,7 @@ grammar Dog
         if !statements.empty? then
           body = statements.transform
         else
-          body = ::Dog::Nodes::Nodes.new([])
+          body = ::Dog::Nodes::Nodes.new_with_context(self.line, [])
         end
         
         variable_name = args.first
@@ -1545,64 +1545,62 @@ grammar Dog
           source_structure = ::Dog::Nodes::Access([::Dog::Language::pluralize(variable_name)])
         end
         
-        node = ::Dog::Nodes::Nodes.new([
-          ::Dog::Nodes::Assign.new(
+        node = ::Dog::Nodes::Nodes.new_with_context(self.line, [
+          ::Dog::Nodes::Assign.new_with_context(self.line, 
             [structure_variable_name],
             source_structure
           ),
-          ::Dog::Nodes::Assign.new(
+          ::Dog::Nodes::Assign.new_with_context(self.line,
             [keys_variable_name], 
-            ::Dog::Nodes::Call.new(
-              ::Dog::Nodes::Access.new(["system", "keys"]),
-              [::Dog::Nodes::Access.new([structure_variable_name])]
+            ::Dog::Nodes::Call.new_with_context(self.line,
+              ::Dog::Nodes::Access.new_with_context(self.line, ["system", "keys"]),
+              [::Dog::Nodes::Access.new_with_context(self.line, [structure_variable_name])]
             )
           ),
-          ::Dog::Nodes::Assign.new(
+          ::Dog::Nodes::Assign.new_with_context(self.line,
             [size_variable_name], 
-            ::Dog::Nodes::Call.new(
-              ::Dog::Nodes::Access.new(["system", "size:on"]),
-              [::Dog::Nodes::Access.new([keys_variable_name])]
+            ::Dog::Nodes::Call.new_with_context(self.line,
+              ::Dog::Nodes::Access.new_with_context(self.line, ["system", "size:on"]),
+              [::Dog::Nodes::Access.new_with_context(self.line, [keys_variable_name])]
             )
           ),
-          Nodes::Assign.new([counter_variable_name], ::Dog::Nodes::NumberLiteral.new(0)),
-          ::Dog::Nodes::Loop.new(::Dog::Nodes::Nodes.new([
-            ::Dog::Nodes::Branch.new(
-              ::Dog::Nodes::Operation.new(
-                ::Dog::Nodes::Access.new([counter_variable_name]),
-                ::Dog::Nodes::Access.new([size_variable_name]),
+          Nodes::Assign.new_with_context(self.line, [counter_variable_name], ::Dog::Nodes::NumberLiteral.new_with_context(self.line, 0)),
+          ::Dog::Nodes::Loop.new_with_context(self.line, ::Dog::Nodes::Nodes.new_with_context(self.line, [
+            ::Dog::Nodes::Branch.new_with_context(self.line,
+              ::Dog::Nodes::Operation.new_with_context(self.line,
+                ::Dog::Nodes::Access.new_with_context(self.line, [counter_variable_name]),
+                ::Dog::Nodes::Access.new_with_context(self.line, [size_variable_name]),
                 "<"
               ),
-              ::Dog::Nodes::Nodes.new([
-                ::Dog::Nodes::Nodes.new([
-                  ::Dog::Nodes::Assign.new(
+              ::Dog::Nodes::Nodes.new_with_context(self.line, [
+                ::Dog::Nodes::Nodes.new_with_context(self.line, [
+                  ::Dog::Nodes::Assign.new_with_context(self.line,
                     [variable_name],
-                    ::Dog::Nodes::Access.new([
+                    ::Dog::Nodes::Access.new_with_context(self.line, [
                       structure_variable_name,
-                      ::Dog::Nodes::Access.new([
+                      ::Dog::Nodes::Access.new_with_context(self.line, [
                         keys_variable_name, 
-                        ::Dog::Nodes::Access.new([counter_variable_name])
+                        ::Dog::Nodes::Access.new_with_context(self.line, [counter_variable_name])
                       ])
                     ])
                   )
                 ]),
-                ::Dog::Nodes::Assign.new(
+                ::Dog::Nodes::Assign.new_with_context(self.line,
                   [counter_variable_name],
-                  ::Dog::Nodes::Operation.new(
-                    ::Dog::Nodes::Access.new([counter_variable_name]),
-                    ::Dog::Nodes::NumberLiteral.new(1),
+                  ::Dog::Nodes::Operation.new_with_context(self.line,
+                    ::Dog::Nodes::Access.new_with_context(self.line, [counter_variable_name]),
+                    ::Dog::Nodes::NumberLiteral.new_with_context(self.line, 1),
                     "+"
                   )
                 )
               ]), 
-              ::Dog::Nodes::Nodes.new([
-                ::Dog::Nodes::Break.new
+              ::Dog::Nodes::Nodes.new_with_context(self.line, [
+                ::Dog::Nodes::Break.new_with_context(self.line)
               ])
             ),
             body
           ]))
         ])
-        
-        node.line = self.line
         
         return node
       end
@@ -1615,21 +1613,19 @@ grammar Dog
         if !statements.empty? then
           body = statements.transform
         else
-          body = ::Dog::Nodes::Nodes.new([])
+          body = ::Dog::Nodes::Nodes.new_with_context(self.line, [])
         end
         
-        condition = ::Dog::Nodes::Branch.new(
+        condition = ::Dog::Nodes::Branch.new_with_context(self.line,
           expression.transform, 
-          ::Dog::Nodes::Nodes.new([]),
-          ::Dog::Nodes::Nodes.new([
-            ::Dog::Nodes::Break.new
+          ::Dog::Nodes::Nodes.new_with_context(self.line, []),
+          ::Dog::Nodes::Nodes.new_with_context(self.line, [
+            ::Dog::Nodes::Break.new_with_context(self.line)
           ])
         )
         body.nodes.unshift(condition)
         
-        node = ::Dog::Nodes::Loop.new body
-        node.line = self.line
-        
+        node = ::Dog::Nodes::Loop.new_with_context(self.line, body)
         return node
       end
     }
@@ -1644,41 +1640,37 @@ grammar Dog
         if !statements.empty? then
           body = statements.transform
         else
-          body = ::Dog::Nodes::Nodes.new([])
+          body = ::Dog::Nodes::Nodes.new_with_context(self.line, [])
         end
         
-        node = ::Dog::Nodes::Nodes.new([
-          ::Dog::Nodes::Assign.new([counter_variable_name], ::Dog::Nodes::NumberLiteral.new(0)),
-          ::Dog::Nodes::Loop.new(::Dog::Nodes::Nodes.new([
-            ::Dog::Nodes::Branch.new(
-              ::Dog::Nodes::Operation.new(
-                ::Dog::Nodes::Access.new([counter_variable_name]),
+        node = ::Dog::Nodes::Nodes.new_with_context(self.line, [
+          ::Dog::Nodes::Assign.new_with_context(self.line, [counter_variable_name], ::Dog::Nodes::NumberLiteral.new_with_context(self.line, 0)),
+          ::Dog::Nodes::Loop.new_with_context(self.line, ::Dog::Nodes::Nodes.new_with_context(self.line, [
+            ::Dog::Nodes::Branch.new_with_context(self.line,
+              ::Dog::Nodes::Operation.new_with_context(self.line,
+                ::Dog::Nodes::Access.new_with_context(self.line, [counter_variable_name]),
                 expression.transform,
                 "<"
               ),
-              ::Dog::Nodes::Nodes.new([
-                ::Dog::Nodes::Assign.new(
+              ::Dog::Nodes::Nodes.new_with_context(self.line, [
+                ::Dog::Nodes::Assign.new_with_context(self.line,
                   [counter_variable_name],
-                  ::Dog::Nodes::Operation.new(
-                    ::Dog::Nodes::Access.new([counter_variable_name]),
-                    ::Dog::Nodes::NumberLiteral.new(1),
+                  ::Dog::Nodes::Operation.new_with_context(self.line,
+                    ::Dog::Nodes::Access.new_with_context(self.line, [counter_variable_name]),
+                    ::Dog::Nodes::NumberLiteral.new_with_context(self.line, 1),
                     "+"
                   )
                 )
               ]), 
-              ::Dog::Nodes::Nodes.new([
-                ::Dog::Nodes::Break.new
+              ::Dog::Nodes::Nodes.new_with_context(self.line, [
+                ::Dog::Nodes::Break.new_with_context(self.line)
               ])
             ),
             body
           ]))
         ])
         
-        node.line = self.line
-        
         return node
-        
-        
       end
     }
   end
@@ -1689,12 +1681,10 @@ grammar Dog
         if !statements.empty? then
           body = statements.transform
         else
-          body = ::Dog::Nodes::Nodes.new([])
+          body = ::Dog::Nodes::Nodes.new_with_context(self.line, [])
         end
         
-        node = ::Dog::Nodes::Loop.new body
-        node.line = self.line
-        
+        node = ::Dog::Nodes::Loop.new_with_context(self.line, body)
         return node
       end
     }
@@ -1709,8 +1699,7 @@ grammar Dog
           exp = e.expression.transform
         end
         
-        node = ::Dog::Nodes::Break.new(exp)
-        node.line = self.line
+        node = ::Dog::Nodes::Break.new_with_context(self.line, exp)
         return node
       end
     }
@@ -1725,9 +1714,7 @@ grammar Dog
           ret_value = e.expression.transform
         end
         
-        node = ::Dog::Nodes::Return.new ret_value
-        node.line = self.line
-        
+        node = ::Dog::Nodes::Return.new_with_context(self.line, ret_value)
         return node
       end
     }
@@ -1753,9 +1740,7 @@ grammar Dog
           scope = "internal"
         end
         
-        node = ::Dog::Nodes::Access.new(path, scope)
-        node.line = self.line
-        
+        node = ::Dog::Nodes::Access.new_with_context(self.line, path, scope)
         return node
       end
     }
@@ -1764,7 +1749,7 @@ grammar Dog
   rule via_clause 
     s 'VIA' s identifier {
       def transform
-        return ::Dog::Nodes::StringLiteral.new(identifier.text_value)
+        return ::Dog::Nodes::StringLiteral.new_with_context(self.line, identifier.text_value)
       end
     }
   end
@@ -1795,6 +1780,7 @@ grammar Dog
     '[' sn? items:(first:expression rest:(sn? ',' sn? expression)*)? sn? (',' sn?)? ']' {
       def transform
         type = ::Dog::Nodes::Access.new(["dog", "array"], "external")
+        type.line = self.line
         value = {}
         
         if !items.empty? then

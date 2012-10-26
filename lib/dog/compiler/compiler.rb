@@ -54,6 +54,7 @@ module Dog
       #end
 
       if errors.empty? && node then
+        package.current_filename = filename
         node.compile(package)
       end
     end
