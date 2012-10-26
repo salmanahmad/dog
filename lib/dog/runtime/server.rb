@@ -62,9 +62,6 @@ module Dog
       end
       
       def find_or_generate_current_user
-        # TODO - Facebook will not work until you refactor this
-
-
         person = Person.find_by_id(session[:current_user])
 
         if person.nil? then
@@ -76,12 +73,8 @@ module Dog
             #session[:current_user] = person.id
           end
         end
-
-
-
-        return person.dog_value
         
-
+        return person.dog_value
       end
 
       def verify_current_user(message = "You need to be logged in when performing this operation")
@@ -129,7 +122,6 @@ module Dog
     
     # TODO - Set the secret here!
     use Rack::Session::Cookie
-    enable :logging
     #enable :sessions
     #enable :raise_errors
 
