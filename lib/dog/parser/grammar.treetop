@@ -1560,7 +1560,7 @@ grammar Dog
           ::Dog::Nodes::Assign.new(
             [size_variable_name], 
             ::Dog::Nodes::Call.new(
-              ::Dog::Nodes::Access.new(["system", "size"]),
+              ::Dog::Nodes::Access.new(["system", "size:on"]),
               [::Dog::Nodes::Access.new([keys_variable_name])]
             )
           ),

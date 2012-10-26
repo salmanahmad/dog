@@ -29,7 +29,6 @@ module Dog
     end
 
     def initialize
-      # TODO - Set the default package name from the project.config?
       self.bundle = Bundle.new
       self.errors = []
     end
@@ -40,15 +39,6 @@ module Dog
       else
         package_name = ""
       end
-      
-
-      # TODO - Fix this
-      #::Dog::Nodes::Node.each_descendant(node) do |d|
-      #  d.filename = filename
-      #  if d.kind_of? ::Dog::Nodes::Package then
-      #    package_name = d.name
-      #  end
-      #end
 
       package = self.bundle.packages[package_name]
 
@@ -57,6 +47,7 @@ module Dog
         self.bundle.link(package)
       end
 
+      # TODO - Reintroduce the rule architecture
       #::Dog::Nodes::Node.each_descendant(node) do |d|
       #  rule = Rules::Rule.new(self)
       #  rule.apply(d)
@@ -65,6 +56,10 @@ module Dog
       if errors.empty? && node then
         node.compile(package)
       end
+    end
+
+    def startup_package(package_name)
+      self.bundle.startup_package = package_name
     end
 
     def finalize
