@@ -194,6 +194,8 @@ class Compile < Command
         end
         
         begin
+          source_filename = File.absolute_path(source_filename)
+          
           nodes = Dog::Parser.parse(source_code, source_filename)
           bundle = compiler.compile(nodes, source_filename)
           
@@ -327,9 +329,10 @@ class Start < Command
     begin
       bundle_filename = args.first + ".bundle"
       Dog::Runtime.run_file(bundle_filename, parse_options(args))
+    rescue ::Dog::RuntimeError => e
+      puts e.summary
     rescue Exception => e
       raise e
-      puts e
     end
   end
 end
@@ -368,8 +371,9 @@ class Restart < Command
     
     begin
       Dog::Runtime.run_file(bundle_filename, options)
+    rescue ::Dog::RuntimeError => e
+      puts e.summary
     rescue Exception => e
-      puts e
       raise e
     end
   end

@@ -46,6 +46,34 @@ require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
 Dir[File.join(File.dirname(__FILE__), "runtime/library", "*.rb")].each { |file| require file }
 
 module Dog
+  
+  class RuntimeError < RuntimeError
+    attr_accessor :dog_backtrace
+    attr_accessor :ruby_exception
+    attr_accessor :failure_reason
+    
+    def summary
+      s = ""
+      
+      s += "Dog error: #{@ruby_exception.to_s}\n"
+      s += "\n"
+      s += "Dog's backtrace:\n"
+      for item in self.dog_backtrace do
+        function_name = item["function"]
+        if function_name == "@root" then
+          function_name = "top-level"
+        end
+        
+        s += "#{item["file"]}:#{item["line"]} in '#{function_name}' of package '#{item["package"]}'.\n"
+      end
+      
+      s += "\n"
+      s += "Ruby's backtrace:\n"
+      s += @ruby_exception.backtrace.join("\n")
+      s
+    end
+  end
+  
   class Runtime
     class << self
       attr_accessor :bundle
@@ -168,8 +196,35 @@ module Dog
                   begin
                     signal = instruction.execute(track)
                   rescue Exception => e
-                    exception = Exception.new("Dog error on line: #{instruction.line} in file: #{track.filename}.\n\nThe ruby error was: #{e.to_s}")
-                    exception.set_backtrace(e.backtrace)
+                    backtrace = []
+                    
+                    backtrace_tracks = [track]
+                    backtrace_tracks.concat(track.control_ancestors.reverse)
+                    
+                    backtrace_tracks.each_index do |index|
+                      t = backtrace_tracks[index]
+                      
+                      if t.kind_of? ::BSON::ObjectId then
+                        t = ::Dog::Track.find_by_id(t)
+                      end
+                      
+                      the_current_instruction = t.current_instruction
+                      
+                      unless index == 0
+                        the_current_instruction -= 1
+                      end
+                      
+                      backtrace << {
+                        "line" => t.context["instructions"][the_current_instruction].line,
+                        "file" => t.filename,
+                        "function" => t.function_name,
+                        "package" => t.package_name
+                      }
+                    end
+
+                    exception = ::Dog::RuntimeError.new
+                    exception.dog_backtrace = backtrace
+                    exception.ruby_exception = e
                     raise exception
                   end
 

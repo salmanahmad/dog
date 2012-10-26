@@ -16,11 +16,13 @@ module Dog
     attr_accessor :symbols_stack
     attr_accessor :current_filename
 
-    def initialize(name = nil)
+    def initialize(name = nil, filename = "")
       self.name = name
       self.imports = []
       self.symbols = {}
       self.symbols_stack = []
+      self.current_filename = filename
+      
       self.push_symbol("@root")
       self.add_implementation
     end

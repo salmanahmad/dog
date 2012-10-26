@@ -43,7 +43,7 @@ module Dog
       package = self.bundle.packages[package_name]
 
       unless package then
-        package = ::Dog::Package.new(package_name)
+        package = ::Dog::Package.new(package_name, filename)
         self.bundle.link(package)
       end
 
