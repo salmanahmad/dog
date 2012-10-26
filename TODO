@@ -124,6 +124,10 @@ Obvious idea - Optional parameters can be passed on the stack by simply counting
 
 - TODO
 
+Fix line numbers
+
+Logger / Debugger log
+
 Client API (Authentication and account creation)
 
 Return from ON EACH
@@ -131,6 +135,8 @@ Return from ON EACH
 PERFORM
 
 Package format
+
+GridFS
 
 Change the default package from "" to "default" and have an error message restricting "default" from being used...?
 
