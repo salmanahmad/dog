@@ -38,6 +38,12 @@ public class ScratchTest {
             }
         }
         */
-        StackFrame frame = new StackFrame();
+        try {
+            //Type f = new Type();
+            //StructureValue frame = Type.class.newInstance();
+            //System.out.println(frame.getClass().toString());
+        } catch (Exception e) {
+            //System.out.println(e.toString());
+        }
     }
 }
