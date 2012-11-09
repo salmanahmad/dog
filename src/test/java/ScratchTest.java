@@ -16,13 +16,13 @@ public class ScratchTest extends TestCase {
             .setScanners(new SubTypesScanner(false), new ResourcesScanner())
             .setUrls(ClasspathHelper.forPackage("dog")));
             //.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix("dog.lang"))));
-    */
+
       
       // I shoudl consider using getTypesAnnotatedWith instead
     
     Reflections reflections = new Reflections("dog");
     
-    Set<Class<? extends dog.Symbol>> allClasses = reflections.getSubTypesOf(dog.Symbol.class);
+    Set<Class<? extends dog.lang.Value>> allClasses = reflections.getSubTypesOf(dog.lang.Value.class);
     
     System.out.println(allClasses.size());
     System.out.println("\n\n");
@@ -38,6 +38,7 @@ public class ScratchTest extends TestCase {
         //System.out.println("\n\n-- HERE -- \n");
       }
     }
+        */
     
   }
 
