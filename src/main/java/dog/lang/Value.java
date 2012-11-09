@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2011 by Salman Ahmad (salman@salmanahmad.com).
+ *  Copyright 2012 by Salman Ahmad (salman@salmanahmad.com).
  *  All rights reserved.
  *
  *  Permission is granted for use, copying, modification, distribution,
@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
 
-public class Value {
+public class Value implements Persistable {
 
     public ObjectId id;
 
@@ -190,11 +190,27 @@ public class Value {
         }
     }
 
+    public Value get(String key) {
+        throw new RuntimeException("Cannot access key for non-structure type.");
+    }
+
+    public Value put(String key, Value value) {
+        throw new RuntimeException("Cannot assign key for non-structure type.");
+    }
+    
     public JSONObject toJSON() {
         throw new RuntimeException("Unsupported binary operation.");
     }
 
     public DBObject toMongo() {
+        throw new RuntimeException("Unsupported binary operation.");
+    }
+
+    public void fromJSON(JSONObject json) {
+        throw new RuntimeException("Unsupported binary operation.");
+    }
+
+    public void fromMongo(DBObject bson) {
         throw new RuntimeException("Unsupported binary operation.");
     }
 }

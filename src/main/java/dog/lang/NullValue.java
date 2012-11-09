@@ -1,7 +1,7 @@
 
 /*
  *
- *  Copyright 2011 by Salman Ahmad (salman@salmanahmad.com).
+ *  Copyright 2012 by Salman Ahmad (salman@salmanahmad.com).
  *  All rights reserved.
  *
  *  Permission is granted for use, copying, modification, distribution,

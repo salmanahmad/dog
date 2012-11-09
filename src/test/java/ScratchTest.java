@@ -1,6 +1,7 @@
 
 import java.util.*;
 import org.junit.*; 
+import dog.lang.*;
 
 public class ScratchTest {
     
@@ -37,6 +38,6 @@ public class ScratchTest {
             }
         }
         */
-
+        StackFrame frame = new StackFrame();
     }
 }
