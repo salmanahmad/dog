@@ -12,12 +12,12 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.instructions.Signal;
 
 public class Exit extends Node {
 	public void compile(Symbol symbol) {
-		
+		Signal instruction = new Signal(this.line, "exit");
+		symbol.instructions.add(instruction);
+		symbol.currentOutputRegister = -1;
 	}
 }
-
-
-

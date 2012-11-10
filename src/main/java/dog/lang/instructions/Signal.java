@@ -11,4 +11,11 @@
 
 package dog.lang.instructions;
 
+public class Signal extends Instruction {
+	public String symbol;
 
+	public Signal (int line, String symbol) {
+		super(line);
+		this.symbol = symbol;
+	}
+}
