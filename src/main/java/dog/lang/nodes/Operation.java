@@ -55,7 +55,17 @@ public class Operation extends Node {
 	}
 
 	public ArrayList<Node> children() {
-		return new ArrayList<Node>(Arrays.asList(arg1, arg2));
+		ArrayList<Node> output = new ArrayList<Node>();
+
+		if(arg1 != null) {
+			output.add(arg1);
+		}
+
+		if(arg2 != null) {
+			output.add(arg2);
+		}
+
+		return output;
 	}
 }
 
