@@ -14,6 +14,7 @@ package dog.lang.compiler;
 import dog.lang.instructions.Instruction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Symbol {
 
@@ -26,6 +27,7 @@ public class Symbol {
 	public ArrayList<Instruction> instructions = new ArrayList<Instruction>();
 	public ArrayList<Scope> scopes = new ArrayList<Scope>();
 
+	public VariableGenerator variableGenerator = new VariableGenerator();
 	public RegisterGenerator registerGenerator = new RegisterGenerator();
 }
 
