@@ -9,11 +9,15 @@
  *
  */
 
-package dog.lang.parser.nodes;
+package dog.lang.nodes;
+
+import dog.lang.compiler.Symbol;
+import dog.lang.instructions.LoadFalse;
 
 public class FalseLiteral extends Node {
-	
+	public void compile(Symbol symbol) {
+		LoadFalse instruction = new LoadFalse(this.line, symbol.registerGenerator.generate());
+		symbol.instructions.add(instruction);
+		symbol.currentOutputRegister = instruction.outputRegister;
+	}
 }
-
-
-

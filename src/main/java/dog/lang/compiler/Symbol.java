@@ -11,7 +11,7 @@
 
 package dog.lang.compiler;
 
-import dog.lang.compiler.instructions.Instruction;
+import dog.lang.instructions.Instruction;
 
 import java.util.ArrayList;
 
@@ -21,10 +21,12 @@ public class Symbol {
 	public String packageName;
 	public String filePath;
 
+	public int currentOutputRegister;
+
 	public ArrayList<Instruction> instructions = new ArrayList<Instruction>();
 	public ArrayList<Scope> scopes = new ArrayList<Scope>();
 
-	public RegisterGenerator registerAllocator = new RegisterGenerator();
+	public RegisterGenerator registerGenerator = new RegisterGenerator();
 }
 
 

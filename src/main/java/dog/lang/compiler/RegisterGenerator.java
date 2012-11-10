@@ -14,7 +14,6 @@ package dog.lang.compiler;
 import java.util.Stack;
 
 public class RegisterGenerator {
-	public int lastGeneratedRegister = -1;
 	public int largestRegister = -1;
 
 	Stack<Integer> availableRegisters = new Stack<Integer>();
@@ -29,12 +28,13 @@ public class RegisterGenerator {
 			generatedRegister = availableRegisters.pop();
 		}
 
-		lastGeneratedRegister = generatedRegister;
 		return generatedRegister;
 	}
 
 	public void release(int register) {
-		availableRegisters.push(register);
+		if(register != -1) {
+			availableRegisters.push(register);
+		}
 	}
 }
 

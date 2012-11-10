@@ -11,4 +11,9 @@
 
 package dog.lang.instructions;
 
+public class LoadNull extends Instruction {
+	public LoadNull(int line, int outputRegister) {
+		super(line, outputRegister);
+	}
+}
 

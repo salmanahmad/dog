@@ -16,4 +16,5 @@ public class Scope {
 	public int end;
 	public String label;
 	public int offsetFromEnd;
+	public int returnRegister;
 }

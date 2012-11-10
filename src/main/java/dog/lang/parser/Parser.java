@@ -11,7 +11,7 @@
 
 package dog.lang.parser;
 
-import dog.lang.parser.nodes.*;
+import dog.lang.nodes.*;
 
 public class Parser {
 	

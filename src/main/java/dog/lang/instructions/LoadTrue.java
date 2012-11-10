@@ -11,4 +11,9 @@
 
 package dog.lang.instructions;
 
+public class LoadTrue extends Instruction {
+	public LoadTrue(int line, int outputRegister) {
+		super(line, outputRegister);
+	}
+}
 

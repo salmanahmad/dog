@@ -11,4 +11,12 @@
 
 package dog.lang.instructions;
 
+public class LoadString extends Instruction {
+	public String string;
+
+	public LoadString(int line, int outputRegister, String string) {
+		super(line, outputRegister);
+		this.string = string;
+	}
+}
 

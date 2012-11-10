@@ -11,4 +11,12 @@
 
 package dog.lang.instructions;
 
+public class LoadNumber extends Instruction {
+	public double number;
+
+	public LoadNumber(int line, int outputRegister, double number) {
+		super(line, outputRegister);
+		this.number = number;
+	}
+}
 

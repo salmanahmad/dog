@@ -9,10 +9,14 @@
  *
  */
 
-package dog.lang.parser.nodes;
+package dog.lang.nodes;
+
+import dog.lang.compiler.Symbol;
 
 public class Loop extends Node {
-	
+	public void compile(Symbol symbol) {
+		
+	}
 }
 
 
