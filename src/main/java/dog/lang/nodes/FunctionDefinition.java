@@ -13,9 +13,15 @@ package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
 
+import java.util.ArrayList;
+
 public class FunctionDefinition extends Node {
 	public void compile(Symbol symbol) {
 		
+	}
+
+	public ArrayList<Node> children() {
+		return new ArrayList<Node>();
 	}
 }
 

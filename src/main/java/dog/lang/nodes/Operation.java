@@ -14,6 +14,9 @@ package dog.lang.nodes;
 import dog.lang.compiler.Symbol;
 import dog.lang.instructions.Perform;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Operation extends Node {
 	Node arg1;
 	Node arg2;
@@ -49,6 +52,10 @@ public class Operation extends Node {
 		Perform instruction = new Perform(this.line, symbol.registerGenerator.generate(), register1, register2, operation);
 		symbol.instructions.add(instruction);
 		symbol.currentOutputRegister = instruction.outputRegister;
+	}
+
+	public ArrayList<Node> children() {
+		return new ArrayList<Node>(Arrays.asList(arg1, arg2));
 	}
 }
 

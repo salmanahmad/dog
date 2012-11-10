@@ -23,6 +23,9 @@ public class Perform extends Instruction {
 
 	public Perform(int line, int outputRegister, int inputRegister1, int inputRegister2, String operation) {
 		super(line, outputRegister);
+		this.inputRegister1 = inputRegister1;
+		this.inputRegister2 = inputRegister2;
+		this.operation = operation;
 	}
 }
 

@@ -13,6 +13,8 @@ package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
 
+import java.util.ArrayList;
+
 public abstract class Node {
 	public int line;
 
@@ -30,7 +32,7 @@ public abstract class Node {
 	}
 
 	public abstract void compile(Symbol symbol);
-	//public abstract ArrayList<Node> children();
+	public abstract ArrayList<Node> children();
 }
 
 

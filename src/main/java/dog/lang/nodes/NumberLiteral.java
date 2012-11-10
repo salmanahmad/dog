@@ -14,6 +14,8 @@ package dog.lang.nodes;
 import dog.lang.compiler.Symbol;
 import dog.lang.instructions.LoadNumber;
 
+import java.util.ArrayList;
+
 public class NumberLiteral extends Node {
 	double number;
 
@@ -25,6 +27,10 @@ public class NumberLiteral extends Node {
 		LoadNumber instruction = new LoadNumber(this.line, symbol.registerGenerator.generate(), number);
 		symbol.instructions.add(instruction);
 		symbol.currentOutputRegister = instruction.outputRegister;
+	}
+
+	public ArrayList<Node> children() {
+		return new ArrayList<Node>();
 	}
 }
 

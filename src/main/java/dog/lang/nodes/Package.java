@@ -14,6 +14,8 @@ package dog.lang.nodes;
 import dog.lang.compiler.Symbol;
 import dog.lang.instructions.Perform;
 
+import java.util.ArrayList;
+
 public class Package extends Node {
 	String name;
 
@@ -28,6 +30,10 @@ public class Package extends Node {
 
 	public void compile(Symbol symbol) {
 		symbol.currentOutputRegister = -1;
+	}
+
+	public ArrayList<Node> children() {
+		return new ArrayList<Node>();
 	}
 }
 

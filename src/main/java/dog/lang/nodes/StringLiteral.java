@@ -14,6 +14,8 @@ package dog.lang.nodes;
 import dog.lang.compiler.Symbol;
 import dog.lang.instructions.LoadString;
 
+import java.util.ArrayList;
+
 public class StringLiteral extends Node {
 	String string;
 
@@ -25,6 +27,10 @@ public class StringLiteral extends Node {
 		LoadString instruction = new LoadString(this.line, symbol.registerGenerator.generate(), string);
 		symbol.instructions.add(instruction);
 		symbol.currentOutputRegister = instruction.outputRegister;
+	}
+
+	public ArrayList<Node> children() {
+		return new ArrayList<Node>();
 	}
 }
 

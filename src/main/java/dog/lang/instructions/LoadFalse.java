@@ -12,5 +12,8 @@
 package dog.lang.instructions;
 
 public class LoadFalse extends Instruction {
+	public LoadFalse(int line, int outputRegister) {
+		super(line, outputRegister);
+	}
 }
 

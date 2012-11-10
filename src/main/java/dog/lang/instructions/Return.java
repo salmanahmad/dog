@@ -11,4 +11,15 @@
 
 package dog.lang.instructions;
 
+public class Return extends Instruction {
+	int inputRegister;
 
+	public Return(int inputRegister) {
+		this(-1, inputRegister);
+	}
+
+	public Return(int line, int inputRegister) {
+		super(line);
+		this.inputRegister = inputRegister;
+	}
+}

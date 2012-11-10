@@ -14,11 +14,17 @@ package dog.lang.nodes;
 import dog.lang.compiler.Symbol;
 import dog.lang.instructions.LoadNull;
 
+import java.util.ArrayList;
+
 public class NullLiteral extends Node {
 	public void compile(Symbol symbol) {
 		LoadNull instruction = new LoadNull(this.line, symbol.registerGenerator.generate());
 		symbol.instructions.add(instruction);
 		symbol.currentOutputRegister = instruction.outputRegister;
+	}
+
+	public ArrayList<Node> children() {
+		return new ArrayList<Node>();
 	}
 }
 

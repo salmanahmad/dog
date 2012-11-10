@@ -14,10 +14,16 @@ package dog.lang.nodes;
 import dog.lang.compiler.Symbol;
 import dog.lang.instructions.LoadFalse;
 
+import java.util.ArrayList;
+
 public class FalseLiteral extends Node {
 	public void compile(Symbol symbol) {
 		LoadFalse instruction = new LoadFalse(this.line, symbol.registerGenerator.generate());
 		symbol.instructions.add(instruction);
 		symbol.currentOutputRegister = instruction.outputRegister;
+	}
+
+	public ArrayList<Node> children() {
+		return new ArrayList<Node>();
 	}
 }

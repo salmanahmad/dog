@@ -14,11 +14,17 @@ package dog.lang.nodes;
 import dog.lang.compiler.Symbol;
 import dog.lang.instructions.Signal;
 
+import java.util.ArrayList;
+
 public class Stop extends Node {
 	public void compile(Symbol symbol) {
 		Signal instruction = new Signal(this.line, "stop");
 		symbol.instructions.add(instruction);
 		symbol.currentOutputRegister = -1;
+	}
+
+	public ArrayList<Node> children() {
+		return new ArrayList<Node>();
 	}
 }
 
