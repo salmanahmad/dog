@@ -9,16 +9,5 @@
  *
  */
 
-package dog.lang.parser;
-
-import dog.lang.parser.nodes.*;
-
-public class Parser {
-	
-	public Node parse(String source) {
-		return null;
-	}
-
-}
-
+package dog.lang.instructions;
 

@@ -9,16 +9,20 @@
  *
  */
 
-package dog.lang.parser;
+package dog.lang.parser.nodes;
 
-import dog.lang.parser.nodes.*;
+import dog.lang.compiler.Symbol;
 
-public class Parser {
+public class Node {
+	public int line;
+    public String filePath;
 	
-	public Node parse(String source) {
-		return null;
-	}
+	public Node parent;
+	public String packageName;
 
+	public void compile(Symbol symbol) {
+		
+	}
 }
 
 

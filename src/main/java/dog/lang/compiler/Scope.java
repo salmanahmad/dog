@@ -9,16 +9,11 @@
  *
  */
 
-package dog.lang.parser;
+package dog.lang.compiler;
 
-import dog.lang.parser.nodes.*;
-
-public class Parser {
-	
-	public Node parse(String source) {
-		return null;
-	}
-
+public class Scope {
+	public int start;
+	public int end;
+	public String label;
+	public int offsetFromEnd;
 }
-
-

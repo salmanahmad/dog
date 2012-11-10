@@ -12,5 +12,5 @@
 package dog.lang;
 
 public abstract class DatabaseObject implements Persistable {
-
+	public abstract String collectionName();
 }

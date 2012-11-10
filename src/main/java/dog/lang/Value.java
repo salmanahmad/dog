@@ -17,10 +17,18 @@ import org.bson.types.ObjectId;
 
 public class Value implements Persistable {
 
-    public ObjectId id;
+    private ObjectId id;
 
-    public Value() {
-        this.id = new ObjectId();
+    public ObjectId getId() {
+        if (this.id == null) {
+            this.id = new ObjectId();
+        }
+
+        return this.id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
     }
 
     public Object getValue() { return null; }
@@ -175,7 +183,7 @@ public class Value implements Persistable {
     }
 
     public Value identicalTo(Value v) { 
-        if(this.id.equals(v.id)) {
+        if(this.getId().equals(v.getId())) {
             return new TrueValue();
         } else {
             return new FalseValue();
@@ -183,7 +191,7 @@ public class Value implements Persistable {
     }
     
     public Value notIdenticalTo(Value v) { 
-        if(!this.id.equals(v.id)) {
+        if(!this.getId().equals(v.getId())) {
             return new TrueValue();
         } else {
             return new FalseValue();

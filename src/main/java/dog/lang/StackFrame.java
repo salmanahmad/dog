@@ -34,6 +34,10 @@ public class StackFrame extends DatabaseObject {
 		programCounter = 0;
 	}
 
+	public String collectionName() {
+		return "stack_frames";
+	}
+
 	public JSONObject toJSON() {
 		return null;
 	}
