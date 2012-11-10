@@ -15,7 +15,7 @@ import dog.lang.compiler.Symbol;
 import dog.lang.instructions.LoadNumber;
 
 public class NumberLiteral extends Node {
-	public double number;
+	double number;
 
 	public NumberLiteral(double number) {
 		this.number = number;

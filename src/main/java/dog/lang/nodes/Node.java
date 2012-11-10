@@ -15,12 +15,22 @@ import dog.lang.compiler.Symbol;
 
 public abstract class Node {
 	public int line;
+
     public String filePath;
-	
-	public Node parent;
 	public String packageName;
 
+	public Node parent;
+	
+	public Node() {
+		this.line = -1;
+	}
+
+	public Node(int line) {
+		this.line = line;
+	}
+
 	public abstract void compile(Symbol symbol);
+	//public abstract ArrayList<Node> children();
 }
 
 

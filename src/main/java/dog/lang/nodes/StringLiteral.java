@@ -15,7 +15,7 @@ import dog.lang.compiler.Symbol;
 import dog.lang.instructions.LoadString;
 
 public class StringLiteral extends Node {
-	public String string;
+	String string;
 
 	public StringLiteral(String string) {
 		this.string = string;

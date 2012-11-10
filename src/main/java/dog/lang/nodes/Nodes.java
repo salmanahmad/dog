@@ -21,6 +21,9 @@ public class Nodes extends Node {
 
     public Nodes(ArrayList<Node> nodes) {
     	this.nodes = nodes;
+    	for (Node node : nodes) {
+    		node.parent = this;
+    	}
     }
 
 	public void compile(Symbol symbol) {

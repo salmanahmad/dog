@@ -11,4 +11,18 @@
 
 package dog.lang.instructions;
 
+public class Perform extends Instruction {
+	public int inputRegister1;
+	public int inputRegister2;
+
+	public String operation;
+
+	public Perform(int outputRegister, int inputRegister1, int inputRegister2, String operation) {
+		this(-1, outputRegister, inputRegister1, inputRegister2, operation);
+	}
+
+	public Perform(int line, int outputRegister, int inputRegister1, int inputRegister2, String operation) {
+		super(line, outputRegister);
+	}
+}
 
