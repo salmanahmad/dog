@@ -30,11 +30,10 @@ public class Operation extends Node {
 		super(line);
 		this.arg1 = arg1;
 		this.arg2 = arg2;
-
-		arg1.parent = this;
-		arg2.parent = this;
-
 		this.operation = operation;
+
+		setParentOfChild(arg1);
+		setParentOfChild(arg2);
 	}
 
 	public void compile(Symbol symbol) {

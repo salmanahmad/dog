@@ -11,4 +11,16 @@
 
 package dog.lang.instructions;
 
+public class Jump extends Instruction {
+	int offset;
+
+	public Jump(int offset) {
+		this(-1, offset);
+	}
+
+	public Jump(int line, int offset) {
+		super(line);
+		this.offset = offset;	
+	}
+}
 

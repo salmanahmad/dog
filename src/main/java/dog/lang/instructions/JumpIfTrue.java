@@ -11,4 +11,18 @@
 
 package dog.lang.instructions;
 
+public class JumpIfTrue extends Instruction {
+	int offset;
+	int inputRegister;
+
+	public JumpIfTrue(int offset, int inputRegister) {
+		this(-1, offset, inputRegister);
+	}
+
+	public JumpIfTrue(int line, int offset, int inputRegister) {
+		super(line);
+		this.offset = offset;
+		this.inputRegister = inputRegister;
+	}
+}
 

@@ -29,6 +29,20 @@ public class Symbol {
 
 	public VariableGenerator variableGenerator = new VariableGenerator();
 	public RegisterGenerator registerGenerator = new RegisterGenerator();
+
+	public Symbol nestedSymbol() {
+		Symbol nested = new Symbol();
+		
+		nested.name = this.name;
+		nested.packageName = this.packageName;
+		nested.filePath = this.filePath;
+
+		nested.scopes = this.scopes;
+		nested.variableGenerator = this.variableGenerator;
+		nested.registerGenerator = this.registerGenerator;
+
+		return nested;
+	}
 }
 
 

@@ -31,6 +31,12 @@ public abstract class Node {
 		this.line = line;
 	}
 
+	public void setParentOfChild(Node child) {
+		if(child != null) {
+			child.parent = this;
+		}
+	}
+
 	public abstract void compile(Symbol symbol);
 	public abstract ArrayList<Node> children();
 }
