@@ -11,4 +11,10 @@
 
 package dog.lang.instructions;
 
+public class LoadStructure extends Instruction {
+
+	public LoadStructure(int line, int outputRegister) {
+		super(line, outputRegister);
+	}
+}
 
