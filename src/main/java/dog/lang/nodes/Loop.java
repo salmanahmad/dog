@@ -40,6 +40,7 @@ public class Loop extends Node {
 
 			Symbol nested = symbol.nestedSymbol();
 			body.compile(nested);
+			int nestedRegister = nested.currentOutputRegister;
 
 			Jump jumpToStart = new Jump(this.line, 0 - nested.instructions.size());
 
@@ -54,8 +55,8 @@ public class Loop extends Node {
 			scope.returnRegister = outputRegister;
 			symbol.scopes.add(scope);
 
-			symbol.registerGenerator.release(nested.currentOutputRegister);
-
+			symbol.registerGenerator.release(nestedRegister);
+			
 			symbol.currentOutputRegister = outputRegister;
 		}
 	}

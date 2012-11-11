@@ -40,6 +40,8 @@ public class Branch extends Node {
 
 	public void compile(Symbol symbol) {
 		int conditionRegister = -1;
+		int trueRegister = -1;
+		int falseRegister = -1;
 
 		Symbol trueSymbol = symbol.nestedSymbol();
 		Symbol falseSymbol = symbol.nestedSymbol();
@@ -49,10 +51,12 @@ public class Branch extends Node {
 
 		if(trueBranch != null) {
 			trueBranch.compile(trueSymbol);
+			trueRegister = trueSymbol.currentOutputRegister;
 		}
 
 		if(falseBranch != null) {
-			falseBranch.compile(trueSymbol);
+			falseBranch.compile(falseSymbol);
+			falseRegister = falseSymbol.currentOutputRegister;
 		}
 
 		Move move;
@@ -77,8 +81,8 @@ public class Branch extends Node {
 		symbol.instructions.addAll(falseSymbol.instructions);
 
 		symbol.registerGenerator.release(conditionRegister);
-		symbol.registerGenerator.release(trueSymbol.currentOutputRegister);
-		symbol.registerGenerator.release(falseSymbol.currentOutputRegister);
+		symbol.registerGenerator.release(trueRegister);
+		symbol.registerGenerator.release(falseRegister);
 
 		symbol.currentOutputRegister = outputRegister;
 	}
