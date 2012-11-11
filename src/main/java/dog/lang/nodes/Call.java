@@ -12,16 +12,49 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.compiler.Identifier;
+import dog.lang.instructions.Invoke;
 
 import java.util.ArrayList;
 
 public class Call extends Node {
+	boolean asynchronous;
+	Identifier function;
+	ArrayList<Node> arguments;
+
+	public Call(boolean asynchronous, Identifier function, ArrayList<Node> arguments) {
+		this(-1, asynchronous, function, arguments);
+	}
+
+	public Call(int line, boolean asynchronous, Identifier function, ArrayList<Node> arguments) {
+		super(line);
+		this.asynchronous = asynchronous;
+		this.function = function;
+		this.arguments = arguments;
+	}
+
 	public void compile(Symbol symbol) {
-		
+		ArrayList<Integer> argumentRegisters = new ArrayList<Integer>();
+
+		for(Node argument: arguments) {
+			argument.compile(symbol);
+			argumentRegisters.add(symbol.currentOutputRegister);
+		}
+
+		int outputRegister = symbol.registerGenerator.generate();
+
+		Invoke invocation = new Invoke(this.line, outputRegister, asynchronous, function, argumentRegisters);
+		symbol.instructions.add(invocation);
+
+		for(int register : argumentRegisters) {
+			symbol.registerGenerator.release(register);
+		}
+
+		symbol.currentOutputRegister = outputRegister;
 	}
 
 	public ArrayList<Node> children() {
-		return new ArrayList<Node>();
+		return arguments;
 	}
 }
 

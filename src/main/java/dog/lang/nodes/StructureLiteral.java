@@ -70,7 +70,7 @@ public class StructureLiteral extends Node {
 			property.compile(symbol);
 			int propertyRegister = symbol.currentOutputRegister;
 
-			Assign assignStructure = new Assign(property.line, structureRegister, keyRegister, propertyRegister);
+			dog.lang.instructions.Assign assignStructure = new dog.lang.instructions.Assign(property.line, structureRegister, keyRegister, propertyRegister);
 			symbol.instructions.add(assignStructure);
 
 			symbol.registerGenerator.release(keyRegister);

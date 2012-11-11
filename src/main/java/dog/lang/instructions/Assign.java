@@ -19,7 +19,7 @@ public class Assign extends Instruction {
 		this(-1, outputRegister, keyRegister, valueRegister);
 	}
 
-	Assign(int line, int outputRegister, int keyRegister, int valueRegister) {
+	public Assign(int line, int outputRegister, int keyRegister, int valueRegister) {
 		super(line, outputRegister);
 		this.keyRegister = keyRegister;
 		this.valueRegister = valueRegister;
