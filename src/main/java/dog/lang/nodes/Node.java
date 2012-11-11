@@ -37,6 +37,7 @@ public abstract class Node {
 		}
 	}
 
+	// public abstract void scaffold();
 	public abstract void compile(Symbol symbol);
 	public abstract ArrayList<Node> children();
 }
