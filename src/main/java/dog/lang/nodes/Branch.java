@@ -12,6 +12,7 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.instructions.Move;
 import dog.lang.instructions.Jump;
 import dog.lang.instructions.JumpIfTrue;
 
@@ -54,8 +55,32 @@ public class Branch extends Node {
 			falseBranch.compile(trueSymbol);
 		}
 
-		Jump skipFalseBranch = new Jump(this.line, 1 + falseSymbol.instructions.size());
-		trueSymbol.instructions.add(skipFalseBranch);
+		Move move;
+		int outputRegister = symbol.registerGenerator.generate();
+
+		move = new Move(this.line, outputRegister, trueSymbol.currentOutputRegister);
+		trueSymbol.instructions.add(move);
+
+		move = new Move(this.line, outputRegister, falseSymbol.currentOutputRegister);
+		falseSymbol.instructions.add(move);
+
+		Jump skipOverFalseBranch = new Jump(this.line, 1 + falseSymbol.instructions.size());
+		trueSymbol.instructions.add(skipOverFalseBranch);
+
+		JumpIfTrue skipToTrueBranch = new JumpIfTrue(this.line, conditionRegister, 2);
+		symbol.instructions.add(skipToTrueBranch);
+
+		Jump skipToFalseBranch = new Jump(this.line, 1 + trueSymbol.instructions.size());
+		symbol.instructions.add(skipToFalseBranch);
+
+		symbol.instructions.addAll(trueSymbol.instructions);
+		symbol.instructions.addAll(falseSymbol.instructions);
+
+		symbol.registerGenerator.release(conditionRegister);
+		symbol.registerGenerator.release(trueSymbol.currentOutputRegister);
+		symbol.registerGenerator.release(falseSymbol.currentOutputRegister);
+
+		symbol.currentOutputRegister = outputRegister;
 	}
 
 	public ArrayList<Node> children() {

@@ -12,12 +12,37 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.instructions.Throw;
 
 import java.util.ArrayList;
 
 public class Break extends Node {
+	Node expression;
+
+	public Break(Node expression) {
+		this(-1, expression);
+	}
+
+	public Break(int line, Node expression) {
+		super(line);
+		this.expression = expression;
+
+		setParentOfChild(expression);
+	}
+
 	public void compile(Symbol symbol) {
-		
+		int inputRegister = -1;
+
+		if(expression != null) {
+			expression.compile(symbol);
+			inputRegister = symbol.currentOutputRegister;
+		}
+
+		Throw instruction = new Throw(this.line, inputRegister, "break");
+		symbol.instructions.add(instruction);
+		symbol.currentOutputRegister = -1;
+
+		symbol.registerGenerator.release(inputRegister);
 	}
 
 	public ArrayList<Node> children() {

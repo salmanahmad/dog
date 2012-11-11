@@ -11,4 +11,16 @@
 
 package dog.lang.instructions;
 
+public class Move extends Instruction {
+	int inputRegister;
 
+	public Move(int outputRegister, int inputRegister) {
+		this(-1, outputRegister, inputRegister);
+	}
+
+	public Move(int line, int outputRegister, int inputRegister) {
+		super(line);
+		this.outputRegister = outputRegister;
+		this.inputRegister = inputRegister;
+	}
+}

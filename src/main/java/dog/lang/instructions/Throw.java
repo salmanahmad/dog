@@ -11,18 +11,21 @@
 
 package dog.lang.instructions;
 
-public class JumpIfTrue extends Instruction {
-	int offset;
+public class Throw extends Instruction {
 	int inputRegister;
+	String symbol;
 
-	public JumpIfTrue(int inputRegister, int offset) {
-		this(-1, offset, inputRegister);
+	public Throw(String symbol) {
+		this(-1, -1, symbol);
 	}
 
-	public JumpIfTrue(int line, int inputRegister, int offset) {
+	public Throw(int inputRegister, String symbol) {
+		this(-1, inputRegister, symbol);
+	}
+
+	public Throw(int line, int inputRegister, String symbol) {
 		super(line);
-		this.offset = offset;
 		this.inputRegister = inputRegister;
+		this.symbol = symbol;
 	}
 }
-
