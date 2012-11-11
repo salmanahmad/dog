@@ -50,6 +50,10 @@ public class Operation extends Node {
 
 		Perform instruction = new Perform(this.line, symbol.registerGenerator.generate(), register1, register2, operation);
 		symbol.instructions.add(instruction);
+
+		symbol.registerGenerator.release(register1);
+		symbol.registerGenerator.release(register2);
+
 		symbol.currentOutputRegister = instruction.outputRegister;
 	}
 

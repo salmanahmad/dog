@@ -40,6 +40,9 @@ public class Return extends Node {
 
 		dog.lang.instructions.Return instruction = new dog.lang.instructions.Return(this.line, register);
 		symbol.instructions.add(instruction);
+
+		symbol.registerGenerator.release(register);
+
 		symbol.currentOutputRegister = -1;
 	}
 
