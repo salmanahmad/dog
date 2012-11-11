@@ -9,6 +9,18 @@
  *
  */
 
-package dog.lang.instructions;
+package dog.lang.compiler;
 
+import java.util.ArrayList;
 
+public class Identifier {
+	public enum Scope {
+		CASCADE,
+		LOCAL,
+		INTERNAL,
+		EXTERNAL
+	}
+
+	Scope scope;
+	ArrayList<String> path;
+}
