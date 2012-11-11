@@ -12,12 +12,26 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.compiler.Identifier;
 
 import java.util.ArrayList;
 
 public class Access extends Node {
-	public void compile(Symbol symbol) {
+	Identifier identifier;
 
+	public Access(Identifier identifier) {
+		this(-1, identifier);
+	}
+
+	public Access(int line, Identifier identifier) {
+		super(line);
+		this.identifier = identifier;
+	}
+
+	public void compile(Symbol symbol) {
+		// TODO: I need to resolve this once scaffolding is done.
+		// TODO: Note that at some point I will have to start take 
+		// into account the variable generator.
 	}
 
 	public ArrayList<Node> children() {

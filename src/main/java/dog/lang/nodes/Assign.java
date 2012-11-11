@@ -16,8 +16,21 @@ import dog.lang.compiler.Symbol;
 import java.util.ArrayList;
 
 public class Assign extends Node {
+	ArrayList<String> path;
+	Node value;
+
+	public Assign(ArrayList<String> path, Node value) {
+		this(-1, path, value);
+	}
+
+	public Assign(int line, ArrayList<String> path, Node value) {
+		super(line);
+		this.path = path;
+		this.value = value;
+	}
+
 	public void compile(Symbol symbol) {
-		
+		// TODO: I need to resolve this once scaffolding is done.
 	}
 
 	public ArrayList<Node> children() {
