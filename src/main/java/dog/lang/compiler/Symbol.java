@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Symbol {
-
+	
 	public String name;
 	public String filePath;
 
