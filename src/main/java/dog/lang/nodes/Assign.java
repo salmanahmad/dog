@@ -31,6 +31,7 @@ public class Assign extends Node {
 
 	public void compile(Symbol symbol) {
 		// TODO: I need to resolve this once scaffolding is done.
+		// TODO: I need to use VariableGenerator here
 	}
 
 	public ArrayList<Node> children() {

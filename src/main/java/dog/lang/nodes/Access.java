@@ -30,8 +30,7 @@ public class Access extends Node {
 
 	public void compile(Symbol symbol) {
 		// TODO: I need to resolve this once scaffolding is done.
-		// TODO: Note that at some point I will have to start take 
-		// into account the variable generator.
+		// TODO: I need to use VariableGenerator here
 	}
 
 	public ArrayList<Node> children() {

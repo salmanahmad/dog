@@ -12,6 +12,7 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.compiler.Package;
 
 import java.util.ArrayList;
 
@@ -37,7 +38,25 @@ public abstract class Node {
 		}
 	}
 
-	// public abstract void scaffold();
+	public String getPackageName() {
+		String packageName = null;
+
+		for(Node child : this.children()) {
+			String temporaryPackageName = child.getPackageName();
+			if(temporaryPackageName != null) {
+				packageName = temporaryPackageName;
+			}
+		}
+
+		return packageName;
+	}
+
+	public void scaffold(Compiler compiler) {
+		for(Node child : this.children()) {
+			child.scaffold(compiler);
+		}
+	}
+
 	public abstract void compile(Symbol symbol);
 	public abstract ArrayList<Node> children();
 }

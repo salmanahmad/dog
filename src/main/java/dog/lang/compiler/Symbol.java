@@ -13,29 +13,35 @@ package dog.lang.compiler;
 
 import dog.lang.instructions.Instruction;
 
+import dog.lang.nodes.Node;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Symbol {
 
 	public String name;
-	public String packageName;
 	public String filePath;
+
+	Node node;
 
 	public int currentOutputRegister;
 
-	public ArrayList<Instruction> instructions = new ArrayList<Instruction>();
+	// TODO: Rename this as a catchTable with CatchEntry?
 	public ArrayList<Scope> scopes = new ArrayList<Scope>();
+	public ArrayList<Instruction> instructions = new ArrayList<Instruction>();
 
 	public VariableGenerator variableGenerator = new VariableGenerator();
 	public RegisterGenerator registerGenerator = new RegisterGenerator();
 
+	public Symbol(String name, Node node) {
+		this.name = name;
+		this.node = node;
+		this.filePath = node.filePath;
+	}
+
 	public Symbol nestedSymbol() {
-		Symbol nested = new Symbol();
-		
-		nested.name = this.name;
-		nested.packageName = this.packageName;
-		nested.filePath = this.filePath;
+		Symbol nested = new Symbol(this.name, this.node);
 
 		nested.scopes = this.scopes;
 		nested.variableGenerator = this.variableGenerator;

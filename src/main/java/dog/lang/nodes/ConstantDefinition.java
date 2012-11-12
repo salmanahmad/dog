@@ -12,33 +12,17 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
-import dog.lang.instructions.Perform;
 
 import java.util.ArrayList;
 
-public class Package extends Node {
-	String name;
-
-	public Package(String name) {
-		this(-1, name);
-	}
-
-	public Package(int line, String name) {
-		super(line);
-		this.name = name;
-	}
-
+public class ConstantDefinition extends Definition {
 	public void compile(Symbol symbol) {
-		symbol.currentOutputRegister = -1;
-	}
-
-	public String getPackageName() {
-		return name;
+		if(symbol.name.equals(this.fullyQualifiedName())) {
+			
+		}
 	}
 
 	public ArrayList<Node> children() {
 		return new ArrayList<Node>();
 	}
 }
-
-
