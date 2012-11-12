@@ -9,11 +9,16 @@
  *
  */
 
-package dog.lang;
+package dog.lang.instructions;
 
-public class Constant {
-	public Value value() {
-		return null;
+import dog.lang.Value;
+
+public class LoadValue extends Instruction {
+	public Value value;
+
+	public LoadValue(int line, int outputRegister, Value string) {
+		super(line, outputRegister);
+		this.value = value;
 	}
 }
 

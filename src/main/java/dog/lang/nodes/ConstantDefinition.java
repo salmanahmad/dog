@@ -11,14 +11,45 @@
 
 package dog.lang.nodes;
 
+import dog.lang.Value;
 import dog.lang.compiler.Symbol;
+import dog.lang.instructions.LoadValue;
 
 import java.util.ArrayList;
 
+// TODO: Should constants be Node instead of a Value. The first time it is called I memorize it
+// and from then on I just return the results? Right now that means that I will not be able to 
+// do things like define a constant of a runtime type (since I will not have that information)
+// available to me during the parser stage, right? Perhaps I add a new field to this class called
+// "type" to save a string of the symbol to use? Maybe?
+
+// If I do decide to change this and make it a memorized result on the first try then I should
+// Remove the readConstant instruction and compile into a function definition that is replaced
+// with an invoke in the "Access" node instead of the ReadConstant
+
 public class ConstantDefinition extends Definition {
+	Value value;
+
+	public ConstantDefinition(String name, Value value) {
+		this(-1, name, value);
+	}
+
+	public ConstantDefinition(int line, String name, Value value) {
+		super(line, name);
+		this.value = value;
+	}
+
 	public void compile(Symbol symbol) {
 		if(symbol.name.equals(this.fullyQualifiedName())) {
-			
+			int outputRegsiter = symbol.registerGenerator.generate();
+			LoadValue load = new LoadValue(this.line, outputRegsiter, value);
+			symbol.instructions.add(load);
+
+			symbol.currentOutputRegister = outputRegsiter;
+		} else {
+			// TODO: I should consider returning the actual constant that will
+			// be assignable to the caller code.
+			symbol.currentOutputRegister = -1;
 		}
 	}
 

@@ -12,7 +12,7 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
-import dog.lang.compiler.Package;
+import dog.lang.compiler.Compiler;
 
 import java.util.ArrayList;
 
