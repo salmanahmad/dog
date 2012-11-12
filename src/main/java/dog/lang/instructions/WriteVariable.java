@@ -11,4 +11,15 @@
 
 package dog.lang.instructions;
 
+public class WriteVariable extends Instruction {
+	int variableRegister;
 
+	public WriteVariable(int variableRegister, int inputRegister) {
+		this(-1, inputRegister, variableRegister);
+	}
+
+	public WriteVariable(int line, int variableRegister, int inputRegister) {
+		super(line, inputRegister);
+		this.variableRegister = variableRegister;
+	}
+}

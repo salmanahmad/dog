@@ -16,6 +16,8 @@ import dog.lang.instructions.LoadStructure;
 import dog.lang.instructions.LoadString;
 import dog.lang.instructions.LoadNumber;
 import dog.lang.instructions.Build;
+import dog.lang.instructions.Return;
+import dog.lang.instructions.ReadVariable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,8 +36,11 @@ public class StructureDefinition extends Definition {
 
 	public void compile(Symbol symbol) {
 		if(symbol.name.equals(this.fullyQualifiedName())) {			
-			// TODO: Move the "this" variable into the structureRegister.
-			int structureRegister = 0;
+			int variableRegister = symbol.variableGenerator.getIndexForVariable("this");
+			int structureRegister = symbol.registerGenerator.generate();
+
+			ReadVariable read = new ReadVariable(this.line, structureRegister, variableRegister);
+			symbol.instructions.add(read);
 
 			for(Object key : properties.keySet()) {
 				Node property = properties.get(key);
@@ -64,8 +69,10 @@ public class StructureDefinition extends Definition {
 				symbol.registerGenerator.release(propertyRegister);
 			}
 
-			// TODO: I need to return the "this" variable
+			Return ret = new Return(this.line, structureRegister);
+			symbol.instructions.add(ret);
 
+			symbol.currentOutputRegister = structureRegister;
 		} else {
 			// TODO: I should consider returning the TyepPointer so that it is 
 			// available to the caller code.

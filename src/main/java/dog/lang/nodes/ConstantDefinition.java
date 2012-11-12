@@ -41,11 +41,14 @@ public class ConstantDefinition extends Definition {
 
 	public void compile(Symbol symbol) {
 		if(symbol.name.equals(this.fullyQualifiedName())) {
-			int outputRegsiter = symbol.registerGenerator.generate();
-			LoadValue load = new LoadValue(this.line, outputRegsiter, value);
+			int outputRegister = symbol.registerGenerator.generate();
+			LoadValue load = new LoadValue(this.line, outputRegister, value);
 			symbol.instructions.add(load);
 
-			symbol.currentOutputRegister = outputRegsiter;
+			dog.lang.instructions.Return ret = new dog.lang.instructions.Return(this.line, outputRegister);
+			symbol.instructions.add(ret);
+
+			symbol.currentOutputRegister = outputRegister;
 		} else {
 			// TODO: I should consider returning the actual constant that will
 			// be assignable to the caller code.
