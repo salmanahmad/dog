@@ -20,5 +20,9 @@ public class LoadValue extends Instruction {
 		super(line, outputRegister);
 		this.value = value;
 	}
+
+	public String toString() {
+		return String.format(":load_value %s", value.toString());
+	}
 }
 

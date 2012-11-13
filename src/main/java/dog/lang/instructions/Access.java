@@ -24,4 +24,8 @@ public class Access extends Instruction {
 		this.valueRegister = valueRegister;
 		this.keyRegister = keyRegister;
 	}
+
+	public String toString() {
+		return String.format(":access %%r%d %%r%d %%r%d", outputRegister, valueRegister, keyRegister);
+	}
 }

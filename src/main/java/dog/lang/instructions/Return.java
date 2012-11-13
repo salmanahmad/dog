@@ -22,4 +22,8 @@ public class Return extends Instruction {
 		super(line);
 		this.inputRegister = inputRegister;
 	}
+
+	public String toString() {
+		return String.format(":return %%r%d", inputRegister);
+	}
 }

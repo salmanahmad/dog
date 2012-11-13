@@ -18,5 +18,9 @@ public class LoadNumber extends Instruction {
 		super(line, outputRegister);
 		this.number = number;
 	}
+
+	public String toString() {
+		return String.format(":load_number %%r%d %d", outputRegister, number);
+	}
 }
 

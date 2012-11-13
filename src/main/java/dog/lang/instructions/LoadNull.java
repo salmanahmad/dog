@@ -15,5 +15,9 @@ public class LoadNull extends Instruction {
 	public LoadNull(int line, int outputRegister) {
 		super(line, outputRegister);
 	}
+
+	public String toString() {
+		return String.format(":load_null %%r%d", outputRegister);
+	}
 }
 

@@ -23,4 +23,8 @@ public class Move extends Instruction {
 		this.outputRegister = outputRegister;
 		this.inputRegister = inputRegister;
 	}
+
+	public String toString() {
+		return String.format(":move %%r%d %%r%d", outputRegister, inputRegister);
+	}
 }

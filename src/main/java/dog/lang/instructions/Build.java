@@ -21,6 +21,9 @@ public class Build extends Instruction {
 	public Build(int line, int outputRegister, String typeIdentifier) {
 		super(line, outputRegister);
 		this.typeIdentifier = typeIdentifier;
+	}
 
+	public String toString() {
+		return String.format(":build %%r%d '%s'", outputRegister, typeIdentifier);
 	}
 }

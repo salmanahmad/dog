@@ -22,5 +22,9 @@ public class Jump extends Instruction {
 		super(line);
 		this.offset = offset;	
 	}
+
+	public String toString() {
+		return String.format(":jump %d", offset);
+	}
 }
 

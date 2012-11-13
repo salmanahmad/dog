@@ -22,4 +22,8 @@ public class ReadConstant extends Instruction {
 		super(line, outputRegister);
 		this.identifier = identifier;
 	}
+
+	public String toString() {
+		return String.format(":read_constant %%r%d %s", outputRegister, identifier);
+	}
 }

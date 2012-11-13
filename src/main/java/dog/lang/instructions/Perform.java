@@ -27,5 +27,9 @@ public class Perform extends Instruction {
 		this.inputRegister2 = inputRegister2;
 		this.operation = operation;
 	}
+
+	public String toString() {
+		return String.format(":perform %%r%d %%r%d %%r%d %s", outputRegister, inputRegister1, inputRegister2, operation);
+	}
 }
 

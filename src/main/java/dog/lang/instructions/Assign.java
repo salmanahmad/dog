@@ -24,4 +24,8 @@ public class Assign extends Instruction {
 		this.keyRegister = keyRegister;
 		this.valueRegister = valueRegister;
 	}
+
+	public String toString() {
+		return String.format(":assign %%r%d %%r%d %%r%d", outputRegister, keyRegister, valueRegister);
+	}
 }

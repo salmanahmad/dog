@@ -18,5 +18,9 @@ public class LoadString extends Instruction {
 		super(line, outputRegister);
 		this.string = string;
 	}
+
+	public String toString() {
+		return String.format(":load_string %%r%d %s", outputRegister, string);
+	}
 }
 

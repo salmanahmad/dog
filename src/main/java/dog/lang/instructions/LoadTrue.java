@@ -15,5 +15,9 @@ public class LoadTrue extends Instruction {
 	public LoadTrue(int line, int outputRegister) {
 		super(line, outputRegister);
 	}
+
+	public String toString() {
+		return String.format(":load_true %%r%d", outputRegister);
+	}
 }
 

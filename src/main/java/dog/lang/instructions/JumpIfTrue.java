@@ -24,5 +24,9 @@ public class JumpIfTrue extends Instruction {
 		this.offset = offset;
 		this.inputRegister = inputRegister;
 	}
+
+	public String toString() {
+		return String.format(":jump_if_true %%r%d %d", inputRegister, offset);
+	}
 }
 

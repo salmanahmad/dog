@@ -22,4 +22,8 @@ public class WriteVariable extends Instruction {
 		super(line, outputRegister);
 		this.inputRegister = inputRegister;
 	}
+
+	public String toString() {
+		return String.format(":write_variable %%v%d %%r%d", outputRegister, inputRegister);
+	}
 }

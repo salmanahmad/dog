@@ -30,4 +30,13 @@ public class Invoke extends Instruction {
 		this.functionIdentifier = functionIdentifier;
 		this.arguments = arguments;
 	}
+
+	public String toString() {
+		String args = "";
+		for(int arg : arguments) {
+			args += "%r" + arg;
+		}
+
+		return String.format(":invoke %%r%d %b '%s' %s", outputRegister, asynchronous, functionIdentifier, args);
+	}
 }

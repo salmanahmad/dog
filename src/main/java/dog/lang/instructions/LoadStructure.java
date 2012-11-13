@@ -16,5 +16,9 @@ public class LoadStructure extends Instruction {
 	public LoadStructure(int line, int outputRegister) {
 		super(line, outputRegister);
 	}
+
+	public String toString() {
+		return String.format(":load_structure %%r%d", outputRegister);
+	}
 }
 

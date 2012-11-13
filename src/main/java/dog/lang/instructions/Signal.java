@@ -18,4 +18,8 @@ public class Signal extends Instruction {
 		super(line);
 		this.symbol = symbol;
 	}
+
+	public String toString() {
+		return String.format(":signal %s", symbol);
+	}
 }

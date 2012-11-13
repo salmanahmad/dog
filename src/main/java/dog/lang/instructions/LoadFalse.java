@@ -15,5 +15,9 @@ public class LoadFalse extends Instruction {
 	public LoadFalse(int line, int outputRegister) {
 		super(line, outputRegister);
 	}
+
+	public String toString() {
+		return String.format(":load_false %%r%d", outputRegister);
+	}
 }
 

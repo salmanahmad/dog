@@ -22,4 +22,8 @@ public class ReadVariable extends Instruction {
 		super(line, outputRegister);
 		this.inputRegister = inputRegister;
 	}
+
+	public String toString() {
+		return String.format(":read_variable %%r%d %%v%d", outputRegister, inputRegister);
+	}
 }
