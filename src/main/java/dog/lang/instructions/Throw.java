@@ -13,19 +13,25 @@ package dog.lang.instructions;
 
 public class Throw extends Instruction {
 	int inputRegister;
-	String symbol;
+	
+	public String label;
+	public int destination;
 
-	public Throw(String symbol) {
-		this(-1, -1, symbol);
+	public Throw(String label) {
+		this(-1, -1, label);
 	}
 
-	public Throw(int inputRegister, String symbol) {
-		this(-1, inputRegister, symbol);
+	public Throw(int inputRegister, String label) {
+		this(-1, inputRegister, label);
 	}
 
-	public Throw(int line, int inputRegister, String symbol) {
+	public Throw(int line, int inputRegister, String label) {
 		super(line);
 		this.inputRegister = inputRegister;
-		this.symbol = symbol;
+		this.label = label;
+	}
+
+	public String toString() {
+		return String.format(":throw %%r%d %%r%d %d", outputRegister, inputRegister, destination);
 	}
 }

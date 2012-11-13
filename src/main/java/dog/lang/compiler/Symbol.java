@@ -12,6 +12,7 @@
 package dog.lang.compiler;
 
 import dog.lang.instructions.Instruction;
+import dog.lang.instructions.Throw;
 
 import dog.lang.nodes.Node;
 
@@ -54,6 +55,32 @@ public class Symbol {
 		nested.registerGenerator = this.registerGenerator;
 
 		return nested;
+	}
+
+	public void convertThrows() {
+		for(int i = 0; i < instructions.size(); i++) {
+			Instruction instruction = instructions.get(i);
+
+			if(instruction instanceof Throw) {
+				Throw t = (Throw)instruction;
+				Scope bestScope = null;
+
+				for(Scope scope : scopes) {
+					if(scope.label.equals(t.label) && scope.start <= i && scope.end >= i) {
+						if (bestScope == null || (scope.end - scope.start) < (bestScope.end - bestScope.start)) {
+							bestScope = scope;
+						}
+					}
+				}
+
+				if(bestScope == null) {
+					throw new RuntimeException("Could not resolve throw statement.");
+				}
+
+				t.outputRegister = bestScope.returnRegister;
+				t.destination = bestScope.end + bestScope.offsetFromEnd;
+			}
+		}
 	}
 }
 

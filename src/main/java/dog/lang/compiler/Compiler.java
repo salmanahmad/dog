@@ -24,6 +24,11 @@ public class Compiler {
 	ArrayList<Symbol> symbols = new ArrayList<Symbol>();
 	
 	public byte[] compile() {
+		for(Symbol symbol : symbols) {
+			symbol.node.compile(symbol);
+			symbol.convertThrows();
+		}
+
 		return null;
 	}
 
