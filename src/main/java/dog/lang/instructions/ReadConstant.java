@@ -11,17 +11,15 @@
 
 package dog.lang.instructions;
 
-import dog.lang.compiler.Identifier;
-
 public class ReadConstant extends Instruction {
-	Identifier type;
+	String identifier;
 
-	public ReadConstant(int outputRegister, Identifier type) {
-		this(-1, outputRegister, type);
+	public ReadConstant(int outputRegister, String identifier) {
+		this(-1, outputRegister, identifier);
 	}
 
-	public ReadConstant(int line, int outputRegister, Identifier type) {
+	public ReadConstant(int line, int outputRegister, String identifier) {
 		super(line, outputRegister);
-		this.type = type;
+		this.identifier = identifier;
 	}
 }

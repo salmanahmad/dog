@@ -16,6 +16,9 @@ import dog.lang.compiler.Identifier;
 import dog.lang.compiler.Constant;
 import dog.lang.compiler.Function;
 import dog.lang.compiler.Type;
+import dog.lang.instructions.Build;
+import dog.lang.instructions.Invoke;
+import dog.lang.instructions.ReadConstant;
 import dog.lang.instructions.ReadVariable;
 import dog.lang.instructions.WriteVariable;
 import dog.lang.instructions.LoadString;
@@ -73,12 +76,17 @@ public class Access extends Node {
 				if(symbols.size() == 0) {
 					break;
 				} else if(symbols.size() == 1) {
+					outputRegister = symbol.registerGenerator.generate();
+
 					if(symbols.get(0) instanceof Constant) {
-
+						ReadConstant constant = new ReadConstant(this.line, outputRegister, symbolIdentifier);
+						symbol.instructions.add(constant);
 					} else if(symbols.get(0) instanceof Type) {
-
+						Build build = new Build(this.line, outputRegister, symbolIdentifier);
+						symbol.instructions.add(build);
 					} else if(symbols.get(0) instanceof Function) {
-
+						Invoke invoke = new Invoke(this.line, outputRegister, false, symbolIdentifier, new ArrayList<Integer>());
+						symbol.instructions.add(invoke);
 					}
 					
 					try {
