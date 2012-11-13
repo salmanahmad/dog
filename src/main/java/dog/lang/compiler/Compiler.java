@@ -50,7 +50,6 @@ public class Compiler {
 	}
 
 	public void addSymbol(Symbol symbol) {
-		// TODO: I also need to search the Resolver to see if there are duplicate symbols already defined...
 		for(Symbol s : symbols) {
 			if(s.name.equals(symbol.name)) {
 				throw new RuntimeException("Duplicate symbol during compilation.");
@@ -61,6 +60,13 @@ public class Compiler {
 	}
 
 	public ArrayList<Symbol> searchForSymbols(String name) {
-		return null;
+		ArrayList<Symbol> list = new ArrayList<Symbol>();
+		for(Symbol symbol : symbols) {
+			if(symbol.name.startsWith(name)) {
+				list.add(symbol);
+			}
+		}
+
+		return list;
 	}
 }
