@@ -17,4 +17,18 @@ public class Function extends Symbol {
 	public Function(String name, Node node, Compiler compiler) {
 		super(name, node, compiler);
 	}
+
+	public String bytecode() {
+		String output = "";
+		output += String.format("; function: %s\n", name);
+		output += String.format("; variables: %d stack:%d\n", this.variableGenerator.currentVariableIndex + 1, registerGenerator.largestRegister + 1);
+
+		for(int i = 0; i < instructions.size(); i++) {
+			output += String.format("%04d %s\n", i, instructions.get(i).toString());
+		}
+
+		output += "; end function\n\n\n";
+
+		return output;
+	}
 }

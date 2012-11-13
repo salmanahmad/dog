@@ -23,10 +23,13 @@ import java.util.ArrayList;
 public class Compiler {
 	ArrayList<Symbol> symbols = new ArrayList<Symbol>();
 	
-	public byte[] compile() {
+	public String compile() {
+		String bytecode = "";
+
 		for(Symbol symbol : symbols) {
 			symbol.node.compile(symbol);
 			symbol.convertThrows();
+			bytecode += symbol.bytecode();
 		}
 
 		return null;
@@ -49,7 +52,7 @@ public class Compiler {
 		}
 
 		if(containsNonDefinitions) {
-			Symbol root = new Symbol(packageName + "." + "@root", ast, this);
+			Symbol root = new Function(packageName + "." + "@root", ast, this);
 			this.addSymbol(root);
 		}
 	}

@@ -12,6 +12,7 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.compiler.Function;
 import dog.lang.instructions.Move;
 import dog.lang.instructions.Jump;
 import dog.lang.instructions.JumpIfTrue;

@@ -19,7 +19,7 @@ import dog.lang.nodes.Node;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Symbol {
+public abstract class Symbol {
 	
 	public String name;
 	public String filePath;
@@ -36,6 +36,9 @@ public class Symbol {
 	public VariableGenerator variableGenerator = new VariableGenerator();
 	public RegisterGenerator registerGenerator = new RegisterGenerator();
 
+	public abstract String bytecode();
+	// public abstract byte[] assemble();
+
 	public Symbol(String name, Node node, Compiler compiler) {
 		this.name = name;
 		this.node = node;
@@ -48,7 +51,15 @@ public class Symbol {
 	}
 
 	public Symbol nestedSymbol() {
-		Symbol nested = new Symbol(this.name, this.node, this.compiler);
+		Symbol nested = null;
+
+		if(this instanceof Function) {
+			nested = new Function(this.name, this.node, this.compiler);
+		} else if(this instanceof Type) {
+			nested = new Type(this.name, this.node, this.compiler);
+		} else if(this instanceof Constant) {
+			nested = new Constant(this.name, this.node, this.compiler);
+		}
 
 		nested.scopes = this.scopes;
 		nested.variableGenerator = this.variableGenerator;

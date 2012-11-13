@@ -11,6 +11,7 @@
 
 package dog.lang.nodes;
 
+import dog.lang.compiler.Function;
 import dog.lang.compiler.Symbol;
 import dog.lang.compiler.Scope;
 import dog.lang.instructions.LoadNull;
