@@ -18,6 +18,10 @@ public class VariableGenerator {
 
 	HashMap<String, Integer> variables = new HashMap<String, Integer>();
 
+	public boolean containsVariable(String variable) {
+		return variables.containsKey(variable);
+	}
+
 	public int registerVariable(String variable) {
 		return getIndexForVariable(variable);
 	}
