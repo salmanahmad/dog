@@ -14,7 +14,7 @@ package dog.lang.compiler;
 import dog.lang.nodes.Node;
 
 public class Type extends Symbol {
-	public Type(String name, Node node) {
-		super(name, node);
+	public Type(String name, Node node, Compiler compiler) {
+		super(name, node, compiler);
 	}	
 }

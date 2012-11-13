@@ -47,7 +47,7 @@ public class FunctionDefinition extends Definition {
 	}
 
 	public void scaffold(Compiler compiler) {
-		Function symbol = new Function(this.fullyQualifiedName(), this);
+		Function symbol = new Function(this.fullyQualifiedName(), this, compiler);
 		compiler.addSymbol(symbol);
 		super.scaffold(compiler);
 	}

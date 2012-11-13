@@ -44,7 +44,7 @@ public class Compiler {
 		}
 
 		if(containsNonDefinitions) {
-			Symbol root = new Symbol(packageName + "." + "@root", ast);
+			Symbol root = new Symbol(packageName + "." + "@root", ast, this);
 			this.addSymbol(root);
 		}
 	}

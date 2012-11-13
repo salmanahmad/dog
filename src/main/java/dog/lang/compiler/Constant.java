@@ -14,7 +14,7 @@ package dog.lang.compiler;
 import dog.lang.nodes.Node;
 
 public class Constant extends Symbol {
-	public Constant(String name, Node node) {
-		super(name, node);
+	public Constant(String name, Node node, Compiler compiler) {
+		super(name, node, compiler);
 	}	
 }

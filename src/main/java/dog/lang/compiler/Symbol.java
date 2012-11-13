@@ -24,6 +24,7 @@ public class Symbol {
 	public String filePath;
 
 	Node node;
+	Compiler compiler;
 
 	public int currentOutputRegister;
 
@@ -34,14 +35,19 @@ public class Symbol {
 	public VariableGenerator variableGenerator = new VariableGenerator();
 	public RegisterGenerator registerGenerator = new RegisterGenerator();
 
-	public Symbol(String name, Node node) {
+	public Symbol(String name, Node node, Compiler compiler) {
 		this.name = name;
 		this.node = node;
 		this.filePath = node.filePath;
+		this.compiler = compiler;
+	}
+
+	public Compiler getCompiler() {
+		return compiler;
 	}
 
 	public Symbol nestedSymbol() {
-		Symbol nested = new Symbol(this.name, this.node);
+		Symbol nested = new Symbol(this.name, this.node, this.compiler);
 
 		nested.scopes = this.scopes;
 		nested.variableGenerator = this.variableGenerator;

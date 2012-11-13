@@ -59,7 +59,7 @@ public class ConstantDefinition extends Definition {
 	}
 
 	public void scaffold(Compiler compiler) {
-		Constant symbol = new Constant(this.fullyQualifiedName(), this);
+		Constant symbol = new Constant(this.fullyQualifiedName(), this, compiler);
 		compiler.addSymbol(symbol);
 		super.scaffold(compiler);
 	}

@@ -83,7 +83,7 @@ public class StructureDefinition extends Definition {
 	}
 
 	public void scaffold(Compiler compiler) {
-		Type symbol = new Type(this.fullyQualifiedName(), this);
+		Type symbol = new Type(this.fullyQualifiedName(), this, compiler);
 		compiler.addSymbol(symbol);
 		super.scaffold(compiler);
 	}

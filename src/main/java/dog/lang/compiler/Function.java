@@ -14,7 +14,7 @@ package dog.lang.compiler;
 import dog.lang.nodes.Node;
 
 public class Function extends Symbol {
-	public Function(String name, Node node) {
-		super(name, node);
+	public Function(String name, Node node, Compiler compiler) {
+		super(name, node, compiler);
 	}
 }
