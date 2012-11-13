@@ -12,6 +12,8 @@
 package dog.lang.nodes;
 
 import dog.lang.Value;
+import dog.lang.compiler.Compiler;
+import dog.lang.compiler.Constant;
 import dog.lang.compiler.Symbol;
 import dog.lang.instructions.LoadValue;
 
@@ -54,6 +56,12 @@ public class ConstantDefinition extends Definition {
 			// be assignable to the caller code.
 			symbol.currentOutputRegister = -1;
 		}
+	}
+
+	public void scaffold(Compiler compiler) {
+		Constant symbol = new Constant(this.fullyQualifiedName(), this);
+		compiler.addSymbol(symbol);
+		super.scaffold(compiler);
 	}
 
 	public ArrayList<Node> children() {

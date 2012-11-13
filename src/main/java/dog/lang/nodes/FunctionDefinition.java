@@ -11,7 +11,9 @@
 
 package dog.lang.nodes;
 
+import dog.lang.compiler.Compiler;
 import dog.lang.compiler.Symbol;
+import dog.lang.compiler.Function;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -42,6 +44,12 @@ public class FunctionDefinition extends Definition {
 			// be assignable to the caller code. Useful for inner functions
 			symbol.currentOutputRegister = -1;
 		}
+	}
+
+	public void scaffold(Compiler compiler) {
+		Function symbol = new Function(this.fullyQualifiedName(), this);
+		compiler.addSymbol(symbol);
+		super.scaffold(compiler);
 	}
 
 	public ArrayList<Node> children() {

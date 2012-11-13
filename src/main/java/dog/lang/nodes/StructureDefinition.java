@@ -11,7 +11,9 @@
 
 package dog.lang.nodes;
 
+import dog.lang.compiler.Compiler;
 import dog.lang.compiler.Symbol;
+import dog.lang.compiler.Type;
 import dog.lang.instructions.LoadStructure;
 import dog.lang.instructions.LoadString;
 import dog.lang.instructions.LoadNumber;
@@ -78,6 +80,12 @@ public class StructureDefinition extends Definition {
 			// available to the caller code.
 			symbol.currentOutputRegister = -1;
 		}
+	}
+
+	public void scaffold(Compiler compiler) {
+		Type symbol = new Type(this.fullyQualifiedName(), this);
+		compiler.addSymbol(symbol);
+		super.scaffold(compiler);
 	}
 
 	public ArrayList<Node> children() {

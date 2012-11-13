@@ -28,12 +28,6 @@ public abstract class Definition extends Node {
 		this.name = name;
 	}
 
-	public void scaffold(Compiler compiler) {
-		Symbol symbol = new Symbol(this.fullyQualifiedName(), this);
-		compiler.addSymbol(symbol);
-		super.scaffold(compiler);
-	}
-
 	// TODO: This currently does not work with nested functions because the fullyQualified name
 	// does not look into Symbol that it is defined in. How do I fix that?
 	public String fullyQualifiedName() {
