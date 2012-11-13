@@ -17,6 +17,8 @@ import dog.lang.instructions.Invoke;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Call extends Node {
 	boolean asynchronous;
 	Identifier function;
@@ -35,6 +37,7 @@ public class Call extends Node {
 
 	public void compile(Symbol symbol) {
 		ArrayList<Integer> argumentRegisters = new ArrayList<Integer>();
+		String functionIdentifier;
 
 		for(Node argument: arguments) {
 			argument.compile(symbol);
@@ -43,7 +46,17 @@ public class Call extends Node {
 
 		int outputRegister = symbol.registerGenerator.generate();
 
-		Invoke invocation = new Invoke(this.line, outputRegister, asynchronous, function, argumentRegisters);
+		if(function.scope == Identifier.Scope.EXTERNAL) {
+			functionIdentifier = StringUtils.join(function.path, ".");
+		} else {
+			functionIdentifier = this.packageName + "." + StringUtils.join(function.path, ".");
+		}
+
+		if(symbol.getCompiler().searchForSymbols(functionIdentifier).size() != 1) {
+			throw new RuntimeException("Unable to unique identify the function symbol.");
+		}
+
+		Invoke invocation = new Invoke(this.line, outputRegister, asynchronous, functionIdentifier, argumentRegisters);
 		symbol.instructions.add(invocation);
 
 		for(int register : argumentRegisters) {

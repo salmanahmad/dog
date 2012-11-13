@@ -21,6 +21,6 @@ public class Identifier {
 		EXTERNAL
 	}
 
-	Scope scope;
-	ArrayList<String> path;
+	public Scope scope;
+	public ArrayList<String> path;
 }

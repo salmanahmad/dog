@@ -17,17 +17,17 @@ import java.util.ArrayList;
 
 public class Invoke extends Instruction {
 	boolean asynchronous;
-	Identifier function;
+	String functionIdentifier;
 	ArrayList<Integer> arguments;
 
-	public Invoke(int outputRegister, boolean asynchronous, Identifier function, ArrayList<Integer> arguments) {
-		this(-1, outputRegister, asynchronous, function, arguments);
+	public Invoke(int outputRegister, boolean asynchronous, String functionIdentifier, ArrayList<Integer> arguments) {
+		this(-1, outputRegister, asynchronous, functionIdentifier, arguments);
 	}
 
-	public Invoke(int line, int outputRegister, boolean asynchronous, Identifier function, ArrayList<Integer> arguments) {
+	public Invoke(int line, int outputRegister, boolean asynchronous, String functionIdentifier, ArrayList<Integer> arguments) {
 		super(line, outputRegister);
 		this.asynchronous = asynchronous;
-		this.function = function;
+		this.functionIdentifier = functionIdentifier;
 		this.arguments = arguments;
 	}
 }

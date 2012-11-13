@@ -21,6 +21,8 @@ import dog.lang.instructions.Build;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class StructureLiteral extends Node {
 	Identifier type;
 	HashMap<Object, Node> value;
@@ -46,7 +48,19 @@ public class StructureLiteral extends Node {
 			LoadStructure structure = new LoadStructure(this.line, structureRegister);
 			symbol.instructions.add(structure);
 		} else {
-			Build structure = new Build(this.line, structureRegister, type);
+			String typeIdentifier;
+
+			if(type.scope == Identifier.Scope.EXTERNAL) {
+				typeIdentifier = StringUtils.join(type.path, ".");
+			} else {
+				typeIdentifier = this.packageName + "." + StringUtils.join(type.path, ".");
+			}
+
+			if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
+				throw new RuntimeException("Unable to unique identify the type symbol.");
+			}
+
+			Build structure = new Build(this.line, structureRegister, typeIdentifier);
 			symbol.instructions.add(structure);
 		}
 

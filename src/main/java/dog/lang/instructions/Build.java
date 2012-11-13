@@ -11,18 +11,16 @@
 
 package dog.lang.instructions;
 
-import dog.lang.compiler.Identifier;
-
 public class Build extends Instruction {
-	Identifier type;
+	String typeIdentifier;
 
-	public Build(int outputRegister, Identifier type) {
-		this(-1, outputRegister, type);
+	public Build(int outputRegister, String typeIdentifier) {
+		this(-1, outputRegister, typeIdentifier);
 	}
 
-	public Build(int line, int outputRegister, Identifier type) {
+	public Build(int line, int outputRegister, String typeIdentifier) {
 		super(line, outputRegister);
-		this.type = type;
+		this.typeIdentifier = typeIdentifier;
 
 	}
 }
