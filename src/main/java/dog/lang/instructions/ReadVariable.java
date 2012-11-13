@@ -12,14 +12,14 @@
 package dog.lang.instructions;
 
 public class ReadVariable extends Instruction {
-	int variableRegister;
+	int inputRegister;
 
-	public ReadVariable(int outputRegister, int variableRegister) {
-		this(-1, outputRegister, variableRegister);
+	public ReadVariable(int outputRegister, int inputRegister) {
+		this(-1, outputRegister, inputRegister);
 	}
 
-	public ReadVariable(int line, int outputRegister, int variableRegister) {
+	public ReadVariable(int line, int outputRegister, int inputRegister) {
 		super(line, outputRegister);
-		this.variableRegister = variableRegister;
+		this.inputRegister = inputRegister;
 	}
 }

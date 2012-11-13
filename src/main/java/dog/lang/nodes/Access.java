@@ -17,15 +17,16 @@ import dog.lang.compiler.Identifier;
 import java.util.ArrayList;
 
 public class Access extends Node {
-	Identifier identifier;
+	Identifier.Scope scope;
+	ArrayList<Object> path;
 
-	public Access(Identifier identifier) {
-		this(-1, identifier);
+	public Access(Identifier.Scope scope) {
+		this(-1, scope);
 	}
 
-	public Access(int line, Identifier identifier) {
+	public Access(int line, Identifier.Scope scope) {
 		super(line);
-		this.identifier = identifier;
+		this.scope = scope;
 	}
 
 	public void compile(Symbol symbol) {

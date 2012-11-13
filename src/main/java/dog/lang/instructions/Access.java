@@ -11,3 +11,17 @@
 
 package dog.lang.instructions;
 
+public class Access extends Instruction {
+	int valueRegister;
+	int keyRegister;
+
+	public Access(int outputRegister, int valueRegister, int keyRegister) {
+		this(-1, outputRegister, valueRegister, keyRegister);
+	}
+
+	public Access(int line, int outputRegister, int valueRegister, int keyRegister) {
+		super(line, outputRegister);
+		this.valueRegister = valueRegister;
+		this.keyRegister = keyRegister;
+	}
+}
