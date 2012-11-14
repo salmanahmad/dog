@@ -6,6 +6,13 @@ grammar Grammar;
 @lexer::header { package dog.lang.parser.grammar; }
 
 
+@lexer::members {
+    // TODO - Better error reporting here --- http://www.antlr.org/wiki/display/ANTLR3/Error+reporting+and+recovery
+    public void emitErrorMessage(String message) {
+        throw new RuntimeException(message);
+    }
+}
+
 /* This will be the entry point of our parser. */
 eval
     :    additionExp
