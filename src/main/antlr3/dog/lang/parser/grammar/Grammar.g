@@ -2,9 +2,15 @@
 grammar Grammar;
 
 
-@parser::header { package dog.lang.parser.grammar; }
-@lexer::header { package dog.lang.parser.grammar; }
+@parser::header { 
+package dog.lang.parser.grammar;
+import dog.lang.nodes.*;
+}
 
+@lexer::header {
+package dog.lang.parser.grammar;
+import dog.lang.nodes.*;
+}
 
 @lexer::members {
     // TODO - Better error reporting here --- http://www.antlr.org/wiki/display/ANTLR3/Error+reporting+and+recovery
@@ -13,41 +19,76 @@ grammar Grammar;
     }
 }
 
-/* This will be the entry point of our parser. */
-eval
-    :    additionExp
-    ;
 
-/* Addition and subtraction have the lowest precedence. */
-additionExp
-    :    multiplyExp 
-         ( '+' multiplyExp 
-         | '-' multiplyExp
-         )* 
-    ;
 
-/* Multiplication and division have a higher precedence. */
-multiplyExp
-    :    atomExp
-         ( '*' atomExp 
-         | '/' atomExp
-         )* 
-    ;
 
-/* An expression atom is the smallest part of an expression: a number. Or 
-   when we encounter parenthesis, we're making a recursive call back to the
-   rule 'additionExp'. As you can see, an 'atomExp' has the highest precedence. */
-atomExp
-    :    Number
-    |    '(' additionExp ')'
-    ;
+DEFINE:             'define';
+DO:		    'do';
+END:                'end';
+IF:                 'if';
+ELSE:               'else';
+WHILE:              'while';
+REPEAT:             'repeat';
+FOREVER:            'forever';
+FOR:                'for';
+ON:		    'on';
+EACH:               'each';
 
-/* A number: can be an integer value, or a decimal value */
-Number
-    :    ('0'..'9')+ ('.' ('0'..'9')+)?
-    ;
+IMPORT: 	    'import';
+PACKAGE:	    'package';
 
-/* We're going to ignore all white space characters */
-WS  
-    :   (' ' | '\t' | '\r'| '\n') {$channel=HIDDEN;}
-    ;
+WAIT:	            'wait';
+STOP:	            'stop';
+PAUSE:	            'pause';
+EXIT:	            'exit';
+
+PRINT:         	    'print';
+
+NULL:               'null';
+TRUE:               'true';
+FALSE:              'false';
+
+STRING:             '"' ~('\\' | '"')* '"';
+NUMBER:             '-'? DIGIT+ '.' DIGIT+;
+
+COLON:              ':';
+SEMICOLON:          ';';
+DOT:                '.';
+COMMA:              ',';
+
+OPEN_BRACKET:       '[';
+CLOSE_BRACKET:      ']';
+OPEN_PAREN:         '(';
+CLOSE_PAREN:        ')';
+OPEN_BRACE:         '{';
+CLOSE_BRACE:        '{';
+
+ASSIGN:             '=';
+EQUAL:              '==';
+NOT_EQUAL:	    '!=';
+IDENTICAL:          '===';
+NOT_IDENTICAL:      '!==';
+
+LESS_THAN_EQUAL:    '<=';
+GREATER_THAN_EQUAL: '>=';
+LESS_THAN:          '<';
+GREATER_THAN:       '>';
+PLUS:               '+';
+MINUS:              '-';
+MULTIPLY:           '*';
+DIVIDE:             '/';
+MODULO:             '%';
+AND:                '&&';
+OR:                 '||';
+NOT:                '!';
+
+COMMENT:            '#' ~('\r' | '\n')* (NEWLINE | EOF) { skip(); };
+
+NEWLINE:            '\r'? '\n';
+WHITESPACE:         SPACE+ { $channel = HIDDEN; };
+
+fragment CHAR:      LOWER | UPPER;
+fragment LOWER:     'a'..'z';
+fragment UPPER:     'A'..'Z';
+fragment DIGIT:     '0'..'9';
+fragment SPACE:     ' ' | '\t';
