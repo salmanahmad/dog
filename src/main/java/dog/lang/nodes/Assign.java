@@ -42,6 +42,7 @@ public class Assign extends Node {
 
 		if(path.size() == 0) {
 			WriteVariable write = new WriteVariable(this.line, variable, valueRegister);
+			symbol.instructions.add(write);
 			symbol.currentOutputRegister = valueRegister;
 			return;
 		}

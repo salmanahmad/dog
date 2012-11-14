@@ -48,11 +48,11 @@ public class Operation extends Node {
 			register2 = symbol.currentOutputRegister;
 		}
 
-		Perform instruction = new Perform(this.line, symbol.registerGenerator.generate(), register1, register2, operation);
-		symbol.instructions.add(instruction);
-
 		symbol.registerGenerator.release(register1);
 		symbol.registerGenerator.release(register2);
+
+		Perform instruction = new Perform(this.line, symbol.registerGenerator.generate(), register1, register2, operation);
+		symbol.instructions.add(instruction);
 
 		symbol.currentOutputRegister = instruction.outputRegister;
 	}

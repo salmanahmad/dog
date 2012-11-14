@@ -46,14 +46,14 @@ public class Access extends Node {
 	public void compile(Symbol symbol) {
 		int outputRegister = -1;
 		int componentRegister = -1;
-		List<Object> remainingPath = null;
+		List<Object> remainingPath = new ArrayList<Object>();
 
 		if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.LOCAL)) {
 			if(symbol.variableGenerator.containsVariable((String)path.get(0))) {
 				outputRegister = symbol.registerGenerator.generate();
 
 				int variable = symbol.variableGenerator.getIndexForVariable((String)path.get(0));
-				WriteVariable write = new WriteVariable(this.line, outputRegister, variable);
+				ReadVariable write = new ReadVariable(this.line, outputRegister, variable);
 				symbol.instructions.add(write);
 			}
 		}

@@ -32,7 +32,7 @@ public class Compiler {
 			bytecode += symbol.bytecode();
 		}
 
-		return null;
+		return bytecode;
 	}
 
 	public void processNodes(Nodes ast) {
@@ -55,6 +55,8 @@ public class Compiler {
 			Symbol root = new Function(packageName + "." + "@root", ast, this);
 			this.addSymbol(root);
 		}
+
+		ast.scaffold(this);
 	}
 
 	public void addSymbol(Symbol symbol) {

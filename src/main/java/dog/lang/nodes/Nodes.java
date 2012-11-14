@@ -37,7 +37,7 @@ public class Nodes extends Node {
 	}
 
 	public ArrayList<Node> children() {
-		return new ArrayList<Node>();
+		return nodes;
 	}
 }
 
