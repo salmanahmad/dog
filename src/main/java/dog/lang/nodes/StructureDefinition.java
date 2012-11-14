@@ -89,6 +89,6 @@ public class StructureDefinition extends Definition {
 	}
 
 	public ArrayList<Node> children() {
-		return new ArrayList<Node>();
+		return new ArrayList<Node>(properties.values());
 	}
 }

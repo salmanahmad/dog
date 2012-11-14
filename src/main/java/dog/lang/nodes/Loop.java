@@ -18,6 +18,7 @@ import dog.lang.instructions.LoadNull;
 import dog.lang.instructions.Jump;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Loop extends Node {
 	Node body;
@@ -63,7 +64,7 @@ public class Loop extends Node {
 	}
 
 	public ArrayList<Node> children() {
-		return new ArrayList<Node>();
+		return new ArrayList<Node>(Arrays.asList(body));
 	}
 }
 

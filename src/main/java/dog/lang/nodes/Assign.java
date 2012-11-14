@@ -121,7 +121,15 @@ public class Assign extends Node {
 	}
 
 	public ArrayList<Node> children() {
-		return new ArrayList<Node>();
+		ArrayList<Node> list = new ArrayList<Node>();
+
+		for(Object component : path) {
+			if(component instanceof Node) {
+				list.add((Node)component);
+			}
+		}
+
+		return list;
 	}
 }
 

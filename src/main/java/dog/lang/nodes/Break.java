@@ -46,7 +46,13 @@ public class Break extends Node {
 	}
 
 	public ArrayList<Node> children() {
-		return new ArrayList<Node>();
+		ArrayList<Node> list = new ArrayList<Node>();
+
+		if(expression != null) {
+			list.add(expression);
+		}
+
+		return list;
 	}
 }
 
