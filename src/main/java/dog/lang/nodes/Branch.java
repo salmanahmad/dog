@@ -33,10 +33,6 @@ public class Branch extends Node {
 		this.condition = condition;
 		this.trueBranch = trueBranch;
 		this.falseBranch = falseBranch;
-
-		setParentOfChild(condition);
-		setParentOfChild(trueBranch);
-		setParentOfChild(falseBranch);
 	}
 
 	public void compile(Symbol symbol) {

@@ -26,8 +26,6 @@ public class Return extends Node {
 	public Return(int line, Node expression) {
 		super(line);
 		this.expression = expression;
-
-		setParentOfChild(expression);
 	}
 
 	public void compile(Symbol symbol) {
