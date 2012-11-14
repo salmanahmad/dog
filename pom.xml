@@ -31,6 +31,11 @@
       <version>3.3.1</version>
     </dependency>
     <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr</artifactId>
+      <version>3.3</version>
+    </dependency>
+    <dependency>
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
       <version>0.9.8</version>
@@ -126,6 +131,24 @@
           </execution>
         </executions>
       </plugin>
+      
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr3-maven-plugin</artifactId>
+        <version>3.3</version>
+        <executions>
+          <execution>
+            <id>run antlr</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>antlr</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+
+
     </plugins>
   </build>
 </project>
