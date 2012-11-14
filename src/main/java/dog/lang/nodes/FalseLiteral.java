@@ -18,9 +18,12 @@ import java.util.ArrayList;
 
 public class FalseLiteral extends Node {
 	public void compile(Symbol symbol) {
-		LoadFalse instruction = new LoadFalse(this.line, symbol.registerGenerator.generate());
+		int outputRegister = symbol.registerGenerator.generate();
+
+		LoadFalse instruction = new LoadFalse(this.line, outputRegister);
 		symbol.instructions.add(instruction);
-		symbol.currentOutputRegister = instruction.outputRegister;
+
+		symbol.currentOutputRegister = outputRegister;
 	}
 
 	public ArrayList<Node> children() {

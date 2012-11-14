@@ -24,9 +24,12 @@ public class NumberLiteral extends Node {
 	}
 
 	public void compile(Symbol symbol) {
-		LoadNumber instruction = new LoadNumber(this.line, symbol.registerGenerator.generate(), number);
+		int outputRegister = symbol.registerGenerator.generate();
+
+		LoadNumber instruction = new LoadNumber(this.line, outputRegister, number);
 		symbol.instructions.add(instruction);
-		symbol.currentOutputRegister = instruction.outputRegister;
+
+		symbol.currentOutputRegister = outputRegister;
 	}
 
 	public ArrayList<Node> children() {

@@ -71,10 +71,12 @@ public class StructureLiteral extends Node {
 
 			if(key instanceof Number) {
 				Number number = (Number)key;
+
 				LoadNumber loadKey = new LoadNumber(property.line, keyRegister, number.doubleValue());
 				symbol.instructions.add(loadKey);
 			} else if (key instanceof String) {
 				String string = (String)key;
+				
 				LoadString loadKey = new LoadString(property.line, keyRegister, string);
 				symbol.instructions.add(loadKey);
 			} else {

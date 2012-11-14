@@ -44,6 +44,7 @@ public class ConstantDefinition extends Definition {
 	public void compile(Symbol symbol) {
 		if(symbol.name.equals(this.fullyQualifiedName())) {
 			int outputRegister = symbol.registerGenerator.generate();
+			
 			LoadValue load = new LoadValue(this.line, outputRegister, value);
 			symbol.instructions.add(load);
 

@@ -39,6 +39,7 @@ public class FunctionDefinition extends Definition {
 			}
 
 			body.compile(symbol);
+			symbol.currentOutputRegister = -1;
 		} else {
 			// TODO: I should consider returning a FunctionPointer type that will
 			// be assignable to the caller code. Useful for inner functions

@@ -38,9 +38,10 @@ public class Break extends Node {
 
 		Throw instruction = new Throw(this.line, inputRegister, "break");
 		symbol.instructions.add(instruction);
-		symbol.currentOutputRegister = -1;
 
 		symbol.registerGenerator.release(inputRegister);
+
+		symbol.currentOutputRegister = -1;
 	}
 
 	public ArrayList<Node> children() {

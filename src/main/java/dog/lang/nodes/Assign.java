@@ -107,6 +107,8 @@ public class Assign extends Node {
 		WriteVariable write = new WriteVariable(variable, register);
 		symbol.instructions.add(write);
 
+		symbol.registerGenerator.release(valueRegister);
+
 		for(int r : intermediateRegisters) {
 			if(r != register) {
 				symbol.registerGenerator.release(r);

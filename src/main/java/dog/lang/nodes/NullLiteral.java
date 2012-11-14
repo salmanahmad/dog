@@ -18,9 +18,12 @@ import java.util.ArrayList;
 
 public class NullLiteral extends Node {
 	public void compile(Symbol symbol) {
-		LoadNull instruction = new LoadNull(this.line, symbol.registerGenerator.generate());
+		int outputRegister = symbol.registerGenerator.generate();
+
+		LoadNull instruction = new LoadNull(this.line, outputRegister);
 		symbol.instructions.add(instruction);
-		symbol.currentOutputRegister = instruction.outputRegister;
+
+		symbol.currentOutputRegister = outputRegister;
 	}
 
 	public ArrayList<Node> children() {

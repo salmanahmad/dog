@@ -18,9 +18,12 @@ import java.util.ArrayList;
 
 public class TrueLiteral extends Node {
 	public void compile(Symbol symbol) {
-		LoadTrue instruction = new LoadTrue(this.line, symbol.registerGenerator.generate());
+		int outputRegister = symbol.registerGenerator.generate();
+
+		LoadTrue instruction = new LoadTrue(this.line, outputRegister);
 		symbol.instructions.add(instruction);
-		symbol.currentOutputRegister = instruction.outputRegister;
+		
+		symbol.currentOutputRegister = outputRegister;
 	}
 
 	public ArrayList<Node> children() {

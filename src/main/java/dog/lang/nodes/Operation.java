@@ -34,6 +34,7 @@ public class Operation extends Node {
 	}
 
 	public void compile(Symbol symbol) {
+		int outputRegister = symbol.registerGenerator.generate();
 		int register1 = -1;
 		int register2 = -1;
 
@@ -48,10 +49,10 @@ public class Operation extends Node {
 		symbol.registerGenerator.release(register1);
 		symbol.registerGenerator.release(register2);
 
-		Perform instruction = new Perform(this.line, symbol.registerGenerator.generate(), register1, register2, operation);
+		Perform instruction = new Perform(this.line, outputRegister, register1, register2, operation);
 		symbol.instructions.add(instruction);
 
-		symbol.currentOutputRegister = instruction.outputRegister;
+		symbol.currentOutputRegister = outputRegister;
 	}
 
 	public ArrayList<Node> children() {

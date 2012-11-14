@@ -24,9 +24,12 @@ public class StringLiteral extends Node {
 	}
 
 	public void compile(Symbol symbol) {
-		LoadString instruction = new LoadString(this.line, symbol.registerGenerator.generate(), string);
+		int outputRegister = symbol.registerGenerator.generate();
+
+		LoadString instruction = new LoadString(this.line, outputRegister, string);
 		symbol.instructions.add(instruction);
-		symbol.currentOutputRegister = instruction.outputRegister;
+		
+		symbol.currentOutputRegister = outputRegister;
 	}
 
 	public ArrayList<Node> children() {
