@@ -37,6 +37,15 @@ public class Parser {
 		return nodes;
 	}
 
+    public GrammarParser parser(String source) {
+        ANTLRStringStream stream = new ANTLRStringStream(source);
+        GrammarLexer lexer = new GrammarLexer(stream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        GrammarParser parser = new GrammarParser(tokens);
+
+        return parser;
+    }
+
 }
 
 

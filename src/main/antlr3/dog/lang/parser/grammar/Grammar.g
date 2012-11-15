@@ -22,6 +22,13 @@ package dog.lang.parser.grammar;
 import dog.lang.nodes.*;
 }
 
+@parser::members {
+    // TODO - Better error reporting here --- http://www.antlr.org/wiki/display/ANTLR3/Error+reporting+and+recovery
+    public void emitErrorMessage(String message) {
+        throw new RuntimeException(message);
+    }
+}
+
 
 @lexer::members {
     // TODO - Better error reporting here --- http://www.antlr.org/wiki/display/ANTLR3/Error+reporting+and+recovery
@@ -447,7 +454,14 @@ STRING
     | normal=~('"'|'\\'|'\n'|'\r')     {buf.appendCodePoint($normal);} 
     )*
     '"'                                {setText(buf.toString());}
+  | '\''
+    ( normal=~('\'')                   {buf.appendCodePoint($normal);} 
+    )*
+    '\''                               {setText(buf.toString());}
   ;
+
+
+
 
 NUMBER:             '-'? DIGIT+ ('.' DIGIT+)?;
 
