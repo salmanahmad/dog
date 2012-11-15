@@ -49,34 +49,71 @@ expression returns [Node node]
   ;
 
 assignmentExpression returns [Node node]
-  : assignment           { $node = $assignment.node; }
+  : assignment             { $node = $assignment.node; }
   | e=orExpression         { $node = $e.node; }
   ;
   
 orExpression returns [Node node]
+  : n1=andExpression { $node = $n1.node; }
+    ( OR
+      n2=orExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, "||"); }
+    )?
+  ;
+
+/*
   : node1=andExpression OR node2=orExpression { $node = new Operation($tree.getLine(), $node1.node, $node2.node, "||"); }
   | e=andExpression {$node = $e.node; }
   ;
-  
+*/
 andExpression returns [Node node]
+  : n1=relationalExpression { $node = $n1.node; }
+    ( AND
+      n2=andExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, "&&"); }
+    )?
+  ;
+/*
   : node1=relationalExpression AND node2=andExpression { $node = new Operation($tree.getLine(), $node1.node, $node2.node, "&&"); }
   | e=relationalExpression { $node = $e.node; }
   ;
+*/
 
 relationalExpression returns [Node node]
+  : n1=additiveExpression { $node = $n1.node; }
+    ( relationalOperator
+      n2=relationalExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, $relationalOperator.text); }
+    )?
+  ;
+/*
   : node1=additiveExpression relationalOperator node2=relationalExpression { $node = new Operation($start.getLine(), $node1.node, $node2.node, $relationalOperator.text); }
   | e=additiveExpression { $node = $e.node; }
   ;
+*/
 
 additiveExpression returns [Node node]
+  : n1=multiplicativeExpression   { $node = $n1.node; }
+    ( additiveOperator
+      n2=additiveExpression       { $node = new Operation($start.getLine(), $n1.node, $n2.node, $additiveOperator.text); }
+    )?
+  ;
+
+/*
   : node1=multiplicativeExpression additiveOperator node2=additiveExpression { $node = new Operation($start.getLine(), $node1.node, $node2.node, $additiveOperator.text); }
   | e=multiplicativeExpression { $node = $e.node; }
   ;
+*/
 
 multiplicativeExpression returns [Node node]
+  : n1=unaryExpresion             { $node = $n1.node; }
+    ( multiplicativeOperator
+      n2=multiplicativeExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, $multiplicativeOperator.text); }
+    )?
+  ;
+
+/*
   : node1=unaryExpresion multiplicativeOperator node2=multiplicativeExpression { $node = new Operation($start.getLine(), $node1.node, $node2.node, $multiplicativeOperator.text); }
   | e=unaryExpresion { $node = $e.node; }
   ;
+*/
 
 unaryExpresion returns [Node node]
   : NOT node1=unaryExpresion { $node = new Operation($start.getLine(), $node1.node, null, "!"); }
@@ -87,6 +124,17 @@ primaryExpression returns [Node node]
   : literal { $node = $literal.node; }
   | access  { $node = $access.node; }
   | call
+  | functionDefinition
+  | structureDefinition
+  | collectionDefinition
+  | controlStructure
+  | timingStructure
+  | waitStatement
+  | spawnStatement
+  | packageDeclaration
+  | importStatement
+  | onEachStatement
+  | onStatement
   ;
 
 assignment returns [Node node]
@@ -148,6 +196,171 @@ call returns [Node node]
     )*
   ;
 
+
+functionDefinition returns [Node node]
+  : functionWithArguments
+  | functionWithoutArguments
+  ;
+
+functionWithArguments returns [Node node]
+  : DEFINE
+    PARAMETER
+    IDENTIFIER
+    (
+      PARAMETER
+      IDENTIFIER
+    )?
+    DO
+    expressions?
+    END
+  ;
+
+functionWithoutArguments returns [Node node]
+  : DEFINE
+    IDENTIFIER
+    DO
+    terminator?
+    expressions?
+    END
+  ;
+
+
+structureDefinition returns [Node node]
+  : DEFINE
+    IDENTIFIER
+    OPEN_BRACE
+    ( structureAssociation
+    )?
+    ( (COMMA | terminator)
+      structureAssociation
+    )*
+    CLOSE_BRACE
+  ;
+
+collectionDefinition
+  : DEFINE
+    COLLECTION
+    IDENTIFIER
+  ;
+
+controlStructure
+  : ifStatement
+  | forLoop
+  | whileLoop
+  | repeatLoop
+  | foreverLoop
+  | breakStatement
+  | returnStatement
+  ;
+
+ifStatement
+  : IF 
+    expression
+    (THEN | DO) terminator?
+    ( elseIfStatement
+    )*
+    ( elseStatement
+    )?
+    END
+  ;
+
+elseIfStatement
+  : ELSE 
+    IF
+    expression
+    (THEN | DO) terminator?
+    ( expressions
+    )?
+  ;
+
+elseStatement
+  : ELSE
+    ( expressions
+    )?
+  ;
+
+
+forLoop
+  : FOR EACH
+    IDENTIFIER
+    IN
+    expression
+    DO terminator?
+    ( expressions
+    )?
+    END
+  ;
+
+whileLoop
+  : WHILE
+    expression
+    DO terminator?
+    ( expressions
+    )?
+    END
+  ;
+
+repeatLoop
+  : REPEAT
+    expression
+    (TIMES | DO) terminator?
+    ( expressions
+    )?
+    END
+  ;
+
+foreverLoop
+  : FOREVER DO
+    ( expressions
+    )?
+    END
+  ;
+
+breakStatement
+  : BREAK
+  | BREAK expression
+  ;
+
+returnStatement
+  : RETURN
+  | RETURN expression
+  ;
+
+timingStructure
+  : PAUSE
+  | STOP
+  | EXIT
+  ;
+
+waitStatement
+  : WAIT ON
+    expression
+    ( COMMA
+      expression
+    )*
+  ;
+
+spawnStatement
+  : SPAWN
+    call
+  ;
+
+packageDeclaration
+  : PACKAGE IDENTIFIER
+  ;
+
+importStatement
+  : IMPORT IDENTIFIER
+  ;
+
+onEachStatement
+  : IDENTIFIER
+  ;
+
+onStatement
+  : IDENTIFIER
+  ;
+
 literal returns [Node node]
   : NUMBER { $node = new NumberLiteral($start.getLine(), Double.parseDouble($text)); }
   | STRING { $node = new StringLiteral($start.getLine(), $text); }
@@ -162,8 +375,9 @@ structure returns [Node node]
   : ( identifierPath
     )?
     OPEN_BRACE
-    structureAssociation
-    ( COMMA
+    ( structureAssociation
+    )?
+    ( (COMMA | terminator)
       structureAssociation
     )*
     COMMA*
@@ -222,6 +436,7 @@ INTERNAL:           'internal';
 LOCAL:              'local';
 
 DEFINE:             'define';
+COLLECTION:         'collection';
 DO:		    		      'do';
 END:                'end';
 IF:                 'if';
@@ -231,7 +446,16 @@ REPEAT:             'repeat';
 FOREVER:            'forever';
 FOR:                'for';
 ON:		  		        'on';
+IN:                 'in';
 EACH:               'each';
+
+SPAWN:              'spawn';
+
+THEN:               'then';
+TIMES:              'times';
+
+RETURN:             'return';
+BREAK:              'break';
 
 IMPORT: 	          'import';
 PACKAGE:	          'package';
@@ -316,7 +540,8 @@ fragment ESC
     )
   ;
 
-fragment ID_CHAR:      LOWER | UPPER | '_';
+fragment LETTER:    LOWER | UPPER;
+fragment ID_CHAR:   LETTER | DIGIT | '_';
 fragment LOWER:     'a'..'z';
 fragment UPPER:     'A'..'Z';
 fragment DIGIT:     '0'..'9';
