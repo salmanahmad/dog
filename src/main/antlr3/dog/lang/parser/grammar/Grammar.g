@@ -60,22 +60,12 @@ orExpression returns [Node node]
     )?
   ;
 
-/*
-  : node1=andExpression OR node2=orExpression { $node = new Operation($tree.getLine(), $node1.node, $node2.node, "||"); }
-  | e=andExpression {$node = $e.node; }
-  ;
-*/
 andExpression returns [Node node]
   : n1=relationalExpression { $node = $n1.node; }
     ( AND
       n2=andExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, "&&"); }
     )?
   ;
-/*
-  : node1=relationalExpression AND node2=andExpression { $node = new Operation($tree.getLine(), $node1.node, $node2.node, "&&"); }
-  | e=relationalExpression { $node = $e.node; }
-  ;
-*/
 
 relationalExpression returns [Node node]
   : n1=additiveExpression { $node = $n1.node; }
@@ -83,11 +73,6 @@ relationalExpression returns [Node node]
       n2=relationalExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, $relationalOperator.text); }
     )?
   ;
-/*
-  : node1=additiveExpression relationalOperator node2=relationalExpression { $node = new Operation($start.getLine(), $node1.node, $node2.node, $relationalOperator.text); }
-  | e=additiveExpression { $node = $e.node; }
-  ;
-*/
 
 additiveExpression returns [Node node]
   : n1=multiplicativeExpression   { $node = $n1.node; }
@@ -96,24 +81,12 @@ additiveExpression returns [Node node]
     )?
   ;
 
-/*
-  : node1=multiplicativeExpression additiveOperator node2=additiveExpression { $node = new Operation($start.getLine(), $node1.node, $node2.node, $additiveOperator.text); }
-  | e=multiplicativeExpression { $node = $e.node; }
-  ;
-*/
-
 multiplicativeExpression returns [Node node]
   : n1=unaryExpresion             { $node = $n1.node; }
     ( multiplicativeOperator
       n2=multiplicativeExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, $multiplicativeOperator.text); }
     )?
   ;
-
-/*
-  : node1=unaryExpresion multiplicativeOperator node2=multiplicativeExpression { $node = new Operation($start.getLine(), $node1.node, $node2.node, $multiplicativeOperator.text); }
-  | e=unaryExpresion { $node = $e.node; }
-  ;
-*/
 
 unaryExpresion returns [Node node]
   : NOT node1=unaryExpresion { $node = new Operation($start.getLine(), $node1.node, null, "!"); }
