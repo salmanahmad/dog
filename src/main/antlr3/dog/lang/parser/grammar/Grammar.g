@@ -11,6 +11,7 @@ options {
 package dog.lang.parser.grammar;
 
 import dog.lang.nodes.*;
+import dog.lang.compiler.Identifier;
 
 import java.util.ArrayList;
 
@@ -85,12 +86,67 @@ unaryExpresion returns [Node node]
 primaryExpression returns [Node node]
   : literal { $node = $literal.node; }
   | access  { $node = $access.node; }
+  | call
   ;
 
 assignment returns [Node node]
-  : IDENTIFIER ASSIGN expression
+  : IDENTIFIER 
+    ( accessPath
+    )?
+    ASSIGN 
+    expression
   ;
 
+access returns [Node node]
+  : ( literal
+    | identifierPath
+    | OPEN_PAREN expression CLOSE_PAREN
+    )
+    ( accessPath
+    )?
+  ;
+
+accessPath returns [ArrayList<Object> path]
+  : accessDot
+  | accessBracket
+  ;
+
+accessDot returns [ArrayList<Object> path]
+  : DOT 
+    IDENTIFIER
+    ( accessPath
+    )?
+  ;
+
+accessBracket returns [ArrayList<Object> path]
+  : OPEN_BRACKET
+    expression
+    CLOSE_BRACKET
+    ( accessPath
+    )?
+  ;
+
+identifierPath returns [Identifier identifier]
+  : ( CASCADE
+    | EXTERNAL
+    | INTERNAL
+    | LOCAL
+    )?
+    IDENTIFIER
+    ( DOT
+      IDENTIFIER
+    )*
+  ;
+
+call returns [Node node]
+  : ( identifierPath
+    )?
+    PARAMETER
+    expression
+    ( PARAMETER
+      expression
+    )*
+  ;
 
 literal returns [Node node]
   : NUMBER { $node = new NumberLiteral($start.getLine(), Double.parseDouble($text)); }
@@ -103,7 +159,9 @@ literal returns [Node node]
   ;
 
 structure returns [Node node]
-  : OPEN_BRACE
+  : ( identifierPath
+    )?
+    OPEN_BRACE
     structureAssociation
     ( COMMA
       structureAssociation
@@ -158,6 +216,11 @@ terminator
   : (NEWLINE | SEMICOLON)+
   ;
 
+CASCADE:            'cascade';
+EXTERNAL:           'external';
+INTERNAL:           'internal';
+LOCAL:              'local';
+
 DEFINE:             'define';
 DO:		    		      'do';
 END:                'end';
@@ -196,7 +259,8 @@ FALSE:              'false';
 
 NULL:               'null';
 
-IDENTIFIER:         LOWER CHAR*;
+IDENTIFIER:         LOWER ID_CHAR*;
+PARAMETER:          IDENTIFIER COLON;
 
 COLON:              ':';
 SEMICOLON:          ';';
@@ -252,7 +316,7 @@ fragment ESC
     )
   ;
 
-fragment CHAR:      LOWER | UPPER;
+fragment ID_CHAR:      LOWER | UPPER | '_';
 fragment LOWER:     'a'..'z';
 fragment UPPER:     'A'..'Z';
 fragment DIGIT:     '0'..'9';

@@ -56,4 +56,12 @@ public class ParserTest {
         Nodes program = parser.parse("{ 5 = 5, foo = 7}");
 
     }
+
+    @Test
+    public void testCall() {
+        Parser parser = new Parser();
+        
+        Nodes program = parser.parse("read_file: 5 with_encoding: 7");
+
+    }
 }
