@@ -23,6 +23,11 @@ public class NumberLiteral extends Node {
 		this.number = number;
 	}
 
+	public NumberLiteral(int line, double number) {
+		super(line);
+		this.number = number;
+	}
+
 	public void compile(Symbol symbol) {
 		int outputRegister = symbol.registerGenerator.generate();
 

@@ -13,15 +13,20 @@
 import org.junit.*;
 import java.util.*;
 
-import dog.lang.*;
 import dog.lang.parser.*;
 import dog.lang.nodes.*;
+import dog.lang.compiler.Compiler;
 
 public class ParserTest {
     
     @Test
     public void testSimpleFunction() {
         Parser parser = new Parser();
-        parser.parse("adsf safa fasdfa a(asdfa");
+        Compiler compiler = new Compiler();
+        
+        Nodes program = parser.parse("5 + 5 + 10 + 11 + 14");
+        compiler.processNodes(program);
+        System.out.println(compiler.compile());
+
     }
 }

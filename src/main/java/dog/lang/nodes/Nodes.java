@@ -17,7 +17,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Nodes extends Node {
-    ArrayList<Node> nodes = new ArrayList<Node>();
+    ArrayList<Node> nodes;
+
+	public Nodes() {
+    	this.nodes = new ArrayList<Node>();
+    }
 
     public Nodes(ArrayList<Node> nodes) {
     	this.nodes = nodes;
@@ -31,6 +35,10 @@ public class Nodes extends Node {
 				symbol.registerGenerator.release(symbol.currentOutputRegister);
 			}
 		}
+	}
+
+	public void add(Node node) {
+		nodes.add(node);
 	}
 
 	public ArrayList<Node> children() {

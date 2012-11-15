@@ -19,20 +19,22 @@ import org.antlr.runtime.*;
 
 public class Parser {
 	
-	public Node parse(String source) {
-		ANTLRStringStream stream = new ANTLRStringStream(source);
+	public Nodes parse(String source) {
+		Nodes nodes = null;
+
+        ANTLRStringStream stream = new ANTLRStringStream(source);
         
         GrammarLexer lexer = new GrammarLexer(stream);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GrammarParser parser = new GrammarParser(tokens);
 
         try {
-			parser.eval();
+            nodes = parser.program().nodes;
         } catch(RecognitionException exception) {
         	throw new RuntimeException("Parser error.");
         }
 
-		return null;
+		return nodes;
 	}
 
 }

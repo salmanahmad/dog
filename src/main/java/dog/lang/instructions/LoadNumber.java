@@ -20,7 +20,7 @@ public class LoadNumber extends Instruction {
 	}
 
 	public String toString() {
-		return String.format(":load_number %%r%d %d", outputRegister, number);
+		return String.format(":load_number %%r%d %.2f", outputRegister, number);
 	}
 }
 
