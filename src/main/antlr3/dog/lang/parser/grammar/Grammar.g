@@ -83,8 +83,8 @@ unaryExpresion returns [Node node]
   ;
 
 primaryExpression returns [Node node]
-  : IDENTIFIER
-  | literal { $node = $literal.node; }
+  : literal { $node = $literal.node; }
+  | access  { $node = $access.node; }
   ;
 
 assignment returns [Node node]
@@ -94,8 +94,42 @@ assignment returns [Node node]
 
 literal returns [Node node]
   : NUMBER { $node = new NumberLiteral($start.getLine(), Double.parseDouble($text)); }
+  | STRING { $node = new StringLiteral($start.getLine(), $text); }
+  | TRUE   { $node = new TrueLiteral($start.getLine()); }
+  | FALSE  { $node = new FalseLiteral($start.getLine()); }
+  | NULL   { $node = new NullLiteral($start.getLine()); }
+  | structure { $node = $structure.node; }
+  | array     { $node = $array.node; }
   ;
 
+structure returns [Node node]
+  : OPEN_BRACE
+    structureAssociation
+    ( COMMA
+      structureAssociation
+    )*
+    COMMA*
+    CLOSE_BRACE
+  ;
+
+structureAssociation returns [Object key, Node node]
+  : ( IDENTIFIER { $key = $text; }
+    | STRING     { $key = $text; }
+    | NUMBER     { $key = Double.parseDouble($text); }
+    )
+    ASSIGN
+    expression { $node = $expression.node; }
+  ;
+
+array returns [Node node]
+  : OPEN_BRACKET
+    head=expression
+    ( COMMA
+      tail=expression
+    )*
+    COMMA*
+    CLOSE_BRACKET
+  ;
 
 
 relationalOperator 
@@ -146,7 +180,15 @@ EXIT:	              'exit';
 
 PRINT:         	    'print';
 
-STRING:             '"' ~('\\' | '"')* '"';
+STRING      
+@init{ StringBuilder buf = new StringBuilder(); }
+  : '"' 
+    ( escape=ESC                       {buf.append(getText());} 
+    | normal=~('"'|'\\'|'\n'|'\r')     {buf.appendCodePoint($normal);} 
+    )*
+    '"'                                {setText(buf.toString());}
+  ;
+
 NUMBER:             '-'? DIGIT+ ('.' DIGIT+)?;
 
 TRUE:               'true';
@@ -195,8 +237,25 @@ COMMENT:            '#' ~('\r' | '\n')* (NEWLINE | EOF) { skip(); };
 NEWLINE:            '\r'? '\n';
 WHITESPACE:         SPACE+ { $channel = HIDDEN; };
 
+fragment ESC
+  : '\\'
+    ( 'n'    {setText("\n");}
+    | 'r'    {setText("\r");}
+    | 't'    {setText("\t");}
+    | 'b'    {setText("\b");}
+    | 'f'    {setText("\f");}
+    | '"'    {setText("\"");}
+    | '\''   {setText("\'");}
+    | '/'    {setText("/");}
+    | '\\'   {setText("\\");}
+    | ('u')+ i=HEX_DIGIT j=HEX_DIGIT k=HEX_DIGIT l=HEX_DIGIT { setText(Character.toString((char)Integer.parseInt("" + $i.getText() + $j.getText() + $k.getText() + $l.getText(), 16))); }
+    )
+  ;
+
 fragment CHAR:      LOWER | UPPER;
 fragment LOWER:     'a'..'z';
 fragment UPPER:     'A'..'Z';
 fragment DIGIT:     '0'..'9';
+fragment HEX_DIGIT: ('0'..'9'|'a'..'f'|'A'..'F');
 fragment SPACE:     ' ' | '\t';
+

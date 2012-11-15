@@ -29,4 +29,31 @@ public class ParserTest {
         System.out.println(compiler.compile());
 
     }
+
+    @Test
+    public void testString() {
+        Parser parser = new Parser();
+        Compiler compiler = new Compiler();
+        
+        Nodes program = parser.parse("\"Hello, \\\" Worlrd\" + \"Foo\"");
+        compiler.processNodes(program);
+        System.out.println(compiler.compile());
+
+    }
+
+    @Test
+    public void testArray() {
+        Parser parser = new Parser();
+        
+        Nodes program = parser.parse("[5,4,3,2,1]");
+
+    }
+
+    @Test
+    public void testStructure() {
+        Parser parser = new Parser();
+        
+        Nodes program = parser.parse("{ 5 = 5, foo = 7}");
+
+    }
 }

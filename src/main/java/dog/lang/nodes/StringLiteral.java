@@ -23,6 +23,11 @@ public class StringLiteral extends Node {
 		this.string = string;
 	}
 
+	public StringLiteral(int line, String string) {
+		super(line);
+		this.string = string;
+	}
+
 	public void compile(Symbol symbol) {
 		int outputRegister = symbol.registerGenerator.generate();
 

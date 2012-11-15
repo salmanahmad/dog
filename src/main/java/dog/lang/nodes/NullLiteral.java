@@ -17,6 +17,11 @@ import dog.lang.instructions.LoadNull;
 import java.util.ArrayList;
 
 public class NullLiteral extends Node {
+
+	public NullLiteral(int line) {
+		super(line);
+	}
+
 	public void compile(Symbol symbol) {
 		int outputRegister = symbol.registerGenerator.generate();
 
