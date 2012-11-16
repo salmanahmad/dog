@@ -26,7 +26,7 @@ public class Version extends Command {
 	}
 
 	public void run(ArrayList<String> args) {
-
+		System.out.println(super.versionString());
 	}
 }
 

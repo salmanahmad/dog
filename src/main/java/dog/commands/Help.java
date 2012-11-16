@@ -56,7 +56,12 @@ public class Help extends Command {
 	}
 
 	public void run(ArrayList<String> args) {
-
+		try {
+			Command command = Command.commandNamed(args.get(0));
+			command.usage();
+		} catch (Exception e) {
+			this.usage();
+		}
 	}
 }
 
