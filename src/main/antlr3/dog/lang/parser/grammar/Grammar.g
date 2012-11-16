@@ -216,15 +216,17 @@ functionWithoutArguments returns [Node node]
 
 
 structureDefinition returns [Node node]
+@init { String name = ""; HashMap<Object, Node> properties = new HashMap<Object, Node>(); }
   : DEFINE
-    IDENTIFIER
-    OPEN_BRACE
-    ( structureAssociation
+    IDENTIFIER                   { name = $IDENTIFIER.text; }
+    NEWLINE* OPEN_BRACE NEWLINE*
+    ( terminator?
+      head=structureAssociation       { properties.put($head.key, $head.node); }
+      ( (COMMA | terminator)
+        tail=structureAssociation       { properties.put($tail.key, $tail.node); }
+      )*
     )?
-    ( (COMMA | terminator)
-      structureAssociation
-    )*
-    CLOSE_BRACE
+    NEWLINE* CLOSE_BRACE                { $node = new StructureDefinition($start.getLine(), name, properties); }
   ;
 
 collectionDefinition returns [Node node]
@@ -307,8 +309,8 @@ foreverLoop returns [Node node]
   ;
 
 breakStatement returns [Node node]
-  : BREAK expression
-  | BREAK
+  : BREAK expression        { $node = new Break($start.getLine(), $expression.node); }
+  | BREAK                   { $node = new Break($start.getLine(), null); }
   ;
 
 returnStatement returns [Node node]
@@ -469,9 +471,6 @@ STRING
     )*
     '\''                               {setText(buf.toString());}
   ;
-
-
-
 
 NUMBER:             '-'? DIGIT+ ('.' DIGIT+)?;
 
