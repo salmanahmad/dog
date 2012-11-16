@@ -34,7 +34,7 @@ public class Invoke extends Instruction {
 	public String toString() {
 		String args = "";
 		for(int arg : arguments) {
-			args += "%r" + arg;
+			args += "%r" + arg + " ";
 		}
 
 		return String.format(":invoke %%r%d %b '%s' %s", outputRegister, asynchronous, functionIdentifier, args);

@@ -13,6 +13,11 @@
 import org.junit.*;
 import java.util.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 import dog.lang.parser.*;
 import dog.lang.parser.grammar.*;
 import dog.lang.nodes.*;
@@ -21,7 +26,23 @@ import dog.lang.compiler.Compiler;
 import org.antlr.runtime.RecognitionException;
 
 public class ParserTest {
-    
+
+
+    @Test
+    public void testCallByte() throws IOException {
+        Parser parser = new Parser();
+        Compiler compiler = new Compiler();
+
+        InputStream in = getClass().getResourceAsStream("/res.dog");
+        String source = new Scanner(in).useDelimiter("\\A").next();
+
+        
+
+        Nodes program = parser.parse(source);
+        compiler.processNodes(program);
+        System.out.println(compiler.compile());
+    }
+    /*
     @Test
     public void testSimpleFunction() {
         Parser parser = new Parser();
@@ -30,8 +51,8 @@ public class ParserTest {
         Nodes program = parser.parse("5 + (5 + 10) + 11 + 14");
         compiler.processNodes(program);
         System.out.println(compiler.compile());
-
     }
+
 
 
     @Test
@@ -132,6 +153,6 @@ public class ParserTest {
         parser.parse("1+2 # comments\n\n\n");
         parser.parse("\n\n\n  1+2 # comments\n\n\n");
     }
-
+*/
 
 }

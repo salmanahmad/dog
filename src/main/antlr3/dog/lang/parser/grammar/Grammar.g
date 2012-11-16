@@ -172,41 +172,46 @@ identifierPath returns [Identifier identifier]
   ;
 
 call returns [Node node]
-  : ( identifierPath
+@init { ArrayList<Node> arguments = new ArrayList<Node>(); Identifier path = new Identifier(); String name = ""; }
+  : ( identifierPath             { path = $identifierPath.identifier; }
     )?
-    PARAMETER
-    expression
-    ( PARAMETER
-      expression
-    )*
+    headParam=PARAMETER          { name += $headParam.getText(); }
+    head=expression              { arguments.add($head.node); }
+    ( tailParam=PARAMETER        { name += $tailParam.getText(); }
+      tail=expression            { arguments.add($tail.node); }
+    )*                           { path.path.add(name); $node = new Call($start.getLine(), false, path, arguments); }
   ;
+
+
 
 
 functionDefinition returns [Node node]
-  : functionWithArguments
-  | functionWithoutArguments
+  : functionWithArguments        { $node = $functionWithArguments.node; }
+  | functionWithoutArguments     { $node = $functionWithoutArguments.node; }
   ;
 
 functionWithArguments returns [Node node]
-  : DEFINE
-    PARAMETER
-    IDENTIFIER
-    (
-      PARAMETER
-      IDENTIFIER
+@init { String name = ""; ArrayList<String> args = new ArrayList<String>(); Node body = new Nodes(); }
+  : DEFINE                       
+    headParam=PARAMETER          { name += $headParam.getText(); }
+    headId=IDENTIFIER            { args.add($headId.getText()); }
+    ( tailParam=PARAMETER        { name += $tailParam.getText(); }
+      tailId=IDENTIFIER          { args.add($tailId.getText()); }
+    )*
+    DO terminator
+    ( expressions                { body = $expressions.nodes; }
     )?
-    DO
-    expressions?
-    END
+    END                          { $node = new FunctionDefinition($start.getLine(), name, args, body); }
   ;
 
 functionWithoutArguments returns [Node node]
+@init { String name = ""; ArrayList<String> args = new ArrayList<String>(); Node body = new Nodes(); }
   : DEFINE
-    IDENTIFIER
-    DO
-    terminator?
-    expressions?
-    END
+    IDENTIFIER                   { name += $IDENTIFIER.text; }
+    DO terminator
+    ( expressions                { body = $expressions.nodes; }
+    )?
+    END                          { $node = new FunctionDefinition($start.getLine(), name, args, body); }
   ;
 
 
@@ -302,13 +307,13 @@ foreverLoop returns [Node node]
   ;
 
 breakStatement returns [Node node]
-  : BREAK
-  | BREAK expression
+  : BREAK expression
+  | BREAK
   ;
 
 returnStatement returns [Node node]
-  : RETURN
-  | RETURN expression
+  : RETURN expression
+  | RETURN
   ;
 
 timingStructure returns [Node node]
