@@ -182,9 +182,6 @@ call returns [Node node]
     )*                           { path.path.add(name); $node = new Call($start.getLine(), false, path, arguments); }
   ;
 
-
-
-
 functionDefinition returns [Node node]
   : functionWithArguments        { $node = $functionWithArguments.node; }
   | functionWithoutArguments     { $node = $functionWithoutArguments.node; }
@@ -213,7 +210,6 @@ functionWithoutArguments returns [Node node]
     )?
     END                          { $node = new FunctionDefinition($start.getLine(), name, args, body); }
   ;
-
 
 structureDefinition returns [Node node]
 @init { String name = ""; HashMap<Object, Node> properties = new HashMap<Object, Node>(); }
@@ -319,9 +315,9 @@ returnStatement returns [Node node]
   ;
 
 timingStructure returns [Node node]
-  : PAUSE
-  | STOP
-  | EXIT
+  : PAUSE     { $node = new Pause($start.getLine()); }
+  | STOP      { $node = new Stop($start.getLine()); }
+  | EXIT      { $node = new Exit($start.getLine()); }
   ;
 
 waitStatement returns [Node node]
@@ -334,15 +330,15 @@ waitStatement returns [Node node]
 
 spawnStatement returns [Node node]
   : SPAWN
-    call
+    call        {$node = $call.node; ((Call)$node).setAsynchronous(true); }
   ;
 
 packageDeclaration returns [Node node]
-  : PACKAGE IDENTIFIER
+  : PACKAGE IDENTIFIER  { $node = new dog.lang.nodes.Package($start.getLine(), $IDENTIFIER.text); }
   ;
 
 importStatement returns [Node node]
-  : IMPORT IDENTIFIER
+  : IMPORT IDENTIFIER   { $node = new Import($start.getLine(), $IDENTIFIER.text); }
   ;
 
 onEachStatement returns [Node node]

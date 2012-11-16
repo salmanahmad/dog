@@ -17,6 +17,11 @@ import dog.lang.instructions.Signal;
 import java.util.ArrayList;
 
 public class Stop extends Node {
+	
+	public Stop(int line) {
+		super(line);
+	}
+
 	public void compile(Symbol symbol) {
 		Signal instruction = new Signal(this.line, "stop");
 		symbol.instructions.add(instruction);

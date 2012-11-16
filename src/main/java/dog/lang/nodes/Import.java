@@ -12,19 +12,23 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
-import dog.lang.instructions.Signal;
+import dog.lang.instructions.Perform;
 
 import java.util.ArrayList;
 
-public class Pause extends Node {
+public class Import extends Node {
+	String name;
 
-	public Pause(int line) {
+	public Import(String name) {
+		this(-1, name);
+	}
+
+	public Import(int line, String name) {
 		super(line);
+		this.name = name;
 	}
 
 	public void compile(Symbol symbol) {
-		Signal instruction = new Signal(this.line, "pause");
-		symbol.instructions.add(instruction);
 		symbol.currentOutputRegister = -1;
 	}
 
@@ -32,4 +36,5 @@ public class Pause extends Node {
 		return new ArrayList<Node>();
 	}
 }
+
 

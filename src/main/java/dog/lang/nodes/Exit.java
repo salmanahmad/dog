@@ -17,6 +17,11 @@ import dog.lang.instructions.Signal;
 import java.util.ArrayList;
 
 public class Exit extends Node {
+
+	public Exit(int line) {
+		super(line);
+	}
+
 	public void compile(Symbol symbol) {
 		Signal instruction = new Signal(this.line, "exit");
 		symbol.instructions.add(instruction);

@@ -35,6 +35,10 @@ public class Call extends Node {
 		this.arguments = arguments;
 	}
 
+	public void setAsynchronous(boolean flag) {
+		asynchronous = flag;
+	}
+
 	public void compile(Symbol symbol) {
 		ArrayList<Integer> argumentRegisters = new ArrayList<Integer>();
 		String functionIdentifier;
