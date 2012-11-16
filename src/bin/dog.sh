@@ -31,6 +31,6 @@ JAR_NAME="dog.jar"
 JAR_PATH="$DIR_NAME/../../target/lib/$JAR_NAME"
 
 CLASSPATH="$JAR_PATH:$DEP_PATH"
-COMMAND_NAME="dog.lang.commands.Main"
+COMMAND_NAME="dog.commands.Main"
 
 exec java -classpath "$CLASSPATH" "$COMMAND_NAME"  "$@"

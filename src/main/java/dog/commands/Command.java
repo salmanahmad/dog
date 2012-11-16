@@ -9,7 +9,7 @@
  *
  */
 
-package dog.lang.commands;
+package dog.commands;
 
 import dog.util.Helper;
 

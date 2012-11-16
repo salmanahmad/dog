@@ -10,7 +10,7 @@
  *
  */
 
-package dog.lang.commands;
+package dog.commands;
 
 import java.util.List;
 import java.util.ArrayList;

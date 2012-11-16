@@ -10,7 +10,7 @@
  *
  */
 
-package dog.lang.commands;
+package dog.commands;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -60,7 +60,6 @@ public class Help extends Command {
 			Command command = Command.commandNamed(args.get(0));
 			command.usage();
 		} catch (Exception e) {
-			System.out.println("Exception: " + e.toString());
 			this.usage();
 		}
 	}
