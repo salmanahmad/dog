@@ -1,0 +1,4 @@
+
+Usage: dog reset [FILE] [options]
+
+  Clears the database associated with the dog application. Takes the same options as 'run'.

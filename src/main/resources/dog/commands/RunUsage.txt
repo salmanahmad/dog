@@ -1,0 +1,6 @@
+
+Usage: dog run [FILE] [options]
+
+  Compile FILE.dog if it has not been compiled before (FILE.bundle is missing) or if the the
+  FILE.dog has been modified after FILE.bundle. After compiling as necessary, start the Dog
+  application. This command takes the same options as 'dog start'.

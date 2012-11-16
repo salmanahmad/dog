@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Shell extends Command {
-	public void usage() {
-
-	}
-
 	public String description() {
 		return "Start a shell session with a running Dog application";
 	}

@@ -19,7 +19,7 @@ import java.lang.Math;
 
 public class Help extends Command {
 	public void usage() {
-		super.usage();
+		System.out.println(this.versionString());
 		System.out.println();
 		System.out.println("Usage: dog COMMAND [command-specific-arguments]");
 		System.out.println();
@@ -60,6 +60,7 @@ public class Help extends Command {
 			Command command = Command.commandNamed(args.get(0));
 			command.usage();
 		} catch (Exception e) {
+			System.out.println("Exception: " + e.toString());
 			this.usage();
 		}
 	}

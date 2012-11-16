@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Start extends Command {
-	public void usage() {
-
-	}
-
 	public String description() {
 		return "Resume executing a Dog source file or application";
 	}

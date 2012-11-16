@@ -11,6 +11,8 @@
 
 package dog.lang.commands;
 
+import dog.util.Helper;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +64,12 @@ public class Command {
 
 	public void usage() {
 		System.out.println(this.versionString());
+		String[] path = name().split("\\.");
+		String name = path[path.length - 1];
+		String resourceName = "/dog/commands/" + name + "Usage.txt";
+
+		String contents = Helper.readResource(resourceName);
+		System.out.println(contents);
 	}
 
 	public void run(ArrayList<String> args) {

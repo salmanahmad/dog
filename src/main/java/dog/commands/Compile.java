@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Compile extends Command {
-	public void usage() {
-
-	}
-
 	public String description() {
 		return "Compile a Dog source file or application";
 	}

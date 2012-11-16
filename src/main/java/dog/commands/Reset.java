@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Reset extends Command {
-	public void usage() {
-
-	}
-
 	public String description() {
 		return "Clears the database associated with the dog application";
 	}

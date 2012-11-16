@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Version extends Command {
-	public void usage() {
-
-	}
-
 	public String description() {
 		return "Show the dog version";
 	}

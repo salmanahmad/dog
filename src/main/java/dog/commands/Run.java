@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Run extends Command {
-	public void usage() {
-
-	}
-
 	public String description() {
 		return "Compile and execute a dog program and clears the database if needed";
 	}

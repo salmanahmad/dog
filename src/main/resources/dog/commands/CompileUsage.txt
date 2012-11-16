@@ -1,0 +1,8 @@
+
+ Usage: dog compile [FILE] [options]
+
+   Will compile the file named FILE.dog into FILE.bundle. The bundle
+   can then be executed with 'dog run', 'dog start', or 'dog restart'.
+
+ Options include:
+   --show-byte-code    # Show the compiled byte code instead. Useful for debugging purposes.

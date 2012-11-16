@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Init extends Command {
-	public void usage() {
-
-	}
-
 	public String description() {
 		return "Create a new Dog application directory";
 	}

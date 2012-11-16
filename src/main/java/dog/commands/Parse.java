@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Parse extends Command {
-	public void usage() {
-
-	}
-
 	public String description() {
 		return "Parse a Dog source file and return the resulting syntax tree";
 	}
