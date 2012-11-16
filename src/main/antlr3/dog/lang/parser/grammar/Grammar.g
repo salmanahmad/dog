@@ -101,69 +101,74 @@ unaryExpresion returns [Node node]
   ;
 
 primaryExpression returns [Node node]
-  : literal { $node = $literal.node; }
-  | access  { $node = $access.node; }
-  | call
-  | functionDefinition
-  | structureDefinition
-  | collectionDefinition
-  | controlStructure
-  | timingStructure
-  | waitStatement
-  | spawnStatement
-  | packageDeclaration
-  | importStatement
-  | onEachStatement
-  | onStatement
+  : literal                   { $node = $literal.node; }
+  | OPEN_PAREN expression CLOSE_PAREN   { $node = $expression.node; }
+  | access                    { $node = $access.node; }
+  | call                      { $node = $call.node; }
+  | functionDefinition        { $node = $functionDefinition.node; }
+  | structureDefinition       { $node = $structureDefinition.node; }
+  | collectionDefinition      { $node = $collectionDefinition.node; }
+  | controlStructure          { $node = $controlStructure.node; }
+  | timingStructure           { $node = $timingStructure.node; }
+  | waitStatement             { $node = $waitStatement.node; }
+  | spawnStatement            { $node = $spawnStatement.node; }
+  | packageDeclaration        { $node = $packageDeclaration.node; }
+  | importStatement           { $node = $importStatement.node; }
+  | onEachStatement           { $node = $onEachStatement.node; }
+  | onStatement               { $node = $onStatement.node; }
   ;
 
 assignment returns [Node node]
-  : IDENTIFIER 
-    ( accessPath
+@init{ ArrayList<Object> path = new ArrayList<Object>(); }
+  : IDENTIFIER      { path.add($IDENTIFIER.text); }
+    ( accessPath    { path.addAll($accessPath.path); }
     )?
     ASSIGN 
-    expression
+    expression      { $node = new Assign($start.getLine(), path, $expression.node); }
   ;
 
 access returns [Node node]
-  : ( literal
-    | identifierPath
-    | OPEN_PAREN expression CLOSE_PAREN
+@init{ Identifier.Scope scope = Identifier.Scope.CASCADE; ArrayList<Object> path = new ArrayList<Object>(); }
+  :                                        
+    ( literal                             { path.add($literal.node); } 
+    | identifierPath                      { path.add($identifierPath.identifier.path); scope = $identifierPath.identifier.scope; } 
     )
-    ( accessPath
-    )?
+    ( accessPath                          { path.addAll($accessPath.path); }
+    )?                                    { $node = new Access($start.getLine(), scope, path); }
   ;
 
 accessPath returns [ArrayList<Object> path]
-  : accessDot
-  | accessBracket
+  : accessDot         { $path = $accessDot.path; }
+  | accessBracket     { $path = $accessBracket.path; }
   ;
 
 accessDot returns [ArrayList<Object> path]
-  : DOT 
-    IDENTIFIER
-    ( accessPath
+  : DOT               { $path = new ArrayList<Object>(); }
+    IDENTIFIER        { $path.add($text); }
+    ( accessPath      { $path.addAll($accessPath.path); }
     )?
   ;
 
 accessBracket returns [ArrayList<Object> path]
-  : OPEN_BRACKET
-    expression
+  : OPEN_BRACKET      { $path = new ArrayList<Object>(); }
+    expression        { $path.add($expression.node); }
     CLOSE_BRACKET
-    ( accessPath
+    ( accessPath      { $path.addAll($accessPath.path); }
     )?
   ;
 
 identifierPath returns [Identifier identifier]
-  : ( CASCADE
-    | EXTERNAL
-    | INTERNAL
-    | LOCAL
-    )?
-    IDENTIFIER
+  :               { $identifier =  new Identifier(); }
+                  { $identifier.scope = Identifier.Scope.CASCADE; }
+    ( CASCADE     { $identifier.scope = Identifier.Scope.CASCADE; }
+    | EXTERNAL    { $identifier.scope = Identifier.Scope.EXTERNAL; }
+    | INTERNAL    { $identifier.scope = Identifier.Scope.INTERNAL; }
+    | LOCAL       { $identifier.scope = Identifier.Scope.LOCAL; }
+    )?              
+    head=IDENTIFIER    { $identifier.path.add($head.getText()); }
     ( DOT
-      IDENTIFIER
-    )*
+      tail=IDENTIFIER  { $identifier.path.add($tail.getText()); }
+    )*              
   ;
 
 call returns [Node node]
@@ -217,13 +222,13 @@ structureDefinition returns [Node node]
     CLOSE_BRACE
   ;
 
-collectionDefinition
+collectionDefinition returns [Node node]
   : DEFINE
     COLLECTION
     IDENTIFIER
   ;
 
-controlStructure
+controlStructure returns [Node node]
   : ifStatement
   | forLoop
   | whileLoop
@@ -233,7 +238,7 @@ controlStructure
   | returnStatement
   ;
 
-ifStatement
+ifStatement returns [Node node]
   : IF 
     expression
     (THEN | DO) terminator?
@@ -244,7 +249,7 @@ ifStatement
     END
   ;
 
-elseIfStatement
+elseIfStatement returns [Node node]
   : ELSE 
     IF
     expression
@@ -253,14 +258,14 @@ elseIfStatement
     )?
   ;
 
-elseStatement
+elseStatement returns [Node node]
   : ELSE
     ( expressions
     )?
   ;
 
 
-forLoop
+forLoop returns [Node node]
   : FOR EACH
     IDENTIFIER
     IN
@@ -271,7 +276,7 @@ forLoop
     END
   ;
 
-whileLoop
+whileLoop returns [Node node]
   : WHILE
     expression
     DO terminator?
@@ -280,7 +285,7 @@ whileLoop
     END
   ;
 
-repeatLoop
+repeatLoop returns [Node node]
   : REPEAT
     expression
     (TIMES | DO) terminator?
@@ -289,30 +294,30 @@ repeatLoop
     END
   ;
 
-foreverLoop
+foreverLoop returns [Node node]
   : FOREVER DO
     ( expressions
     )?
     END
   ;
 
-breakStatement
+breakStatement returns [Node node]
   : BREAK
   | BREAK expression
   ;
 
-returnStatement
+returnStatement returns [Node node]
   : RETURN
   | RETURN expression
   ;
 
-timingStructure
+timingStructure returns [Node node]
   : PAUSE
   | STOP
   | EXIT
   ;
 
-waitStatement
+waitStatement returns [Node node]
   : WAIT ON
     expression
     ( COMMA
@@ -320,24 +325,24 @@ waitStatement
     )*
   ;
 
-spawnStatement
+spawnStatement returns [Node node]
   : SPAWN
     call
   ;
 
-packageDeclaration
+packageDeclaration returns [Node node]
   : PACKAGE IDENTIFIER
   ;
 
-importStatement
+importStatement returns [Node node]
   : IMPORT IDENTIFIER
   ;
 
-onEachStatement
+onEachStatement returns [Node node]
   : IDENTIFIER
   ;
 
-onStatement
+onStatement returns [Node node]
   : IDENTIFIER
   ;
 

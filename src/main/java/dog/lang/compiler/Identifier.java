@@ -21,6 +21,6 @@ public class Identifier {
 		EXTERNAL
 	}
 
-	public Scope scope;
-	public ArrayList<String> path;
+	public Scope scope = Scope.CASCADE;
+	public ArrayList<String> path = new ArrayList<String>();
 }

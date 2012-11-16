@@ -27,11 +27,23 @@ public class ParserTest {
         Parser parser = new Parser();
         Compiler compiler = new Compiler();
         
-        Nodes program = parser.parse("5 + 5 + 10 + 11 + 14");
+        Nodes program = parser.parse("5 + (5 + 10) + 11 + 14");
         compiler.processNodes(program);
         System.out.println(compiler.compile());
 
     }
+
+
+    @Test
+    public void testAssignByte() {
+        Parser parser = new Parser();
+        Compiler compiler = new Compiler();
+        
+        Nodes program = parser.parse("i = 5 + 5 + 10 + 11 + 14");
+        compiler.processNodes(program);
+        System.out.println(compiler.compile());
+    }
+
 
     @Test
     public void testString() {
@@ -55,9 +67,7 @@ public class ParserTest {
     @Test
     public void testStructure() {
         Parser parser = new Parser();
-        
         parser.parse("{ 5 = 5, foo = 7}");
-
     }
 
     @Test
