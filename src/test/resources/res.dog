@@ -1,7 +1,7 @@
 
 
-define foo: foo bar: bar do
-	i = 6 + 8
+define foo: a bar: b do
+	i = a + b
 	return 7
 end
 

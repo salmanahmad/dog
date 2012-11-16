@@ -42,7 +42,7 @@ public class ParserTest {
         compiler.processNodes(program);
         System.out.println(compiler.compile());
     }
-    /*
+    
     @Test
     public void testSimpleFunction() {
         Parser parser = new Parser();
@@ -153,6 +153,6 @@ public class ParserTest {
         parser.parse("1+2 # comments\n\n\n");
         parser.parse("\n\n\n  1+2 # comments\n\n\n");
     }
-*/
+
 
 }

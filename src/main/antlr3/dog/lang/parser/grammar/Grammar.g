@@ -131,7 +131,7 @@ access returns [Node node]
 @init{ Identifier.Scope scope = Identifier.Scope.CASCADE; ArrayList<Object> path = new ArrayList<Object>(); }
   :                                        
     ( literal                             { path.add($literal.node); } 
-    | identifierPath                      { path.add($identifierPath.identifier.path); scope = $identifierPath.identifier.scope; } 
+    | identifierPath                      { path.addAll($identifierPath.identifier.path); scope = $identifierPath.identifier.scope; } 
     )
     ( accessPath                          { path.addAll($accessPath.path); }
     )?                                    { $node = new Access($start.getLine(), scope, path); }
@@ -234,13 +234,13 @@ collectionDefinition returns [Node node]
   ;
 
 controlStructure returns [Node node]
-  : ifStatement
-  | forLoop
-  | whileLoop
-  | repeatLoop
-  | foreverLoop
-  | breakStatement
-  | returnStatement
+  : ifStatement           { $node = $ifStatement.node; }
+  | forLoop               { $node = $forLoop.node; }  
+  | whileLoop             { $node = $whileLoop.node; }  
+  | repeatLoop            { $node = $repeatLoop.node; } 
+  | foreverLoop           { $node = $foreverLoop.node; }  
+  | breakStatement        { $node = $breakStatement.node; }   
+  | returnStatement       { $node = $returnStatement.node; }    
   ;
 
 ifStatement returns [Node node]
@@ -312,8 +312,8 @@ breakStatement returns [Node node]
   ;
 
 returnStatement returns [Node node]
-  : RETURN expression
-  | RETURN
+  : RETURN expression       { $node = new Return($start.getLine(), $expression.node); }
+  | RETURN                  { $node = new Return($start.getLine(), null); }
   ;
 
 timingStructure returns [Node node]
