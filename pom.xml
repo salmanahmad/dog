@@ -106,6 +106,8 @@
 
   <build>
     <plugins>
+      <!--
+      TODO: I need to enable jar-with-dependencies for release
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.3</version>
@@ -124,6 +126,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -136,7 +139,30 @@
           </execution>
         </executions>
       </plugin>
-      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                <mkdir dir="${project.build.directory}/lib"/>
+                <!--
+                TODO: I need to enable jar-with-dependencies for release
+                <copy file="${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar" tofile="${project.build.directory}/lib/dog.jar"/>
+                -->
+                <copy file="${project.build.directory}/${project.build.finalName}.jar" tofile="${project.build.directory}/lib/dog.jar"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr3-maven-plugin</artifactId>
@@ -151,9 +177,6 @@
           </execution>
         </executions>
       </plugin>
-
-
-
     </plugins>
   </build>
 </project>
