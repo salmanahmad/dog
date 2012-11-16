@@ -8,7 +8,12 @@ public class ScratchTest {
     @Test
     public void test() {
 
-        dog.lang.instructions.Access access = new dog.lang.instructions.Access(1, 2, 3);
+        ArrayList<String> list = new ArrayList<String>();
+        //if(list.get(0) == null) {
+        //    System.out.println("hisad");
+        //}
+
+        //dog.lang.instructions.Access access = new dog.lang.instructions.Access(1, 2, 3);
         //System.out.println(access);
 
         //dog.lang.Runtime.run();

@@ -13,11 +13,13 @@ package dog.lang.commands;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Main {
 	public static void main(String[] args) {
-		System.out.println("Bark bark!");
-		System.out.println(args);
+		ArrayList<String> arguments = new ArrayList<String>(Arrays.asList(args));
+		Command command = new Command();
+		command.run(arguments);
 	}
 }
 
