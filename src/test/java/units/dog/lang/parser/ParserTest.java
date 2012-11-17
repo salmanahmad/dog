@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import dog.util.Helper;
 import dog.lang.parser.*;
 import dog.lang.parser.grammar.*;
 import dog.lang.nodes.*;
@@ -27,22 +28,22 @@ import org.antlr.runtime.RecognitionException;
 
 public class ParserTest {
 
-
     @Test
-    public void testCallByte() throws IOException {
-        Parser parser = new Parser();
-        Compiler compiler = new Compiler();
-
-        InputStream in = getClass().getResourceAsStream("/res.dog");
-        String source = new Scanner(in).useDelimiter("\\A").next();
-
-        
-
-        Nodes program = parser.parse(source);
-        compiler.processNodes(program);
-        System.out.println(compiler.compile());
+    public void testResourceExamples() throws Exception {
+        String[] paths = Helper.getResourceListing("/examples/");
+        for(String path : paths) {
+            path = "/examples/" + path;
+            try {
+                Parser parser = new Parser();
+                String source = Helper.readResource(path);
+                Nodes program = parser.parse(source);
+            } catch(Exception e) {
+                System.out.println("Failed on test: " + path);
+                throw e;
+            }
+        }
     }
-    
+
     @Test
     public void testSimpleFunction() {
         Parser parser = new Parser();

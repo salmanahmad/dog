@@ -17,6 +17,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.MappedByteBuffer;
 import java.nio.charset.Charset;
+import java.net.URL;
 
 public class Helper {
 	
@@ -40,13 +41,33 @@ public class Helper {
 	  	}
 	}
 
-	public static String readResource(String path) {
+	public static String[] getResourceListing(Class klass, String path) {
+      try {
+		URL dirURL = klass.getResource(path);
+      	return new File(dirURL.toURI()).list();
+      } catch(Exception e) {
+		return null;
+      }
+  	}
+
+
+  	public static String[] getResourceListing(String path) {
+		return getResourceListing(Helper.class, path);
+    }
+
+
+	public static String readResource(Class klass, String path) {
 		try {
-			InputStream in = Helper.class.getResourceAsStream(path);
+			InputStream in = klass.getResourceAsStream(path);
         	String content = new Scanner(in).useDelimiter("\\A").next();
         	return content;
 		} catch(Exception e) {
 			return null;
 		}
+	}
+
+
+	public static String readResource(String path) {
+		return readResource(Helper.class, path);
 	}
 }

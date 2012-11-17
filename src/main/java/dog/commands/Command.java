@@ -64,11 +64,13 @@ public class Command {
 
 	public void usage() {
 		System.out.println(this.versionString());
+		
 		String[] path = name().split("\\.");
 		String name = path[path.length - 1];
-		String resourceName = "/dog/commands/" + name + "Usage.txt";
 
-		String contents = Helper.readResource(resourceName);
+		String resourceName = resourceName = name + "Usage.txt";
+		String contents = Helper.readResource(this.getClass(), resourceName);
+
 		System.out.println(contents);
 	}
 
