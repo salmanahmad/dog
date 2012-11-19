@@ -28,6 +28,11 @@ public class Nodes extends Node {
     }
 
 	public void compile(Symbol symbol) {
+		if(nodes == null || nodes.size() == 0) {
+			symbol.currentOutputRegister = -1;
+			return;
+		}
+		
 		for(Iterator<Node> i = nodes.iterator(); i.hasNext();) {
 			Node node = i.next();
 			node.compile(symbol);

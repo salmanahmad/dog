@@ -250,30 +250,41 @@ controlStructure returns [Node node]
   ;
 
 ifStatement returns [Node node]
+@init { 
+  Node condition = null; 
+  Nodes trueBranch = null; 
+  Nodes falseBranch = null; 
+  Nodes falseBranchPointer = null; 
+  Nodes temp = null;  
+}
   : IF 
-    expression
+    expression                { condition = $expression.node; }
     (THEN | DO) terminator?
-    ( expressions
+    ( expressions             { trueBranch = $expressions.nodes; }
     )?
-    ( elseIfStatement
+    ( elseIfStatement         { if(falseBranch == null) { falseBranch = new Nodes(); falseBranchPointer = falseBranch; } }
+                              { temp = new Nodes(); }
+                              { falseBranchPointer.add(new Branch($elseIfStatement.condition, $elseIfStatement.nodes, temp)); }
+                              { falseBranchPointer = temp; }
     )*
-    ( elseStatement
+    ( elseStatement           { if(falseBranch == null) { falseBranch = new Nodes(); falseBranchPointer = falseBranch; } }
+                              { falseBranchPointer.add($elseStatement.nodes);  }
     )?
-    END
+    END                       { $node = new Branch($start.getLine(), condition, trueBranch, falseBranch); }
   ;
 
-elseIfStatement returns [Node node]
+elseIfStatement returns [Node condition, Nodes nodes]
   : ELSE 
-    IF
-    expression
+    IF                          { $nodes = null; }
+    expression                  { $condition = $expression.node; }
     (THEN | DO) terminator?
-    ( expressions
+    ( expressions               { $nodes = $expressions.nodes; }
     )?
   ;
 
-elseStatement returns [Node node]
+elseStatement returns [Nodes nodes]
   : ELSE terminator?
-    ( expressions
+    ( expressions               { $nodes = $expressions.nodes; }
     )?
   ;
 
