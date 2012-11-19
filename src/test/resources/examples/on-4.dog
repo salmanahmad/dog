@@ -1,0 +1,7 @@
+on each request in dog.account.signin do
+  print: 'hello, world!'
+end
+
+on each request in dog.account.signin do
+  print: 'hello, world!'
+end

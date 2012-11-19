@@ -44,6 +44,14 @@ public class ParserTest {
         }
     }
 
+
+    @Test
+    public void testEmpty() {
+        Parser parser = new Parser();
+        Nodes program = parser.parse("");
+    }
+
+
     @Test
     public void testSimpleFunction() {
         Parser parser = new Parser();
@@ -249,5 +257,50 @@ public class ParserTest {
         parser.parse("{\n\t'key'=1,\n\t'key2'='value'\n}");
     }
 
+    @Test
+    public void testScope() throws RecognitionException {
+        Parser parser = new Parser();
+
+        parser.parse("i = external foo.bar.baz");
+        parser.parse("i = internal foo.bar.baz");
+        parser.parse("i = local foo.bar.baz");
+    }
+
+
+    @Test
+    public void testSpaces() throws RecognitionException {
+        Parser parser = new Parser();
+        
+        parser.parse("");
+        parser.parse("    ");
+        parser.parse("\n");
+        parser.parse(" \n");
+        parser.parse(" \n\n  \n\n   ");
+        parser.parse(" \n   \n  \n\n\n     \n\n\n   \n\n    \n");
+        parser.parse("\n\n  \n\n  i = 'foobar'  \n\n");
+        parser.parse("\n\n  \n\n  i = 'foobar'\n5+5  \n\n");
+        parser.parse("\n\n  \n\n  i = 'foobar'\n5 +  5  \n\n");
+        parser.parse("i = 'foobar'");
+        parser.parse("i = 'foobar'\n");
+        parser.parse(" # comments");
+        parser.parse("# comments");
+        parser.parse("1+2# comments");
+        parser.parse("\n\n1+2# comments\n\n");
+    }
+
+
+    @Test
+    public void testWait() throws RecognitionException {
+        Parser parser = new Parser();
+
+        parser.parse("wait on 5");
+        parser.parse("spawn create: matrix height: 500 width: 500");
+        
+        try { parser.parse("spawn 5 + 5"); Assert.fail(); } catch (Exception e) {}
+    
+        parser.parse("stop");
+        parser.parse("pause");
+        parser.parse("exit");
+    }
 
 }

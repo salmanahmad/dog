@@ -1,0 +1,23 @@
+on offer do
+  print: 'hello, world!'
+end
+
+
+on value in next_page do
+  print: 'hello, world!'
+end
+
+
+on value in next_page do
+  print: 'hello, world!'
+else on value in prev_page do
+  print: 'Previous Page!'
+end
+
+on value in next_page do
+  print: 'hello, world!'
+else on value in prev_page do
+  print: 'Previous Page!'
+end
+
+

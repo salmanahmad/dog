@@ -1,0 +1,33 @@
+while 5 do
+  i = 5 + 5
+end
+
+
+while false do
+  print: 'hello'
+  print: 'hi'
+end
+
+
+repeat 5 times
+  i = 5 + 5
+end
+
+
+repeat 5 do
+  i = 5 + 5
+end
+
+forever do
+  i = 5 + 5
+end
+
+
+forever do
+  i = 5 + 5
+  if i == 10 do
+    break
+  end
+end
+
+

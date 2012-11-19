@@ -300,10 +300,47 @@ repeatLoop returns [Node node]
   ;
 
 foreverLoop returns [Node node]
-  : FOREVER DO
+  : FOREVER DO terminator?
     ( expressions
     )?
     END
+  ;
+
+onEachStatement returns [Node node]
+  : ON EACH
+    IDENTIFIER
+    ( IN
+      expression
+    )?
+    DO terminator?
+    ( expressions
+    )?
+    END
+  ;
+
+onStatement returns [Node node]
+  : ON
+    IDENTIFIER
+    ( IN
+      expression
+    )?
+    DO terminator?
+    ( expressions
+    )?
+    ( elseOnStatement
+    )*
+    END
+  ;
+
+elseOnStatement returns [Node node]
+  : ELSE ON
+    IDENTIFIER
+    ( IN
+      expression
+    )?
+    DO terminator?
+    ( expressions
+    )?
   ;
 
 breakStatement returns [Node node]
@@ -341,14 +378,6 @@ packageDeclaration returns [Node node]
 
 importStatement returns [Node node]
   : IMPORT IDENTIFIER   { $node = new Import($start.getLine(), $IDENTIFIER.text); }
-  ;
-
-onEachStatement returns [Node node]
-  : IDENTIFIER
-  ;
-
-onStatement returns [Node node]
-  : IDENTIFIER
   ;
 
 literal returns [Node node]
