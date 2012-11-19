@@ -12,6 +12,8 @@
 
 package dog.commands;
 
+import dog.util.StringList;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +23,7 @@ public class Init extends Command {
 		return "Create a new Dog application directory";
 	}
 
-	public void run(ArrayList<String> args) {
+	public void run(StringList args) {
 
 	}
 }

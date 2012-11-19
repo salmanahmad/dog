@@ -12,6 +12,8 @@
 
 package dog.commands;
 
+import dog.util.StringList;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +23,7 @@ public class Version extends Command {
 		return "Show the dog version";
 	}
 
-	public void run(ArrayList<String> args) {
+	public void run(StringList args) {
 		System.out.println(super.versionString());
 	}
 }

@@ -1,6 +1,18 @@
 
 
 
+=============================================
+
+JVM TODO:
+
+Handle nested function definition appropariated  especially with the resolver and compiler symbol table.
+
+=============================================
+
+
+
+
+
 Look into why printing is so slow
 
 

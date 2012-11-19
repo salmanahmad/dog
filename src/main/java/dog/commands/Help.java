@@ -12,6 +12,8 @@
 
 package dog.commands;
 
+import dog.util.StringList;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,7 +57,7 @@ public class Help extends Command {
 		return "Show the help page for a command";
 	}
 
-	public void run(ArrayList<String> args) {
+	public void run(StringList args) {
 		try {
 			Command command = Command.commandNamed(args.get(0));
 			command.usage();

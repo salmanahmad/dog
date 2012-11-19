@@ -15,7 +15,11 @@ import java.util.HashMap;
 
 public class StructureValue extends Value {
 
-	public HashMap<Object, Value> value;
+	public HashMap<Object, Value> value = new HashMap<Object, Value>();
+
+    public StructureValue() {
+        
+    }
 
 	public StructureValue(HashMap<Object, Value> v) {
         super();

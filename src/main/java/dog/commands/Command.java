@@ -12,6 +12,7 @@
 package dog.commands;
 
 import dog.util.Helper;
+import dog.util.StringList;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class Command {
 		System.out.println(contents);
 	}
 
-	public void run(ArrayList<String> args) {
+	public void run(StringList args) {
 
 		String name = "";
 
@@ -87,7 +88,7 @@ public class Command {
 		Command command = commandNamed(name);
 		
 		if(command != null) {
-			args.remove(0);
+			args.shift();
 			command.run(args);
 		} else {
 			Help help = new Help();

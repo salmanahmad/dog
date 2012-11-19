@@ -12,6 +12,8 @@
 
 package dog.commands;
 
+import dog.util.StringList;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +23,7 @@ public class Restart extends Command {
 		return "Compile and execute a dog program after clearing the database";
 	}
 
-	public void run(ArrayList<String> args) {
+	public void run(StringList args) {
 
 	}
 }
