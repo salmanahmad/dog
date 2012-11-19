@@ -232,9 +232,11 @@ structureDefinition returns [Node node]
   ;
 
 collectionDefinition returns [Node node]
+// TODO: Once I add the native language integration I need to create the package type
+// and subclass it here...
   : DEFINE
     COLLECTION
-    IDENTIFIER
+    IDENTIFIER 
   ;
 
 controlStructure returns [Node node]
