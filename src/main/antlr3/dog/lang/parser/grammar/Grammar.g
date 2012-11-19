@@ -183,6 +183,11 @@ call returns [Node node]
     )*                           { path.path.add(name); $node = new Call($start.getLine(), false, path, arguments); }
   ;
 
+spawnStatement returns [Node node]
+  : SPAWN
+    call                    {$node = $call.node; ((Call)$node).setAsynchronous(true); }
+  ;
+
 functionDefinition returns [Node node]
   : functionWithArguments        { $node = $functionWithArguments.node; }
   | functionWithoutArguments     { $node = $functionWithoutArguments.node; }
@@ -307,6 +312,30 @@ foreverLoop returns [Node node]
     END
   ;
 
+breakStatement returns [Node node]
+  : BREAK expression        { $node = new Break($start.getLine(), $expression.node); }
+  | BREAK                   { $node = new Break($start.getLine(), null); }
+  ;
+
+returnStatement returns [Node node]
+  : RETURN expression       { $node = new Return($start.getLine(), $expression.node); }
+  | RETURN                  { $node = new Return($start.getLine(), null); }
+  ;
+
+timingStructure returns [Node node]
+  : PAUSE                   { $node = new Pause($start.getLine()); }
+  | STOP                    { $node = new Stop($start.getLine()); }
+  | EXIT                    { $node = new Exit($start.getLine()); }
+  ;
+
+waitStatement returns [Node node]
+  : WAIT ON
+    expression
+    ( COMMA
+      expression
+    )*
+  ;
+
 onEachStatement returns [Node node]
   : ON EACH
     IDENTIFIER
@@ -342,35 +371,6 @@ elseOnStatement returns [Node node]
     DO terminator?
     ( expressions
     )?
-  ;
-
-breakStatement returns [Node node]
-  : BREAK expression        { $node = new Break($start.getLine(), $expression.node); }
-  | BREAK                   { $node = new Break($start.getLine(), null); }
-  ;
-
-returnStatement returns [Node node]
-  : RETURN expression       { $node = new Return($start.getLine(), $expression.node); }
-  | RETURN                  { $node = new Return($start.getLine(), null); }
-  ;
-
-timingStructure returns [Node node]
-  : PAUSE                   { $node = new Pause($start.getLine()); }
-  | STOP                    { $node = new Stop($start.getLine()); }
-  | EXIT                    { $node = new Exit($start.getLine()); }
-  ;
-
-waitStatement returns [Node node]
-  : WAIT ON
-    expression
-    ( COMMA
-      expression
-    )*
-  ;
-
-spawnStatement returns [Node node]
-  : SPAWN
-    call                    {$node = $call.node; ((Call)$node).setAsynchronous(true); }
   ;
 
 packageDeclaration returns [Node node]
