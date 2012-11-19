@@ -319,10 +319,11 @@ repeatLoop returns [Node node]
   ;
 
 foreverLoop returns [Node node]
+@init { Node body = null; }
   : FOREVER DO terminator?
-    ( expressions
+    ( expressions                 { body = $expressions.nodes; }
     )?
-    END
+    END                           { $node = new Loop($start.getLine(), body); }
   ;
 
 breakStatement returns [Node node]
