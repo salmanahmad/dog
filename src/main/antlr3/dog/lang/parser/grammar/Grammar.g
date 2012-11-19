@@ -354,9 +354,9 @@ returnStatement returns [Node node]
   ;
 
 timingStructure returns [Node node]
-  : PAUSE     { $node = new Pause($start.getLine()); }
-  | STOP      { $node = new Stop($start.getLine()); }
-  | EXIT      { $node = new Exit($start.getLine()); }
+  : PAUSE                   { $node = new Pause($start.getLine()); }
+  | STOP                    { $node = new Stop($start.getLine()); }
+  | EXIT                    { $node = new Exit($start.getLine()); }
   ;
 
 waitStatement returns [Node node]
@@ -369,7 +369,7 @@ waitStatement returns [Node node]
 
 spawnStatement returns [Node node]
   : SPAWN
-    call        {$node = $call.node; ((Call)$node).setAsynchronous(true); }
+    call                    {$node = $call.node; ((Call)$node).setAsynchronous(true); }
   ;
 
 packageDeclaration returns [Node node]
