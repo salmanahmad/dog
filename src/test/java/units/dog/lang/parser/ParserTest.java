@@ -190,5 +190,64 @@ public class ParserTest {
         parser.parse("! ! x");
     }
 
+    @Test
+    public void testLiteral() throws RecognitionException {
+        Parser parser = new Parser();
+
+        parser.parse("0");
+        parser.parse("1");
+        parser.parse("13");
+
+        parser.parse("0.0");
+        parser.parse("1.0");
+        parser.parse("3.14");
+        
+        parser.parse("-0");
+        parser.parse("-1");
+        parser.parse("-13");
+
+        parser.parse("-0.0");
+        parser.parse("-1.0");
+        parser.parse("-3.14");
+
+        parser.parse("true");
+        parser.parse("false");
+
+        parser.parse("'Hello, World!'");
+        parser.parse("\"Hello, World!\"");
+        parser.parse("'Hello, \" World!'");
+        parser.parse("\"Hello, \\\" World!\"");
+        parser.parse("\"Hello, \\\\ \\\" World!\"");
+        try { parser.parse("'Hello, \\' World!'"); Assert.fail(); } catch (Exception e) {}
+        
+        parser.parse("[]");
+        parser.parse("[1]");
+        parser.parse("[1,]");
+        parser.parse("[1,2,3]");
+        parser.parse("[1,2.0,-3]");
+        parser.parse("[1   ,    2.0, -3]");
+        parser.parse("[1,'Foo Bar']");
+        parser.parse("[1,'Foo Bar', true, false]");
+        parser.parse("[[1],'Foo Bar', true, false]");
+        parser.parse("[[[[[[3.14]]]]]]");
+        parser.parse("[{'key'=5}]");
+        
+        try { parser.parse("[1items,]"); Assert.fail(); } catch (Exception e) {}
+        
+        parser.parse("{'key'='value'}");
+        parser.parse("{\"key\"='value'}");
+        parser.parse("{'key'=1,}");
+        parser.parse("{'key'=1}");
+        parser.parse("{'key'=true}");
+        parser.parse("{'key'=-4.5}");
+        parser.parse("{'key'=1, 'key2'='value'}");
+        parser.parse("{'key'=[1,2,3]}");
+        parser.parse("{'key'=[[1]]}");
+        parser.parse("{'key'=[[1,2,true]]}");
+        parser.parse("{'key'={'key'='value'}}");
+        parser.parse("{  'key' =   1   , 'key2'  =  'value'  }");
+        parser.parse("{\n\t'key'=1,\n\t'key2'='value'\n}");
+    }
+
 
 }

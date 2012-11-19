@@ -367,10 +367,10 @@ structure returns [Node node]
     OPEN_BRACE
     ( structureAssociation
     )?
-    ( (COMMA | terminator)
+    ( (COMMA | NEWLINE)+
       structureAssociation
     )*
-    COMMA*
+    (COMMA | NEWLINE)*
     CLOSE_BRACE
   ;
 
@@ -385,11 +385,12 @@ structureAssociation returns [Object key, Node node]
 
 array returns [Node node]
   : OPEN_BRACKET
-    head=expression
-    ( COMMA
+    ( head=expression
+    )?
+    ( (COMMA | NEWLINE)+
       tail=expression
     )*
-    COMMA*
+    (COMMA | NEWLINE)*
     CLOSE_BRACKET
   ;
 
