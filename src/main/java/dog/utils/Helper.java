@@ -19,8 +19,16 @@ import java.nio.MappedByteBuffer;
 import java.nio.charset.Charset;
 import java.net.URL;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Helper {
 	
+	public static AtomicInteger uniqueCounter = new AtomicInteger();
+
+	public static int uniqueNumber() {
+		return uniqueCounter.getAndIncrement();
+	}
+
 	private static String readFile(String path) {
 	  	FileInputStream stream = null;
 
@@ -65,7 +73,6 @@ public class Helper {
 			return null;
 		}
 	}
-
 
 	public static String readResource(String path) {
 		return readResource(Helper.class, path);

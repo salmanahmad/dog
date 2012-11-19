@@ -28,6 +28,18 @@ public class Nodes extends Node {
     }
 
 	public void compile(Symbol symbol) {
+
+		ArrayList<Node> nodes = new ArrayList<Node>();
+
+		if(this.nodes != null) {
+			for(Iterator<Node> i = this.nodes.iterator(); i.hasNext();) {
+				Node node = i.next();
+				if(node != null) {
+					nodes.add(node);
+				}
+			}
+		}
+
 		if(nodes == null || nodes.size() == 0) {
 			symbol.currentOutputRegister = -1;
 			return;

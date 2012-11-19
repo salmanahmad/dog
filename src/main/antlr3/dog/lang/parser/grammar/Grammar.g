@@ -290,6 +290,8 @@ elseStatement returns [Nodes nodes]
 
 
 forLoop returns [Node node]
+// TODO: Implement this once the native language integration bridge is created so I can get the
+// keys in a structure at runtime by calling dog.keys_for_structure: or something...
   : FOR EACH
     IDENTIFIER
     IN
@@ -301,21 +303,60 @@ forLoop returns [Node node]
   ;
 
 whileLoop returns [Node node]
+@init { Node body = null; }
   : WHILE
     expression
     DO terminator?
-    ( expressions
+    ( expressions                 { body = $expressions.nodes; }
     )?
-    END
+    END {
+      $node = new Loop($start.getLine(),
+        new Branch($start.getLine(),
+          $expression.node,
+          body,
+          new Break($start.getLine(), null)
+        )
+      );
+    }
   ;
 
 repeatLoop returns [Node node]
+@init { Node body = null; String counterVariable = "@counter" + dog.util.Helper.uniqueNumber(); }
   : REPEAT
     expression
     (TIMES | DO) terminator?
-    ( expressions
+    ( expressions                 { body = $expressions.nodes; }
     )?
-    END
+    END {
+      $node = new Nodes(new ArrayList<Node>(Arrays.asList(
+          new Assign($start.getLine(), 
+            new ArrayList(Arrays.asList(counterVariable)),
+            new NumberLiteral($start.getLine(), 0)
+          ),
+          new Loop($start.getLine(), new Nodes(new ArrayList<Node>(Arrays.asList(
+            new Branch($start.getLine(),
+              new Operation($start.getLine(), 
+                new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList(counterVariable))),
+                $expression.node,
+                "<"
+              ),
+              new Nodes(new ArrayList<Node>(Arrays.asList(
+                new Assign($start.getLine(), 
+                  new ArrayList(Arrays.asList(counterVariable)),
+                  new Operation(
+                    new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList(counterVariable))),
+                    new NumberLiteral($start.getLine(), 1),
+                    "+"
+                  )
+                )
+              ))),
+              new Break($start.getLine(), null)
+            )
+          )))),
+          body
+        ))
+      );
+    }
   ;
 
 foreverLoop returns [Node node]
