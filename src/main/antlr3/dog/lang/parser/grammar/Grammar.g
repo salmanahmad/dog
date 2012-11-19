@@ -245,6 +245,8 @@ ifStatement returns [Node node]
   : IF 
     expression
     (THEN | DO) terminator?
+    ( expressions
+    )?
     ( elseIfStatement
     )*
     ( elseStatement
@@ -509,9 +511,9 @@ MULTIPLY:           '*';
 DIVIDE:             '/';
 MODULO:             '%';
 
-AND:                '&&';
-OR:                 '||';
-NOT:                '!';
+AND:                '&&' | 'and';
+OR:                 '||' | 'or';
+NOT:                '!' | 'not';
 
 COMMENT:            '#' ~('\r' | '\n')* (NEWLINE | EOF) { skip(); };
 

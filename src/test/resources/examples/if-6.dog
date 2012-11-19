@@ -1,0 +1,7 @@
+    if waiting_users.count > 0 do
+      print: 'foo'
+      print: 'foo'
+      print: 'foo'
+    else
+      print: 'bar'
+    end

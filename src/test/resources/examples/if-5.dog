@@ -1,0 +1,5 @@
+    if waiting_users.count > 0 then
+      a = 5
+      b = a + 5
+      c = 'Hello, World!'
+    end
