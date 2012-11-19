@@ -14,6 +14,7 @@ import dog.lang.nodes.*;
 import dog.lang.compiler.Identifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 }
 
@@ -391,16 +392,17 @@ literal returns [Node node]
   ;
 
 structure returns [Node node]
-  : ( identifierPath
+@init { Identifier type = null;  HashMap<Object, Node> value = new HashMap<Object, Node>(); }
+  : ( identifierPath          { type = $identifierPath.identifier; }
     )?
     OPEN_BRACE
-    ( structureAssociation
+    ( head=structureAssociation    { value.put($head.key, $head.node); }
     )?
     ( (COMMA | NEWLINE)+
-      structureAssociation
+      tail=structureAssociation    { value.put($tail.key, $tail.node); }
     )*
     (COMMA | NEWLINE)*
-    CLOSE_BRACE
+    CLOSE_BRACE                    { $node = new StructureLiteral($start.getLine(), type, value); }
   ;
 
 structureAssociation returns [Object key, Node node]
@@ -413,14 +415,19 @@ structureAssociation returns [Object key, Node node]
   ;
 
 array returns [Node node]
+@init { 
+    HashMap<Object, Node> value = new HashMap<Object, Node>(); 
+    double index = 0; 
+    Identifier type = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "array")));
+}
   : OPEN_BRACKET
-    ( head=expression
+    ( head=expression       { value.put(index, $head.node); index++; }
     )?
     ( (COMMA | NEWLINE)+
-      tail=expression
+      tail=expression       { value.put(index, $tail.node); index++; }
     )*
     (COMMA | NEWLINE)*
-    CLOSE_BRACKET
+    CLOSE_BRACKET           { $node = new StructureLiteral($start.getLine(), type, value);  }
   ;
 
 

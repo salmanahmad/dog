@@ -11,7 +11,31 @@
 
 package dog.lang;
 
+import java.util.HashMap;
+
 public class StructureValue extends Value {
+
+	public HashMap<Object, Value> value;
+
+	public StructureValue(HashMap<Object, Value> v) {
+        super();
+        value = v;
+    }
+    
+    public Object getValue() {
+        return value;
+    }
+
+	public Value get(Object key) {
+        return value.get(key);
+    }
+
+    public void put(Object key, Value value) {
+		if((key instanceof Number) || (key instanceof String)) {
+			value.put(key, value);	
+		}
+    }
+
     public boolean isStructure() {
         return true;
     }

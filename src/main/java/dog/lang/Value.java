@@ -198,11 +198,11 @@ public class Value implements Persistable {
         }
     }
 
-    public Value get(String key) {
+    public Value get(Object key) {
         throw new RuntimeException("Cannot access key for non-structure type.");
     }
 
-    public Value put(String key, Value value) {
+    public void put(Object key, Value value) {
         throw new RuntimeException("Cannot assign key for non-structure type.");
     }
     
