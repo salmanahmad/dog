@@ -61,21 +61,21 @@ assignmentExpression returns [Node node]
   ;
   
 orExpression returns [Node node]
-  : n1=andExpression { $node = $n1.node; }
+  : n1=andExpression      { $node = $n1.node; }
     ( OR
-      n2=orExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, "||"); }
+      n2=orExpression     { $node = new Operation($start.getLine(), $n1.node, $n2.node, "||"); }
     )?
   ;
 
 andExpression returns [Node node]
   : n1=relationalExpression { $node = $n1.node; }
     ( AND
-      n2=andExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, "&&"); }
+      n2=andExpression      { $node = new Operation($start.getLine(), $n1.node, $n2.node, "&&"); }
     )?
   ;
 
 relationalExpression returns [Node node]
-  : n1=additiveExpression { $node = $n1.node; }
+  : n1=additiveExpression     { $node = $n1.node; }
     ( relationalOperator
       n2=relationalExpression { $node = new Operation($start.getLine(), $n1.node, $n2.node, $relationalOperator.text); }
     )?
@@ -96,8 +96,8 @@ multiplicativeExpression returns [Node node]
   ;
 
 unaryExpresion returns [Node node]
-  : NOT node1=unaryExpresion { $node = new Operation($start.getLine(), $node1.node, null, "!"); }
-  | primaryExpression { $node = $primaryExpression.node; }
+  : NOT node1=unaryExpresion      { $node = new Operation($start.getLine(), $node1.node, null, "!"); }
+  | primaryExpression             { $node = $primaryExpression.node; }
   ;
 
 primaryExpression returns [Node node]
@@ -158,12 +158,12 @@ accessBracket returns [ArrayList<Object> path]
   ;
 
 identifierPath returns [Identifier identifier]
-  :               { $identifier =  new Identifier(); }
-                  { $identifier.scope = Identifier.Scope.CASCADE; }
-    ( CASCADE     { $identifier.scope = Identifier.Scope.CASCADE; }
-    | EXTERNAL    { $identifier.scope = Identifier.Scope.EXTERNAL; }
-    | INTERNAL    { $identifier.scope = Identifier.Scope.INTERNAL; }
-    | LOCAL       { $identifier.scope = Identifier.Scope.LOCAL; }
+  :                    { $identifier =  new Identifier(); }
+                       { $identifier.scope = Identifier.Scope.CASCADE; }
+    ( CASCADE          { $identifier.scope = Identifier.Scope.CASCADE; }
+    | EXTERNAL         { $identifier.scope = Identifier.Scope.EXTERNAL; }
+    | INTERNAL         { $identifier.scope = Identifier.Scope.INTERNAL; }
+    | LOCAL            { $identifier.scope = Identifier.Scope.LOCAL; }
     )?              
     head=IDENTIFIER    { $identifier.path.add($head.getText()); }
     ( DOT
@@ -214,15 +214,15 @@ functionWithoutArguments returns [Node node]
 structureDefinition returns [Node node]
 @init { String name = ""; HashMap<Object, Node> properties = new HashMap<Object, Node>(); }
   : DEFINE
-    IDENTIFIER                   { name = $IDENTIFIER.text; }
+    IDENTIFIER                        { name = $IDENTIFIER.text; }
     NEWLINE* OPEN_BRACE NEWLINE*
     ( terminator?
       head=structureAssociation       { properties.put($head.key, $head.node); }
       ( (COMMA | terminator)
-        tail=structureAssociation       { properties.put($tail.key, $tail.node); }
+        tail=structureAssociation     { properties.put($tail.key, $tail.node); }
       )*
     )?
-    NEWLINE* CLOSE_BRACE                { $node = new StructureDefinition($start.getLine(), name, properties); }
+    NEWLINE* CLOSE_BRACE              { $node = new StructureDefinition($start.getLine(), name, properties); }
   ;
 
 collectionDefinition returns [Node node]
