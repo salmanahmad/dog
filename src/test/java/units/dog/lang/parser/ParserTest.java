@@ -51,7 +51,8 @@ public class ParserTest {
         
         Nodes program = parser.parse("5 + (5 + 10) + 11 + 14");
         compiler.processNodes(program);
-        System.out.println(compiler.compile());
+        
+        //System.out.println(compiler.compile());
     }
 
 
@@ -63,7 +64,8 @@ public class ParserTest {
         
         Nodes program = parser.parse("i = 5 + 5 + 10 + 11 + 14");
         compiler.processNodes(program);
-        System.out.println(compiler.compile());
+        
+        //System.out.println(compiler.compile());
     }
 
 
@@ -74,7 +76,8 @@ public class ParserTest {
         
         Nodes program = parser.parse("\"Hello, \\\" Worlrd\" + \"Foo\"");
         compiler.processNodes(program);
-        System.out.println(compiler.compile());
+        
+        //System.out.println(compiler.compile());
 
     }
 
@@ -153,6 +156,38 @@ public class ParserTest {
         parser.parse("1+2 # comments");
         parser.parse("1+2 # comments\n\n\n");
         parser.parse("\n\n\n  1+2 # comments\n\n\n");
+    }
+
+    @Test
+    public void testExpression() throws RecognitionException {
+        Parser parser = new Parser();
+
+        parser.parse("!true");
+        parser.parse("5 + 5");
+        parser.parse("5 + 5 + 5 + 5");
+        parser.parse("5 + 5 + foo['hi']['world'] + 5");
+        parser.parse("5 + 5 + (foo['hi']['world']) + 5");
+        parser.parse("5 + 5 + (((foo['hi']['world']))) + 5");
+        parser.parse("(5 + 5) / 2");
+        parser.parse("5 + 5 / 2");
+        parser.parse("5 / 2 + 5");
+        parser.parse("(5) + (5 + 5) + 5");
+        parser.parse("foo");
+        parser.parse("foo.bar") ;
+        parser.parse("foo.bar.baz");
+        parser.parse("foo.bar.baz.poo");
+        parser.parse("foo.bar['hi']");
+        parser.parse("foo[bar]");
+        parser.parse("foo[bar][baz]");
+        parser.parse("foo[bar[bar]]");
+        parser.parse("(foo[bar])[baz]");
+        parser.parse("foo[bar][baz[foo][bar]][poo]");
+        parser.parse("!true");
+        parser.parse("!x");
+        parser.parse("!!x");
+        parser.parse("! true");
+        parser.parse("! x");
+        parser.parse("! ! x");
     }
 
 

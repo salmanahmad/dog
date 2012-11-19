@@ -102,7 +102,6 @@ unaryExpresion returns [Node node]
 
 primaryExpression returns [Node node]
   : literal                   { $node = $literal.node; }
-  | OPEN_PAREN expression CLOSE_PAREN   { $node = $expression.node; }
   | access                    { $node = $access.node; }
   | call                      { $node = $call.node; }
   | functionDefinition        { $node = $functionDefinition.node; }
@@ -130,7 +129,8 @@ assignment returns [Node node]
 access returns [Node node]
 @init{ Identifier.Scope scope = Identifier.Scope.CASCADE; ArrayList<Object> path = new ArrayList<Object>(); }
   :                                        
-    ( literal                             { path.add($literal.node); } 
+    ( literal                             { path.add($literal.node); }
+    | OPEN_PAREN expression CLOSE_PAREN   { $node = $expression.node; }
     | identifierPath                      { path.addAll($identifierPath.identifier.path); scope = $identifierPath.identifier.scope; } 
     )
     ( accessPath                          { path.addAll($accessPath.path); }
@@ -195,7 +195,7 @@ functionWithArguments returns [Node node]
     ( tailParam=PARAMETER        { name += $tailParam.getText(); }
       tailId=IDENTIFIER          { args.add($tailId.getText()); }
     )*
-    DO terminator
+    DO terminator? 
     ( expressions                { body = $expressions.nodes; }
     )?
     END                          { $node = new FunctionDefinition($start.getLine(), name, args, body); }
@@ -205,7 +205,7 @@ functionWithoutArguments returns [Node node]
 @init { String name = ""; ArrayList<String> args = new ArrayList<String>(); Node body = new Nodes(); }
   : DEFINE
     IDENTIFIER                   { name += $IDENTIFIER.text; }
-    DO terminator
+    DO terminator?
     ( expressions                { body = $expressions.nodes; }
     )?
     END                          { $node = new FunctionDefinition($start.getLine(), name, args, body); }
@@ -262,7 +262,7 @@ elseIfStatement returns [Node node]
   ;
 
 elseStatement returns [Node node]
-  : ELSE
+  : ELSE terminator?
     ( expressions
     )?
   ;
@@ -415,7 +415,8 @@ multiplicativeOperator
   ;
 
 terminator
-  : (NEWLINE | SEMICOLON)+
+  : COMMENT
+  | (NEWLINE | SEMICOLON)+
   ;
 
 CASCADE:            'cascade';

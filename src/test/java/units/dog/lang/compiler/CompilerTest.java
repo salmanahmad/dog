@@ -47,6 +47,7 @@ public class CompilerTest {
         dog.lang.compiler.Compiler c = new dog.lang.compiler.Compiler();
         c.processNodes(program);
         String bytecode = c.compile();
-        System.out.println(bytecode);
+        
+        //System.out.println(bytecode);
     }
 }

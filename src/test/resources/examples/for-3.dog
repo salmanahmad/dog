@@ -1,0 +1,3 @@
+for each a in b do # test comment...
+  a = a + 1
+end
