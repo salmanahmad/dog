@@ -29,7 +29,7 @@ public class Helper {
 		return uniqueCounter.getAndIncrement();
 	}
 
-	private static String readFile(String path) {
+	public static String readFile(String path) {
 	  	FileInputStream stream = null;
 
 	  	try {

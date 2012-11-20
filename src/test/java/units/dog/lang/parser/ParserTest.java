@@ -73,7 +73,7 @@ public class ParserTest {
         Nodes program = parser.parse("i = 5 + 5 + 10 + 11 + 14");
         compiler.processNodes(program);
         
-        System.out.println(compiler.compile());
+        //System.out.println(compiler.compile());
     }
 
 

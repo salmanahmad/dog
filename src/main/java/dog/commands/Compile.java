@@ -12,6 +12,11 @@
 
 package dog.commands;
 
+import dog.lang.parser.Parser;
+import dog.lang.compiler.Compiler;
+import dog.lang.nodes.*;
+
+import dog.util.Helper;
 import dog.util.StringList;
 
 import java.util.List;
@@ -24,7 +29,33 @@ public class Compile extends Command {
 	}
 
 	public void run(StringList args) {
-		
+		boolean dump = false;
+
+		if (args.get(0) == "--show-byte-code") {
+			dump = true;
+			args.shift();
+		} else {
+			dump = false;
+		}
+
+		Compiler compiler = new Compiler();
+		Parser parser = new Parser();
+
+		for(String arg : args.strings) {
+			String source_filename = arg;
+        	String source_code = "";
+        	
+        	if(!source_filename.endsWith(".dog")) {
+				source_filename += ".dog";
+        	}
+
+        	String source_string = Helper.readFile(source_filename);
+        	
+        	Nodes ast = parser.parse(source_string);
+        	compiler.processNodes(ast);
+
+        	System.out.println(compiler.compile());
+		}
 	}
 }
 

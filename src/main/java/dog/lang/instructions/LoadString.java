@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 public class LoadString extends Instruction {
 	public String string;
 
@@ -20,7 +22,7 @@ public class LoadString extends Instruction {
 	}
 
 	public String toString() {
-		return String.format(":load_string %%r%d %s", outputRegister, string);
+		return String.format(":load_string %%r%d \"%s\"", outputRegister, StringEscapeUtils.escapeJava(string));
 	}
 }
 
