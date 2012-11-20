@@ -9,6 +9,11 @@ Handle nested function definition appropariated  especially with the resolver an
 
 Dynamic late binding option for packages.
 
+2 issues with class naming:
+	If I want dynamic capabilities or other features to suit my needs - I will add those when java packages are no longer suitable
+	When to subclass for compilation and runtime (custom class loaders)???
+	Utility methods to translate between dog and jvm symbols - how to handle nested - # and $hash$
+
 =============================================
 
 

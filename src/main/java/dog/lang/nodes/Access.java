@@ -106,6 +106,10 @@ public class Access extends Node {
 			// TODO...
 		}
 
+		// TODO: If you cannot resolve a symbol at compile time I should create a dynamic-access instruction that will
+		// attempt to use late-binding to resolve it. That way I can get the best of both worlds. It will respect the 
+		// Identifier SCOPE and use the Variable Mapping in the custom symbol class as well as the Resolver class for reflection.
+
 		if(outputRegister == -1) {
 			throw new RuntimeException("Could not resolve symbol.");
 		}

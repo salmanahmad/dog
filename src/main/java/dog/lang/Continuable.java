@@ -14,6 +14,6 @@ package dog.lang;
 public interface Continuable {
 	public int getRegisterCount();
 	public int getVariableCount();
-
+	
 	public Signal resume(StackFrame stack);
 }
