@@ -56,6 +56,10 @@ public class Call extends Node {
 			functionIdentifier = this.packageName + "." + StringUtils.join(function.path, ".");
 		}
 
+		// TODO: Explore the ability to make function calls dynamic with late binding. One idea is that
+		// if the compiler cannot find a function it will assume that the function identifier is a local variable
+		// and convert it into a dynamic invocation with a warning.
+
 		if(symbol.getCompiler().searchForSymbols(functionIdentifier).size() != 1) {
 			throw new RuntimeException("Unable to unique identify the function symbol.");
 		}
