@@ -35,6 +35,10 @@ public class VariableGenerator {
 			return currentVariableIndex;
 		}
 	}
+
+	public int variableCount() {
+		return currentVariableIndex + 1;
+	}
 }
 
 

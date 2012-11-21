@@ -36,6 +36,10 @@ public class RegisterGenerator {
 			availableRegisters.push(register);
 		}
 	}
+
+	public int registerCount() {
+		return largestRegister + 1;
+	}
 }
 
 

@@ -12,8 +12,12 @@
 package dog.lang.compiler;
 
 import dog.lang.nodes.Node;
+import dog.lang.instructions.Instruction;
+import dog.lang.Resolver;
 
-public class Function extends Symbol {
+import org.objectweb.asm.*;
+
+public class Function extends Symbol implements Opcodes {
 	public Function(String name, Node node, Compiler compiler) {
 		super(name, node, compiler);
 	}
@@ -21,7 +25,7 @@ public class Function extends Symbol {
 	public String toDogBytecodeString() {
 		String output = "";
 		output += String.format("; function: %s\n", name);
-		output += String.format("; variables: %d stack: %d\n", this.variableGenerator.currentVariableIndex + 1, registerGenerator.largestRegister + 1);
+		output += String.format("; variables: %d stack: %d\n", this.variableGenerator.variableCount(), registerGenerator.registerCount());
 
 		for(int i = 0; i < instructions.size(); i++) {
 			output += String.format("%04d %s\n", i, instructions.get(i).toString());
@@ -39,5 +43,50 @@ public class Function extends Symbol {
 	public void compile() {
 		compileNodes();
 
+		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+		FieldVisitor fv;
+		MethodVisitor mv;
+		AnnotationVisitor av0;
+
+		cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, Resolver.encodeSymbol(name), null, "dog/lang/Function", null);
+
+		// Add the default constructor
+		mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+		mv.visitCode();
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/Function", "<init>", "()V");
+		mv.visitInsn(RETURN);
+		mv.visitMaxs(1, 1);
+		mv.visitEnd();
+
+		// Add the register count information
+		mv = cw.visitMethod(ACC_PUBLIC, "getRegisterCount", "()I", null, null);
+		mv.visitCode();
+		mv.visitIntInsn(SIPUSH, registerGenerator.registerCount());
+		mv.visitInsn(IRETURN);
+		mv.visitMaxs(1, 1);
+		mv.visitEnd();
+
+		// Add the variable count information
+		mv = cw.visitMethod(ACC_PUBLIC, "getVariableCount", "()I", null, null);
+		mv.visitCode();
+		mv.visitIntInsn(SIPUSH, this.variableGenerator.variableCount());
+		mv.visitInsn(IRETURN);
+		mv.visitMaxs(1, 1);
+		mv.visitEnd();
+
+		// Start the body of the resume method
+		mv = cw.visitMethod(ACC_PUBLIC, "resume", "(Ldog/lang/StackFrame;)Ldog/lang/Signal;", null, null);
+		mv.visitCode();
+
+		for(Instruction instruction : instructions) {
+			instruction.assemble(mv);
+		}
+
+		mv.visitMaxs(0, 0);
+		mv.visitEnd();
+		cw.visitEnd();
+
+		this.bytecode = cw.toByteArray();
 	}
 }
