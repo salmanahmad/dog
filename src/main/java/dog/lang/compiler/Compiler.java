@@ -23,18 +23,15 @@ import java.util.ArrayList;
 public class Compiler {
 	ArrayList<Symbol> symbols = new ArrayList<Symbol>();
 	
-	public String compile() {
-		String bytecode = "";
-
+	public Bark compile() {
 		for(Symbol symbol : symbols) {
-			symbol.node.compile(symbol);
-			symbol.convertThrows();
-			bytecode += symbol.bytecode();
+			symbol.compile();
 		}
 
-		return bytecode;
+		return new Bark(symbols);
 	}
 
+	// TODO: Rename to addCompilationUnit
 	public void processNodes(Nodes ast) {
 		String packageName = ast.getPackageName();
 		boolean containsNonDefinitions = false;

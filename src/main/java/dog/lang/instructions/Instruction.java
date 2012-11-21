@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class Instruction {
 	public int line;
 	public int outputRegister;
@@ -27,5 +29,9 @@ public class Instruction {
 	public Instruction(int line, int outputRegister) {
 		this.line = line;
 		this.outputRegister = outputRegister;
+	}
+
+	public void assemble(MethodVisitor mv) {
+
 	}
 }

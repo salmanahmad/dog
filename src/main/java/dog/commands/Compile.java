@@ -14,6 +14,7 @@ package dog.commands;
 
 import dog.lang.parser.Parser;
 import dog.lang.compiler.Compiler;
+import dog.lang.compiler.Bark;
 import dog.lang.nodes.*;
 
 import dog.util.Helper;
@@ -53,8 +54,9 @@ public class Compile extends Command {
         	
         	Nodes ast = parser.parse(source_string);
         	compiler.processNodes(ast);
+			Bark bark = compiler.compile();
 
-        	System.out.println(compiler.compile());
+        	System.out.println(bark.symbols.get(0).toDogBytecodeString());
 		}
 	}
 }

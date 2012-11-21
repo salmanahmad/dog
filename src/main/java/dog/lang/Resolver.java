@@ -11,6 +11,10 @@
 
 package dog.lang;
 
+import dog.lang.compiler.Bark;
+
+import java.io.File;
+
 public class Resolver {
 	
 	public static void linkBytecode(byte[] bytecode) {
@@ -26,6 +30,10 @@ public class Resolver {
 		// to it here. You cannot add the jar file to the system class loader
 	}
 
+	public static void linkBark(Bark bark) {
+
+	}
+
 	public static void linkNativeCode() {
 
 	}
@@ -33,14 +41,15 @@ public class Resolver {
 	public static Object resolveSymbol(String symbol) {
 		// You may need to check the Resolver's class loader for packages
 		// that have been loaded dynmically...
+		return null;
 	}
 
 	public static String encodeSymbol(String symbol) {
-
+		return null;
 	}
 
 	public static String decodeSymbol(String symbol) {
-
+		return null;
 	}
 	
 }

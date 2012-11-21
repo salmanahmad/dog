@@ -25,6 +25,7 @@ public abstract class Symbol {
 	public String filePath;
 
 	Node node;
+	byte[] bytecode;
 	Compiler compiler;
 
 	public int currentOutputRegister;
@@ -36,8 +37,9 @@ public abstract class Symbol {
 	public VariableGenerator variableGenerator = new VariableGenerator();
 	public RegisterGenerator registerGenerator = new RegisterGenerator();
 
-	public abstract String bytecode();
-	// public abstract byte[] assemble();
+	public abstract String toDogBytecodeString();
+	public abstract String toJVMBytecodeString();
+	public abstract void compile();
 
 	public Symbol(String name, Node node, Compiler compiler) {
 		this.name = name;
@@ -66,6 +68,11 @@ public abstract class Symbol {
 		nested.registerGenerator = this.registerGenerator;
 
 		return nested;
+	}
+
+	public void compileNodes() {
+		this.node.compile(this);
+		this.convertThrows();
 	}
 
 	public void convertThrows() {

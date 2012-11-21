@@ -18,7 +18,7 @@ public class Function extends Symbol {
 		super(name, node, compiler);
 	}
 
-	public String bytecode() {
+	public String toDogBytecodeString() {
 		String output = "";
 		output += String.format("; function: %s\n", name);
 		output += String.format("; variables: %d stack: %d\n", this.variableGenerator.currentVariableIndex + 1, registerGenerator.largestRegister + 1);
@@ -30,5 +30,14 @@ public class Function extends Symbol {
 		output += "\n\n\n";
 
 		return output;
+	}
+
+	public String toJVMBytecodeString() {
+		return null;
+	}
+
+	public void compile() {
+		compileNodes();
+
 	}
 }

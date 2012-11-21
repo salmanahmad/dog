@@ -16,11 +16,11 @@ import com.mongodb.DBObject;
 
 public class StackFrame extends DatabaseObject {
 
+	public Class<? extends Continuable> symbol = null;
+
 	public Value returnRegister = null;
 	public Value[] registers = null;
 	public Value[] variables = null;
-
-	public Class<? extends Continuable> symbol = null;
 
 	public int programCounter = 0;
 

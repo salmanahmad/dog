@@ -18,7 +18,7 @@ public class Type extends Symbol {
 		super(name, node, compiler);
 	}
 
-	public String bytecode() {
+	public String toDogBytecodeString() {
 		String output = "";
 		output += String.format("; type: %s\n", name);
 		output += String.format("; variables: %d stack:%d\n", variableGenerator.currentVariableIndex + 1, registerGenerator.largestRegister + 1);
@@ -30,5 +30,13 @@ public class Type extends Symbol {
 		output += "; end type\n\n\n";
 
 		return output;
+	}
+
+	public String toJVMBytecodeString() {
+		return null;
+	}
+
+	public void compile() {
+
 	}
 }
