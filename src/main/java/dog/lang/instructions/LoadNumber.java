@@ -11,7 +11,9 @@
 
 package dog.lang.instructions;
 
-public class LoadNumber extends Instruction {
+import org.objectweb.asm.*;
+
+public class LoadNumber extends Instruction implements Opcodes {
 	public double number;
 
 	public LoadNumber(int line, int outputRegister, double number) {
@@ -22,5 +24,20 @@ public class LoadNumber extends Instruction {
 	public String toString() {
 		return String.format(":load_number %%r%d %.2f", outputRegister, number);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitIntInsn(SIPUSH, this.outputRegister);
+		mv.visitTypeInsn(NEW, "dog/lang/NumberValue");
+		mv.visitInsn(DUP);
+		mv.visitLdcInsn(this.number);
+		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/NumberValue", "<init>", "(D)V");
+		mv.visitInsn(AASTORE);
+
+		incrementProgramCounter(mv);
+	}
+
 }
 

@@ -13,7 +13,7 @@ package dog.lang.instructions;
 
 import org.objectweb.asm.*;
 
-public class Instruction {
+public class Instruction implements Opcodes {
 	public int line;
 	public int outputRegister;
 
@@ -31,7 +31,16 @@ public class Instruction {
 		this.outputRegister = outputRegister;
 	}
 
-	public void assemble(MethodVisitor mv) {
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
 
+	}
+
+	public void incrementProgramCounter(MethodVisitor mv) {
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitInsn(DUP);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "programCounter", "I");
+		mv.visitInsn(ICONST_1);
+		mv.visitInsn(IADD);
+		mv.visitFieldInsn(PUTFIELD, "dog/lang/StackFrame", "programCounter", "I");
 	}
 }

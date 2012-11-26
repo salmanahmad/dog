@@ -11,13 +11,28 @@
 
 package dog.lang.instructions;
 
-public class LoadNull extends Instruction {
+import org.objectweb.asm.*;
+
+public class LoadNull extends Instruction implements Opcodes {
 	public LoadNull(int line, int outputRegister) {
 		super(line, outputRegister);
 	}
 
 	public String toString() {
 		return String.format(":load_null %%r%d", outputRegister);
+	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitIntInsn(SIPUSH, this.outputRegister);
+		mv.visitTypeInsn(NEW, "dog/lang/NullValue");
+		mv.visitInsn(DUP);
+		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/NullValue", "<init>", "()V");
+		mv.visitInsn(AASTORE);
+
+		incrementProgramCounter(mv);
 	}
 }
 

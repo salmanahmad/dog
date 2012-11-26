@@ -13,8 +13,18 @@ public class ZZZ extends dog.lang.Function {
 
 		switch(stack.programCounter) {
 			case 0:
+				stack.registers[3452] = new dog.lang.StructureValue();
+				
+			case 1:
+				stack.programCounter++;
+			case 5: 
+				
+			case 2: 
+				
+			
 		}
 
-		return null;
+
+		return new dog.lang.Signal(dog.lang.Signal.Type.RETURN, stack);
 	}
 }

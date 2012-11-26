@@ -79,9 +79,30 @@ public class Function extends Symbol implements Opcodes {
 		mv = cw.visitMethod(ACC_PUBLIC, "resume", "(Ldog/lang/StackFrame;)Ldog/lang/Signal;", null, null);
 		mv.visitCode();
 
-		for(Instruction instruction : instructions) {
-			instruction.assemble(mv);
+		// Create switch statement for continuations
+		Label returnLabel = new Label();
+		Label[] labels = new Label[instructions.size() + 1];
+
+		for (int index = 0; index < instructions.size(); index++) {
+			labels[index] = new Label();
 		}
+
+		labels[labels.length - 1] = returnLabel;
+
+		mv.visitTableSwitchInsn(0, labels.length, returnLabel, labels);
+
+		for (int index = 0; index < instructions.size(); index++) {
+			Instruction instruction = instructions.get(index);
+			instruction.assemble(mv, index, labels);
+		}
+
+		mv.visitLabel(returnLabel);
+		mv.visitTypeInsn(NEW, "dog/lang/Signal");
+		mv.visitInsn(DUP);
+		mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "RETURN", "Ldog/lang/Signal$Type;");
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/Signal", "<init>", "(Ldog/lang/Signal$Type;Ldog/lang/StackFrame;)V");
+		mv.visitInsn(ARETURN);
 
 		mv.visitMaxs(0, 0);
 		mv.visitEnd();

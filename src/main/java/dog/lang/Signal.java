@@ -13,14 +13,24 @@ package dog.lang;
 
 public class Signal {
 	public enum Type {
-		NONE,
+		RETURN,
 		CALL,
 		SCHEDULE,
 		PAUSE,
 		STOP,
-		EXIT
+		EXIT,
+		NONE
 	}
 
-	public Type type;
+	public Signal() {
+
+	}
+
+	public Signal(Type type, StackFrame frame) {
+		this.type = type;
+		this.stackFrame = frame;
+	}
+
+	public Type type = Type.NONE;
 	public StackFrame stackFrame = null;
 }
