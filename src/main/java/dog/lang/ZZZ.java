@@ -13,7 +13,7 @@ public class ZZZ extends dog.lang.Function {
 
 		switch(stack.programCounter) {
 			case 0:
-				stack.variables[3452] = stack.registers[1000];
+				stack.registers[3452] = stack.registers[9999].plus(stack.registers[1000]);
 				
 			case 1:
 				stack.programCounter++;

@@ -11,11 +11,37 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class Perform extends Instruction {
 	public int inputRegister1;
 	public int inputRegister2;
 
 	public String operation;
+
+	static HashMap<String, String> operationMapping;
+	static {
+		operationMapping = new HashMap<String, String>();
+
+		operationMapping.put("==", "equalTo");
+		operationMapping.put("!=", "notEqualTo");
+		operationMapping.put("===", "identicalTo");
+		operationMapping.put("!==", "notIdenticalTo");
+
+		operationMapping.put("<=", "lessThanEqualTo");
+		operationMapping.put(">=", "greaterThanEqualTo");
+		operationMapping.put("<", "lessThan");
+		operationMapping.put(">", "greaterThan");
+
+		operationMapping.put("+", "plus");
+		operationMapping.put("-", "minus");
+		operationMapping.put("*", "multiply");
+		operationMapping.put("/", "divide");
+		operationMapping.put("%", "modulo");
+
+		operationMapping.put("&&", "logicalAnd");
+		operationMapping.put("||", "logicalOr");
+	}
 
 	public Perform(int outputRegister, int inputRegister1, int inputRegister2, String operation) {
 		this(-1, outputRegister, inputRegister1, inputRegister2, operation);
@@ -30,6 +56,32 @@ public class Perform extends Instruction {
 
 	public String toString() {
 		return String.format(":perform %%r%d %%r%d %%r%d %s", outputRegister, inputRegister1, inputRegister2, operation);
+	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+		
+		String operationMethod = operationMapping.get(this.operation);
+		if(operationMethod == null) {
+			throw new RuntimeException("Invalid operation");
+		}
+
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitIntInsn(SIPUSH, this.outputRegister);
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitIntInsn(SIPUSH, this.inputRegister1);
+		mv.visitInsn(AALOAD);
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitIntInsn(SIPUSH, this.inputRegister2);
+		mv.visitInsn(AALOAD);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "(Ldog/lang/Value;)Ldog/lang/Value;");
+		mv.visitInsn(AASTORE);
+
+
+		incrementProgramCounter(mv);
 	}
 }
 
