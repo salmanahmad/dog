@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class ReadVariable extends Instruction {
 	int inputRegister;
 
@@ -26,4 +28,20 @@ public class ReadVariable extends Instruction {
 	public String toString() {
 		return String.format(":read_variable %%r%d %%v%d", outputRegister, inputRegister);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+		
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitIntInsn(SIPUSH, this.outputRegister);
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "variables", "[Ldog/lang/Value;");
+		mv.visitIntInsn(SIPUSH, this.inputRegister);
+		mv.visitInsn(AALOAD);
+		mv.visitInsn(AASTORE);
+
+		incrementProgramCounter(mv);
+	}
+
 }

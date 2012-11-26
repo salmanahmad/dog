@@ -32,7 +32,7 @@ public class Instruction implements Opcodes {
 	}
 
 	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-
+		throw new RuntimeException("Assemble not implemented");
 	}
 
 	public void incrementProgramCounter(MethodVisitor mv) {
