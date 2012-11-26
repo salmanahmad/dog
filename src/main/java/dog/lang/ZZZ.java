@@ -1,6 +1,16 @@
 
 
+import java.util.HashMap;
+
 public class ZZZ extends dog.lang.Function {
+
+	public HashMap<String, Integer> getVariableTable() {
+		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		map.put("Hello", 1);
+		map.put("Hi", 2);
+		return map;
+	};
+
 	public int getRegisterCount() {
 		return 2341;
 	}

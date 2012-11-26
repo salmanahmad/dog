@@ -59,7 +59,26 @@ public class Function extends Symbol implements Opcodes {
 		mv.visitMaxs(1, 1);
 		mv.visitEnd();
 
-		// Add the register count information
+		// Add the meta information
+		mv = cw.visitMethod(ACC_PUBLIC, "getVariableTable", "()Ljava/util/HashMap;", "()Ljava/util/HashMap<Ljava/lang/String;Ljava/lang/Integer;>;", null);
+		mv.visitCode();
+		mv.visitTypeInsn(NEW, "java/util/HashMap");
+		mv.visitInsn(DUP);
+		mv.visitMethodInsn(INVOKESPECIAL, "java/util/HashMap", "<init>", "()V");
+		mv.visitVarInsn(ASTORE, 1);
+		for(String variableName : this.variableGenerator.variables.keySet()) {
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitLdcInsn(variableName);
+			mv.visitIntInsn(SIPUSH, variableGenerator.variables.get(variableName));
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+			mv.visitInsn(POP);
+		}
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitInsn(ARETURN);
+		mv.visitMaxs(0, 0);
+		mv.visitEnd();
+
 		mv = cw.visitMethod(ACC_PUBLIC, "getRegisterCount", "()I", null, null);
 		mv.visitCode();
 		mv.visitIntInsn(SIPUSH, registerGenerator.registerCount());

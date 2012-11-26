@@ -11,7 +11,14 @@
 
 package dog.lang;
 
+import java.util.HashMap;
+
 public class Function implements Continuable {
+	
+	public HashMap<String, Integer> getVariableTable() {
+		return null;
+	}
+
 	public int getRegisterCount() {
 		return 0;
 	}

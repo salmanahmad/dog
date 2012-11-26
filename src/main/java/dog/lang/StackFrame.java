@@ -11,6 +11,7 @@
 
 package dog.lang;
 
+import java.util.HashMap;
 import org.json.JSONObject;
 import com.mongodb.DBObject;
 
@@ -23,6 +24,8 @@ public class StackFrame extends DatabaseObject {
 	public Value[] variables = null;
 
 	public int programCounter = 0;
+
+	public HashMap<String, Integer> variableTable = new HashMap<String, Integer>();
 
 	public StackFrame() {
 		/* Keeping the default constructor so I can fromJSON and fromMongo */

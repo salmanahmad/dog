@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class VariableGenerator {
 	public int currentVariableIndex = -1;
 
-	HashMap<String, Integer> variables = new HashMap<String, Integer>();
+	public HashMap<String, Integer> variables = new HashMap<String, Integer>();
 
 	public boolean containsVariable(String variable) {
 		return variables.containsKey(variable);

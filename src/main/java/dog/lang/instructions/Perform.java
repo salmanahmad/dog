@@ -11,6 +11,7 @@
 
 package dog.lang.instructions;
 
+import java.util.HashMap;
 import org.objectweb.asm.*;
 
 public class Perform extends Instruction {
