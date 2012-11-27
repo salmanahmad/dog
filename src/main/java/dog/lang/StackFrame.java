@@ -31,10 +31,19 @@ public class StackFrame extends DatabaseObject {
 		/* Keeping the default constructor so I can fromJSON and fromMongo */
 	}
 
+	public StackFrame(Continuable symbol) {
+		this(symbol.getRegisterCount(), symbol.getVariableCount(), symbol.getVariableTable());
+	}
+
 	public StackFrame(int registerCount, int variableCount) {
-		registers = new Value[registerCount];
-		variables = new Value[variableCount];
-		programCounter = 0;
+		this(registerCount, variableCount, new HashMap<String, Integer>());
+	}
+
+	public StackFrame(int registerCount, int variableCount, HashMap<String, Integer> variableTable) {
+		this.registers = new Value[registerCount];
+		this.variables = new Value[variableCount];
+		this.variableTable = variableTable;
+		this.programCounter = 0;
 	}
 
 	public String collectionName() {

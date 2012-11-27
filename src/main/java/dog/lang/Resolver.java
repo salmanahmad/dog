@@ -12,35 +12,53 @@
 package dog.lang;
 
 import dog.lang.compiler.Bark;
+import dog.lang.compiler.Symbol;
 
 import java.io.File;
 
-public class Resolver {
+public class Resolver extends ClassLoader {
+		
+	public Class loadClass(byte[] b) {
+		Class klass = null;
+
+		try {
+			klass = defineClass(null, b, 0, b.length);
+		} catch(Exception e) {
+			e.printStackTrace();
+	    	System.exit(1);
+		}
+
+		return klass;
+	}
 	
-	public static void linkBytecode(byte[] bytecode) {
-
+	public void linkBytecode(byte[] bytecode) {
+		loadClass(bytecode);
 	}
 
-	public static void linkBark(String filepath) {
-
+	public void linkBark(String filepath) {
+		// Create a File object and call linkBark(File).
 	}
 
-	public static void linkBark(File file) {
+	public void linkBark(File file) {
 		// You need to create your own class loader and add the file
 		// to it here. You cannot add the jar file to the system class loader
 	}
 
-	public static void linkBark(Bark bark) {
-
+	public void linkBark(Bark bark) {
+		for(Symbol symbol : bark.symbols) {
+			linkBytecode(symbol.bytecode);
+		}
 	}
 
-	public static void linkNativeCode() {
-
+	public void linkNativeCode() {
+		// This method will use reflections to find all of the classes that are 
+		// annotated and create a subclass that is dog runtime friendly.
 	}
 
-	public static Object resolveSymbol(String symbol) {
+	public Object resolveSymbol(String symbol) {
 		// You may need to check the Resolver's class loader for packages
-		// that have been loaded dynmically...
+		// that have been loaded dynamically...
+		symbol = Resolver.encodeSymbol(symbol);
 		return null;
 	}
 

@@ -50,4 +50,9 @@ public class CompilerTest {
         
         //System.out.println(bytecode);
     }
+
+    @Test
+    public void testRuntime() {
+        
+    }
 }

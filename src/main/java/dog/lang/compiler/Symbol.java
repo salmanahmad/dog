@@ -21,12 +21,13 @@ import java.util.HashMap;
 
 public abstract class Symbol {
 	
+	Compiler compiler;
+
 	public String name;
 	public String filePath;
 
-	Node node;
-	byte[] bytecode;
-	Compiler compiler;
+	public Node node;
+	public byte[] bytecode;
 
 	public int currentOutputRegister;
 

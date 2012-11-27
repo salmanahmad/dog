@@ -11,9 +11,14 @@
 
 package dog.util;
 
+import dog.lang.*;
+import dog.lang.parser.*;
+import dog.lang.compiler.*;
+import dog.lang.runtime.*;
+import dog.lang.nodes.*;
+
 import java.util.*;
 import java.io.*;
-
 import java.nio.channels.FileChannel;
 import java.nio.MappedByteBuffer;
 import java.nio.charset.Charset;
@@ -77,4 +82,20 @@ public class Helper {
 	public static String readResource(String path) {
 		return readResource(Helper.class, path);
 	}
+
+	public static StackFrame eval(String source) {
+		Parser parser = new Parser();
+		Nodes program = parser.parse(source);
+
+    	dog.lang.compiler.Compiler compiler = new dog.lang.compiler.Compiler();
+    	compiler.processNodes(program);
+    	Bark bark = compiler.compile();
+
+    	Resolver resolver = new Resolver();
+    	resolver.linkBark(bark);
+
+    	dog.lang.runtime.Runtime runtime = new dog.lang.runtime.Runtime(resolver);
+    	return runtime.invoke("null.root");
+	}
+
 }

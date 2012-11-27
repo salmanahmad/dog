@@ -18,5 +18,5 @@ public class Bark {
 
 	public Bark(ArrayList<Symbol> symbols) {
 		symbols = symbols;
-	}	
+	}
 }
