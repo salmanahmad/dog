@@ -26,4 +26,12 @@ public class ReadConstant extends Instruction {
 	public String toString() {
 		return String.format(":read_constant %%r%d %s", outputRegister, identifier);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		throw new RuntimeException("Assemble not implemented");
+
+		incrementProgramCounter(mv);
+	}
 }

@@ -39,4 +39,12 @@ public class Invoke extends Instruction {
 
 		return String.format(":invoke %%r%d %b '%s' %s", outputRegister, asynchronous, functionIdentifier, args);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		throw new RuntimeException("Assemble not implemented");
+
+		incrementProgramCounter(mv);
+	}
 }

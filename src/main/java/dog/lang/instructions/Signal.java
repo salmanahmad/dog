@@ -22,4 +22,12 @@ public class Signal extends Instruction {
 	public String toString() {
 		return String.format(":signal %s", symbol);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		throw new RuntimeException("Assemble not implemented");
+
+		incrementProgramCounter(mv);
+	}
 }

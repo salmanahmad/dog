@@ -28,5 +28,13 @@ public class JumpIfTrue extends Instruction {
 	public String toString() {
 		return String.format(":jump_if_true %%r%d %d", inputRegister, offset);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		throw new RuntimeException("Assemble not implemented");
+
+		incrementProgramCounter(mv);
+	}
 }
 

@@ -26,4 +26,12 @@ public class Build extends Instruction {
 	public String toString() {
 		return String.format(":build %%r%d '%s'", outputRegister, typeIdentifier);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		throw new RuntimeException("Assemble not implemented");
+
+		incrementProgramCounter(mv);
+	}
 }

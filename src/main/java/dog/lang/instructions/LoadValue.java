@@ -24,5 +24,13 @@ public class LoadValue extends Instruction {
 	public String toString() {
 		return String.format(":load_value %s", value.toString());
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		throw new RuntimeException("Assemble not implemented");
+
+		incrementProgramCounter(mv);
+	}
 }
 

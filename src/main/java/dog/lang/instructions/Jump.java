@@ -26,5 +26,13 @@ public class Jump extends Instruction {
 	public String toString() {
 		return String.format(":jump %d", offset);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		throw new RuntimeException("Assemble not implemented");
+
+		incrementProgramCounter(mv);
+	}
 }
 

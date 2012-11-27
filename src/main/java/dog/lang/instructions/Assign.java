@@ -28,4 +28,12 @@ public class Assign extends Instruction {
 	public String toString() {
 		return String.format(":assign %%r%d %%r%d %%r%d", outputRegister, keyRegister, valueRegister);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		throw new RuntimeException("Assemble not implemented");
+
+		incrementProgramCounter(mv);
+	}
 }
