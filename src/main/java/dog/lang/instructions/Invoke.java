@@ -14,6 +14,7 @@ package dog.lang.instructions;
 import dog.lang.compiler.Identifier;
 
 import java.util.ArrayList;
+import org.objectweb.asm.*;
 
 public class Invoke extends Instruction {
 	boolean asynchronous;
@@ -43,7 +44,7 @@ public class Invoke extends Instruction {
 	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
 		mv.visitLabel(labels[instructionIndex]);
 
-		throw new RuntimeException("Assemble not implemented");
+		
 
 		incrementProgramCounter(mv);
 	}

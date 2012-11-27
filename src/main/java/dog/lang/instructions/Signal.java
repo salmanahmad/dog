@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class Signal extends Instruction {
 	public String symbol;
 
@@ -23,11 +25,4 @@ public class Signal extends Instruction {
 		return String.format(":signal %s", symbol);
 	}
 
-	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		mv.visitLabel(labels[instructionIndex]);
-
-		throw new RuntimeException("Assemble not implemented");
-
-		incrementProgramCounter(mv);
-	}
 }

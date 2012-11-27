@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class Assign extends Instruction {
 	int keyRegister;
 	int valueRegister;
@@ -29,11 +31,5 @@ public class Assign extends Instruction {
 		return String.format(":assign %%r%d %%r%d %%r%d", outputRegister, keyRegister, valueRegister);
 	}
 
-	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		mv.visitLabel(labels[instructionIndex]);
 
-		throw new RuntimeException("Assemble not implemented");
-
-		incrementProgramCounter(mv);
-	}
 }

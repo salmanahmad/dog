@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class Access extends Instruction {
 	int valueRegister;
 	int keyRegister;
@@ -29,11 +31,4 @@ public class Access extends Instruction {
 		return String.format(":access %%r%d %%r%d %%r%d", outputRegister, valueRegister, keyRegister);
 	}
 
-	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		mv.visitLabel(labels[instructionIndex]);
-
-		throw new RuntimeException("Assemble not implemented");
-
-		incrementProgramCounter(mv);
-	}
 }

@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class Build extends Instruction {
 	String typeIdentifier;
 
@@ -27,11 +29,4 @@ public class Build extends Instruction {
 		return String.format(":build %%r%d '%s'", outputRegister, typeIdentifier);
 	}
 
-	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		mv.visitLabel(labels[instructionIndex]);
-
-		throw new RuntimeException("Assemble not implemented");
-
-		incrementProgramCounter(mv);
-	}
 }

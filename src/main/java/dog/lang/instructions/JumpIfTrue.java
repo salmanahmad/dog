@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class JumpIfTrue extends Instruction {
 	int offset;
 	int inputRegister;
@@ -32,8 +34,25 @@ public class JumpIfTrue extends Instruction {
 	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
 		mv.visitLabel(labels[instructionIndex]);
 
-		throw new RuntimeException("Assemble not implemented");
+		int destinationIndex = instructionIndex + this.offset;
 
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitIntInsn(SIPUSH, inputRegister);
+		mv.visitInsn(AALOAD);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "booleanEquivalent", "()Z");
+
+		Label l0 = new Label();
+		mv.visitJumpInsn(IFEQ, l0);
+
+		// If booleanEquivalent is not zero (true)
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitIntInsn(SIPUSH, destinationIndex);
+		mv.visitFieldInsn(PUTFIELD, "dog/lang/StackFrame", "programCounter", "I");
+		mv.visitJumpInsn(GOTO, labels[destinationIndex]);
+
+		// If booleanEquivalent is zero (false)
+		mv.visitLabel(l0);
 		incrementProgramCounter(mv);
 	}
 }

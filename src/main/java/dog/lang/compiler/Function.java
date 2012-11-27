@@ -101,23 +101,28 @@ public class Function extends Symbol implements Opcodes {
 
 		// Create switch statement for continuations
 		Label returnLabel = new Label();
-		Label[] labels = new Label[instructions.size()];
+		Label defaultLabel = new Label();
+		Label[] labels = new Label[instructions.size() + 1];
 
 		for (int index = 0; index < instructions.size(); index++) {
 			labels[index] = new Label();
 		}
 
+		labels[labels.length - 1] = new Label();
+
 		// Start the switch statement
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "programCounter", "I");
-		mv.visitTableSwitchInsn(0, labels.length - 1, returnLabel, labels);
+		mv.visitTableSwitchInsn(0, labels.length - 1, defaultLabel, labels);
 
 		for (int index = 0; index < instructions.size(); index++) {
 			Instruction instruction = instructions.get(index);
 			instruction.assemble(mv, index, labels);
 		}
 
+		// Insert a dummy label so I can avoid the fence post problem
 		mv.visitLabel(returnLabel);
+		mv.visitLabel(defaultLabel);
 		mv.visitTypeInsn(NEW, "dog/lang/Signal");
 		mv.visitInsn(DUP);
 		mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "RETURN", "Ldog/lang/Signal$Type;");

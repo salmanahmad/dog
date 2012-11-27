@@ -19,18 +19,26 @@ public class ZZZ extends dog.lang.Function {
 		return 2341;
 	}
 
-	public dog.lang.Signal resume(dog.lang.StackFrame stack) {
+	public void test() {
+		
+	}
 
+	public dog.lang.Signal resume(dog.lang.StackFrame stack) {
+		
+		if(stack.registers[5000].booleanEquivalent()) {
+			stack.programCounter = 5000;
+		} else {
+			stack.programCounter++;
+		}
+		
 		switch(stack.programCounter) {
 			case 0:
-				stack.registers[3452] = stack.registers[9999].plus(stack.registers[1000]);
+				stack.registers[1] = stack.registers[0];
 			case 1:
-				stack.programCounter++;
-			case 2:
 				stack.registers[2] = stack.registers[0];
-			case 3:
+			case 2:
 				stack.registers[3] = stack.registers[0];
-			case 4:
+			case 3:
 				stack.registers[4] = stack.registers[0];
 		}
 

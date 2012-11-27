@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class Return extends Instruction {
 	int inputRegister;
 
@@ -25,13 +27,5 @@ public class Return extends Instruction {
 
 	public String toString() {
 		return String.format(":return %%r%d", inputRegister);
-	}
-
-	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		mv.visitLabel(labels[instructionIndex]);
-
-		throw new RuntimeException("Assemble not implemented");
-
-		incrementProgramCounter(mv);
 	}
 }

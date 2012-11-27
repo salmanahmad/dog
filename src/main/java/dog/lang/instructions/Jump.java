@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class Jump extends Instruction {
 	int offset;
 
@@ -30,9 +32,14 @@ public class Jump extends Instruction {
 	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
 		mv.visitLabel(labels[instructionIndex]);
 
-		throw new RuntimeException("Assemble not implemented");
+		int destinationIndex = instructionIndex + this.offset;
 
-		incrementProgramCounter(mv);
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitLdcInsn(destinationIndex);
+		mv.visitFieldInsn(PUTFIELD, "dog/lang/StackFrame", "programCounter", "I");
+		mv.visitVarInsn(ALOAD, 1);
+
+		mv.visitJumpInsn(GOTO, labels[destinationIndex]);
 	}
 }
 

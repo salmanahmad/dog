@@ -34,13 +34,5 @@ public class LoadFalse extends Instruction implements Opcodes {
 
 		incrementProgramCounter(mv);
 	}
-
-	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		mv.visitLabel(labels[instructionIndex]);
-
-		throw new RuntimeException("Assemble not implemented");
-
-		incrementProgramCounter(mv);
-	}
 }
 

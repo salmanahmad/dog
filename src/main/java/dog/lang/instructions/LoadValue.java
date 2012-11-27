@@ -13,24 +13,18 @@ package dog.lang.instructions;
 
 import dog.lang.Value;
 
+import org.objectweb.asm.*;
+
 public class LoadValue extends Instruction {
 	public Value value;
 
-	public LoadValue(int line, int outputRegister, Value string) {
+	public LoadValue(int line, int outputRegister, Value value) {
 		super(line, outputRegister);
 		this.value = value;
 	}
 
 	public String toString() {
 		return String.format(":load_value %s", value.toString());
-	}
-
-	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		mv.visitLabel(labels[instructionIndex]);
-
-		throw new RuntimeException("Assemble not implemented");
-
-		incrementProgramCounter(mv);
 	}
 }
 

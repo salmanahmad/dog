@@ -11,6 +11,8 @@
 
 package dog.lang.instructions;
 
+import org.objectweb.asm.*;
+
 public class ReadConstant extends Instruction {
 	String identifier;
 
@@ -27,11 +29,4 @@ public class ReadConstant extends Instruction {
 		return String.format(":read_constant %%r%d %s", outputRegister, identifier);
 	}
 
-	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		mv.visitLabel(labels[instructionIndex]);
-
-		throw new RuntimeException("Assemble not implemented");
-
-		incrementProgramCounter(mv);
-	}
 }
