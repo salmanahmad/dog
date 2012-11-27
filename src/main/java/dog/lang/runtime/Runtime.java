@@ -13,15 +13,23 @@ package dog.lang.runtime;
 
 import dog.lang.*;
 
-import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Runtime {
 
 	Resolver resolver;
+	LinkedBlockingQueue<StackFrame> scheduledStackFrames;
+
+	public Runtime() {
+		this(new Resolver());
+	}
 
 	public Runtime(Resolver resolver) {
 		this.resolver = resolver;
+		resolver.linkNativeCode();
+		scheduledStackFrames = new LinkedBlockingQueue<StackFrame>();
 	}
 
 	public StackFrame invoke(String symbol) {
@@ -33,8 +41,7 @@ public class Runtime {
 	}
 
 	public StackFrame invoke(String symbol, List<Value> arguments, StackFrame parentStackFrame) {
-		Continuable symbolInstance = (Continuable)resolver.resolveSymbol(symbol);
-		StackFrame frame = null;
+		StackFrame frame = new StackFrame(symbol, resolver);
 
 		this.schedule(frame);
 		this.resume();
@@ -43,11 +50,20 @@ public class Runtime {
 	}
 
 	public void schedule(StackFrame frame) {
+		for(StackFrame f : scheduledStackFrames) {
+			if(f.getId().equals(frame.getId())) {
+				return;
+			}
+		}
 
+		scheduledStackFrames.offer(frame);
 	}
 
 	public void resume() {
-
+		while(!scheduledStackFrames.isEmpty()) {
+			StackFrame frame = scheduledStackFrames.poll();
+			frame.resume();
+		}
 	}
 }
 

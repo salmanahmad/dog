@@ -22,6 +22,9 @@ public class SimpleTest {
     @Test
     public void testSimpleFunction() {
     	String source = Helper.readResource("/integrations/simple.dog");
-    	Helper.eval(source);
+    	StackFrame frame = Helper.eval(source);
+
+    	NumberValue value = (NumberValue)frame.getVariableNamed("i");
+    	System.out.println(value.value);
     }
 }

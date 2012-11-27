@@ -17,7 +17,7 @@ import dog.lang.compiler.Symbol;
 import java.io.File;
 
 public class Resolver extends ClassLoader {
-		
+	
 	public Class loadClass(byte[] b) {
 		Class klass = null;
 
@@ -56,18 +56,61 @@ public class Resolver extends ClassLoader {
 	}
 
 	public Object resolveSymbol(String symbol) {
-		// You may need to check the Resolver's class loader for packages
-		// that have been loaded dynamically...
-		symbol = Resolver.encodeSymbol(symbol);
-		return null;
+		try {
+			symbol = Resolver.convertJVMClassNameToJavaClassName(Resolver.encodeSymbol(symbol));
+			Class klass = this.loadClass(symbol);
+			return klass.newInstance();
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Ahh: 1");
+		} catch (InstantiationException e) {
+			throw new RuntimeException("Ahh: 1");
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Ahh: 1");
+		}
+
+
+	}
+
+	public static String convertJVMClassNameToJavaClassName(String name) {
+		return name.replaceAll("/", ".");
 	}
 
 	public static String encodeSymbol(String symbol) {
-		return null;
+		// Dots represent package scoping. 
+		symbol = symbol.replace(".", "$dot$");
+
+		// Colons represent named-parameters
+		symbol = symbol.replace(":", "$colon$");
+		
+		// Hash marks represent nested symbol definitions
+		symbol = symbol.replace("#", "$hash$");
+
+		// Used for top-level scope code and is not "defined"
+		symbol = symbol.replace("@root", "$root$");
+
+		// Used for anonymous functions, most notably with "on each"
+		symbol = symbol.replace("@anonymous", "$anonymous$");
+
+		return "dog/packages/universe/" + symbol;
 	}
 
 	public static String decodeSymbol(String symbol) {
-		return null;
+		// Dots represent package scoping. 
+		symbol = symbol.replace("$dot$", ".");
+
+		// Colons represent named-parameters
+		symbol = symbol.replace("$colon$", ":");
+		
+		// Hash marks represent nested symbol definitions
+		symbol = symbol.replace("$hash$", "#");
+
+		// Used for top-level scope code and is not "defined"
+		symbol = symbol.replace("$root$", "@root");
+
+		// Used for anonymous functions, most notably with "on each"
+		symbol = symbol.replace("$anonymous$", "@anonymous");
+
+		return symbol.substring("dog/packages/universe/".length());
 	}
 	
 }

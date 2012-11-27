@@ -17,6 +17,6 @@ public class Bark {
 	public ArrayList<Symbol> symbols;
 
 	public Bark(ArrayList<Symbol> symbols) {
-		symbols = symbols;
+		this.symbols = symbols;
 	}
 }

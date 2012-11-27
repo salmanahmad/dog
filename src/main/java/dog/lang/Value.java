@@ -214,11 +214,11 @@ public class Value implements Persistable {
         throw new RuntimeException("Unsupported binary operation.");
     }
 
-    public void fromJSON(JSONObject json) {
+    public void fromJSON(JSONObject json, Resolver resolver) {
         throw new RuntimeException("Unsupported binary operation.");
     }
 
-    public void fromMongo(DBObject bson) {
+    public void fromMongo(DBObject bson, Resolver resolver) {
         throw new RuntimeException("Unsupported binary operation.");
     }
 }

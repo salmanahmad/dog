@@ -27,6 +27,7 @@ public class LoadNumber extends Instruction implements Opcodes {
 
 	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
 		mv.visitLabel(labels[instructionIndex]);
+
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
 		mv.visitIntInsn(SIPUSH, this.outputRegister);

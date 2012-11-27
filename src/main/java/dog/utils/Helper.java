@@ -95,7 +95,7 @@ public class Helper {
     	resolver.linkBark(bark);
 
     	dog.lang.runtime.Runtime runtime = new dog.lang.runtime.Runtime(resolver);
-    	return runtime.invoke("null.root");
+    	return runtime.invoke("null.@root");
 	}
 
 }

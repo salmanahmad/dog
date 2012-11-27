@@ -43,7 +43,7 @@ public class Function extends Symbol implements Opcodes {
 	public void compile() {
 		compileNodes();
 
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		FieldVisitor fv;
 		MethodVisitor mv;
 		AnnotationVisitor av0;
@@ -93,6 +93,7 @@ public class Function extends Symbol implements Opcodes {
 		mv.visitInsn(IRETURN);
 		mv.visitMaxs(1, 1);
 		mv.visitEnd();
+		
 
 		// Start the body of the resume method
 		mv = cw.visitMethod(ACC_PUBLIC, "resume", "(Ldog/lang/StackFrame;)Ldog/lang/Signal;", null, null);
@@ -100,15 +101,16 @@ public class Function extends Symbol implements Opcodes {
 
 		// Create switch statement for continuations
 		Label returnLabel = new Label();
-		Label[] labels = new Label[instructions.size() + 1];
+		Label[] labels = new Label[instructions.size()];
 
 		for (int index = 0; index < instructions.size(); index++) {
 			labels[index] = new Label();
 		}
 
-		labels[labels.length - 1] = returnLabel;
-
-		mv.visitTableSwitchInsn(0, labels.length, returnLabel, labels);
+		// Start the switch statement
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "programCounter", "I");
+		mv.visitTableSwitchInsn(0, labels.length - 1, returnLabel, labels);
 
 		for (int index = 0; index < instructions.size(); index++) {
 			Instruction instruction = instructions.get(index);

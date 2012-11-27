@@ -24,14 +24,14 @@ public class ZZZ extends dog.lang.Function {
 		switch(stack.programCounter) {
 			case 0:
 				stack.registers[3452] = stack.registers[9999].plus(stack.registers[1000]);
-				
 			case 1:
 				stack.programCounter++;
-			case 5: 
-				
-			case 2: 
-				
-			
+			case 2:
+				stack.registers[2] = stack.registers[0];
+			case 3:
+				stack.registers[3] = stack.registers[0];
+			case 4:
+				stack.registers[4] = stack.registers[0];
 		}
 
 

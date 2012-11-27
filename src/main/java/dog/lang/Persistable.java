@@ -18,7 +18,7 @@ public interface Persistable {
 	public JSONObject toJSON();
 	public DBObject toMongo();
 
-	public void fromJSON(JSONObject json);
-	public void fromMongo(DBObject bson);
+	public void fromJSON(JSONObject json, Resolver resolver);
+	public void fromMongo(DBObject bson, Resolver resolver);
 }
 

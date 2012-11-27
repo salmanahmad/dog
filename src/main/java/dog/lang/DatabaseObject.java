@@ -11,6 +11,9 @@
 
 package dog.lang;
 
+import org.bson.types.ObjectId;
+
 public abstract class DatabaseObject implements Persistable {
+	public abstract ObjectId getId();
 	public abstract String collectionName();
 }
