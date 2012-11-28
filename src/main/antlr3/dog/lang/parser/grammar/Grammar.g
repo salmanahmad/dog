@@ -131,7 +131,7 @@ access returns [Node node]
 @init{ Identifier.Scope scope = Identifier.Scope.CASCADE; ArrayList<Object> path = new ArrayList<Object>(); }
   :                                        
     ( literal                             { path.add($literal.node); }
-    | OPEN_PAREN expression CLOSE_PAREN   { $node = $expression.node; }
+    | OPEN_PAREN expression CLOSE_PAREN   { path.add($expression.node); }
     | identifierPath                      { path.addAll($identifierPath.identifier.path); scope = $identifierPath.identifier.scope; } 
     )
     ( accessPath                          { path.addAll($accessPath.path); }

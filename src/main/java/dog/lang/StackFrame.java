@@ -35,7 +35,8 @@ public class StackFrame extends DatabaseObject {
 	public Value[] registers = null;
 	public Value[] variables = null;
 	
-	public int returnRegister = 0;
+	// TODO: If the return Register is -1 it means null...
+	public int returnRegister = -1;
 	public int programCounter = 0;
 
 	public HashMap<String, Integer> variableTable = new HashMap<String, Integer>();

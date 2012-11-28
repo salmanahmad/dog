@@ -48,70 +48,84 @@ public class Access extends Node {
 		int componentRegister = -1;
 		List<Object> remainingPath = new ArrayList<Object>();
 
-		if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.LOCAL)) {
-			if(symbol.variableGenerator.containsVariable((String)path.get(0))) {
-				outputRegister = symbol.registerGenerator.generate();
-
-				int variable = symbol.variableGenerator.getIndexForVariable((String)path.get(0));
-				ReadVariable write = new ReadVariable(this.line, outputRegister, variable);
-				symbol.instructions.add(write);
+		if(path.get(0) instanceof Node) {
+			Node node = (Node)path.get(0);
+			node.compile(symbol);
+			outputRegister = symbol.currentOutputRegister;
+			
+			try {
+				remainingPath = path.subList(1, path.size());
+			} catch(Exception e) {
+				remainingPath = new ArrayList<Object>();
 			}
-		}
-
-		if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.INTERNAL)) {
-			ArrayList<String> prefix = new ArrayList<String>();
-
-			for (int i = 0; i < path.size(); i++) {
-				Object component = path.get(i);
-				if(component instanceof String) {
-					prefix.add((String)component);
-				} else {
-					break;
-				}
-			}
-
-			for(int i = 1; i <= prefix.size(); i++) {
-				String symbolIdentifier = this.packageName + "." + StringUtils.join(prefix.subList(0, i).toArray(), ".");
-				ArrayList<Symbol> symbols = symbol.getCompiler().searchForSymbols(symbolIdentifier);
-				if(symbols.size() == 0) {
-					break;
-				} else if(symbols.size() == 1) {
+		} else {
+			if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.LOCAL)) {
+				System.out.println(path);
+				if(symbol.variableGenerator.containsVariable((String)path.get(0))) {
 					outputRegister = symbol.registerGenerator.generate();
 
-					if(symbols.get(0) instanceof Constant) {
-						ReadConstant constant = new ReadConstant(this.line, outputRegister, symbolIdentifier);
-						symbol.instructions.add(constant);
-					} else if(symbols.get(0) instanceof Type) {
-						Build build = new Build(this.line, outputRegister, symbolIdentifier);
-						symbol.instructions.add(build);
-					} else if(symbols.get(0) instanceof Function) {
-						Invoke invoke = new Invoke(this.line, outputRegister, false, symbolIdentifier, new ArrayList<Integer>());
-						symbol.instructions.add(invoke);
+					int variable = symbol.variableGenerator.getIndexForVariable((String)path.get(0));
+					ReadVariable write = new ReadVariable(this.line, outputRegister, variable);
+					symbol.instructions.add(write);
+				}
+			}
+
+			if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.INTERNAL)) {
+				ArrayList<String> prefix = new ArrayList<String>();
+
+				for (int i = 0; i < path.size(); i++) {
+					Object component = path.get(i);
+					if(component instanceof String) {
+						prefix.add((String)component);
+					} else {
+						break;
 					}
-					
-					try {
-						remainingPath = path.subList(i + 1, path.size());
-					} catch(Exception e) {
-						remainingPath = new ArrayList<Object>();
+				}
+
+				for(int i = 1; i <= prefix.size(); i++) {
+					// TODO - Handle the bug here since not all elements may be a string. If I come accross a non-string I should break
+					String symbolIdentifier = this.packageName + "." + StringUtils.join(prefix.subList(0, i).toArray(), ".");
+					ArrayList<Symbol> symbols = symbol.getCompiler().searchForSymbols(symbolIdentifier);
+					if(symbols.size() == 0) {
+						break;
+					} else if(symbols.size() == 1) {
+						outputRegister = symbol.registerGenerator.generate();
+
+						if(symbols.get(0) instanceof Constant) {
+							ReadConstant constant = new ReadConstant(this.line, outputRegister, symbolIdentifier);
+							symbol.instructions.add(constant);
+						} else if(symbols.get(0) instanceof Type) {
+							Build build = new Build(this.line, outputRegister, symbolIdentifier);
+							symbol.instructions.add(build);
+						} else if(symbols.get(0) instanceof Function) {
+							Invoke invoke = new Invoke(this.line, outputRegister, false, symbolIdentifier, new ArrayList<Integer>());
+							symbol.instructions.add(invoke);
+						}
+						
+						try {
+							remainingPath = path.subList(i + 1, path.size());
+						} catch(Exception e) {
+							remainingPath = new ArrayList<Object>();
+						}
 					}
 				}
 			}
-		}
 
-		if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.INTERNAL)) {
-			// TODO - Handle Imports
-		}
+			if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.INTERNAL)) {
+				// TODO - Handle Imports
+			}
 
-		if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.EXTERNAL)) {
-			// TODO...
-		}
+			if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.EXTERNAL)) {
+				// TODO...
+			}
 
-		// TODO: If you cannot resolve a symbol at compile time I should create a dynamic-access instruction that will
-		// attempt to use late-binding to resolve it. That way I can get the best of both worlds. It will respect the 
-		// Identifier SCOPE and use the Variable Mapping in the custom symbol class as well as the Resolver class for reflection.
+			// TODO: If you cannot resolve a symbol at compile time I should create a dynamic-access instruction that will
+			// attempt to use late-binding to resolve it. That way I can get the best of both worlds. It will respect the 
+			// Identifier SCOPE and use the Variable Mapping in the custom symbol class as well as the Resolver class for reflection.
 
-		if(outputRegister == -1) {
-			throw new RuntimeException("Could not resolve symbol.");
+			if(outputRegister == -1) {
+				throw new RuntimeException("Could not resolve symbol.");
+			}
 		}
 
 		for(Object component : remainingPath) {
