@@ -14,8 +14,10 @@ package dog.lang.runtime;
 import dog.lang.*;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.List;
+import org.bson.types.ObjectId;
 
 public class Runtime {
 
@@ -32,21 +34,19 @@ public class Runtime {
 		scheduledStackFrames = new LinkedBlockingQueue<StackFrame>();
 	}
 
-	public StackFrame invoke(String symbol) {
+	public ArrayList<StackFrame> invoke(String symbol) {
 		return this.invoke(symbol, new ArrayList<Value>(), null);
 	}
 
-	public StackFrame invoke(String symbol, List<Value> arguments) {
+	public ArrayList<StackFrame> invoke(String symbol, List<Value> arguments) {
 		return this.invoke(symbol, arguments, null);
 	}
 
-	public StackFrame invoke(String symbol, List<Value> arguments, StackFrame parentStackFrame) {
+	public ArrayList<StackFrame> invoke(String symbol, List<Value> arguments, StackFrame parentStackFrame) {
 		StackFrame frame = new StackFrame(symbol, resolver);
 
 		this.schedule(frame);
-		this.resume();
-
-		return frame;
+		return this.resume();
 	}
 
 	public void schedule(StackFrame frame) {
@@ -59,11 +59,42 @@ public class Runtime {
 		scheduledStackFrames.offer(frame);
 	}
 
-	public void resume() {
+	public ArrayList<StackFrame> resume() {
+		LinkedHashMap<ObjectId, StackFrame> stackTraceHeads = new LinkedHashMap<ObjectId, StackFrame>();
+
 		while(!scheduledStackFrames.isEmpty()) {
 			StackFrame frame = scheduledStackFrames.poll();
-			frame.resume();
+
+			while(true) {
+				Signal signal = frame.resume();
+
+				if(signal.type == Signal.Type.RETURN) {
+					if(frame.controlAncestors.size() == 0) {
+						stackTraceHeads.put(frame.getId(), frame);
+						break;
+					} else {
+						StackFrame returnFrame = (StackFrame)frame.controlAncestors.get(frame.controlAncestors.size() - 1);
+						returnFrame.registers[returnFrame.returnRegister] = frame.registers[frame.returnRegister];
+						frame = returnFrame;
+					}
+				} else if (signal.type == Signal.Type.INVOKE) {
+					StackFrame newFrame = signal.stackFrame;
+					newFrame.controlAncestors = frame.controlAncestors;
+					newFrame.controlAncestors.add(frame);
+					frame = newFrame;
+				} else if (signal.type == Signal.Type.SCHEDULE) {
+
+				} else if (signal.type == Signal.Type.PAUSE) {
+
+				} else if (signal.type == Signal.Type.STOP) {
+
+				} else if (signal.type == Signal.Type.EXIT) {
+
+				}
+			}
 		}
+
+		return new ArrayList<StackFrame>(stackTraceHeads.values());
 	}
 }
 

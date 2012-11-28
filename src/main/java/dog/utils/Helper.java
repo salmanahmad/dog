@@ -83,7 +83,7 @@ public class Helper {
 		return readResource(Helper.class, path);
 	}
 
-	public static StackFrame eval(String source) {
+	public static ArrayList<StackFrame> eval(String source) {
 		Parser parser = new Parser();
 		Nodes program = parser.parse(source);
 

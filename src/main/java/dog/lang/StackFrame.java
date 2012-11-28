@@ -11,13 +11,18 @@
 
 package dog.lang;
 
-import java.util.HashMap;
-import org.json.JSONObject;
-import com.mongodb.DBObject;
-import org.bson.types.ObjectId;
 import java.lang.Math;
+import java.util.HashMap;
+import java.util.ArrayList;
+
+import org.json.JSONObject;
+import org.bson.types.ObjectId;
+import com.mongodb.DBObject;
 
 public class StackFrame extends DatabaseObject {
+
+	ObjectId id;
+	ObjectId futureReturnId;
 
 	public Continuable symbol = null;
 	public String symbolName = null;
@@ -34,8 +39,7 @@ public class StackFrame extends DatabaseObject {
 	public int programCounter = 0;
 
 	public HashMap<String, Integer> variableTable = new HashMap<String, Integer>();
-
-	ObjectId id;
+	public ArrayList<Object> controlAncestors = new ArrayList<Object>();
 
 	public StackFrame() {
 		/* Keeping the default constructor so I can fromJSON and fromMongo */

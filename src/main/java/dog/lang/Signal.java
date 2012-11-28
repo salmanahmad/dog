@@ -18,8 +18,7 @@ public class Signal {
 		SCHEDULE,
 		PAUSE,
 		STOP,
-		EXIT,
-		NONE
+		EXIT
 	}
 
 	public Signal() {
@@ -35,6 +34,6 @@ public class Signal {
 		this.stackFrame = frame;
 	}
 
-	public Type type = Type.NONE;
+	public Type type = Type.RETURN;
 	public StackFrame stackFrame = null;
 }

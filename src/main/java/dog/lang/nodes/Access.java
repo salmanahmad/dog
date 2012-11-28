@@ -91,7 +91,7 @@ public class Access extends Node {
 					
 					try {
 						remainingPath = path.subList(i + 1, path.size());
-					} catch(IndexOutOfBoundsException e) {
+					} catch(Exception e) {
 						remainingPath = new ArrayList<Object>();
 					}
 				}
