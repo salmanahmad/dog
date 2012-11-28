@@ -20,9 +20,8 @@ import java.util.List;
 import org.bson.types.ObjectId;
 
 public class Runtime {
-
-	Resolver resolver;
 	LinkedBlockingQueue<StackFrame> scheduledStackFrames;
+	Resolver resolver;
 
 	public Runtime() {
 		this(new Resolver());
@@ -30,7 +29,6 @@ public class Runtime {
 
 	public Runtime(Resolver resolver) {
 		this.resolver = resolver;
-		resolver.linkNativeCode();
 		scheduledStackFrames = new LinkedBlockingQueue<StackFrame>();
 	}
 

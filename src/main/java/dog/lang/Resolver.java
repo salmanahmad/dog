@@ -23,6 +23,11 @@ import org.objectweb.asm.*;
 
 public class Resolver extends ClassLoader implements Opcodes {
 
+	public Resolver() {
+		super();
+		linkNativeCode();
+	}
+
 	public Class loadClass(byte[] b) {
 		Class klass = null;
 
@@ -55,7 +60,7 @@ public class Resolver extends ClassLoader implements Opcodes {
 		}
 	}
 
-	public void linkNativeCode() {
+	protected void linkNativeCode() {
 		Reflections reflections = new Reflections("");
         Set<Class<?>> allClasses = reflections.getTypesAnnotatedWith(dog.lang.annotation.Symbol.class);
 
@@ -82,6 +87,10 @@ public class Resolver extends ClassLoader implements Opcodes {
 
 			this.linkBytecode(cw.toByteArray());
         }
+	}
+
+	public void linkNativeCode(Class klass) {
+		// TODO. This method allows you to dynamically add native code at runtime.
 	}
 
 	public Object resolveSymbol(String symbol) {

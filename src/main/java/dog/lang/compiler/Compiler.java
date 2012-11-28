@@ -11,6 +11,7 @@
 
 package dog.lang.compiler;
 
+import dog.lang.Resolver;
 import dog.lang.nodes.Node;
 import dog.lang.nodes.Nodes;
 import dog.lang.nodes.Definition;
@@ -22,7 +23,16 @@ import java.util.ArrayList;
 
 public class Compiler {
 	ArrayList<Symbol> symbols = new ArrayList<Symbol>();
-	
+	Resolver resolver;
+
+	public Compiler() {
+		this(new Resolver());
+	}
+
+	public Compiler(Resolver r) {
+		resolver = r;
+	}
+
 	public Bark compile() {
 		for(Symbol symbol : symbols) {
 			symbol.compile();
@@ -73,6 +83,7 @@ public class Compiler {
 				list.add(symbol);
 			}
 		}
+
 
 		return list;
 	}

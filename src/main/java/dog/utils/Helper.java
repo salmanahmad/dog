@@ -87,7 +87,9 @@ public class Helper {
 		Parser parser = new Parser();
 		Nodes program = parser.parse(source);
 
-    	dog.lang.compiler.Compiler compiler = new dog.lang.compiler.Compiler();
+		Resolver resolver = new Resolver();
+
+    	dog.lang.compiler.Compiler compiler = new dog.lang.compiler.Compiler(resolver);
     	compiler.processNodes(program);
     	Bark bark = compiler.compile();
 
@@ -95,7 +97,6 @@ public class Helper {
     		System.out.println(symbol.toDogBytecodeString());
     	}
 
-    	Resolver resolver = new Resolver();
     	resolver.linkBark(bark);
 
     	dog.lang.runtime.Runtime runtime = new dog.lang.runtime.Runtime(resolver);
