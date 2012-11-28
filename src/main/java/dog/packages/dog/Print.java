@@ -11,9 +11,21 @@
 
 package dog.packages.dog;
 
-public class Print extends dog.lang.Function {
-	public dog.lang.Signal resume(dog.lang.StackFrame frame) {
-		return null;
+import dog.lang.Function;
+import dog.lang.Signal;
+import dog.lang.StackFrame;
+import dog.lang.annotation.Symbol;
+
+@dog.lang.annotation.Symbol("dog.print:")
+public class Print extends Function {
+
+	public int getVariableCount() {
+		return 1;
+	}
+
+	public Signal resume(StackFrame frame) {
+		System.out.println("Hello, World!");
+		return new Signal(Signal.Type.RETURN);
 	}
 }
 

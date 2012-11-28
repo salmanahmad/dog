@@ -60,7 +60,6 @@ public class Access extends Node {
 			}
 		} else {
 			if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.LOCAL)) {
-				System.out.println(path);
 				if(symbol.variableGenerator.containsVariable((String)path.get(0))) {
 					outputRegister = symbol.registerGenerator.generate();
 

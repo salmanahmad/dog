@@ -52,8 +52,6 @@ public class Invoke extends Instruction {
 		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv);
 
-		System.out.println(Resolver.encodeSymbol(this.functionIdentifier));
-
 		mv.visitTypeInsn(NEW, "dog/lang/Signal");
 		mv.visitInsn(DUP);
 		mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "INVOKE", "Ldog/lang/Signal$Type;");

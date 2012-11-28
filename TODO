@@ -14,6 +14,12 @@ Dynamic late binding option for packages.
 	When to subclass for compilation and runtime (custom class loaders)???
 	Utility methods to translate between dog and jvm symbols - how to handle nested - # and $hash$
 
+Explore V8 and Mono instead of JVM 
+
+Explore faster startup time and 2-level JIT like JRuby with Compile to JVM and the JVM to native code
+
+Explore aliasing / renaming namespaces to avoid collisions. Perhaps that works with the import command like python?
+
 =============================================
 
 

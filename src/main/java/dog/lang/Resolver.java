@@ -14,10 +14,15 @@ package dog.lang;
 import dog.lang.compiler.Bark;
 import dog.lang.compiler.Symbol;
 
+import java.util.Set;
 import java.io.File;
+import java.lang.annotation.Annotation;
 
-public class Resolver extends ClassLoader {
-	
+import org.reflections.*;
+import org.objectweb.asm.*;
+
+public class Resolver extends ClassLoader implements Opcodes {
+
 	public Class loadClass(byte[] b) {
 		Class klass = null;
 
@@ -51,8 +56,32 @@ public class Resolver extends ClassLoader {
 	}
 
 	public void linkNativeCode() {
-		// This method will use reflections to find all of the classes that are 
-		// annotated and create a subclass that is dog runtime friendly.
+		Reflections reflections = new Reflections("");
+        Set<Class<?>> allClasses = reflections.getTypesAnnotatedWith(dog.lang.annotation.Symbol.class);
+
+        for (Class<?> klass : allClasses) {
+        	dog.lang.annotation.Symbol symbol = klass.getAnnotation(dog.lang.annotation.Symbol.class);
+			System.out.println("value: " + symbol.value());
+
+			String className = convertJavaClassNameToJVMClassName(klass.getCanonicalName());
+
+			ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+			MethodVisitor mv;
+
+			cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, Resolver.encodeSymbol(symbol.value()), null, className, null);
+
+			mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+			mv.visitCode();
+			mv.visitVarInsn(ALOAD, 0);
+			mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V");
+			mv.visitInsn(RETURN);
+			mv.visitMaxs(1, 1);
+			mv.visitEnd();
+
+			cw.visitEnd();
+
+			this.linkBytecode(cw.toByteArray());
+        }
 	}
 
 	public Object resolveSymbol(String symbol) {
@@ -67,12 +96,14 @@ public class Resolver extends ClassLoader {
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException("Ahh: 1");
 		}
+	}
 
-
+	public static String convertJavaClassNameToJVMClassName(String name) {
+		return name.replace(".", "/");
 	}
 
 	public static String convertJVMClassNameToJavaClassName(String name) {
-		return name.replaceAll("/", ".");
+		return name.replace("/", ".");
 	}
 
 	public static String encodeSymbol(String symbol) {

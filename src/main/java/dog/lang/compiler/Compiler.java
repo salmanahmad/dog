@@ -54,10 +54,6 @@ public class Compiler {
 		}
 
 		ast.scaffold(this);
-
-		for (Symbol s : symbols) {
-			System.out.println(s.name);
-		}
 	}
 
 	public void addSymbol(Symbol symbol) {
