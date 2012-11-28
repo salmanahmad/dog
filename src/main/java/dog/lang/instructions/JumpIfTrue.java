@@ -35,7 +35,7 @@ public class JumpIfTrue extends Instruction {
 		mv.visitLabel(labels[instructionIndex]);
 
 		int destinationIndex = instructionIndex + this.offset;
-
+		
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
 		mv.visitIntInsn(SIPUSH, inputRegister);

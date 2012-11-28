@@ -37,7 +37,6 @@ public class Jump extends Instruction {
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitLdcInsn(destinationIndex);
 		mv.visitFieldInsn(PUTFIELD, "dog/lang/StackFrame", "programCounter", "I");
-		mv.visitVarInsn(ALOAD, 1);
 
 		mv.visitJumpInsn(GOTO, labels[destinationIndex]);
 	}

@@ -25,6 +25,9 @@ public class ZZZ extends dog.lang.Function {
 
 	public dog.lang.Signal resume(dog.lang.StackFrame stack) {
 		
+
+		stack.programCounter = 5000;
+
 		stack.returnRegister = 89;
 
 		if(stack.registers[5000].booleanEquivalent()) {
