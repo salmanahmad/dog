@@ -108,7 +108,7 @@ public class Function extends Symbol implements Opcodes {
 			labels[index] = new Label();
 		}
 
-		labels[labels.length - 1] = new Label();
+		labels[labels.length - 1] = returnLabel;
 
 		// Start the switch statement
 		mv.visitVarInsn(ALOAD, 1);

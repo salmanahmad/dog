@@ -79,7 +79,7 @@ public class Runtime {
 					}
 				} else if (signal.type == Signal.Type.INVOKE) {
 					StackFrame newFrame = signal.stackFrame;
-					newFrame.controlAncestors = frame.controlAncestors;
+					newFrame.controlAncestors = new ArrayList<Object>(frame.controlAncestors);
 					newFrame.controlAncestors.add(frame);
 					frame = newFrame;
 				} else if (signal.type == Signal.Type.SCHEDULE) {

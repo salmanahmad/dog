@@ -27,7 +27,7 @@ public class Resolver extends ClassLoader {
 			e.printStackTrace();
 	    	System.exit(1);
 		}
-
+		
 		return klass;
 	}
 	
