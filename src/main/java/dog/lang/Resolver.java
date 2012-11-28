@@ -61,7 +61,7 @@ public class Resolver extends ClassLoader {
 			Class klass = this.loadClass(symbol);
 			return klass.newInstance();
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Ahh: 1");
+			throw new RuntimeException("Ahh: Could not find: " + symbol);
 		} catch (InstantiationException e) {
 			throw new RuntimeException("Ahh: 1");
 		} catch (IllegalAccessException e) {

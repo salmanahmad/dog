@@ -49,7 +49,7 @@ expressions returns [Nodes nodes]
       terminator         
 	    tail=expression    { $nodes.add($tail.node); }
 	  )*
-	  terminator?
+	  terminator
   ;
 
 expression returns [Node node]
@@ -509,8 +509,8 @@ multiplicativeOperator
   ;
 
 terminator
-  : COMMENT
-  | (NEWLINE | SEMICOLON)+
+  : (NEWLINE | SEMICOLON)+
+  | EOF
   ;
 
 CASCADE:            'cascade';
@@ -607,7 +607,7 @@ AND:                '&&' | 'and';
 OR:                 '||' | 'or';
 NOT:                '!' | 'not';
 
-COMMENT:            '#' ~('\r' | '\n')* (NEWLINE | EOF) { skip(); };
+COMMENT:            '#' ~('\r' | '\n')* (NEWLINE | EOF) { $type = NEWLINE; };
 
 NEWLINE:            '\r'? '\n';
 WHITESPACE:         SPACE+ { $channel = HIDDEN; };

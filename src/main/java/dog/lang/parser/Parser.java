@@ -23,8 +23,17 @@ public class Parser {
 		Nodes nodes = null;
 
         ANTLRStringStream stream = new ANTLRStringStream(source);
-        
         GrammarLexer lexer = new GrammarLexer(stream);
+
+        // Token token;
+        // while (null != (token = lexer.nextToken())) {
+        //     int tokenType = token.getType();
+        //     if (tokenType == -1) break;
+        //     if (token.getChannel() == Token.DEFAULT_CHANNEL)
+        //     System.out.println(GrammarParser.tokenNames[token.getType()]);
+        // }
+        // lexer.reset();
+
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GrammarParser parser = new GrammarParser(tokens);
 
