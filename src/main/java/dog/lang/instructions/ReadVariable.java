@@ -41,6 +41,7 @@ public class ReadVariable extends Instruction {
 		mv.visitInsn(AALOAD);
 		mv.visitInsn(AASTORE);
 
+		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv);
 	}
 

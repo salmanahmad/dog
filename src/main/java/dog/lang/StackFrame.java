@@ -15,16 +15,22 @@ import java.util.HashMap;
 import org.json.JSONObject;
 import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
+import java.lang.Math;
 
 public class StackFrame extends DatabaseObject {
 
 	public Continuable symbol = null;
 	public String symbolName = null;
 
-	public Value returnRegister = null;
+	// TODO: Consider tracking registers, variables, and arguments. 
+	// They will be initialized with registerCount, variableCount, and argumentCount
+	// that way I can check for cases where you pass in more than the correct
+	// number of arguments to a function.
+
 	public Value[] registers = null;
 	public Value[] variables = null;
-
+	
+	public int returnRegister = 0;
 	public int programCounter = 0;
 
 	public HashMap<String, Integer> variableTable = new HashMap<String, Integer>();
@@ -36,23 +42,35 @@ public class StackFrame extends DatabaseObject {
 	}
 
 	public StackFrame(Continuable symbol) {
+		this(symbol, new Value[] {});
+	}
+
+	public StackFrame(Continuable symbol, Value[] arguments) {
 		this.symbol = symbol;
 		this.symbolName = Resolver.decodeSymbol(symbol.getClass().getName());
-		this.initialize(symbol.getRegisterCount(), symbol.getVariableCount(), symbol.getVariableTable());
+		this.initialize(symbol.getRegisterCount(), symbol.getVariableCount(), symbol.getVariableTable(), arguments);
 	}
 
 	public StackFrame(String symbolName, Resolver resolver) {
+		this(symbolName, resolver, new Value[] {});
+	}
+
+	public StackFrame(String symbolName, Resolver resolver, Value[] arguments) {
 		Continuable symbol = (Continuable)resolver.resolveSymbol(symbolName);
 		this.symbolName = symbolName;
 		this.symbol = symbol;
-		this.initialize(symbol.getRegisterCount(), symbol.getVariableCount(), symbol.getVariableTable());
+		this.initialize(symbol.getRegisterCount(), symbol.getVariableCount(), symbol.getVariableTable(), arguments);
 	}
 
-	protected void initialize(int registerCount, int variableCount, HashMap<String, Integer> variableTable) {
+	protected void initialize(int registerCount, int variableCount, HashMap<String, Integer> variableTable, Value[] arguments) {
 		this.registers = new Value[registerCount];
 		this.variables = new Value[variableCount];
 		this.variableTable = variableTable;
 		this.programCounter = 0;
+
+		for(int i = 0; i < Math.min(this.variables.length, arguments.length) ; i++) {
+			this.variables[i] = arguments[i];
+		}
 	}
 
 	public String collectionName() {

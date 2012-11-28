@@ -32,6 +32,7 @@ public class LoadNull extends Instruction implements Opcodes {
 		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/NullValue", "<init>", "()V");
 		mv.visitInsn(AASTORE);
 
+		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv);
 	}
 }

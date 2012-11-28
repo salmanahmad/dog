@@ -123,11 +123,11 @@ public class Function extends Symbol implements Opcodes {
 		// Insert a dummy label so I can avoid the fence post problem
 		mv.visitLabel(returnLabel);
 		mv.visitLabel(defaultLabel);
+		
 		mv.visitTypeInsn(NEW, "dog/lang/Signal");
 		mv.visitInsn(DUP);
 		mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "RETURN", "Ldog/lang/Signal$Type;");
-		mv.visitVarInsn(ALOAD, 1);
-		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/Signal", "<init>", "(Ldog/lang/Signal$Type;Ldog/lang/StackFrame;)V");
+		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/Signal", "<init>", "(Ldog/lang/Signal$Type;)V");
 		mv.visitInsn(ARETURN);
 
 		mv.visitMaxs(0, 0);

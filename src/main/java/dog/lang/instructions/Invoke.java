@@ -12,11 +12,13 @@
 package dog.lang.instructions;
 
 import dog.lang.compiler.Identifier;
+import dog.lang.Resolver;
 
 import java.util.ArrayList;
 import org.objectweb.asm.*;
 
 public class Invoke extends Instruction {
+
 	boolean asynchronous;
 	String functionIdentifier;
 	ArrayList<Integer> arguments;
@@ -44,8 +46,36 @@ public class Invoke extends Instruction {
 	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
 		mv.visitLabel(labels[instructionIndex]);
 
+		// TODO - Do I have to worry about waiting here if a value is pending or will I
+		// have already been waited before this point?
 		
-
+		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv);
+
+		mv.visitTypeInsn(NEW, "dog/lang/Signal");
+		mv.visitInsn(DUP);
+		mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "INVOKE", "Ldog/lang/Signal$Type;");
+		mv.visitTypeInsn(NEW, "dog/lang/StackFrame");
+		mv.visitInsn(DUP);
+		mv.visitTypeInsn(NEW, Resolver.encodeSymbol(this.functionIdentifier));
+		mv.visitInsn(DUP);
+		mv.visitMethodInsn(INVOKESPECIAL, Resolver.encodeSymbol(this.functionIdentifier), "<init>", "()V");
+		
+		mv.visitLdcInsn(arguments.size());
+		mv.visitTypeInsn(ANEWARRAY, "dog/lang/Value");
+		
+		for (int i = 0; i < arguments.size(); i++) {
+			mv.visitInsn(DUP);
+			mv.visitLdcInsn(i);
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+			mv.visitLdcInsn(arguments.get(i));
+			mv.visitInsn(AALOAD);
+			mv.visitInsn(AASTORE);
+		}
+
+		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/StackFrame", "<init>", "(Ldog/lang/Continuable;[Ldog/lang/Value;)V");
+		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/Signal", "<init>", "(Ldog/lang/Signal$Type;Ldog/lang/StackFrame;)V");
+		mv.visitInsn(ARETURN);
 	}
 }

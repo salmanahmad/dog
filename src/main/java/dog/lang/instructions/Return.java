@@ -28,4 +28,17 @@ public class Return extends Instruction {
 	public String toString() {
 		return String.format(":return %%r%d", inputRegister);
 	}
+
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
+
+		setReturnRegister(mv, this.inputRegister);
+		incrementProgramCounter(mv);
+
+		mv.visitTypeInsn(NEW, "dog/lang/Signal");
+		mv.visitInsn(DUP);
+		mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "RETURN", "Ldog/lang/Signal$Type;");
+		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/Signal", "<init>", "(Ldog/lang/Signal$Type;)V");
+		mv.visitInsn(ARETURN);
+	}
 }

@@ -37,6 +37,7 @@ public class LoadString extends Instruction implements Opcodes {
 		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/StringValue", "<init>", "(Ljava/lang/String;)V");
 		mv.visitInsn(AASTORE);
 
+		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv);
 	}
 

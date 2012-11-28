@@ -14,7 +14,7 @@ package dog.lang;
 public class Signal {
 	public enum Type {
 		RETURN,
-		CALL,
+		INVOKE,
 		SCHEDULE,
 		PAUSE,
 		STOP,
@@ -24,6 +24,10 @@ public class Signal {
 
 	public Signal() {
 
+	}
+
+	public Signal(Type type) {
+		this.type = type;
 	}
 
 	public Signal(Type type, StackFrame frame) {

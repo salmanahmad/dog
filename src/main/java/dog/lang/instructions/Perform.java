@@ -81,7 +81,7 @@ public class Perform extends Instruction {
 		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "(Ldog/lang/Value;)Ldog/lang/Value;");
 		mv.visitInsn(AASTORE);
 
-
+		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv);
 	}
 }

@@ -37,6 +37,7 @@ public class LoadNumber extends Instruction implements Opcodes {
 		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/NumberValue", "<init>", "(D)V");
 		mv.visitInsn(AASTORE);
 
+		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv);
 	}
 

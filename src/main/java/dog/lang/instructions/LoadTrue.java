@@ -32,6 +32,7 @@ public class LoadTrue extends Instruction implements Opcodes {
 		mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/TrueValue", "<init>", "()V");
 		mv.visitInsn(AASTORE);
 
+		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv);
 	}
 }

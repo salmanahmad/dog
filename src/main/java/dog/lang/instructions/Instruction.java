@@ -35,6 +35,12 @@ public class Instruction implements Opcodes {
 		throw new RuntimeException("Assemble not implemented");
 	}
 
+	public void setReturnRegister(MethodVisitor mv, int register) {
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitIntInsn(BIPUSH, register);
+		mv.visitFieldInsn(PUTFIELD, "dog/lang/StackFrame", "returnRegister", "I");
+	}
+
 	public void incrementProgramCounter(MethodVisitor mv) {
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitInsn(DUP);
