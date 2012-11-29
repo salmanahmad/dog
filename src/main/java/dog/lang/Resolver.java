@@ -41,7 +41,7 @@ public class Resolver extends ClassLoader implements Opcodes {
 
 		try {
 			klass = defineClass(null, b, 0, b.length);
-			linkedSymbols.add(Resolver.decodeSymbol(klass.getName()));
+			linkedSymbols.add(Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(klass.getName())));
 		} catch(Exception e) {
 			e.printStackTrace();
 	    	System.exit(1);
@@ -117,6 +117,16 @@ public class Resolver extends ClassLoader implements Opcodes {
 			throw new RuntimeException("Ahh: 1");
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException("Ahh: 1");
+		}
+	}
+
+	public boolean containsSymbol(String name) {
+		ArrayList<String> list = searchForSymbols(name);
+
+		if(list.size() == 1 && list.get(0).equals(name)) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 

@@ -175,6 +175,7 @@ identifierPath returns [Identifier identifier]
 call returns [Node node]
 @init { ArrayList<Node> arguments = new ArrayList<Node>(); Identifier path = new Identifier(); String name = ""; }
   : ( identifierPath             { path = $identifierPath.identifier; }
+      DOT
     )?
     headParam=PARAMETER          { name += $headParam.getText(); }
     head=expression              { arguments.add($head.node); }

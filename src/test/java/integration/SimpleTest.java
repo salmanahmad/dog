@@ -25,6 +25,7 @@ public class SimpleTest {
     	StackFrame frame = Helper.eval(source).get(0);
 
     	NumberValue value = (NumberValue)frame.getVariableNamed("i");
-    	System.out.println(value.value);
+    	Assert.assertEquals(120.0, value.value, 0.0);
+
     }
 }

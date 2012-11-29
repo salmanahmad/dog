@@ -93,10 +93,6 @@ public class Helper {
     	compiler.processNodes(program);
     	Bark bark = compiler.compile();
 
-    	for(dog.lang.compiler.Symbol symbol : bark.symbols) {
-    		System.out.println(symbol.toDogBytecodeString());
-    	}
-
     	resolver.linkBark(bark);
 
     	dog.lang.runtime.Runtime runtime = new dog.lang.runtime.Runtime(resolver);

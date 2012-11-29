@@ -73,7 +73,14 @@ public class Runtime {
 						break;
 					} else {
 						StackFrame returnFrame = (StackFrame)frame.controlAncestors.get(frame.controlAncestors.size() - 1);
-						returnFrame.registers[returnFrame.returnRegister] = frame.registers[frame.returnRegister];
+						if(returnFrame.returnRegister != -1) {
+							if(frame.returnRegister != -1) {
+								returnFrame.registers[returnFrame.returnRegister] = frame.registers[frame.returnRegister];
+							} else {
+								returnFrame.registers[returnFrame.returnRegister] = new NullValue();
+							}
+						}
+						
 						frame = returnFrame;
 					}
 				} else if (signal.type == Signal.Type.INVOKE) {

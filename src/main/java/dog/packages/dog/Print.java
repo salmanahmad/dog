@@ -11,6 +11,7 @@
 
 package dog.packages.universe;
 
+import dog.lang.Value;
 import dog.lang.Function;
 import dog.lang.Signal;
 import dog.lang.StackFrame;
@@ -24,7 +25,8 @@ public class Print extends Function {
 	}
 
 	public Signal resume(StackFrame frame) {
-		System.out.println("Hello, World!");
+		Value value = frame.variables[0];
+		System.out.println(value.getValue());
 		return new Signal(Signal.Type.RETURN);
 	}
 }

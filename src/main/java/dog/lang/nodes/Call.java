@@ -41,7 +41,7 @@ public class Call extends Node {
 
 	public void compile(Symbol symbol) {
 		ArrayList<Integer> argumentRegisters = new ArrayList<Integer>();
-		String functionIdentifier;
+		String functionIdentifier = null;
 
 		for(Node argument: arguments) {
 			argument.compile(symbol);
@@ -50,18 +50,29 @@ public class Call extends Node {
 
 		int outputRegister = symbol.registerGenerator.generate();
 
-		if(function.scope == Identifier.Scope.EXTERNAL) {
-			functionIdentifier = StringUtils.join(function.path, ".");
-		} else {
-			functionIdentifier = this.packageName + "." + StringUtils.join(function.path, ".");
+		if(functionIdentifier == null && (function.scope == Identifier.Scope.CASCADE || function.scope == Identifier.Scope.INTERNAL)) {
+			String identifier = this.packageName + "." + StringUtils.join(function.path, ".");
+			ArrayList<String> symbols = symbol.getCompiler().searchForSymbols(identifier);
+
+			if(symbols.size() == 1 && symbols.get(0).equals(identifier)) {
+				functionIdentifier = identifier;
+			}
 		}
 
-		// TODO: Explore the ability to make function calls dynamic with late binding. One idea is that
-		// if the compiler cannot find a function it will assume that the function identifier is a local variable
-		// and convert it into a dynamic invocation with a warning.
+		if(functionIdentifier == null && (function.scope == Identifier.Scope.CASCADE || function.scope == Identifier.Scope.EXTERNAL)) {
+			String identifier = StringUtils.join(function.path, ".");
+			ArrayList<String> symbols = symbol.getCompiler().searchForSymbols(identifier);
 
-		if(symbol.getCompiler().searchForSymbols(functionIdentifier).size() != 1) {
-			throw new RuntimeException("Unable to unique identify the function symbol.");
+			if(symbols.size() == 1 && symbols.get(0).equals(identifier)) {
+				functionIdentifier = identifier;
+			}
+		}
+
+		if(functionIdentifier == null) {
+			// TODO: Explore the ability to make function calls dynamic with late binding. One idea is that
+			// if the compiler cannot find a function it will assume that the function identifier is a local variable
+			// and convert it into a dynamic invocation with a warning.
+			throw new RuntimeException("Unable to find the function symbol: " + StringUtils.join(function.path, "."));
 		}
 
 		Invoke invocation = new Invoke(this.line, outputRegister, asynchronous, functionIdentifier, argumentRegisters);
