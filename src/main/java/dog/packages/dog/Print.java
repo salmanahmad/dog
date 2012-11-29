@@ -9,7 +9,7 @@
  *
  */
 
-package dog.packages.universe;
+package dog.packages.dog;
 
 import dog.lang.Value;
 import dog.lang.Function;
@@ -17,7 +17,7 @@ import dog.lang.Signal;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
 
-@dog.lang.annotation.Symbol("dog.print:")
+@Symbol("dog.print:")
 public class Print extends Function {
 
 	public int getVariableCount() {
