@@ -103,8 +103,8 @@ unaryExpresion returns [Node node]
 
 primaryExpression returns [Node node]
   : literal                   { $node = $literal.node; }
-  | access                    { $node = $access.node; }
   | call                      { $node = $call.node; }
+  | access                    { $node = $access.node; }
   | functionDefinition        { $node = $functionDefinition.node; }
   | structureDefinition       { $node = $structureDefinition.node; }
   | collectionDefinition      { $node = $collectionDefinition.node; }

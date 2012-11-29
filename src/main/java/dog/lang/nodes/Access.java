@@ -84,29 +84,30 @@ public class Access extends Node {
 				for(int i = 1; i <= prefix.size(); i++) {
 					// TODO - Handle the bug here since not all elements may be a string. If I come accross a non-string I should break
 					String symbolIdentifier = this.packageName + "." + StringUtils.join(prefix.subList(0, i).toArray(), ".");
-					ArrayList<Symbol> symbols = symbol.getCompiler().searchForSymbols(symbolIdentifier);
-					if(symbols.size() == 0) {
-						break;
-					} else if(symbols.size() == 1) {
-						outputRegister = symbol.registerGenerator.generate();
+					// TODO: Fix this bug as soon as possible...
+					// ArrayList<String> symbols = symbol.getCompiler().searchForSymbols(symbolIdentifier);
+					// if(symbols.size() == 0) {
+					// 	break;
+					// } else if(symbols.size() == 1) {
+					// 	outputRegister = symbol.registerGenerator.generate();
 
-						if(symbols.get(0) instanceof Constant) {
-							ReadConstant constant = new ReadConstant(this.line, outputRegister, symbolIdentifier);
-							symbol.instructions.add(constant);
-						} else if(symbols.get(0) instanceof Type) {
-							Build build = new Build(this.line, outputRegister, symbolIdentifier);
-							symbol.instructions.add(build);
-						} else if(symbols.get(0) instanceof Function) {
-							Invoke invoke = new Invoke(this.line, outputRegister, false, symbolIdentifier, new ArrayList<Integer>());
-							symbol.instructions.add(invoke);
-						}
+					// 	if(symbols.get(0) instanceof Constant) {
+					// 		ReadConstant constant = new ReadConstant(this.line, outputRegister, symbolIdentifier);
+					// 		symbol.instructions.add(constant);
+					// 	} else if(symbols.get(0) instanceof Type) {
+					// 		Build build = new Build(this.line, outputRegister, symbolIdentifier);
+					// 		symbol.instructions.add(build);
+					// 	} else if(symbols.get(0) instanceof Function) {
+					// 		Invoke invoke = new Invoke(this.line, outputRegister, false, symbolIdentifier, new ArrayList<Integer>());
+					// 		symbol.instructions.add(invoke);
+					// 	}
 						
-						try {
-							remainingPath = path.subList(i + 1, path.size());
-						} catch(Exception e) {
-							remainingPath = new ArrayList<Object>();
-						}
-					}
+					// 	try {
+					// 		remainingPath = path.subList(i + 1, path.size());
+					// 	} catch(Exception e) {
+					// 		remainingPath = new ArrayList<Object>();
+					// 	}
+					// }
 				}
 			}
 

@@ -76,14 +76,16 @@ public class Compiler {
 		symbols.add(symbol);
 	}
 
-	public ArrayList<Symbol> searchForSymbols(String name) {
-		ArrayList<Symbol> list = new ArrayList<Symbol>();
+	public ArrayList<String> searchForSymbols(String name) {
+		ArrayList<String> list = new ArrayList<String>();
 		for(Symbol symbol : symbols) {
 			if(symbol.name.startsWith(name)) {
-				list.add(symbol);
+				list.add(symbol.name);
 			}
 		}
-
+		
+		ArrayList<String> resolvedList = resolver.searchForSymbols(name);
+		list.addAll(resolvedList);
 
 		return list;
 	}

@@ -9,7 +9,7 @@
  *
  */
 
-package dog.packages.dog;
+package dog.packages.universe;
 
 import dog.lang.Function;
 import dog.lang.Signal;
