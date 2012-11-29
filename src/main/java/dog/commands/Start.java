@@ -24,7 +24,7 @@ public class Start extends Command {
 	}
 
 	public void run(StringList args) {
-
+		System.out.println("Dog does not know how to start yet...");
 	}
 }
 

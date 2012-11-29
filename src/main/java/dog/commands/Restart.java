@@ -24,7 +24,7 @@ public class Restart extends Command {
 	}
 
 	public void run(StringList args) {
-
+		System.out.println("Dog does not know how to restart yet...");
 	}
 }
 
