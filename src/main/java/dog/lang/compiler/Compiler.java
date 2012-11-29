@@ -11,6 +11,7 @@
 
 package dog.lang.compiler;
 
+import dog.lang.Bark;
 import dog.lang.Resolver;
 import dog.lang.nodes.Node;
 import dog.lang.nodes.Nodes;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 public class Compiler {
 	ArrayList<Symbol> symbols = new ArrayList<Symbol>();
 	Resolver resolver;
+	Bark bark;
 
 	public Compiler() {
 		this(new Resolver());
@@ -33,12 +35,27 @@ public class Compiler {
 		resolver = r;
 	}
 
+	public ArrayList<Symbol> getSymbols() {
+		return symbols;
+	}
+
+	public Bark getBark() {
+		return bark;
+	}
+
 	public Bark compile() {
+		ArrayList<byte[]> bytecode = new ArrayList<byte[]>();
+
 		for(Symbol symbol : symbols) {
 			symbol.compile();
 		}
 
-		return new Bark(symbols);
+		for(Symbol symbol : symbols) {
+			bytecode.add(symbol.bytecode);
+		}
+
+		bark = new Bark(symbols.get(0).name, bytecode);
+		return bark;
 	}
 
 	// TODO: Rename to addCompilationUnit

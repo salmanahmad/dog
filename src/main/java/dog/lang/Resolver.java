@@ -11,7 +11,7 @@
 
 package dog.lang;
 
-import dog.lang.compiler.Bark;
+import dog.lang.Bark;
 import dog.lang.compiler.Symbol;
 
 import java.util.Set;
@@ -80,8 +80,8 @@ public class Resolver extends ClassLoader implements Opcodes {
 	}
 
 	public void linkBark(Bark bark) {
-		for(Symbol symbol : bark.symbols) {
-			linkBytecode(symbol.bytecode);
+		for(byte[] bytecode : bark.symbols) {
+			linkBytecode(bytecode);
 		}
 	}
 

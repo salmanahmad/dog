@@ -12,9 +12,9 @@
 
 package dog.commands;
 
+import dog.lang.Bark;
 import dog.lang.Resolver;
 import dog.lang.parser.Parser;
-import dog.lang.compiler.Bark;
 import dog.lang.compiler.Compiler;
 import dog.lang.compiler.Symbol;
 import dog.lang.nodes.*;
@@ -64,24 +64,24 @@ public class Compile extends Command {
         	compiler.processNodes(ast);
 		}
 
-		Bark bark = compiler.compile();
+		compiler.compile();
 
 		if(dump) {
 			System.out.println("Dog Bytecode:");
 			System.out.println("-------------");
 
-			for(Symbol s : bark.symbols) {
+			for(Symbol s : compiler.getSymbols()) {
 				System.out.println(s.toDogBytecodeString());
 			}
 
 			System.out.println("JVM Bytecode:");
 			System.out.println("-------------");
 
-			for(Symbol s : bark.symbols) {
+			for(Symbol s : compiler.getSymbols()) {
 				System.out.println(s.toJVMBytecodeString());
 			}
 		} else {
-
+			Bark bark = compiler.getBark();
 		}
 	}
 }

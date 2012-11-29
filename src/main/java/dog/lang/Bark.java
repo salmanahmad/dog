@@ -9,14 +9,16 @@
  *
  */
 
-package dog.lang.compiler;
+package dog.lang;
 
 import java.util.ArrayList;
 
 public class Bark {
-	public ArrayList<Symbol> symbols;
+	public String startUpSymbol = null;
+	public ArrayList<byte[]> symbols;
 
-	public Bark(ArrayList<Symbol> symbols) {
+	public Bark(String startUpSymbol, ArrayList<byte[]> symbols) {
+		this.startUpSymbol = startUpSymbol;
 		this.symbols = symbols;
 	}
 }
