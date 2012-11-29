@@ -1,8 +1,11 @@
 
+define one do
+	1
+end
 
 define fac: n do
 	if n == 0 then
-		1
+		one
 	else
 		n * (fac: n - 1)
 	end
