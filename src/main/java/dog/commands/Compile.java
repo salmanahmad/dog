@@ -18,13 +18,15 @@ import dog.lang.parser.Parser;
 import dog.lang.compiler.Compiler;
 import dog.lang.compiler.Symbol;
 import dog.lang.nodes.*;
-
 import dog.util.Helper;
 import dog.util.StringList;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.File;
+import java.io.FileOutputStream;
+import org.apache.commons.io.FilenameUtils;
 
 public class Compile extends Command {
 	public String description() {
@@ -81,7 +83,14 @@ public class Compile extends Command {
 				System.out.println(s.toJVMBytecodeString());
 			}
 		} else {
-			Bark bark = compiler.getBark();
+			try {
+				String name = FilenameUtils.removeExtension(args.strings.get(0));
+				name += ".bark";
+
+				compiler.getBark().writeToFile(new FileOutputStream(name));
+			} catch(Exception e) {
+				System.out.println("An error took place when writing the bark file to disk.");
+			}
 		}
 	}
 }
