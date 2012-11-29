@@ -76,15 +76,25 @@ public class Compiler {
 		symbols.add(symbol);
 	}
 
-	public ArrayList<String> searchForSymbols(String name) {
-		ArrayList<String> list = new ArrayList<String>();
+	public ArrayList<dog.lang.Symbol> searchForSymbols(String name) {
+		ArrayList<dog.lang.Symbol> list = new ArrayList<dog.lang.Symbol>();
 		for(Symbol symbol : symbols) {
 			if(symbol.name.startsWith(name)) {
-				list.add(symbol.name);
+				if(symbol instanceof Constant) {
+					list.add(new dog.lang.Symbol(symbol.name, dog.lang.Symbol.Kind.CONSTANT));
+				}
+
+				if(symbol instanceof Type) {
+					list.add(new dog.lang.Symbol(symbol.name, dog.lang.Symbol.Kind.TYPE));
+				}
+
+				if(symbol instanceof Function) {
+					list.add(new dog.lang.Symbol(symbol.name, dog.lang.Symbol.Kind.FUNCTION));
+				}
 			}
 		}
 		
-		ArrayList<String> resolvedList = resolver.searchForSymbols(name);
+		ArrayList<dog.lang.Symbol> resolvedList = resolver.searchForSymbols(name);
 		list.addAll(resolvedList);
 
 		return list;

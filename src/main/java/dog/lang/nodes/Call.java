@@ -52,18 +52,18 @@ public class Call extends Node {
 
 		if(functionIdentifier == null && (function.scope == Identifier.Scope.CASCADE || function.scope == Identifier.Scope.INTERNAL)) {
 			String identifier = this.packageName + "." + StringUtils.join(function.path, ".");
-			ArrayList<String> symbols = symbol.getCompiler().searchForSymbols(identifier);
+			ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
 
-			if(symbols.size() == 1 && symbols.get(0).equals(identifier)) {
+			if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
 				functionIdentifier = identifier;
 			}
 		}
 
 		if(functionIdentifier == null && (function.scope == Identifier.Scope.CASCADE || function.scope == Identifier.Scope.EXTERNAL)) {
 			String identifier = StringUtils.join(function.path, ".");
-			ArrayList<String> symbols = symbol.getCompiler().searchForSymbols(identifier);
+			ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
 
-			if(symbols.size() == 1 && symbols.get(0).equals(identifier)) {
+			if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
 				functionIdentifier = identifier;
 			}
 		}

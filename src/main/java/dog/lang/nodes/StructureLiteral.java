@@ -49,7 +49,7 @@ public class StructureLiteral extends Node {
 			symbol.instructions.add(structure);
 		} else {
 			String typeIdentifier;
-
+			// TODO: This needs to be fixed similar to Call.java
 			if(type.scope == Identifier.Scope.EXTERNAL) {
 				typeIdentifier = StringUtils.join(type.path, ".");
 			} else {

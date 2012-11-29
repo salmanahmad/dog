@@ -29,7 +29,7 @@ import org.objectweb.asm.*;
 
 public class Resolver extends ClassLoader implements Opcodes {
 
-	ArrayList<String> linkedSymbols = new ArrayList<String>();
+	ArrayList<dog.lang.Symbol> linkedSymbols = new ArrayList<dog.lang.Symbol>();
 
 	public Resolver() {
 		super();
@@ -41,7 +41,23 @@ public class Resolver extends ClassLoader implements Opcodes {
 
 		try {
 			klass = defineClass(null, b, 0, b.length);
-			linkedSymbols.add(Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(klass.getName())));
+
+			dog.lang.Symbol.Kind kind = null;
+
+			if(Constant.class.isAssignableFrom(klass)) {
+				kind = dog.lang.Symbol.Kind.CONSTANT;
+			}
+
+			if(Function.class.isAssignableFrom(klass)) {
+				kind = dog.lang.Symbol.Kind.FUNCTION;
+			}
+
+			if(Type.class.isAssignableFrom(klass)) {
+				kind = dog.lang.Symbol.Kind.TYPE;
+			}
+
+			dog.lang.Symbol symbol = new dog.lang.Symbol(Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(klass.getName())), kind);
+			linkedSymbols.add(symbol);
 		} catch(Exception e) {
 			e.printStackTrace();
 	    	System.exit(1);
@@ -121,17 +137,17 @@ public class Resolver extends ClassLoader implements Opcodes {
 	}
 
 	public boolean containsSymbol(String name) {
-		ArrayList<String> list = searchForSymbols(name);
+		ArrayList<dog.lang.Symbol> list = searchForSymbols(name);
 
-		if(list.size() == 1 && list.get(0).equals(name)) {
+		if(list.size() == 1 && list.get(0).name.equals(name)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public ArrayList<String> searchForSymbols(String name) {
-		ArrayList<String> list = new ArrayList<String>();
+	public ArrayList<dog.lang.Symbol> searchForSymbols(String name) {
+		ArrayList<dog.lang.Symbol> list = new ArrayList<dog.lang.Symbol>();
 
 		Reflections reflections = new Reflections("");
 		Set<Class<? extends Continuable>> classes = reflections.getSubTypesOf(Continuable.class);
@@ -139,12 +155,26 @@ public class Resolver extends ClassLoader implements Opcodes {
         for (Class<?> c : classes) {
         	String symbolName = Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(c.getName()));
         	if(symbolName.startsWith(name)) {
-				list.add(symbolName);
+        		dog.lang.Symbol.Kind kind = null;
+
+        		if(Constant.class.isAssignableFrom(c)) {
+        			kind = dog.lang.Symbol.Kind.CONSTANT;
+        		}
+
+        		if(Function.class.isAssignableFrom(c)) {
+        			kind = dog.lang.Symbol.Kind.FUNCTION;
+        		}
+
+        		if(Type.class.isAssignableFrom(c)) {
+        			kind = dog.lang.Symbol.Kind.TYPE;
+        		}
+
+				list.add(new dog.lang.Symbol(symbolName, kind));
 			}
         }
 
-        for(String linkedSymbol: linkedSymbols) {
-        	if(linkedSymbol.startsWith(name)) {
+        for(dog.lang.Symbol linkedSymbol: linkedSymbols) {
+        	if(linkedSymbol.name.startsWith(name)) {
 				list.add(linkedSymbol);
         	}
         }
