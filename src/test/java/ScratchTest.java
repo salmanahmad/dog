@@ -8,20 +8,20 @@ public class ScratchTest {
     @Test
     public void test() throws Exception {
 
-        Resolver resolver = new Resolver();
+        // Resolver resolver = new Resolver();
 
-        Object o = resolver.loadClass("java.lang.Object").newInstance();
-        ClassLoader loader = o.getClass().getClassLoader();
+        // Object o = resolver.loadClass("java.lang.Object").newInstance();
+        // ClassLoader loader = o.getClass().getClassLoader();
 
-        System.out.println("Loading class...");
-        System.out.println(o.getClass().getName());
+        // System.out.println("Loading class...");
+        // System.out.println(o.getClass().getName());
 
-        Object o2 = resolver.loadClass("java/lang/Object").newInstance();
-        System.out.println("Loading class with slashes...");
-        System.out.println(o2.getClass().getName());
+        // Object o2 = resolver.loadClass("java/lang/Object").newInstance();
+        // System.out.println("Loading class with slashes...");
+        // System.out.println(o2.getClass().getName());
 
 
-        ArrayList<String> list = new ArrayList<String>();
+        // ArrayList<String> list = new ArrayList<String>();
         //if(list.get(0) == null) {
         //    System.out.println("hisad");
         //}
