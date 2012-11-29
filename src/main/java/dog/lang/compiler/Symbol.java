@@ -13,11 +13,15 @@ package dog.lang.compiler;
 
 import dog.lang.instructions.Instruction;
 import dog.lang.instructions.Throw;
-
 import dog.lang.nodes.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+
+import org.objectweb.asm.*;
+import org.objectweb.asm.util.*;
 
 public abstract class Symbol {
 	
@@ -39,7 +43,6 @@ public abstract class Symbol {
 	public RegisterGenerator registerGenerator = new RegisterGenerator();
 
 	public abstract String toDogBytecodeString();
-	public abstract String toJVMBytecodeString();
 	public abstract void compile();
 
 	public Symbol(String name, Node node, Compiler compiler) {
@@ -47,6 +50,18 @@ public abstract class Symbol {
 		this.node = node;
 		this.filePath = node.filePath;
 		this.compiler = compiler;
+	}
+
+
+	public String toJVMBytecodeString() {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+		ClassReader classReader = new ClassReader(this.bytecode);
+		PrintWriter printWriter = new PrintWriter(outputStream);
+		TraceClassVisitor traceClassVisitor = new TraceClassVisitor(printWriter);
+		classReader.accept(traceClassVisitor, ClassReader.SKIP_DEBUG);
+
+		return outputStream.toString();
 	}
 
 	public Compiler getCompiler() {

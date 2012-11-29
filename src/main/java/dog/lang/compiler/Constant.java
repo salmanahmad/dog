@@ -32,10 +32,6 @@ public class Constant extends Symbol {
 		return output;
 	}
 
-	public String toJVMBytecodeString() {
-		return null;
-	}
-
 	public void compile() {
 		compileNodes();
 	}

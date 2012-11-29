@@ -36,10 +36,6 @@ public class Function extends Symbol implements Opcodes {
 		return output;
 	}
 
-	public String toJVMBytecodeString() {
-		return null;
-	}
-
 	public void compile() {
 		compileNodes();
 

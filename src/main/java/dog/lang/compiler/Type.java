@@ -32,10 +32,6 @@ public class Type extends Symbol {
 		return output;
 	}
 
-	public String toJVMBytecodeString() {
-		return null;
-	}
-
 	public void compile() {
 
 	}
