@@ -22,9 +22,11 @@ public class Restart extends Command {
 	public String description() {
 		return "Compile and execute a dog program after clearing the database";
 	}
-
+	
 	public void run(StringList args) {
-		System.out.println("Dog does not know how to restart yet. Going to start instead...");
+		Compile compile = new Compile();
+		compile.run(args);
+
 		Start start = new Start();
 		start.run(args);
 	}

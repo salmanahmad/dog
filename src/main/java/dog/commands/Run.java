@@ -39,10 +39,7 @@ public class Run extends Command {
 		File sourceFile = new File(sourceFilename);
 		File barkFile = new File(barkFilename);
 
-		if(barkFile.exists()) {
-			Start command = new Start();
-			command.run(args);
-		} else if(sourceFile.exists() && barkFile.exists() && (sourceFile.lastModified() > barkFile.lastModified())) {
+		if(sourceFile.exists() && barkFile.exists() && (sourceFile.lastModified() > barkFile.lastModified())) {
 			Restart command = new Restart();
 			command.run(args);
 		} else {
