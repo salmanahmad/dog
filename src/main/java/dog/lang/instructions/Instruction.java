@@ -34,7 +34,7 @@ public class Instruction implements Opcodes {
 	}
 
 	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
-		throw new RuntimeException("Assemble not implemented");
+		throw new RuntimeException("Assemble not implemented for : " + this.getClass().getName());
 	}
 
 	public void setReturnRegister(MethodVisitor mv, int register) {

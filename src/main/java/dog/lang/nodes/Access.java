@@ -124,7 +124,7 @@ public class Access extends Node {
 			// Identifier SCOPE and use the Variable Mapping in the custom symbol class as well as the Resolver class for reflection.
 
 			if(outputRegister == -1) {
-				throw new RuntimeException("Could not resolve symbol.");
+				throw new RuntimeException("Could not resolve symbol: " + path.get(0) + ".");
 			}
 		}
 
