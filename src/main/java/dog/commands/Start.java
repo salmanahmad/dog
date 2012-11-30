@@ -12,11 +12,18 @@
 
 package dog.commands;
 
+import dog.lang.Bark;
+import dog.lang.Resolver;
+import dog.lang.runtime.Runtime;
 import dog.util.StringList;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import org.apache.commons.io.FilenameUtils;
 
 public class Start extends Command {
 	public String description() {
@@ -24,7 +31,31 @@ public class Start extends Command {
 	}
 
 	public void run(StringList args) {
-		System.out.println("Dog does not know how to start yet...");
+		try {
+			Resolver resolver = new Resolver();
+			String startUpSymbol = null;
+
+			for(String arg : args.strings) {
+				if(FilenameUtils.isExtension(arg, "dog") || FilenameUtils.isExtension(arg, "bark")) {
+					arg = FilenameUtils.removeExtension(arg);
+				}
+
+				arg += ".bark";
+
+				Bark bark = new Bark(new FileInputStream(arg));
+				resolver.linkBark(bark);
+
+				if(startUpSymbol == null) {
+					startUpSymbol = bark.startUpSymbol;
+				}
+			}
+
+			Runtime runtime = new Runtime(resolver);
+			runtime.invoke(startUpSymbol);
+		} catch (FileNotFoundException e) {
+			System.out.println("An error took place when setting up the runtime.");
+			e.printStackTrace();
+		}
 	}
 }
 

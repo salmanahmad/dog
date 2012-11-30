@@ -70,15 +70,6 @@ public class Resolver extends ClassLoader implements Opcodes {
 		loadClass(bytecode);
 	}
 
-	public void linkBark(String filepath) {
-		// Create a File object and call linkBark(File).
-	}
-
-	public void linkBark(File file) {
-		// You need to create your own class loader and add the file
-		// to it here. You cannot add the jar file to the system class loader
-	}
-
 	public void linkBark(Bark bark) {
 		for(byte[] bytecode : bark.symbols) {
 			linkBytecode(bytecode);
@@ -86,7 +77,7 @@ public class Resolver extends ClassLoader implements Opcodes {
 	}
 
 	protected void linkNativeCode() {
-		Reflections reflections = new Reflections("");
+		Reflections reflections = new Reflections("dog.packages");
         Set<Class<?>> allClasses = reflections.getTypesAnnotatedWith(dog.lang.annotation.Symbol.class);
 
         for (Class<?> klass : allClasses) {

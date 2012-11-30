@@ -48,21 +48,22 @@ public class Compile extends Command {
 		Parser parser = new Parser();
 
 		for(String arg : args.strings) {
-			String source_filename = arg;
-        	String source_code = "";
-        	
-        	if(!source_filename.endsWith(".dog")) {
-				source_filename += ".dog";
-        	}
+			String sourceFilename = arg;
 
-        	String source_string = Helper.readFile(source_filename);
+			if(FilenameUtils.isExtension(sourceFilename, "dog") || FilenameUtils.isExtension(sourceFilename, "bark")) {
+				sourceFilename = FilenameUtils.removeExtension(sourceFilename);
+			}
+
+        	sourceFilename += ".dog";
+
+        	String sourceString = Helper.readFile(sourceFilename);
         	
-        	if(source_string == null) {
-        		System.out.println("Could not open file: " + source_filename + ".");
+        	if(sourceString == null) {
+        		System.out.println("Could not open file: " + sourceFilename + ".");
         		System.exit(1);
         	}
 
-        	Nodes ast = parser.parse(source_string);
+        	Nodes ast = parser.parse(sourceString);
         	compiler.processNodes(ast);
 		}
 

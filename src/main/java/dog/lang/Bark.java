@@ -15,6 +15,8 @@ import java.util.jar.*;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 
 import org.objectweb.asm.ClassReader;
 
@@ -30,8 +32,32 @@ public class Bark {
 		this.symbols = symbols;
 	}
 
-	public Bark(File barkFile) {
+	public Bark(InputStream stream) {
+		symbols = new ArrayList<byte[]>();
+		try {
+			JarInputStream target = new JarInputStream(stream);
+			this.startUpSymbol = (String)target.getManifest().getMainAttributes().get(new Attributes.Name(DOG_STARTUP_SYMBOL));
 
+			JarEntry entry;
+			byte[] buffer = new byte[4096];
+
+			while ((entry = target.getNextJarEntry()) != null) {
+				ByteArrayOutputStream bytecode = new ByteArrayOutputStream();
+
+				while ( true ) {				            
+					int nRead = target.read(buffer, 0, buffer.length);
+					if ( nRead <= 0 ) {
+						break;
+					}
+
+					bytecode.write(buffer, 0, nRead);
+				}
+
+				symbols.add(bytecode.toByteArray());
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void writeToFile(OutputStream stream) {
@@ -54,7 +80,6 @@ public class Bark {
 			target.close();
 		} catch(Exception e) {
 			System.out.println(e);
-			e.printStackTrace();
 		}
 		
 	}
