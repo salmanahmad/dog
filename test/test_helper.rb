@@ -24,6 +24,7 @@ module ParserTests end
 module CompilerTests end
 module RuntimeTests end
 module IntegrationTests end
+module LibraryTests end
 
 module ::Dog
   class Server

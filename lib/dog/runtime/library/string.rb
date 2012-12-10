@@ -11,7 +11,39 @@ module Dog::Library
 			body do |track|
 				string1 = variable("string1").value
 				string2 = variable("string2").value
-				newstring = ::Dog::Value.string_value(string1.concat(string2))
+				newstring = ::Dog::Value.string_value(string1 << string2)
+				dog_return(newstring)
+			end
+		end
+
+		implementation "count:on:of" do
+			argument "origstring"
+			argument "string1"
+			body do |track|
+				origstring = variable("origstring").value
+				string1 = variable("string1").value
+				counted = origstring.count(string1)
+				position = ::Dog::Value.number_value(counted)
+				dog_return(position)
+			end
+		end
+
+		implementation "delete:on:of" do
+			argument "origstring"
+			argument "string1"
+			body do |track|
+				origstring = variable("origstring").value
+				string1 = variable("string1").value
+				newstring = ::Dog::Value.string_value(origstring.delete(string1))
+				dog_return(newstring)
+			end
+		end
+
+		implementation "downcase:of" do
+			argument "string"
+			body do |track|
+				string = variable("string").value
+				newstring = ::Dog::Value.string_value(string.downcase)
 				dog_return(newstring)
 			end
 		end
@@ -65,6 +97,32 @@ module Dog::Library
 			end
 		end
 
+		implementation "replace:on:swap:with" do
+			argument "origstring"
+			argument "findstring"
+			argument "replacestring"
+			body do |track|
+				origstring = variable("origstring").value
+				findstring = variable("findstring").value
+				replacestring = variable("replacestring").value
+				newstring = ::Dog::Value.string_value(origstring.sub(findstring, replacestring))
+				dog_return(newstring)
+			end
+		end
+
+		implementation "replaceall:on:swap:with" do
+			argument "origstring"
+			argument "findstring"
+			argument "replacestring"
+			body do |track|
+				origstring = variable("origstring").value
+				findstring = variable("findstring").value
+				replacestring = variable("replacestring").value
+				newstring = ::Dog::Value.string_value(origstring.gsub(findstring, replacestring))
+				dog_return(newstring)
+			end
+		end
+
 		implementation "reverse:of" do
 			argument "string"
 			body do |track|
@@ -83,8 +141,7 @@ module Dog::Library
 			end
 		end
 
-		implementation "substringk:of:from:to" do
-		#TODO fix this
+		implementation "substring:of:starting:until" do
 			argument "string"
 			argument "sindex"
 			argument "eindex"
@@ -92,14 +149,20 @@ module Dog::Library
 				string = variable("string").value
 				sindex = variable("sindex").value
 				eindex = variable("eindex").value
-				#startint = Integer(starting)
-				#endint = Integer(ending)
-				sreturn = ::Dog::Value.string_value(string)
-				dog_return(sreturn)
-				#printf startint, ", ", endint
-				#substring = string[startint..endint]
-				#substringf = ::Dog::Value.string_value(st)
-				#dog_return(substringf)
+				startint = Integer(sindex)
+				endint = Integer(eindex)
+				substring = string[startint..endint]
+				substringv = ::Dog::Value.string_value(substring)
+				dog_return(substringv)
+			end
+		end
+
+		implementation "upcase:of" do
+			argument "string"
+			body do |track|
+				string = variable("string").value
+				newstring = ::Dog::Value.string_value(string.upcase)
+				dog_return(newstring)
 			end
 		end
 
