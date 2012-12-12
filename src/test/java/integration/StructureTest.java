@@ -21,10 +21,16 @@ public class StructureTest {
     
     @Test
     public void testSimple() {
-    	String source = Helper.readResource("/integrations/structure.dog");
-    	StackFrame frame = Helper.eval(source).get(0);
+		String source = Helper.readResource("/integrations/structure.dog");
+		StackFrame frame = Helper.eval(source).get(0);
 
-    	
+		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
+		Assert.assertEquals(5.5, xValue.value, 0.0);
 
+		TrueValue yValue = (TrueValue)frame.getVariableNamed("y");
+		Assert.assertEquals(TrueValue.class, yValue.getClass());
+		
+		NumberValue zValue = (NumberValue)frame.getVariableNamed("z");
+		Assert.assertEquals(8.0, zValue.value, 0.0);
     }
 }

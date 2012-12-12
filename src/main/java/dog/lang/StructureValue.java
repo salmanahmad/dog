@@ -31,12 +31,18 @@ public class StructureValue extends Value {
     }
 
 	public Value get(Object key) {
-        return value.get(key);
+        Value v = this.value.get(key);
+        
+        if(v == null) {
+            return new NullValue();
+        } else {
+            return v;
+        }
     }
 
     public void put(Object key, Value value) {
         if((key instanceof Number) || (key instanceof String)) {
-			value.put(key, value);
+			this.value.put(key, value);
 		}
     }
 

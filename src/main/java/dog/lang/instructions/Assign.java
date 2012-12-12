@@ -49,10 +49,6 @@ public class Assign extends Instruction {
 		mv.visitInsn(AALOAD);
 		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "put", "(Ljava/lang/Object;Ldog/lang/Value;)V");
 
-
-
-
-
 		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv, instructionIndex);
 	}
