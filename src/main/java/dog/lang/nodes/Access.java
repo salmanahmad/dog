@@ -66,6 +66,8 @@ public class Access extends Node {
 					int variable = symbol.variableGenerator.getIndexForVariable((String)path.get(0));
 					ReadVariable write = new ReadVariable(this.line, outputRegister, variable);
 					symbol.instructions.add(write);
+
+					remainingPath = path.subList(1, path.size());
 				}
 			}
 

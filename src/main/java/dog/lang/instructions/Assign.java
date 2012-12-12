@@ -31,5 +31,12 @@ public class Assign extends Instruction {
 		return String.format(":assign %%r%d %%r%d %%r%d", outputRegister, keyRegister, valueRegister);
 	}
 
+	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
+		mv.visitLabel(labels[instructionIndex]);
 
+		
+
+		setReturnRegister(mv, this.outputRegister);
+		incrementProgramCounter(mv, instructionIndex);
+	}
 }

@@ -103,8 +103,8 @@ unaryExpresion returns [Node node]
 
 primaryExpression returns [Node node]
   : literal                   { $node = $literal.node; }
-  | call                      { $node = $call.node; }
   | access                    { $node = $access.node; }
+  | call                      { $node = $call.node; }
   | functionDefinition        { $node = $functionDefinition.node; }
   | structureDefinition       { $node = $structureDefinition.node; }
   | collectionDefinition      { $node = $collectionDefinition.node; }
@@ -145,7 +145,7 @@ accessPath returns [ArrayList<Object> path]
 
 accessDot returns [ArrayList<Object> path]
   : DOT               { $path = new ArrayList<Object>(); }
-    IDENTIFIER        { $path.add($text); }
+    IDENTIFIER        { $path.add($IDENTIFIER.text); }
     ( accessPath      { $path.addAll($accessPath.path); }
     )?
   ;
