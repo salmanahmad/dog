@@ -1,5 +1,7 @@
 
 
+// This is a file that was added so I could disassemble it aand make it easier to generate JVM byte code...
+
 import java.util.HashMap;
 
 public class ZZZ extends dog.lang.Function {
@@ -26,26 +28,14 @@ public class ZZZ extends dog.lang.Function {
 	public dog.lang.Signal resume(dog.lang.StackFrame stack) {
 		
 
-		stack.programCounter = 5000;
+	
 
-		stack.returnRegister = 89;
-
-		if(stack.registers[5000].booleanEquivalent()) {
-			stack.programCounter = 5000;
-		} else {
-			stack.programCounter++;
-		}
+	
 		
 
 		switch(stack.programCounter) {
 			case 0:
-				stack.registers[1] = stack.registers[0];
-			case 1:
-				stack.registers[2] = stack.registers[0];
-			case 2:
-				stack.registers[3] = stack.registers[0];
-			case 3:
-				stack.registers[4] = stack.registers[0];
+				stack.registers[999999].put(stack.registers[888888].getValue(), stack.registers[7777777]);
 		}
 
 		return new dog.lang.Signal(dog.lang.Signal.Type.RETURN);

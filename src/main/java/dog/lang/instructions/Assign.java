@@ -34,7 +34,24 @@ public class Assign extends Instruction {
 	public void assemble(MethodVisitor mv, int instructionIndex, Label[] labels) {
 		mv.visitLabel(labels[instructionIndex]);
 
-		
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitLdcInsn(this.outputRegister);
+		mv.visitInsn(AALOAD);
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitLdcInsn(this.keyRegister);
+		mv.visitInsn(AALOAD);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "getValue", "()Ljava/lang/Object;");
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+		mv.visitLdcInsn(this.valueRegister);
+		mv.visitInsn(AALOAD);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "put", "(Ljava/lang/Object;Ldog/lang/Value;)V");
+
+
+
+
 
 		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv, instructionIndex);

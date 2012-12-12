@@ -13,6 +13,10 @@ package dog.lang;
 
 public class NullValue extends Value {
 
+    public Object getValue() {
+        return null;
+    }
+
     public Value logicalInverse() {
         return new TrueValue();
     }
