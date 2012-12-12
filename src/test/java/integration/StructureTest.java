@@ -21,7 +21,7 @@ public class StructureTest {
     
     @Test
     public void testSimple() {
-		String source = Helper.readResource("/integrations/structure.dog");
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
 		StackFrame frame = Helper.eval(source).get(0);
 
 		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
@@ -32,5 +32,22 @@ public class StructureTest {
 		
 		NumberValue zValue = (NumberValue)frame.getVariableNamed("z");
 		Assert.assertEquals(8.0, zValue.value, 0.0);
+    }
+
+    @Test
+    public void testNested() {
+		String source = Helper.readResource("/integrations/StructureTest/nested.dog");
+		StackFrame frame = Helper.eval(source).get(0);
+
+		NumberValue value;
+
+		value = (NumberValue)frame.getVariableNamed("a");
+		Assert.assertEquals(42.0, value.value, 0.0);
+
+		value = (NumberValue)frame.getVariableNamed("b");
+		Assert.assertEquals(42.0, value.value, 0.0);
+
+		value = (NumberValue)frame.getVariableNamed("c");
+		Assert.assertEquals(42.0, value.value, 0.0);
     }
 }

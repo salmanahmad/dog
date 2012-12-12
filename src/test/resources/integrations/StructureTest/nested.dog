@@ -1,0 +1,11 @@
+
+
+
+i = {}
+i.value = {} 
+i.value.value = 42
+
+a = i.value.value
+b = i["value"]["value"]
+c = i.value["value"]
+

@@ -1,0 +1,14 @@
+
+
+
+i = {
+	me = 8
+}
+i.key = 5.5
+i.value = true
+
+
+
+x = i.key
+y = i.value
+z = i.me

@@ -1,9 +1,0 @@
-
-
-
-i = {}
-i.value = 7
-
-d = i
-
-dog.print: d.value
