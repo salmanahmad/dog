@@ -42,6 +42,6 @@ public class WriteVariable extends Instruction {
 		mv.visitInsn(AASTORE);
 
 		setReturnRegister(mv, this.inputRegister);
-		incrementProgramCounter(mv);
+		incrementProgramCounter(mv, instructionIndex);
 	}
 }

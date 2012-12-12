@@ -33,7 +33,7 @@ public class Return extends Instruction {
 		mv.visitLabel(labels[instructionIndex]);
 
 		setReturnRegister(mv, this.inputRegister);
-		incrementProgramCounter(mv);
+		incrementProgramCounter(mv, instructionIndex);
 
 		mv.visitTypeInsn(NEW, "dog/lang/Signal");
 		mv.visitInsn(DUP);

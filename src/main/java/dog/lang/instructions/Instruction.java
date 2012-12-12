@@ -43,12 +43,11 @@ public class Instruction implements Opcodes {
 		mv.visitFieldInsn(PUTFIELD, "dog/lang/StackFrame", "returnRegister", "I");
 	}
 
-	public void incrementProgramCounter(MethodVisitor mv) {
+	public void incrementProgramCounter(MethodVisitor mv, int instructionIndex) {
+		int incrementedInstructionIndex = instructionIndex + 1;
+
 		mv.visitVarInsn(ALOAD, 1);
-		mv.visitInsn(DUP);
-		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "programCounter", "I");
-		mv.visitInsn(ICONST_1);
-		mv.visitInsn(IADD);
+		mv.visitLdcInsn(incrementedInstructionIndex);
 		mv.visitFieldInsn(PUTFIELD, "dog/lang/StackFrame", "programCounter", "I");
 	}
 }

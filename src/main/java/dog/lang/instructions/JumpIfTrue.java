@@ -53,7 +53,7 @@ public class JumpIfTrue extends Instruction {
 
 		// If booleanEquivalent is zero (false)
 		mv.visitLabel(l0);
-		incrementProgramCounter(mv);
+		incrementProgramCounter(mv, instructionIndex);
 	}
 }
 

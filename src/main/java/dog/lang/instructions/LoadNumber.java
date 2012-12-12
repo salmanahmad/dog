@@ -38,7 +38,7 @@ public class LoadNumber extends Instruction implements Opcodes {
 		mv.visitInsn(AASTORE);
 
 		setReturnRegister(mv, this.outputRegister);
-		incrementProgramCounter(mv);
+		incrementProgramCounter(mv, instructionIndex);
 	}
 
 }

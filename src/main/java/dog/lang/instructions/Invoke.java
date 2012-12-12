@@ -50,7 +50,7 @@ public class Invoke extends Instruction {
 		// have already been waited before this point?
 		
 		setReturnRegister(mv, this.outputRegister);
-		incrementProgramCounter(mv);
+		incrementProgramCounter(mv, instructionIndex);
 
 		mv.visitTypeInsn(NEW, "dog/lang/Signal");
 		mv.visitInsn(DUP);

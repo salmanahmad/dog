@@ -70,8 +70,7 @@ public class Bark {
 			
 			for(byte[] b : symbols) {
 				ClassReader reader = new ClassReader(b);
-				// TODO - I need to add a .class extension to the file names, I think...
-				JarEntry entry = new JarEntry(reader.getClassName());
+				JarEntry entry = new JarEntry(reader.getClassName() + ".class");
 				target.putNextEntry(entry);
 				target.write(b, 0, b.length);
 				target.closeEntry();

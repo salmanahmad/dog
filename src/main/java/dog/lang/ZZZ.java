@@ -35,9 +35,8 @@ public class ZZZ extends dog.lang.Function {
 		} else {
 			stack.programCounter++;
 		}
-
-
 		
+
 		switch(stack.programCounter) {
 			case 0:
 				stack.registers[1] = stack.registers[0];
