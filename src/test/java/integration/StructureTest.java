@@ -50,4 +50,10 @@ public class StructureTest {
 		value = (NumberValue)frame.getVariableNamed("c");
 		Assert.assertEquals(42.0, value.value, 0.0);
     }
+
+    @Test
+    public void testBuild() {
+		String source = Helper.readResource("/integrations/StructureTest/build.dog");
+		StackFrame frame = Helper.eval(source).get(0);    	
+    }
 }

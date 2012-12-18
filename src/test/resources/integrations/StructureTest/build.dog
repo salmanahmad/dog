@@ -1,0 +1,16 @@
+
+
+define file {
+	name = "foo"
+	foo = "bar"
+}
+
+
+my_file = file {
+	foo = 7
+}
+
+dog.print: my_file
+
+
+

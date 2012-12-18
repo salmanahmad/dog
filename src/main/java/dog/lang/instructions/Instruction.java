@@ -17,6 +17,7 @@ public class Instruction implements Opcodes {
 	public int line;
 	public int outputRegister;
 
+	// TODO: Reaffirming that I need to do this...
 	// TODO: if any operand register (especially function invocations) is "-1" that means that I have to replace the value with NullValue
 
 	public Instruction() {

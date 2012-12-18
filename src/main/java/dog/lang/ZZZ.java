@@ -38,7 +38,9 @@ public class ZZZ extends dog.lang.Function {
 				stack.registers[999999].put(stack.registers[888888].getValue(), stack.registers[7777777]);
 		}
 
-		return new dog.lang.Signal(dog.lang.Signal.Type.RETURN);
+
+		return new dog.lang.Signal(dog.lang.Signal.Type.INVOKE, new dog.lang.StackFrame(new dog.lang.Type(), new dog.lang.Value[] { new dog.lang.Type() }));
+		//return new dog.lang.Signal(dog.lang.Signal.Type.RETURN);
 		//return new dog.lang.Signal(dog.lang.Signal.Type.INVOKE, new dog.lang.StackFrame(new dog.lang.Function(), new dog.lang.Value[] {stack.registers[0], stack.registers[1], stack.registers[2], stack.registers[3]}));
 	}
 }

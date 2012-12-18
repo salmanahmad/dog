@@ -12,8 +12,12 @@
 package dog.lang.compiler;
 
 import dog.lang.nodes.Node;
+import dog.lang.instructions.Instruction;
+import dog.lang.Resolver;
 
-public class Type extends Symbol {
+import org.objectweb.asm.*;
+
+public class Type extends Symbol implements Opcodes {
 	public Type(String name, Node node, Compiler compiler) {
 		super(name, node, compiler);
 	}
@@ -33,6 +37,6 @@ public class Type extends Symbol {
 	}
 
 	public void compile() {
-
+		compileContinuable("dog/lang/Type");
 	}
 }

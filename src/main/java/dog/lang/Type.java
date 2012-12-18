@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class Type extends StructureValue implements Continuable {
 	
 	public HashMap<String, Integer> getVariableTable() {
-		return null;
+		return new HashMap<String, Integer>();
 	}
 
 	public int getRegisterCount() {
