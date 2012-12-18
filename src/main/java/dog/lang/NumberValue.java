@@ -24,6 +24,10 @@ public class NumberValue extends Value {
         return value;
     }
     
+    public String toString() {
+        return "" + value;
+    }
+
     public Value plus(Value v) { 
         return v.dispatchPlus(this); 
     }

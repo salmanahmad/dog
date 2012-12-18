@@ -30,6 +30,17 @@ public class StructureValue extends Value {
         return value;
     }
 
+    public String toString() {
+        HashMap<Object, String> map = new HashMap<Object, String>();
+
+        for(Object key : value.keySet()) {
+            Object v = value.get(key);
+            map.put(key, v.toString());
+        }
+
+        return map.toString();
+    }
+
 	public Value get(Object key) {
         Value v = this.value.get(key);
         

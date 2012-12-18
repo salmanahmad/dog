@@ -24,6 +24,10 @@ public class StringValue extends Value {
         return value;
     }
     
+    public String toString() {
+        return "\"" + org.apache.commons.lang3.StringEscapeUtils.escapeJava(this.value) + "\"";
+    }
+
     public Value plus(Value v) {
         return v.dispatchPlus(this);
     }

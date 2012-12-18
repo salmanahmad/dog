@@ -17,6 +17,10 @@ public class FalseValue extends Value {
         return false;
     }
 
+    public String toString() {
+        return "true";
+    }
+
     public Value logicalInverse() {
         return new TrueValue();
     }

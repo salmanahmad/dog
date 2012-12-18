@@ -17,6 +17,10 @@ public class NullValue extends Value {
         return null;
     }
 
+    public String toString() {
+        return "null";
+    }
+
     public Value logicalInverse() {
         return new TrueValue();
     }

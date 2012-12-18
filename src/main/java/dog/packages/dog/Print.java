@@ -26,7 +26,7 @@ public class Print extends Function {
 
 	public Signal resume(StackFrame frame) {
 		Value value = frame.variables[0];
-		System.out.println(value.getValue());
+		System.out.println(value);
 		return new Signal(Signal.Type.RETURN);
 	}
 }

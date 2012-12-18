@@ -16,6 +16,10 @@ public class TrueValue extends Value {
         return true;
     }
     
+    public String toString() {
+        return "true";
+    }
+
     public boolean isBoolean() {
         return true;
     }
