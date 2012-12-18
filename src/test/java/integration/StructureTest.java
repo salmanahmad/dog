@@ -54,6 +54,13 @@ public class StructureTest {
     @Test
     public void testBuild() {
 		String source = Helper.readResource("/integrations/StructureTest/build.dog");
-		StackFrame frame = Helper.eval(source).get(0);    	
+		StackFrame frame = Helper.eval(source).get(0); 
+
+		StructureValue value = (StructureValue)frame.getVariableNamed("f");
+		
+		Assert.assertEquals(value.getClass().getName(), "dog.packages.universe.null$dot$file");
+		Assert.assertEquals(((HashMap<Object, Value>)value.getValue()).size(), 2);
+		Assert.assertEquals(value.get("name").getValue(), "foo");
+		Assert.assertEquals(value.get("foo").getValue(), 7.0);
     }
 }

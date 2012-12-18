@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class Function implements Continuable {
 	
 	public HashMap<String, Integer> getVariableTable() {
-		return null;
+		return new HashMap<String, Integer>();
 	}
 
 	public int getRegisterCount() {
@@ -28,7 +28,7 @@ public class Function implements Continuable {
 	}
 
 	public Signal resume(StackFrame stack) {
-		return null;
+		return new Signal(Signal.Type.RETURN, stack);
 	}
 }
 

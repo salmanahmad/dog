@@ -28,7 +28,7 @@ public class Type extends StructureValue implements Continuable {
 	}
 
 	public Signal resume(StackFrame stack) {
-		return null;
+		return new Signal(Signal.Type.RETURN, stack);
 	}
 }
 
