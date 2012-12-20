@@ -32,13 +32,18 @@ public class StructureValue extends Value {
 
     public String toString() {
         HashMap<Object, String> map = new HashMap<Object, String>();
+        String type = "";
 
         for(Object key : value.keySet()) {
             Object v = value.get(key);
             map.put(key, v.toString());
         }
 
-        return map.toString();
+        if(!(this.getClass().equals(StructureValue.class) || this.getClass().equals(Type.class))) {
+            type = Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(this.getClass().getName()));
+        }
+
+        return type + " " + map.toString();
     }
 
 	public Value get(Object key) {
