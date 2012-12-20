@@ -24,7 +24,7 @@ public class Type extends StructureValue implements Continuable {
 	}
 
 	public int getVariableCount() {
-		return 0;
+		return 1;
 	}
 
 	public Signal resume(StackFrame stack) {

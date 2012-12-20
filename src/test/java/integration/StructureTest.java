@@ -54,7 +54,7 @@ public class StructureTest {
     @Test
     public void testBuild() {
 		String source = Helper.readResource("/integrations/StructureTest/build.dog");
-		StackFrame frame = Helper.eval(source).get(0); 
+		StackFrame frame = Helper.eval(source).get(0);
 
 		StructureValue value = (StructureValue)frame.getVariableNamed("f");
 		
@@ -62,5 +62,18 @@ public class StructureTest {
 		Assert.assertEquals(((HashMap<Object, Value>)value.getValue()).size(), 2);
 		Assert.assertEquals(value.get("name").getValue(), "foo");
 		Assert.assertEquals(value.get("foo").getValue(), 7.0);
+    }
+
+    @Test
+    public void testNative() {
+    	String source = Helper.readResource("/integrations/StructureTest/native.dog");
+    	StackFrame frame = Helper.eval(source).get(0);
+
+    	StructureValue value = (StructureValue)frame.getVariableNamed("a");
+
+    	Assert.assertEquals(value.getClass().getName(), "dog.packages.universe.dog$dot$date");
+    	Assert.assertEquals(((HashMap<Object, Value>)value.getValue()).size(), 1);
+    	Assert.assertEquals(value.get("month").getValue(), 7.0);
+
     }
 }

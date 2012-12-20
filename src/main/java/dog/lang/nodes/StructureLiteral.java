@@ -48,15 +48,25 @@ public class StructureLiteral extends Node {
 			LoadStructure structure = new LoadStructure(this.line, structureRegister);
 			symbol.instructions.add(structure);
 		} else {
-			String typeIdentifier;
-			// TODO: This needs to be fixed similar to Call.java
-			if(type.scope == Identifier.Scope.EXTERNAL) {
+			String typeIdentifier = null;
+
+			if(typeIdentifier == null && (type.scope == Identifier.Scope.CASCADE || type.scope == Identifier.Scope.INTERNAL)) {
 				typeIdentifier = StringUtils.join(type.path, ".");
-			} else {
-				typeIdentifier = this.packageName + "." + StringUtils.join(type.path, ".");
+
+				if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
+					typeIdentifier = null;
+				}
 			}
 
-			if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
+			if(typeIdentifier == null && (type.scope == Identifier.Scope.CASCADE || type.scope == Identifier.Scope.EXTERNAL)) {
+				typeIdentifier = this.packageName + "." + StringUtils.join(type.path, ".");
+
+				if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
+					typeIdentifier = null;
+				}	
+			}
+
+			if(typeIdentifier == null) {
 				throw new RuntimeException("Unable to unique identify the type symbol.");
 			}
 

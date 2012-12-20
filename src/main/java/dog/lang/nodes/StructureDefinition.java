@@ -76,7 +76,7 @@ public class StructureDefinition extends Definition {
 
 			symbol.currentOutputRegister = structureRegister;
 		} else {
-			// TODO: I should consider returning the TyepPointer so that it is 
+			// TODO: I should consider returning the TypePointer so that it is 
 			// available to the caller code.
 			symbol.currentOutputRegister = -1;
 		}
