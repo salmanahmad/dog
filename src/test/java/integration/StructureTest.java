@@ -74,6 +74,18 @@ public class StructureTest {
     	Assert.assertEquals(value.getClass().getName(), "dog.packages.universe.dog$dot$date");
     	Assert.assertEquals(((HashMap<Object, Value>)value.getValue()).size(), 1);
     	Assert.assertEquals(value.get("month").getValue(), 7.0);
+    }
 
+    @Test
+    public void testArray() {
+    	String source = Helper.readResource("/integrations/StructureTest/array.dog");
+    	StackFrame frame = Helper.eval(source).get(0);
+
+    	StructureValue value = (StructureValue)frame.getVariableNamed("a");
+
+    	Assert.assertEquals(value.getClass().getName(), "dog.packages.universe.dog$dot$array");
+    	Assert.assertEquals(((HashMap<Object, Value>)value.getValue()).size(), 4);
+    	Assert.assertEquals(value.get(1.0).getValue(), 2.0);
+    	Assert.assertNull(value.get("month").getValue());
     }
 }

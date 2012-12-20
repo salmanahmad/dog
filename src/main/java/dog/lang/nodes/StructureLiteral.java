@@ -51,7 +51,7 @@ public class StructureLiteral extends Node {
 			String typeIdentifier = null;
 
 			if(typeIdentifier == null && (type.scope == Identifier.Scope.CASCADE || type.scope == Identifier.Scope.INTERNAL)) {
-				typeIdentifier = StringUtils.join(type.path, ".");
+				typeIdentifier = this.packageName + "." + StringUtils.join(type.path, ".");
 
 				if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
 					typeIdentifier = null;
@@ -59,7 +59,7 @@ public class StructureLiteral extends Node {
 			}
 
 			if(typeIdentifier == null && (type.scope == Identifier.Scope.CASCADE || type.scope == Identifier.Scope.EXTERNAL)) {
-				typeIdentifier = this.packageName + "." + StringUtils.join(type.path, ".");
+				typeIdentifier = StringUtils.join(type.path, ".");				
 
 				if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
 					typeIdentifier = null;
@@ -67,7 +67,7 @@ public class StructureLiteral extends Node {
 			}
 
 			if(typeIdentifier == null) {
-				throw new RuntimeException("Unable to unique identify the type symbol.");
+				throw new RuntimeException("Unable to unique identify the type symbol: " + StringUtils.join(type.path, "."));
 			}
 
 			Build structure = new Build(this.line, structureRegister, typeIdentifier);
