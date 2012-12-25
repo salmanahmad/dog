@@ -11,6 +11,9 @@
 
 package dog.lang;
 
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
+
 public class TrueValue extends Value {
     public Object getValue() {
         return true;
@@ -22,6 +25,20 @@ public class TrueValue extends Value {
 
     public boolean isBoolean() {
         return true;
+    }
+
+    public Object toJSON() {
+        return Boolean.TRUE;
+    }
+
+    public DBObject toMongo() {
+        DBObject object = new BasicDBObject();
+
+        object.put("_id", this.getId());
+        object.put("value", true);
+        object.put("type", "dog.boolean");
+
+        return object;
     }
 }
 

@@ -11,6 +11,9 @@
 
 package dog.lang;
 
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
+
 public class NumberValue extends Value {
 
     public double value;
@@ -212,6 +215,20 @@ public class NumberValue extends Value {
     
     public boolean isNumber() {
         return true;
+    }
+
+    public Object toJSON() {
+        return this.value;
+    }
+
+    public DBObject toMongo() {
+        DBObject object = new BasicDBObject();
+
+        object.put("_id", this.getId());
+        object.put("value", this.getValue());
+        object.put("type", "dog.number");
+
+        return object;
     }
 }
 

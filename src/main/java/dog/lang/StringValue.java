@@ -11,6 +11,9 @@
 
 package dog.lang;
 
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
+
 public class StringValue extends Value {
     
     public String value;
@@ -144,10 +147,22 @@ public class StringValue extends Value {
         throw new RuntimeException("Unsupported binary operation.");
     }
     
-    
-    
     public boolean isString() {
         return true;
+    }
+
+    public Object toJSON() {
+        return this.value;
+    }
+
+    public DBObject toMongo() {
+        DBObject object = new BasicDBObject();
+
+        object.put("_id", this.getId());
+        object.put("value", this.getValue());
+        object.put("type", "dog.string");
+
+        return object;
     }
 }
 

@@ -12,6 +12,12 @@
 package dog.lang;
 
 import java.util.HashMap;
+import java.util.ArrayList;
+
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 public class StructureValue extends Value {
 
@@ -64,6 +70,47 @@ public class StructureValue extends Value {
 
     public boolean isStructure() {
         return true;
+    }
+
+    public Object toJSON() {
+        try {
+            JSONObject object = new JSONObject();
+
+            for(Object k : value.keySet()) {
+                Value v = value.get(k);
+                object.put(k.toString(), v.toJSON());
+            }
+
+            return object;
+        } catch(JSONException e) {
+            return null;
+        }
+    }
+
+    public DBObject toMongo() {
+        DBObject object = new BasicDBObject();
+        ArrayList value = new ArrayList();
+        String type = "dog.structure";
+
+        for(Object k : this.value.keySet()) {
+            Value v = this.value.get(k);
+            DBObject o = new BasicDBObject();
+
+            o.put("key", k);
+            o.put("value", v.toMongo());
+
+            value.add(o);
+        }
+
+        if(!(this.getClass().equals(StructureValue.class) || this.getClass().equals(Type.class))) {
+            type = Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(this.getClass().getName()));
+        }
+
+        object.put("_id", this.getId());
+        object.put("value", value);
+        object.put("type", type);
+
+        return object;
     }
 }
 

@@ -11,9 +11,10 @@
 
 package dog.lang;
 
-import org.json.JSONObject;
 import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
+import org.json.JSONObject;
 
 public class Value implements Persistable {
 
@@ -206,20 +207,20 @@ public class Value implements Persistable {
         throw new RuntimeException("Cannot assign key for non-structure type.");
     }
     
-    public JSONObject toJSON() {
-        throw new RuntimeException("Unsupported binary operation.");
+    public Object toJSON() {
+        throw new RuntimeException("toJSON must be implemented by a subclass.");
     }
 
     public DBObject toMongo() {
-        throw new RuntimeException("Unsupported binary operation.");
+        throw new RuntimeException("toMongo must be implemented by a subclass.");
     }
 
     public void fromJSON(JSONObject json, Resolver resolver) {
-        throw new RuntimeException("Unsupported binary operation.");
+        throw new RuntimeException("fromJSON must be implemented by a subclass.");
     }
 
     public void fromMongo(DBObject bson, Resolver resolver) {
-        throw new RuntimeException("Unsupported binary operation.");
+        throw new RuntimeException("fromMongo must be implemented by a subclass.");
     }
 }
 

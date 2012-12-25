@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import com.mongodb.DBObject;
 
 public interface Persistable {
-	public JSONObject toJSON();
+	public Object toJSON();
 	public DBObject toMongo();
 
 	public void fromJSON(JSONObject json, Resolver resolver);

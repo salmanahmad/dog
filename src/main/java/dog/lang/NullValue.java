@@ -11,6 +11,10 @@
 
 package dog.lang;
 
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
+import org.json.JSONObject;
+
 public class NullValue extends Value {
 
     public Object getValue() {
@@ -37,6 +41,20 @@ public class NullValue extends Value {
 
     public boolean isNull() {
         return true;
+    }
+
+    public Object toJSON() {
+        return JSONObject.NULL;    
+    }
+
+    public DBObject toMongo() {
+        DBObject object = new BasicDBObject();
+
+        object.put("_id", this.getId());
+        object.put("value", null);
+        object.put("type", "dog.null");
+
+        return object;
     }
 }
 
