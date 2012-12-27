@@ -48,13 +48,16 @@ public class NullValue extends Value {
     }
 
     public DBObject toMongo() {
-        DBObject object = new BasicDBObject();
+        DBObject object = super.toMongo();
 
-        object.put("_id", this.getId());
         object.put("value", null);
         object.put("type", "dog.null");
 
         return object;
+    }
+
+    public void fromMongo(DBObject bson, Resolver resolver) {
+        super.fromMongo(bson, resolver);
     }
 }
 

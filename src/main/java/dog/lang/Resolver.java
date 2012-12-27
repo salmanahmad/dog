@@ -222,7 +222,6 @@ public class Resolver extends ClassLoader implements Opcodes {
 			return symbol;
 		}
 	}
-	
 }
 
 

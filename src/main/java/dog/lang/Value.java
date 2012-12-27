@@ -11,6 +11,8 @@
 
 package dog.lang;
 
+import java.util.Map;
+
 import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
@@ -207,12 +209,24 @@ public class Value implements Persistable {
         throw new RuntimeException("Cannot assign key for non-structure type.");
     }
     
+    public Map toMap() {
+        return toMongo().toMap();
+    }
+
     public Object toJSON() {
         throw new RuntimeException("toJSON must be implemented by a subclass.");
     }
 
     public DBObject toMongo() {
-        throw new RuntimeException("toMongo must be implemented by a subclass.");
+        DBObject object = new BasicDBObject();
+
+        object.put("_id", this.getId());
+
+        return object;
+    }
+
+    public void fromMap(Map map, Resolver resolver) {
+        this.fromMongo(new BasicDBObject(map), resolver);
     }
 
     public void fromJSON(JSONObject json, Resolver resolver) {
@@ -220,7 +234,41 @@ public class Value implements Persistable {
     }
 
     public void fromMongo(DBObject bson, Resolver resolver) {
-        throw new RuntimeException("fromMongo must be implemented by a subclass.");
+        this.setId((ObjectId)bson.get("_id"));
+    }
+
+    public static Value createFromMap(Map map, Resolver resolver) {
+        return Value.createFromMongo(new BasicDBObject(map), resolver);
+    }
+
+    public static Value createFromJSON(JSONObject json, Resolver resolver) {
+        return null;
+    }
+
+    public static Value createFromMongo(DBObject bson, Resolver resolver) {
+        String type = (String)bson.get("type");
+        Value value = null;
+
+        if(type == "dog.null") {
+            value = new NullValue();
+        } else if(type == "dog.boolean") {
+            if((Boolean)bson.get("value")) {
+                value = new TrueValue();
+            } else {
+                value = new FalseValue();
+            }
+        } else if(type == "dog.number") {
+            value = new NumberValue();
+        } else if(type == "dog.string") {
+            value = new StringValue();
+        } else if(type == "dog.structure") {
+            value = new StructureValue();
+        } else {
+            value = (Value)resolver.resolveSymbol(type);
+        }
+
+        value.fromMongo(bson, resolver);
+        return value;
     }
 }
 

@@ -18,6 +18,10 @@ public class NumberValue extends Value {
 
     public double value;
     
+    public NumberValue() {
+
+    }
+
     public NumberValue(double v) {
         super();
         value = v;
@@ -222,13 +226,18 @@ public class NumberValue extends Value {
     }
 
     public DBObject toMongo() {
-        DBObject object = new BasicDBObject();
+        DBObject object = super.toMongo();
 
-        object.put("_id", this.getId());
         object.put("value", this.getValue());
         object.put("type", "dog.number");
 
         return object;
+    }
+
+    public void fromMongo(DBObject bson, Resolver resolver) {
+        super.fromMongo(bson, resolver);
+
+        this.value = (Double)bson.get("value");
     }
 }
 

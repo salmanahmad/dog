@@ -18,6 +18,10 @@ public class StringValue extends Value {
     
     public String value;
     
+    public StringValue() {
+
+    }
+
     public StringValue(String v) {
         super();
         value = v;
@@ -156,13 +160,18 @@ public class StringValue extends Value {
     }
 
     public DBObject toMongo() {
-        DBObject object = new BasicDBObject();
+        DBObject object = super.toMongo();
 
-        object.put("_id", this.getId());
         object.put("value", this.getValue());
         object.put("type", "dog.string");
 
         return object;
+    }
+
+    public void fromMongo(DBObject bson, Resolver resolver) {
+        super.fromMongo(bson, resolver);
+
+        this.value = (String)bson.get("value");
     }
 }
 

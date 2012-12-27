@@ -11,13 +11,17 @@
 
 package dog.lang;
 
+import java.util.Map;
+
 import org.json.JSONObject;
 import com.mongodb.DBObject;
 
 public interface Persistable {
+	public Map toMap();
 	public Object toJSON();
 	public DBObject toMongo();
 
+	public void fromMap(Map map, Resolver resolver);
 	public void fromJSON(JSONObject json, Resolver resolver);
 	public void fromMongo(DBObject bson, Resolver resolver);
 }

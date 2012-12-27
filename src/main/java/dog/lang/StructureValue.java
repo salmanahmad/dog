@@ -88,7 +88,7 @@ public class StructureValue extends Value {
     }
 
     public DBObject toMongo() {
-        DBObject object = new BasicDBObject();
+        DBObject object = super.toMongo();
         ArrayList value = new ArrayList();
         String type = "dog.structure";
 
@@ -106,11 +106,50 @@ public class StructureValue extends Value {
             type = Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(this.getClass().getName()));
         }
 
-        object.put("_id", this.getId());
         object.put("value", value);
         object.put("type", type);
 
         return object;
+    }
+
+    public void fromJSON(JSONObject json, Resolver resolver) {
+        throw new RuntimeException("fromJSON must be implemented by a subclass.");
+    }
+
+    public void fromMongo(DBObject bson, Resolver resolver) {
+        super.fromMongo(bson, resolver);
+
+        ArrayList values = (ArrayList)bson.get("value");
+
+        for(Object item : values) {
+            DBObject hash = (DBObject)item;
+            DBObject mongoValue = (DBObject)hash.get("value");
+            
+            Value dogValue = null;
+            String type = (String)mongoValue.get("type");
+
+            if(type == "dog.null") {
+                dogValue = new NullValue();
+            } else if(type == "dog.boolean") {
+                if((Boolean)bson.get("value")) {
+                    dogValue = new TrueValue();
+                } else {
+                    dogValue = new FalseValue();
+                }
+            } else if(type == "dog.number") {
+                dogValue = new NumberValue();
+            } else if(type == "dog.string") {
+                dogValue = new StringValue();
+            } else if(type == "dog.structure") {
+                dogValue = new StructureValue();
+            } else {
+                dogValue = (Value)resolver.resolveSymbol(type);
+            }
+
+            dogValue.fromMongo(mongoValue, resolver);
+
+            value.put(hash.get("key"), dogValue);
+        }
     }
 }
 
