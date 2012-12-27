@@ -56,7 +56,7 @@ public class StructureTest {
 		String source = Helper.readResource("/integrations/StructureTest/build.dog");
 		StackFrame frame = Helper.eval(source).get(0);
 
-		StructureValue value = (StructureValue)frame.getVariableNamed("f");
+		StructureValue value = (StructureValue)frame.getVariableNamed("my_file");
 		
 		Assert.assertEquals(value.getClass().getName(), "dog.packages.universe.null$dot$file");
 		Assert.assertEquals(((HashMap<Object, Value>)value.getValue()).size(), 2);
