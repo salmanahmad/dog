@@ -12,6 +12,7 @@
 package dog.lang.instructions;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import org.objectweb.asm.*;
 
 public class Perform extends Instruction {
@@ -21,6 +22,7 @@ public class Perform extends Instruction {
 	public String operation;
 
 	static HashMap<String, String> operationMapping;
+	static HashSet<String> unaryOperators;
 	static {
 		operationMapping = new HashMap<String, String>();
 
@@ -42,6 +44,11 @@ public class Perform extends Instruction {
 
 		operationMapping.put("&&", "logicalAnd");
 		operationMapping.put("||", "logicalOr");
+
+		operationMapping.put("!", "logicalInverse");
+
+		unaryOperators = new HashSet<String>();
+		unaryOperators.add("!");
 	}
 
 	public Perform(int outputRegister, int inputRegister1, int inputRegister2, String operation) {
@@ -67,19 +74,32 @@ public class Perform extends Instruction {
 			throw new RuntimeException("Invalid operation");
 		}
 
-		mv.visitVarInsn(ALOAD, 1);
-		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
-		mv.visitIntInsn(SIPUSH, this.outputRegister);
-		mv.visitVarInsn(ALOAD, 1);
-		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
-		mv.visitIntInsn(SIPUSH, this.inputRegister1);
-		mv.visitInsn(AALOAD);
-		mv.visitVarInsn(ALOAD, 1);
-		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
-		mv.visitIntInsn(SIPUSH, this.inputRegister2);
-		mv.visitInsn(AALOAD);
-		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "(Ldog/lang/Value;)Ldog/lang/Value;");
-		mv.visitInsn(AASTORE);
+		if(unaryOperators.contains(this.operation)) {
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+			mv.visitIntInsn(SIPUSH, this.outputRegister);
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+			mv.visitIntInsn(SIPUSH, this.inputRegister1);
+			mv.visitInsn(AALOAD);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "()Ldog/lang/Value;");
+			mv.visitInsn(AASTORE);
+		} else {
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+			mv.visitIntInsn(SIPUSH, this.outputRegister);
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+			mv.visitIntInsn(SIPUSH, this.inputRegister1);
+			mv.visitInsn(AALOAD);
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+			mv.visitIntInsn(SIPUSH, this.inputRegister2);
+			mv.visitInsn(AALOAD);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "(Ldog/lang/Value;)Ldog/lang/Value;");
+			mv.visitInsn(AASTORE);
+		}
+		
 
 		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv, instructionIndex);

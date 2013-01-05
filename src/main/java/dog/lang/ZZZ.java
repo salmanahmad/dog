@@ -4,6 +4,8 @@
 
 import java.util.HashMap;
 
+import dog.lang.Value;
+
 public class ZZZ extends dog.lang.Function {
 
 	public HashMap<String, Integer> getVariableTable() {
@@ -33,9 +35,11 @@ public class ZZZ extends dog.lang.Function {
 	
 		
 
+		
+
 		switch(stack.programCounter) {
 			case 0:
-				stack.registers[999999].put(stack.registers[888888].getValue(), stack.registers[7777777]);
+				stack.registers[999999] = stack.registers[5555].logicalInverse();
 		}
 
 
