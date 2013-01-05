@@ -242,7 +242,10 @@ public class Value implements Persistable {
     }
 
     public static Value createFromJSON(JSONObject json, Resolver resolver) {
-        return null;
+        Value value = new StructureValue();
+        value.fromJSON(json, resolver);
+        
+        return value;
     }
 
     public static Value createFromMongo(DBObject bson, Resolver resolver) {

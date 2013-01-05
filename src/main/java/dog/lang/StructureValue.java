@@ -13,6 +13,7 @@ package dog.lang;
 
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
@@ -113,7 +114,31 @@ public class StructureValue extends Value {
     }
 
     public void fromJSON(JSONObject json, Resolver resolver) {
-        throw new RuntimeException("fromJSON must be implemented by a subclass.");
+        Iterator iter = json.keys();
+        while(iter.hasNext()) {
+            String key = (String)iter.next();
+            try {
+                Object value = json.get(key);
+
+                if(value == null) {
+                    this.put(key, new NullValue());
+                } else if(value instanceof Number) {
+                    this.put(key, new NumberValue(((Number)value).doubleValue()));
+                } else if(value instanceof String) {
+                    this.put(key, new StringValue((String)value));
+                } else if(value instanceof Boolean && (Boolean)value == true) {
+                    this.put(key, new TrueValue());
+                } else if(value instanceof Boolean && (Boolean)value == false) {
+                    this.put(key, new FalseValue());
+                } else if(value instanceof JSONObject) {
+                    StructureValue structureValue = new StructureValue();
+                    structureValue.fromJSON((JSONObject)value, resolver);
+                    this.put(key, structureValue);
+                }
+            } catch (JSONException exception) {
+                
+            }
+        }
     }
 
     public void fromMongo(DBObject bson, Resolver resolver) {
@@ -131,7 +156,7 @@ public class StructureValue extends Value {
             if(type == "dog.null") {
                 dogValue = new NullValue();
             } else if(type == "dog.boolean") {
-                if((Boolean)bson.get("value")) {
+                if((Boolean)mongoValue.get("value")) {
                     dogValue = new TrueValue();
                 } else {
                     dogValue = new FalseValue();
