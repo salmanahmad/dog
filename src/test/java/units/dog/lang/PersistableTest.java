@@ -94,6 +94,7 @@ public class PersistableTest {
         Assert.assertTrue(newValue instanceof StructureValue);
         Assert.assertEquals(newValue.getId(), value.getId());
         Assert.assertEquals(((HashMap<Object, Value>)newValue.getValue()).size(), ((HashMap<Object, Value>)value.getValue()).size());
+        Assert.assertTrue(newValue.equalTo(value) instanceof TrueValue);
     }
 
     @Test

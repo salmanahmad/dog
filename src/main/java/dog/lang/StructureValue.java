@@ -106,6 +106,10 @@ public class StructureValue extends Value {
     }
     
     public Value dispatchEqualTo(StructureValue v) {
+        // TODO: Should two structures be considered equal if they have the same
+        // keys but are of different types? Right now, they are considered to be
+        // equal but almost certainly will not be considered to be identical.
+
         if(!v.value.keySet().equals(this.value.keySet())) {
             return new FalseValue();
         }
