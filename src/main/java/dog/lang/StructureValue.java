@@ -73,6 +73,87 @@ public class StructureValue extends Value {
         return true;
     }
 
+    public Value equalTo(Value v) { 
+        return v.dispatchEqualTo(this); 
+    }
+    
+    public Value notEqualTo(Value v) { 
+        return v.dispatchEqualTo(this); 
+    }
+
+    public Value dispatchEqualTo(Value v) {
+        return new FalseValue();
+    }
+    
+    public Value dispatchEqualTo(NullValue v) {
+        return new FalseValue();
+    }
+    
+    public Value dispatchEqualTo(TrueValue v) {
+        return new FalseValue();
+    }
+    
+    public Value dispatchEqualTo(FalseValue v) {
+        return new FalseValue();
+    }
+    
+    public Value dispatchEqualTo(NumberValue v) {
+        return new FalseValue();
+    }
+    
+    public Value dispatchEqualTo(StringValue v) {
+        return new FalseValue();
+    }
+    
+    public Value dispatchEqualTo(StructureValue v) {
+        if(!v.value.keySet().equals(this.value.keySet())) {
+            return new FalseValue();
+        }
+
+        for(Object key : this.value.keySet()) {
+            Value vValue = v.value.get(key);
+            Value thisValue = this.value.get(key);
+
+            if(vValue.equalTo(thisValue) instanceof FalseValue) {
+                return new FalseValue();
+            }
+        }
+
+        return new TrueValue();
+    }
+
+    public Value dispatchNotEqualTo(Value v) {
+        return new TrueValue();
+    }
+    
+    public Value dispatchNotEqualTo(NullValue v) {
+        return new TrueValue();
+    }
+    
+    public Value dispatchNotEqualTo(TrueValue v) {
+        return new TrueValue();
+    }
+    
+    public Value dispatchNotEqualTo(FalseValue v) {
+        return new TrueValue();
+    }
+    
+    public Value dispatchNotEqualTo(NumberValue v) {
+        return new TrueValue();
+    }
+    
+    public Value dispatchNotEqualTo(StringValue v) {
+        return new TrueValue();
+    }
+    
+    public Value dispatchNotEqualTo(StructureValue v) {
+        if(this.dispatchEqualTo(v) instanceof TrueValue) {
+            return new TrueValue();
+        } else {
+            return new FalseValue();
+        }
+    }
+
     public Object toJSON() {
         try {
             JSONObject object = new JSONObject();

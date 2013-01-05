@@ -72,83 +72,113 @@ public class StringValue extends Value {
     }
     
     public Value dispatchPlus(StringValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new StringValue(v.value + this.value);
     }
 
     public Value dispatchMultiply(NumberValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        String output = "";
+        
+        for (int i = 0; i < v.value; i++) {
+            output += this.value;
+        }
+        
+        return new StringValue(output);
     }
 
     public Value dispatchEqualTo(Value v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new FalseValue();
     }
     
     public Value dispatchEqualTo(NullValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new FalseValue();
     }
     
     public Value dispatchEqualTo(TrueValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new FalseValue();
     }
     
     public Value dispatchEqualTo(FalseValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new FalseValue();
     }
     
     public Value dispatchEqualTo(NumberValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new FalseValue();
     }
     
     public Value dispatchEqualTo(StringValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        if(v.value.equals(this.value)) {
+            return new TrueValue();
+        } else {
+            return new FalseValue();
+        }
     }
     
     public Value dispatchEqualTo(StructureValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new FalseValue();
     }
 
     public Value dispatchNotEqualTo(Value v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new TrueValue();
     }
     
     public Value dispatchNotEqualTo(NullValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new TrueValue();
     }
     
     public Value dispatchNotEqualTo(TrueValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new TrueValue();
     }
     
     public Value dispatchNotEqualTo(FalseValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new TrueValue();
     }
     
     public Value dispatchNotEqualTo(NumberValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new TrueValue();
     }
     
     public Value dispatchNotEqualTo(StringValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        if(!v.value.equals(this.value)) {
+            return new TrueValue();
+        } else {
+            return new FalseValue();
+        }
     }
     
     public Value dispatchNotEqualTo(StructureValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        return new TrueValue();
     }
 
     public Value dispatchLessThan(StringValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        if(v.value.compareTo(this.value) < 0) {
+            return new TrueValue();
+        } else {
+            return new FalseValue();
+        }
     }
     
     public Value dispatchGreaterThan(StringValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        if(v.value.compareTo(this.value) > 0) {
+            return new TrueValue();
+        } else {
+            return new FalseValue();
+        }
     }
     
     public Value dispatchLessThanEqualTo(StringValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        if(v.value.compareTo(this.value) < 0 || v.value.equals(this.value)) {
+            return new TrueValue();
+        } else {
+            return new FalseValue();
+        }
     }
     
     public Value dispatchGreaterThanEqualTo(StringValue v) {
-        throw new RuntimeException("Unsupported binary operation.");
+        if(v.value.compareTo(this.value) > 0 || v.value.equals(this.value)) {
+            return new TrueValue();
+        } else {
+            return new FalseValue();
+        }
     }
     
     public boolean isString() {

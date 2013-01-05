@@ -26,6 +26,10 @@ public class OperatorsTest {
     	
     	Assert.assertTrue(frame.getVariableNamed("t") instanceof TrueValue);
     	Assert.assertTrue(frame.getVariableNamed("f") instanceof FalseValue);
+		
+		Assert.assertTrue(frame.getVariableNamed("af") instanceof FalseValue);
 
+		Assert.assertTrue(frame.getVariableNamed("st") instanceof TrueValue);
+		Assert.assertTrue(frame.getVariableNamed("sf") instanceof FalseValue);
     }
 }
