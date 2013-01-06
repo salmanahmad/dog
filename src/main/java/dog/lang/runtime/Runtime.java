@@ -32,6 +32,18 @@ public class Runtime {
 		scheduledStackFrames = new LinkedBlockingQueue<StackFrame>();
 	}
 
+	public Resolver getResolver() {
+		return resolver;
+	}
+
+	public ArrayList<StackFrame> build(String symbol) {
+		Type instance = (Type)resolver.resolveSymbol(symbol);
+		ArrayList<Value> arguments = new ArrayList<Value>();
+		arguments.add(instance);
+
+		return this.invoke(symbol, arguments);
+	}
+
 	public ArrayList<StackFrame> invoke(String symbol) {
 		return this.invoke(symbol, new ArrayList<Value>(), null);
 	}
