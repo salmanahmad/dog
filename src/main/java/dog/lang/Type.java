@@ -30,5 +30,14 @@ public class Type extends StructureValue implements Continuable {
 	public Signal resume(StackFrame stack) {
 		return new Signal(Signal.Type.RETURN, stack);
 	}
+
+	public void initialize() {
+		// This is a method that you could consider using for
+		// custom subclasses of types. The problem with resume
+		// is that it requires a Dog runtime. The nice thing about
+		// initialize is that if you are just creating a dummy structure
+		// and want to use it from, you can call initialize directly withing
+		// schedule a call to resume(). 
+	}
 }
 
