@@ -13,6 +13,8 @@ package dog.lang.instructions;
 
 import org.objectweb.asm.*;
 
+// TODO: As of now, Constants are Deprecated. See the discussion in dog.lang.Constant.
+
 public class ReadConstant extends Instruction {
 	String identifier;
 

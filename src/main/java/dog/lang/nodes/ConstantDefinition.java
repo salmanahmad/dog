@@ -19,6 +19,8 @@ import dog.lang.instructions.LoadValue;
 
 import java.util.ArrayList;
 
+// TODO: As of now, Constants are Deprecated. See the discussion in dog.lang.Constant.
+
 // TODO: Should constants be Node instead of a Value. The first time it is called I memorize it
 // and from then on I just return the results? Right now that means that I will not be able to 
 // do things like define a constant of a runtime type (since I will not have that information)

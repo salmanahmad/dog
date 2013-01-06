@@ -13,6 +13,8 @@ package dog.lang.compiler;
 
 import dog.lang.nodes.Node;
 
+// TODO: As of now, Constants are Deprecated. See the discussion in dog.lang.Constant.
+
 public class Constant extends Symbol {
 	public Constant(String name, Node node, Compiler compiler) {
 		super(name, node, compiler);
