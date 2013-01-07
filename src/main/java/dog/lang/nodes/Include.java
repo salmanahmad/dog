@@ -33,6 +33,12 @@ public class Include extends Node {
 		symbol.currentOutputRegister = -1;
 	}
 
+	public ArrayList<ArrayList<String>> getIncludedPackages() {
+		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+		list.add(identifier);
+		return list;
+	}
+
 	public ArrayList<Node> children() {
 		return new ArrayList<Node>();
 	}

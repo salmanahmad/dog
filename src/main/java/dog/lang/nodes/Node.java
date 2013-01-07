@@ -20,7 +20,9 @@ public abstract class Node {
 	public int line;
 
     public String filePath;
-	public String packageName;
+	public ArrayList<String> packageName;
+	public ArrayList<ArrayList<String>> includedPackages;
+	public ArrayList<ArrayList<String>> loadedPackages;
 
 	public Node parent;
 	
@@ -49,6 +51,21 @@ public abstract class Node {
 		}
 
 		return packageName;
+	}
+
+	public ArrayList<ArrayList<String>> getIncludedPackages() {
+		ArrayList<ArrayList<String>> includedPackages = new ArrayList<ArrayList<String>>();
+
+		for(Node child : this.children()) {
+			ArrayList<ArrayList<String>> temp = child.getIncludedPackages();
+			includedPackages.addAll(temp);
+		}
+
+		return includedPackages;
+	}
+
+	public ArrayList<ArrayList<String>> getLoadedPackages() {
+		return null;
 	}
 
 	public void scaffold(Compiler compiler) {
