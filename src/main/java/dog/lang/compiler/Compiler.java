@@ -20,6 +20,8 @@ import dog.lang.nodes.FunctionDefinition;
 import dog.lang.nodes.ConstantDefinition;
 import dog.lang.nodes.StructureDefinition;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 
 public class Compiler {
@@ -81,7 +83,7 @@ public class Compiler {
 		}
 
 		if(containsNonDefinitions) {
-			Symbol root = new Function(packageName + "." + "@root", ast, this);
+			Symbol root = new Function(StringUtils.join(packageName, ".") + "." + "@root", ast, this);
 			this.addSymbol(root);
 		}
 
