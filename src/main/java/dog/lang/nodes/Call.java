@@ -56,8 +56,6 @@ public class Call extends Node {
 			// TODO: Include "dog" in this search?
 			packagesToSearch.add(this.packageName);
 			packagesToSearch.addAll(this.includedPackages);
-			
-			Iterator iterator = packagesToSearch.iterator();
 
 			for(ArrayList<String> p : packagesToSearch) {
 				String identifier = StringUtils.join(p, ".") + "." + StringUtils.join(function.path, ".");

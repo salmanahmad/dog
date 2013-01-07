@@ -65,7 +65,7 @@ public abstract class Node {
 	}
 
 	public ArrayList<ArrayList<String>> getLoadedPackages() {
-		return null;
+		return new ArrayList<ArrayList<String>>();
 	}
 
 	public void scaffold(Compiler compiler) {

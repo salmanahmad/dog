@@ -131,6 +131,8 @@ public class Assign extends Node {
 			}
 		}
 
+		list.add(value);
+
 		return list;
 	}
 }

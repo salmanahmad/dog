@@ -71,18 +71,18 @@ public class Access extends Node {
 				}
 			}
 
-			if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.INTERNAL)) {
-				ArrayList<String> prefix = new ArrayList<String>();
+			ArrayList<String> prefix = new ArrayList<String>();
 
-				for (int i = 0; i < path.size(); i++) {
-					Object component = path.get(i);
-					if(component instanceof String) {
-						prefix.add((String)component);
-					} else {
-						break;
-					}
+			for (int i = 0; i < path.size(); i++) {
+				Object component = path.get(i);
+				if(component instanceof String) {
+					prefix.add((String)component);
+				} else {
+					break;
 				}
+			}
 
+			if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.INTERNAL)) {
 				ArrayList<ArrayList<String>> packagesToSearch = new ArrayList<ArrayList<String>>();
 				packagesToSearch.add(this.packageName);
 				packagesToSearch.addAll(this.includedPackages);
@@ -123,7 +123,33 @@ public class Access extends Node {
 			}
 
 			if(outputRegister == -1 && (scope == Identifier.Scope.CASCADE || scope == Identifier.Scope.EXTERNAL)) {
-				
+				for(int i = 1; i <= prefix.size(); i++) {
+					String symbolIdentifier = StringUtils.join(prefix.subList(0, i).toArray(), ".");
+					
+					ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(symbolIdentifier);
+					if(symbols.size() == 0) {
+						break;
+					} else if(symbols.size() == 1 && symbols.get(0).name.equals(symbolIdentifier)) {
+						outputRegister = symbol.registerGenerator.generate();
+
+						if(symbols.get(0).kind == dog.lang.Symbol.Kind.CONSTANT) {
+							ReadConstant constant = new ReadConstant(this.line, outputRegister, symbolIdentifier);
+							symbol.instructions.add(constant);
+						} else if(symbols.get(0).kind == dog.lang.Symbol.Kind.TYPE) {
+							Build build = new Build(this.line, outputRegister, symbolIdentifier);
+							symbol.instructions.add(build);
+						} else if(symbols.get(0).kind == dog.lang.Symbol.Kind.FUNCTION) {
+							Invoke invoke = new Invoke(this.line, outputRegister, false, symbolIdentifier, new ArrayList<Integer>());
+							symbol.instructions.add(invoke);
+						}
+						
+						try {
+							remainingPath = path.subList(i + 1, path.size());
+						} catch(Exception e) {
+							remainingPath = new ArrayList<Object>();
+						}
+					}
+				}
 			}
 
 			// TODO: If you cannot resolve a symbol at compile time I should create a dynamic-access instruction that will
