@@ -51,7 +51,7 @@ public class Call extends Node {
 		int outputRegister = symbol.registerGenerator.generate();
 
 		if(functionIdentifier == null && (function.scope == Identifier.Scope.CASCADE || function.scope == Identifier.Scope.INTERNAL)) {
-			String identifier = this.packageName + "." + StringUtils.join(function.path, ".");
+			String identifier = StringUtils.join(this.packageName, ".") + "." + StringUtils.join(function.path, ".");
 			ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
 
 			if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {

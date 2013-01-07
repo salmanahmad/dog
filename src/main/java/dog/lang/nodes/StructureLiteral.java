@@ -51,7 +51,7 @@ public class StructureLiteral extends Node {
 			String typeIdentifier = null;
 
 			if(typeIdentifier == null && (type.scope == Identifier.Scope.CASCADE || type.scope == Identifier.Scope.INTERNAL)) {
-				typeIdentifier = this.packageName + "." + StringUtils.join(type.path, ".");
+				typeIdentifier = StringUtils.join(this.packageName, ".") + "." + StringUtils.join(type.path, ".");
 
 				if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
 					typeIdentifier = null;

@@ -85,7 +85,7 @@ public class Access extends Node {
 
 				for(int i = 1; i <= prefix.size(); i++) {
 					// TODO - Handle the bug here since not all elements may be a string. If I come accross a non-string I should break
-					String symbolIdentifier = this.packageName + "." + StringUtils.join(prefix.subList(0, i).toArray(), ".");
+					String symbolIdentifier = StringUtils.join(this.packageName, ".") + "." + StringUtils.join(prefix.subList(0, i).toArray(), ".");
 					
 					ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(symbolIdentifier);
 					if(symbols.size() == 0) {
