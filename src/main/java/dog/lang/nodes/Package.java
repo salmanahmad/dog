@@ -12,28 +12,29 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.compiler.Identifier;
 import dog.lang.instructions.Perform;
 
 import java.util.ArrayList;
 
 public class Package extends Node {
-	String name;
+	Identifier identifier;
 
-	public Package(String name) {
-		this(-1, name);
+	public Package(Identifier identifier) {
+		this(-1, identifier);
 	}
 
-	public Package(int line, String name) {
+	public Package(int line, Identifier identifier) {
 		super(line);
-		this.name = name;
+		this.identifier = identifier;
 	}
 
 	public void compile(Symbol symbol) {
 		symbol.currentOutputRegister = -1;
 	}
 
-	public String getPackageName() {
-		return name;
+	public Identifier getPackageIdentifier() {
+		return identifier;
 	}
 
 	public ArrayList<Node> children() {

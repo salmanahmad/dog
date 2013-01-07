@@ -12,20 +12,21 @@
 package dog.lang.nodes;
 
 import dog.lang.compiler.Symbol;
+import dog.lang.compiler.Identifier;
 import dog.lang.instructions.Perform;
 
 import java.util.ArrayList;
 
-public class Import extends Node {
-	String name;
+public class Include extends Node {
+	Identifier identifier;
 
-	public Import(String name) {
-		this(-1, name);
+	public Include(Identifier identifier) {
+		this(-1, identifier);
 	}
 
-	public Import(int line, String name) {
+	public Include(int line, Identifier identifier) {
 		super(line);
-		this.name = name;
+		this.identifier = identifier;
 	}
 
 	public void compile(Symbol symbol) {

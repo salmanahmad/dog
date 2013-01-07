@@ -113,7 +113,7 @@ primaryExpression returns [Node node]
   | waitStatement             { $node = $waitStatement.node; }
   | spawnStatement            { $node = $spawnStatement.node; }
   | packageDeclaration        { $node = $packageDeclaration.node; }
-  | importStatement           { $node = $importStatement.node; }
+  | includeStatement           { $node = $includeStatement.node; }
   | onEachStatement           { $node = $onEachStatement.node; }
   | onStatement               { $node = $onStatement.node; }
   ;
@@ -430,11 +430,11 @@ elseOnStatement returns [Node node]
   ;
 
 packageDeclaration returns [Node node]
-  : PACKAGE IDENTIFIER  { $node = new dog.lang.nodes.Package($start.getLine(), $IDENTIFIER.text); }
+  : PACKAGE identifierPath  { $node = new dog.lang.nodes.Package($start.getLine(), $identifierPath.identifier); }
   ;
 
-importStatement returns [Node node]
-  : IMPORT IDENTIFIER   { $node = new Import($start.getLine(), $IDENTIFIER.text); }
+includeStatement returns [Node node]
+  : INCLUDE identifierPath   { $node = new Include($start.getLine(), $identifierPath.identifier); }
   ;
 
 literal returns [Node node]
@@ -541,7 +541,7 @@ TIMES:              'times';
 RETURN:             'return';
 BREAK:              'break';
 
-IMPORT: 	          'import';
+INCLUDE: 	          'include';
 PACKAGE:	          'package';
 
 WAIT:	              'wait';
