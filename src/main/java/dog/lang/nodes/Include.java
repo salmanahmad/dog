@@ -18,13 +18,13 @@ import dog.lang.instructions.Perform;
 import java.util.ArrayList;
 
 public class Include extends Node {
-	Identifier identifier;
+	ArrayList<String> identifier;
 
-	public Include(Identifier identifier) {
+	public Include(ArrayList<String> identifier) {
 		this(-1, identifier);
 	}
 
-	public Include(int line, Identifier identifier) {
+	public Include(int line, ArrayList<String> identifier) {
 		super(line);
 		this.identifier = identifier;
 	}

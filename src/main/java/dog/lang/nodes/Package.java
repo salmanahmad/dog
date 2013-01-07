@@ -18,13 +18,13 @@ import dog.lang.instructions.Perform;
 import java.util.ArrayList;
 
 public class Package extends Node {
-	Identifier identifier;
+	ArrayList<String> identifier;
 
-	public Package(Identifier identifier) {
+	public Package(ArrayList<String> identifier) {
 		this(-1, identifier);
 	}
 
-	public Package(int line, Identifier identifier) {
+	public Package(int line, ArrayList<String> identifier) {
 		super(line);
 		this.identifier = identifier;
 	}
@@ -33,7 +33,7 @@ public class Package extends Node {
 		symbol.currentOutputRegister = -1;
 	}
 
-	public Identifier getPackageIdentifier() {
+	public ArrayList<String> getPackageName() {
 		return identifier;
 	}
 

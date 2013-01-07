@@ -172,6 +172,14 @@ identifierPath returns [Identifier identifier]
     )*              
   ;
 
+packageIdentifier returns [ArrayList<String> identifier]
+  :                    { $identifier =  new ArrayList<String>(); }
+    head=IDENTIFIER    { $identifier.add($head.getText()); }
+    ( DOT
+      tail=IDENTIFIER  { $identifier.add($tail.getText()); }
+    )*              
+  ;
+
 call returns [Node node]
 @init { ArrayList<Node> arguments = new ArrayList<Node>(); Identifier path = new Identifier(); String name = ""; }
   : ( identifierPath             { path = $identifierPath.identifier; }
@@ -430,11 +438,11 @@ elseOnStatement returns [Node node]
   ;
 
 packageDeclaration returns [Node node]
-  : PACKAGE identifierPath  { $node = new dog.lang.nodes.Package($start.getLine(), $identifierPath.identifier); }
+  : PACKAGE packageIdentifier  { $node = new dog.lang.nodes.Package($start.getLine(), $packageIdentifier.identifier); }
   ;
 
 includeStatement returns [Node node]
-  : INCLUDE identifierPath   { $node = new Include($start.getLine(), $identifierPath.identifier); }
+  : INCLUDE packageIdentifier   { $node = new Include($start.getLine(), $packageIdentifier.identifier); }
   ;
 
 literal returns [Node node]

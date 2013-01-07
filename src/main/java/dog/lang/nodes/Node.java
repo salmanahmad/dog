@@ -38,11 +38,11 @@ public abstract class Node {
 		}
 	}
 
-	public String getPackageName() {
-		String packageName = null;
+	public ArrayList<String> getPackageName() {
+		ArrayList<String> packageName = null;
 
 		for(Node child : this.children()) {
-			String temporaryPackageName = child.getPackageName();
+			ArrayList<String> temporaryPackageName = child.getPackageName();
 			if(temporaryPackageName != null) {
 				packageName = temporaryPackageName;
 			}

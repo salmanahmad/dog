@@ -5,6 +5,8 @@
 
 JVM TODO:
 
+Organize functions as packages into separate directories so we don't have a blow up of files in a single system directory.
+
 Handle nested function definition appropariated  especially with the resolver and compiler symbol table.
 
 Dynamic late binding option for packages.

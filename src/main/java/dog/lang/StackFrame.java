@@ -12,12 +12,14 @@
 package dog.lang;
 
 import java.lang.Math;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 
 import org.json.JSONObject;
 import org.bson.types.ObjectId;
 import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
 
 public class StackFrame extends DatabaseObject {
 
@@ -98,12 +100,20 @@ public class StackFrame extends DatabaseObject {
 		return this.variables[this.variableTable.get(name)];
 	}
 
+	public Map toMap() {
+		return toMongo().toMap();
+	}
+
 	public JSONObject toJSON() {
 		return null;
 	}
 
 	public DBObject toMongo() {
 		return null;
+	}
+
+	public void fromMap(Map map, Resolver resolver) {
+		this.fromMongo(new BasicDBObject(map), resolver);
 	}
 
 	public void fromJSON(JSONObject json, Resolver resolver) {
