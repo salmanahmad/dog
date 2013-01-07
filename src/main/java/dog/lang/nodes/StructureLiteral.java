@@ -51,19 +51,29 @@ public class StructureLiteral extends Node {
 			String typeIdentifier = null;
 
 			if(typeIdentifier == null && (type.scope == Identifier.Scope.CASCADE || type.scope == Identifier.Scope.INTERNAL)) {
-				typeIdentifier = StringUtils.join(this.packageName, ".") + "." + StringUtils.join(type.path, ".");
+				ArrayList<ArrayList<String>> packagesToSearch = new ArrayList<ArrayList<String>>();
+				// TODO: Include "dog" in this search?
+				packagesToSearch.add(this.packageName);
+				packagesToSearch.addAll(this.includedPackages);
 
-				if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
-					typeIdentifier = null;
+				for(ArrayList<String> p : packagesToSearch) {
+					String identifier = StringUtils.join(p, ".") + "." + StringUtils.join(type.path, ".");
+					ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
+
+					if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
+						typeIdentifier = identifier;
+						break;
+					}
 				}
 			}
 
 			if(typeIdentifier == null && (type.scope == Identifier.Scope.CASCADE || type.scope == Identifier.Scope.EXTERNAL)) {
-				typeIdentifier = StringUtils.join(type.path, ".");				
+				String identifier = StringUtils.join(type.path, ".");
+				ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
 
-				if(symbol.getCompiler().searchForSymbols(typeIdentifier).size() != 1) {
-					typeIdentifier = null;
-				}	
+				if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
+					typeIdentifier = identifier;
+				}
 			}
 
 			if(typeIdentifier == null) {

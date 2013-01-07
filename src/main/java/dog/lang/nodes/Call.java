@@ -16,6 +16,7 @@ import dog.lang.compiler.Identifier;
 import dog.lang.instructions.Invoke;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -43,7 +44,7 @@ public class Call extends Node {
 		ArrayList<Integer> argumentRegisters = new ArrayList<Integer>();
 		String functionIdentifier = null;
 
-		for(Node argument: arguments) {
+		for(Node argument : arguments) {
 			argument.compile(symbol);
 			argumentRegisters.add(symbol.currentOutputRegister);
 		}
@@ -51,11 +52,21 @@ public class Call extends Node {
 		int outputRegister = symbol.registerGenerator.generate();
 
 		if(functionIdentifier == null && (function.scope == Identifier.Scope.CASCADE || function.scope == Identifier.Scope.INTERNAL)) {
-			String identifier = StringUtils.join(this.packageName, ".") + "." + StringUtils.join(function.path, ".");
-			ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
+			ArrayList<ArrayList<String>> packagesToSearch = new ArrayList<ArrayList<String>>();
+			// TODO: Include "dog" in this search?
+			packagesToSearch.add(this.packageName);
+			packagesToSearch.addAll(this.includedPackages);
+			
+			Iterator iterator = packagesToSearch.iterator();
 
-			if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
-				functionIdentifier = identifier;
+			for(ArrayList<String> p : packagesToSearch) {
+				String identifier = StringUtils.join(p, ".") + "." + StringUtils.join(function.path, ".");
+				ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
+
+				if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
+					functionIdentifier = identifier;
+					break;
+				}
 			}
 		}
 
