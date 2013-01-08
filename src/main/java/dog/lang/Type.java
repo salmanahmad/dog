@@ -20,7 +20,7 @@ public class Type extends StructureValue implements Continuable {
 	}
 
 	public int getRegisterCount() {
-		return 0;
+		return 1;
 	}
 
 	public int getVariableCount() {
@@ -36,7 +36,7 @@ public class Type extends StructureValue implements Continuable {
 		// custom subclasses of types. The problem with resume
 		// is that it requires a Dog runtime. The nice thing about
 		// initialize is that if you are just creating a dummy structure
-		// and want to use it from, you can call initialize directly withing
+		// and want to use it from Java, you can call initialize directly withing
 		// schedule a call to resume(). 
 	}
 }

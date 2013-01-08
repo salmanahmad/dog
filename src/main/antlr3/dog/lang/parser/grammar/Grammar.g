@@ -14,6 +14,7 @@ import dog.lang.nodes.*;
 import dog.lang.compiler.Identifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Arrays;
 
 }
@@ -241,11 +242,13 @@ structureDefinition returns [Node node]
   ;
 
 collectionDefinition returns [Node node]
-// TODO: Once I add the native language integration I need to create the package type
-// and subclass it here...
+@init { String name = ""; Nodes body = new Nodes(); HashMap<Object, Node> value = new HashMap<Object, Node>(); }
   : DEFINE
     COLLECTION
-    IDENTIFIER 
+    IDENTIFIER            { name = $IDENTIFIER.text; }
+                          { value.put("name", new StringLiteral($start.getLine(), $IDENTIFIER.text)); }
+                          { body.add(new StructureLiteral($start.getLine(), new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "collection"))), value)); }
+                          { $node = new FunctionDefinition($start.getLine(), name, new ArrayList<String>(), body); }
   ;
 
 controlStructure returns [Node node]
