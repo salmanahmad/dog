@@ -54,7 +54,7 @@ public class StackFrame extends DatabaseObject {
 
 	public StackFrame(Continuable symbol, Value[] arguments) {
 		this.symbol = symbol;
-		this.symbolName = Resolver.decodeSymbol(symbol.getClass().getName());
+		this.symbolName = Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(symbol.getClass().getName()));
 		this.initialize(symbol.getRegisterCount(), symbol.getVariableCount(), symbol.getVariableTable(), arguments);
 	}
 

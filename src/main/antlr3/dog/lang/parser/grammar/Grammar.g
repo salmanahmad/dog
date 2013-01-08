@@ -246,8 +246,36 @@ collectionDefinition returns [Node node]
   : DEFINE
     COLLECTION
     IDENTIFIER            { name = $IDENTIFIER.text; }
-                          { value.put("name", new StringLiteral($start.getLine(), $IDENTIFIER.text)); }
-                          { body.add(new StructureLiteral($start.getLine(), new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "collection"))), value)); }
+                          { 
+                            value.put("name", new Operation(
+                              $start.getLine(),
+                              new Access($start.getLine(), 
+                                Identifier.Scope.LOCAL,
+                                new ArrayList<Object>(Arrays.asList("p", "name"))
+                              ),
+                              new StringLiteral($start.getLine(), "." + $IDENTIFIER.text),
+                              "+"
+                            ));
+                          }
+                          { 
+                            body.add(new Assign(
+                              $start.getLine(), 
+                              new ArrayList<Object>(Arrays.asList("p")),
+                              new Call(
+                                $start.getLine(),
+                                false,
+                                new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("reflect", "current_package"))),
+                                new ArrayList<Node>()
+                              )
+                            ));
+
+                            body.add(new StructureLiteral(
+                                $start.getLine(), 
+                                new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "collection"))),
+                                value
+                            ));
+                          }
+
                           { $node = new FunctionDefinition($start.getLine(), name, new ArrayList<String>(), body); }
   ;
 

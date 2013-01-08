@@ -5,6 +5,11 @@
 
 JVM TODO:
 
+Multiline function calls - How do I do those? Perhaps a '\' character...?
+	perform_selector: "hi"
+	on: foobar
+	with: [1, 2, 3, 4, 5, 6]
+
 Organize functions as packages into separate directories so we don't have a blow up of files in a single system directory.
 
 Handle nested function definition appropariated  especially with the resolver and compiler symbol table.

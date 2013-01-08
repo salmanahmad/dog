@@ -32,6 +32,10 @@ public class Type extends StructureValue implements Continuable {
 	}
 
 	public void initialize() {
+		// I should have a similar thing for Function called run. That allows me to get 
+		// the functionality while not having to execute in the runtime... Perhaps an interface
+		// is in order for the Java API?
+
 		// This is a method that you could consider using for
 		// custom subclasses of types. The problem with resume
 		// is that it requires a Dog runtime. The nice thing about
