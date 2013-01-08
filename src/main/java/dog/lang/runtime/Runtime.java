@@ -17,19 +17,28 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.UnknownHostException;
+
+import com.mongodb.MongoClient;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.ServerAddress;
 import org.bson.types.ObjectId;
 
 public class Runtime {
-	LinkedBlockingQueue<StackFrame> scheduledStackFrames;
 	Resolver resolver;
+	LinkedBlockingQueue<StackFrame> scheduledStackFrames;
+	
+	MongoClient mongoClient;
 
-	public Runtime() {
+	public Runtime() throws UnknownHostException {
 		this(new Resolver());
 	}
 
-	public Runtime(Resolver resolver) {
+	public Runtime(Resolver resolver) throws UnknownHostException {
 		this.resolver = resolver;
 		scheduledStackFrames = new LinkedBlockingQueue<StackFrame>();
+		mongoClient = new MongoClient(new ServerAddress("localhost", 27017));
 	}
 
 	public Resolver getResolver() {

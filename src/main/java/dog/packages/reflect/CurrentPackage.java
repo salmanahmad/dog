@@ -34,6 +34,7 @@ public class CurrentPackage extends Function {
 		String name = null;
 
 		if(frame.controlAncestors.size() != 0) {
+			// TODO: Update this with StackFrame.parentStackFrame
 			StackFrame returnFrame = (StackFrame)frame.controlAncestors.get(frame.controlAncestors.size() - 1);
 
 			ArrayList<String> list = new ArrayList<String>(Arrays.asList(StringUtils.split(returnFrame.symbolName, ".")));

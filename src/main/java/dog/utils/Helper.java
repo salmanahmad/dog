@@ -98,8 +98,14 @@ public class Helper {
     	//}
 
     	resolver.linkBark(bark);
+		dog.lang.runtime.Runtime runtime = null;
 
-    	dog.lang.runtime.Runtime runtime = new dog.lang.runtime.Runtime(resolver);
+    	try {
+			runtime = new dog.lang.runtime.Runtime(resolver);
+    	} catch(Exception e) {
+    		throw new RuntimeException("Could not create the Dog runtime.");
+    	}
+
     	return runtime.invoke("null.@root");
 	}
 

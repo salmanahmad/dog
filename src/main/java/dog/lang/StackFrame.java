@@ -29,6 +29,10 @@ public class StackFrame extends DatabaseObject {
 	public Continuable symbol = null;
 	public String symbolName = null;
 
+	// TODO: If the return Register is -1 it means null...
+	public int returnRegister = -1;
+	public int programCounter = 0;
+
 	// TODO: Consider tracking registers, variables, and arguments. 
 	// They will be initialized with registerCount, variableCount, and argumentCount
 	// that way I can check for cases where you pass in more than the correct
@@ -36,16 +40,12 @@ public class StackFrame extends DatabaseObject {
 
 	public Value[] registers = null;
 	public Value[] variables = null;
-	
-	// TODO: If the return Register is -1 it means null...
-	public int returnRegister = -1;
-	public int programCounter = 0;
 
 	public HashMap<String, Integer> variableTable = new HashMap<String, Integer>();
 	public ArrayList<Object> controlAncestors = new ArrayList<Object>();
 
 	public StackFrame() {
-		/* Keeping the default constructor so I can fromJSON and fromMongo */
+		// Keeping the default constructor so I can fromJSON and fromMongo
 	}
 
 	public StackFrame(Continuable symbol) {
@@ -100,6 +100,22 @@ public class StackFrame extends DatabaseObject {
 		return this.variables[this.variableTable.get(name)];
 	}
 
+	public StackFrame parentStackFrame() {
+		if(this.controlAncestors.size() == 0) {
+			return null;
+		} else {
+			Object object = this.controlAncestors.get(this.controlAncestors.size() - 1);
+			if(object instanceof StackFrame) {
+				return (StackFrame)object;
+			} else if(object instanceof ObjectId) {
+				// TODO - How do I search for the object?
+				return null;
+			} else {
+				return null;
+			}
+		}
+	}
+
 	public Map toMap() {
 		return toMongo().toMap();
 	}
@@ -109,7 +125,32 @@ public class StackFrame extends DatabaseObject {
 	}
 
 	public DBObject toMongo() {
-		return null;
+		BasicDBObject hash = new BasicDBObject();
+		hash.put("_id", this.getId());
+		hash.put("_id", this.futureReturnId);
+		hash.put("symbol_name", this.symbolName);
+
+		hash.put("program_counter", this.programCounter);
+		hash.put("return_register", this.returnRegister);
+        
+        ArrayList<DBObject> registers = new ArrayList<DBObject>();
+        for(Value register : this.registers) {
+        	registers.add(register.toMongo());
+        }
+
+		ArrayList<DBObject> variables = new ArrayList<DBObject>();
+		for(Value variable : this.variables) {
+			variables.add(variable.toMongo());
+		}
+
+        hash.put("registers", registers);
+		hash.put("variables", variables); 
+
+		hash.put("variable_table", new BasicDBObject(this.variableTable));
+		// TODO: How do I save my control ancestors...?
+		hash.put("control_ancestors", this.controlAncestors);
+
+		return hash;
 	}
 
 	public void fromMap(Map map, Resolver resolver) {
@@ -117,10 +158,10 @@ public class StackFrame extends DatabaseObject {
 	}
 
 	public void fromJSON(JSONObject json, Resolver resolver) {
-
+		// TODO
 	}
 
 	public void fromMongo(DBObject bson, Resolver resolver) {
-
+		
 	}
 }
