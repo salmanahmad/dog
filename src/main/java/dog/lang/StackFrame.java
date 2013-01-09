@@ -128,6 +128,14 @@ public class StackFrame extends DatabaseObject {
 		}
 	}
 
+	public boolean isRoot() {
+		if(this.symbolName.split("\\.").equals("@root")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public Map toMap() {
 		return toMongo().toMap();
 	}
@@ -213,7 +221,7 @@ public class StackFrame extends DatabaseObject {
 		for(int i = 0; i < variables.length; i++) {
 			this.variables[i] = variablesList.get(i);
 		}
-		
+
 		this.variableTable = new HashMap<String, Integer>();
 		this.controlAncestors = new ArrayList<Object>();
 

@@ -93,6 +93,7 @@ public class Runtime {
 			StackFrame frame = scheduledStackFrames.poll();
 
 			while(true) {
+				frame.setRuntime(this);
 				Signal signal = frame.resume();
 
 				if(signal.type == Signal.Type.RETURN) {
