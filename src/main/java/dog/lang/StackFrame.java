@@ -83,6 +83,17 @@ public class StackFrame extends DatabaseObject {
 		}
 	}
 
+	public StackFrame(ObjectId id, Runtime runtime) {
+		BasicDBObject query = new BasicDBObject();
+		query.put("_id", id);
+
+		DBCollection collection = this.getCollection();
+		DBObject data = collection.findOne(query);
+
+		this.setRuntime(runtime);
+		this.fromMongo(data, this.getRuntime().getResolver());
+	}
+
 	public String collectionName() {
 		return "stack_frames";
 	}
@@ -111,17 +122,7 @@ public class StackFrame extends DatabaseObject {
 			if(object instanceof StackFrame) {
 				return (StackFrame)object;
 			} else if(object instanceof ObjectId) {
-				BasicDBObject query = new BasicDBObject();
-				query.put("_id", (ObjectId)object);
-
-				DBCollection collection = this.getCollection();
-				DBObject data = collection.findOne(query);
-
-				StackFrame parent = new StackFrame();
-				parent.setRuntime(this.getRuntime());
-				parent.fromMongo(data, this.getRuntime().getResolver());
-				
-				return parent;
+				return new StackFrame((ObjectId)object, this.getRuntime());
 			} else {
 				return null;
 			}
@@ -129,7 +130,8 @@ public class StackFrame extends DatabaseObject {
 	}
 
 	public boolean isRoot() {
-		if(this.symbolName.split("\\.").equals("@root")) {
+		String[] components = this.symbolName.split("\\.");
+		if(components[components.length - 1].equals("@root")) {
 			return true;
 		} else {
 			return false;

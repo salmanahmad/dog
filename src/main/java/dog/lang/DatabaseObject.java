@@ -15,6 +15,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
 
 public abstract class DatabaseObject implements Persistable {
@@ -36,11 +37,22 @@ public abstract class DatabaseObject implements Persistable {
 		return database.getCollection(this.collectionName());
 	}
 
+	public void remove() {
+		if(runtime == null) {
+			throw new RuntimeException("Cannot save a DatabaseObject without an associated Runtime");
+		}
+
+		BasicDBObject query = new BasicDBObject();
+		query.put("_id", this.getId());
+
+		getCollection().remove(query);
+	}
+
 	public void save() {
 		if(runtime == null) {
 			throw new RuntimeException("Cannot save a DatabaseObject without an associated Runtime");
 		}
 
-		getCollection().save(this.toMongo(), WriteConcern.MAJORITY);
+		getCollection().save(this.toMongo());
 	}
 }

@@ -97,9 +97,13 @@ public class Runtime {
 				Signal signal = frame.resume();
 
 				if(signal.type == Signal.Type.RETURN) {
-					// TODO: If returnRegister is -1 that means that you should just return NullValue
 					if(frame.controlAncestors.size() == 0) {
 						stackTraceHeads.put(frame.getId(), frame);
+
+						if(frame.isRoot()) {
+							frame.save();
+						}
+
 						break;
 					} else {
 						StackFrame returnFrame = (StackFrame)frame.controlAncestors.get(frame.controlAncestors.size() - 1);
