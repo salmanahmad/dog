@@ -14,7 +14,7 @@ package dog.commands;
 
 import dog.lang.Bark;
 import dog.lang.Resolver;
-import dog.lang.runtime.Runtime;
+import dog.lang.Runtime;
 import dog.util.StringList;
 
 import java.util.List;
@@ -34,6 +34,7 @@ public class Start extends Command {
 		try {
 			Resolver resolver = new Resolver();
 			String startUpSymbol = null;
+			String applicationName = null;
 
 			for(String arg : args.strings) {
 				if(FilenameUtils.isExtension(arg, "dog") || FilenameUtils.isExtension(arg, "bark")) {
@@ -47,10 +48,18 @@ public class Start extends Command {
 
 				if(startUpSymbol == null) {
 					startUpSymbol = bark.startUpSymbol;
+					applicationName = FilenameUtils.removeExtension(arg);
 				}
 			}
 
-			Runtime runtime = new Runtime(resolver);
+			Runtime runtime = null;
+			
+			try {
+				runtime = new Runtime(applicationName, resolver);
+			} catch(Exception e) {
+				throw new RuntimeException("Could not create runtime.");
+			}
+			
 			runtime.invoke(startUpSymbol);
 		} catch (FileNotFoundException e) {
 			System.out.println("An error took place when setting up the runtime.");

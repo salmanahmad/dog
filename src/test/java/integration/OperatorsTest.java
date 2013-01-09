@@ -22,7 +22,7 @@ public class OperatorsTest {
     @Test
     public void testSimpleFunction() {
     	String source = Helper.readResource("/integrations/operators.dog");
-    	StackFrame frame = Helper.eval(source).get(0);
+    	StackFrame frame = Helper.eval("dog_unit_tests", source).get(0);
     	
     	Assert.assertTrue(frame.getVariableNamed("t") instanceof TrueValue);
     	Assert.assertTrue(frame.getVariableNamed("f") instanceof FalseValue);

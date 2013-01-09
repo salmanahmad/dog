@@ -22,7 +22,7 @@ public class StructureTest {
     @Test
     public void testSimple() {
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval(source).get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", source).get(0);
 
 		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
 		Assert.assertEquals(5.5, xValue.value, 0.0);
@@ -37,7 +37,7 @@ public class StructureTest {
     @Test
     public void testNested() {
 		String source = Helper.readResource("/integrations/StructureTest/nested.dog");
-		StackFrame frame = Helper.eval(source).get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", source).get(0);
 
 		NumberValue value;
 
@@ -54,7 +54,7 @@ public class StructureTest {
     @Test
     public void testBuild() {
 		String source = Helper.readResource("/integrations/StructureTest/build.dog");
-		StackFrame frame = Helper.eval(source).get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", source).get(0);
 
 		StructureValue value = (StructureValue)frame.getVariableNamed("my_file");
 		
@@ -67,7 +67,7 @@ public class StructureTest {
     @Test
     public void testNative() {
     	String source = Helper.readResource("/integrations/StructureTest/native.dog");
-    	StackFrame frame = Helper.eval(source).get(0);
+    	StackFrame frame = Helper.eval("dog_unit_tests", source).get(0);
 
     	StructureValue value = (StructureValue)frame.getVariableNamed("a");
 
@@ -79,7 +79,7 @@ public class StructureTest {
     @Test
     public void testArray() {
     	String source = Helper.readResource("/integrations/StructureTest/array.dog");
-    	StackFrame frame = Helper.eval(source).get(0);
+    	StackFrame frame = Helper.eval("dog_unit_tests", source).get(0);
 
     	StructureValue value = (StructureValue)frame.getVariableNamed("a");
 

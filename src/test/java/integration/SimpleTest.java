@@ -22,7 +22,7 @@ public class SimpleTest {
     @Test
     public void testSimpleFunction() {
     	String source = Helper.readResource("/integrations/simple.dog");
-    	StackFrame frame = Helper.eval(source).get(0);
+    	StackFrame frame = Helper.eval("dog_unit_tests", source).get(0);
 
     	NumberValue value = (NumberValue)frame.getVariableNamed("i");
     	Assert.assertEquals(120.0, value.value, 0.0);

@@ -9,7 +9,7 @@
  *
  */
 
-package dog.lang.runtime;
+package dog.lang;
 
 import dog.lang.*;
 
@@ -26,23 +26,31 @@ import com.mongodb.ServerAddress;
 import org.bson.types.ObjectId;
 
 public class Runtime {
+	String applicationName;
 	Resolver resolver;
-	LinkedBlockingQueue<StackFrame> scheduledStackFrames;
-	
 	MongoClient mongoClient;
+	DB database;
 
-	public Runtime() throws UnknownHostException {
-		this(new Resolver());
+	LinkedBlockingQueue<StackFrame> scheduledStackFrames;	
+
+	public Runtime(String applicationName) throws UnknownHostException {
+		this(applicationName, new Resolver());
 	}
 
-	public Runtime(Resolver resolver) throws UnknownHostException {
+	public Runtime(String applicationName, Resolver resolver) throws UnknownHostException {
+		this.applicationName = applicationName;
 		this.resolver = resolver;
-		scheduledStackFrames = new LinkedBlockingQueue<StackFrame>();
-		mongoClient = new MongoClient(new ServerAddress("localhost", 27017));
+		this.scheduledStackFrames = new LinkedBlockingQueue<StackFrame>();
+		this.mongoClient = new MongoClient(new ServerAddress("localhost", 27017));
+		this.database = mongoClient.getDB(this.applicationName);
 	}
 
 	public Resolver getResolver() {
 		return resolver;
+	}
+
+	public DB getDatabase() {
+		return database;
 	}
 
 	public ArrayList<StackFrame> build(String symbol) {

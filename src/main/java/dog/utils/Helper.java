@@ -83,7 +83,7 @@ public class Helper {
 		return readResource(Helper.class, path);
 	}
 
-	public static ArrayList<StackFrame> eval(String source) {
+	public static ArrayList<StackFrame> eval(String name, String source) {
 		Parser parser = new Parser();
 		Nodes program = parser.parse(source);
 
@@ -98,10 +98,10 @@ public class Helper {
     	//}
 
     	resolver.linkBark(bark);
-		dog.lang.runtime.Runtime runtime = null;
+		dog.lang.Runtime runtime = null;
 
     	try {
-			runtime = new dog.lang.runtime.Runtime(resolver);
+			runtime = new dog.lang.Runtime(name, resolver);
     	} catch(Exception e) {
     		throw new RuntimeException("Could not create the Dog runtime.");
     	}

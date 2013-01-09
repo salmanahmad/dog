@@ -13,16 +13,19 @@ package dog.lang;
 
 import java.lang.Math;
 import java.util.Map;
+import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
 
 import org.json.JSONObject;
-import org.bson.types.ObjectId;
 import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import org.bson.types.ObjectId;
 
 public class StackFrame extends DatabaseObject {
-
 	ObjectId id;
 	ObjectId futureReturnId;
 
@@ -108,8 +111,17 @@ public class StackFrame extends DatabaseObject {
 			if(object instanceof StackFrame) {
 				return (StackFrame)object;
 			} else if(object instanceof ObjectId) {
-				// TODO - How do I search for the object?
-				return null;
+				BasicDBObject query = new BasicDBObject();
+				query.put("_id", (ObjectId)object);
+
+				DBCollection collection = this.getCollection();
+				DBObject data = collection.findOne(query);
+
+				StackFrame parent = new StackFrame();
+				parent.setRuntime(this.getRuntime());
+				parent.fromMongo(data, this.getRuntime().getResolver());
+				
+				return parent;
 			} else {
 				return null;
 			}
@@ -127,7 +139,7 @@ public class StackFrame extends DatabaseObject {
 	public DBObject toMongo() {
 		BasicDBObject hash = new BasicDBObject();
 		hash.put("_id", this.getId());
-		hash.put("_id", this.futureReturnId);
+		hash.put("future_return_id", this.futureReturnId);
 		hash.put("symbol_name", this.symbolName);
 
 		hash.put("program_counter", this.programCounter);
@@ -146,9 +158,21 @@ public class StackFrame extends DatabaseObject {
         hash.put("registers", registers);
 		hash.put("variables", variables); 
 
+		ArrayList<ObjectId> controlAncestors = new ArrayList<ObjectId>();
+		for(Object controlAncestor : this.controlAncestors) {
+			if(controlAncestor instanceof StackFrame) {
+				StackFrame controlAncestorFrame = (StackFrame)controlAncestor;
+
+				controlAncestorFrame.setRuntime(runtime);
+				controlAncestorFrame.save();
+				controlAncestors.add(controlAncestorFrame.getId());
+			} else if(controlAncestor instanceof ObjectId) {
+				controlAncestors.add((ObjectId)controlAncestor);
+			}
+		}
+
 		hash.put("variable_table", new BasicDBObject(this.variableTable));
-		// TODO: How do I save my control ancestors...?
-		hash.put("control_ancestors", this.controlAncestors);
+		hash.put("control_ancestors", controlAncestors);
 
 		return hash;
 	}
@@ -158,10 +182,49 @@ public class StackFrame extends DatabaseObject {
 	}
 
 	public void fromJSON(JSONObject json, Resolver resolver) {
-		// TODO
+		
 	}
 
 	public void fromMongo(DBObject bson, Resolver resolver) {
+		this.id = (ObjectId)bson.get("_id");
+		this.futureReturnId = (ObjectId)bson.get("future_return_id");
+		this.symbolName = (String)bson.get("symbol_name");
+
+		this.programCounter = (Integer)bson.get("program_counter");
+		this.returnRegister = (Integer)bson.get("return_register");
+
+		ArrayList<Value> registersList = new ArrayList<Value>();
+		for(DBObject object : (List<DBObject>)bson.get("registers")) {
+			registersList.add(Value.createFromMongo(object, resolver));
+		}
+
+		ArrayList<Value> variablesList = new ArrayList<Value>();
+		for(DBObject object : (List<DBObject>)bson.get("variables")) {
+			variablesList.add(Value.createFromMongo(object, resolver));
+		}
+
+		this.registers = new Value[registersList.size()];
+		this.variables = new Value[variablesList.size()];
+
+		for(int i = 0; i < registers.length; i++) {
+			this.registers[i] = registersList.get(i);
+		}
+
+		for(int i = 0; i < variables.length; i++) {
+			this.variables[i] = variablesList.get(i);
+		}
 		
+		this.variableTable = new HashMap<String, Integer>();
+		this.controlAncestors = new ArrayList<Object>();
+
+		Map variableTableMap = (Map)bson.get("variable_table");
+		for(Object key : variableTableMap.keySet()) {
+			String stringKey = (String)key;
+			this.variableTable.put(stringKey, (Integer)variableTableMap.get(key));
+		}
+
+		for(Object object : (List)bson.get("control_ancestors")) {
+			this.controlAncestors.add(object);
+		}
 	}
 }
