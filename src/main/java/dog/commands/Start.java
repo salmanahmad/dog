@@ -26,6 +26,8 @@ import java.io.FileNotFoundException;
 import org.apache.commons.io.FilenameUtils;
 
 public class Start extends Command {
+	public boolean restart = false;
+
 	public String description() {
 		return "Resume executing a Dog source file or application";
 	}
@@ -60,7 +62,11 @@ public class Start extends Command {
 				throw new RuntimeException("Could not create runtime.");
 			}
 
-			runtime.start(startUpSymbol);
+			if(this.restart) {
+				runtime.restart(startUpSymbol);
+			} else {
+				runtime.start(startUpSymbol);
+			}
 		} catch (FileNotFoundException e) {
 			System.out.println("An error took place when setting up the runtime.");
 			e.printStackTrace();

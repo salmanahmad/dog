@@ -28,6 +28,7 @@ public class Restart extends Command {
 		compile.run(args);
 
 		Start start = new Start();
+		start.restart = true;
 		start.run(args);
 	}
 }
