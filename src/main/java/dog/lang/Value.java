@@ -252,19 +252,19 @@ public class Value implements Persistable {
         String type = (String)bson.get("type");
         Value value = null;
 
-        if(type == "dog.null") {
+        if(type.equals("dog.null")) {
             value = new NullValue();
-        } else if(type == "dog.boolean") {
+        } else if(type.equals("dog.boolean")) {
             if((Boolean)bson.get("value")) {
                 value = new TrueValue();
             } else {
                 value = new FalseValue();
             }
-        } else if(type == "dog.number") {
+        } else if(type.equals("dog.number")) {
             value = new NumberValue();
-        } else if(type == "dog.string") {
+        } else if(type.equals("dog.string")) {
             value = new StringValue();
-        } else if(type == "dog.structure") {
+        } else if(type.equals("dog.structure")) {
             value = new StructureValue();
         } else {
             value = (Value)resolver.resolveSymbol(type);

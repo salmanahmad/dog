@@ -238,19 +238,19 @@ public class StructureValue extends Value {
             Value dogValue = null;
             String type = (String)mongoValue.get("type");
 
-            if(type == "dog.null") {
+            if(type.equals("dog.null")) {
                 dogValue = new NullValue();
-            } else if(type == "dog.boolean") {
+            } else if(type.equals("dog.boolean")) {
                 if((Boolean)mongoValue.get("value")) {
                     dogValue = new TrueValue();
                 } else {
                     dogValue = new FalseValue();
                 }
-            } else if(type == "dog.number") {
+            } else if(type.equals("dog.number")) {
                 dogValue = new NumberValue();
-            } else if(type == "dog.string") {
+            } else if(type.equals("dog.string")) {
                 dogValue = new StringValue();
-            } else if(type == "dog.structure") {
+            } else if(type.equals("dog.structure")) {
                 dogValue = new StructureValue();
             } else {
                 dogValue = (Value)resolver.resolveSymbol(type);

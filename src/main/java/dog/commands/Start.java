@@ -59,8 +59,8 @@ public class Start extends Command {
 			} catch(Exception e) {
 				throw new RuntimeException("Could not create runtime.");
 			}
-			
-			runtime.invoke(startUpSymbol);
+
+			runtime.start(startUpSymbol);
 		} catch (FileNotFoundException e) {
 			System.out.println("An error took place when setting up the runtime.");
 			e.printStackTrace();

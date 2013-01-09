@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.json.JSONObject;
 import com.mongodb.DBObject;
@@ -26,11 +27,20 @@ import com.mongodb.DBCollection;
 import org.bson.types.ObjectId;
 
 public class StackFrame extends DatabaseObject {
+	
+	public static String RUNNING = "running";
+	public static String CALLING = "calling";
+	public static String WAITING = "waiting";
+	public static String FINISHED = "finished";
+
 	ObjectId id;
 	ObjectId futureReturnId;
 
 	public Continuable symbol = null;
 	public String symbolName = null;
+	
+	String state;
+	Date createdAt;
 
 	// TODO: If the return Register is -1 it means null...
 	public int returnRegister = -1;
@@ -50,6 +60,10 @@ public class StackFrame extends DatabaseObject {
 	public StackFrame() {
 		// Keeping the default constructor so I can fromJSON and fromMongo
 	}
+
+	// TODO: Right now the constructors take a reference to the Resolver, however those should be a runtime reference
+	// shouldn't they? And the runtime field should be set rather than having to rely on the setRuntime call from
+	// the Runtime class
 
 	public StackFrame(Continuable symbol) {
 		this(symbol, new Value[] {});
@@ -75,8 +89,12 @@ public class StackFrame extends DatabaseObject {
 	protected void initialize(int registerCount, int variableCount, HashMap<String, Integer> variableTable, Value[] arguments) {
 		this.registers = new Value[registerCount];
 		this.variables = new Value[variableCount];
+		
 		this.variableTable = variableTable;
 		this.programCounter = 0;
+
+		this.state = StackFrame.RUNNING;
+		this.createdAt = new Date();
 
 		for(int i = 0; i < Math.min(this.variables.length, arguments.length) ; i++) {
 			this.variables[i] = arguments[i];
@@ -104,6 +122,10 @@ public class StackFrame extends DatabaseObject {
         }
 
         return this.id;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 
 	public Signal resume() {
@@ -138,6 +160,11 @@ public class StackFrame extends DatabaseObject {
 		}
 	}
 
+	// TODO: Right now in toMongo() it always saves all of the controlAncestors
+	// to mongo. However, I don't always want to do that. In some cases I want to
+	// have a normal memory-based execution model like a normal langauge. In those
+	// cases toMap() should not serialize the controlAncestors into ObjectIds
+
 	public Map toMap() {
 		return toMongo().toMap();
 	}
@@ -150,19 +177,31 @@ public class StackFrame extends DatabaseObject {
 		BasicDBObject hash = new BasicDBObject();
 		hash.put("_id", this.getId());
 		hash.put("future_return_id", this.futureReturnId);
+		
 		hash.put("symbol_name", this.symbolName);
+		hash.put("state", this.state);
+		hash.put("created_at", this.createdAt);
 
 		hash.put("program_counter", this.programCounter);
 		hash.put("return_register", this.returnRegister);
         
         ArrayList<DBObject> registers = new ArrayList<DBObject>();
         for(Value register : this.registers) {
-        	registers.add(register.toMongo());
+        	if(register != null) {
+        		registers.add(register.toMongo());
+        	} else {
+        		registers.add(null);
+        	}
+        	
         }
 
 		ArrayList<DBObject> variables = new ArrayList<DBObject>();
 		for(Value variable : this.variables) {
-			variables.add(variable.toMongo());
+			if(variable != null) {
+				variables.add(variable.toMongo());
+			} else {
+				variables.add(null);
+			}
 		}
 
         hash.put("registers", registers);
@@ -198,19 +237,32 @@ public class StackFrame extends DatabaseObject {
 	public void fromMongo(DBObject bson, Resolver resolver) {
 		this.id = (ObjectId)bson.get("_id");
 		this.futureReturnId = (ObjectId)bson.get("future_return_id");
+		
 		this.symbolName = (String)bson.get("symbol_name");
+		this.symbol = (Continuable)resolver.resolveSymbol(this.symbolName);
+
+		this.state = (String)bson.get("state");
+		this.createdAt = (Date)bson.get("created_at");
 
 		this.programCounter = (Integer)bson.get("program_counter");
 		this.returnRegister = (Integer)bson.get("return_register");
 
 		ArrayList<Value> registersList = new ArrayList<Value>();
-		for(DBObject object : (List<DBObject>)bson.get("registers")) {
-			registersList.add(Value.createFromMongo(object, resolver));
+		for(Object object : (List)bson.get("registers")) {
+			if(object == null) {
+				registersList.add(null);
+			} else {
+				registersList.add(Value.createFromMongo((DBObject)object, resolver));
+			}
 		}
 
 		ArrayList<Value> variablesList = new ArrayList<Value>();
-		for(DBObject object : (List<DBObject>)bson.get("variables")) {
-			variablesList.add(Value.createFromMongo(object, resolver));
+		for(Object object : (List)bson.get("variables")) {
+			if(object == null) {
+				variablesList.add(null);
+			} else {
+				variablesList.add(Value.createFromMongo((DBObject)object, resolver));
+			}
 		}
 
 		this.registers = new Value[registersList.size()];

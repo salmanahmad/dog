@@ -12,7 +12,9 @@
 
 package dog.commands;
 
+import dog.lang.Runtime;
 import dog.util.StringList;
+
 
 import java.util.List;
 import java.util.ArrayList;
@@ -24,7 +26,15 @@ public class Reset extends Command {
 	}
 
 	public void run(StringList args) {
-
+		String applicationName = args.get(0);
+		
+		try {
+			dog.lang.Runtime runtime = new dog.lang.Runtime(applicationName);
+			runtime.reset();
+		} catch(Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Could not create Dog runtime.");
+		}
 	}
 }
 
