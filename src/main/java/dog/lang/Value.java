@@ -22,6 +22,11 @@ public class Value implements Persistable {
 
     private ObjectId id;
 
+    public ObjectId futureId = null;
+    public boolean pending = false;
+    public boolean channelMode = false;
+    public int channelSize = 0;
+
     public ObjectId getId() {
         if (this.id == null) {
             this.id = new ObjectId();
@@ -221,6 +226,10 @@ public class Value implements Persistable {
         DBObject object = new BasicDBObject();
 
         object.put("_id", this.getId());
+        object.put("future_id", this.futureId);
+        object.put("pending", this.pending);
+        object.put("channel_mode", this.channelMode);
+        object.put("channel_size", this.channelSize);
 
         return object;
     }
@@ -235,6 +244,11 @@ public class Value implements Persistable {
 
     public void fromMongo(DBObject bson, Resolver resolver) {
         this.setId((ObjectId)bson.get("_id"));
+
+        this.futureId = (ObjectId)bson.get("future_id");
+        this.pending = (Boolean)bson.get("pending");
+        this.channelMode = (Boolean)bson.get("channel_mode");
+        this.channelSize = (Integer)bson.get("channel_size");
     }
 
     public static Value createFromMap(Map map, Resolver resolver) {
