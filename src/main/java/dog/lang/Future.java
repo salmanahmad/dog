@@ -35,7 +35,7 @@ public class Future extends DatabaseObject {
 	public ArrayList<Object> blockingStackFrames = new ArrayList<Object>();
 	public ArrayList<Object> broadcastStackFrames = new ArrayList<Object>();
 	public ArrayList<String> handlers = new ArrayList<String>();
-
+	
 	public Future(Runtime runtime) {
 		this.runtime = runtime;
 	}

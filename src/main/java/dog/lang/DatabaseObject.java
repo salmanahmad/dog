@@ -14,6 +14,7 @@ package dog.lang;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.DB;
+import com.mongodb.DBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
@@ -44,6 +45,12 @@ public abstract class DatabaseObject implements Persistable {
 	DBCollection getCollection() {
 		DB database = this.runtime.getDatabase();
 		return database.getCollection(this.collectionName());
+	}
+
+	public void findOne(DBObject query) {
+		DBCollection collection = this.runtime.getDatabase().getCollection(this.collectionName());
+		DBObject object = collection.findOne(query);
+		this.fromMongo(object, this.runtime.getResolver());
 	}
 
 	public void remove() {
