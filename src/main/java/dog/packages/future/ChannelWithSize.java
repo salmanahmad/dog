@@ -12,6 +12,9 @@
 package dog.packages.future;
 
 import dog.lang.Value;
+import dog.lang.NullValue;
+import dog.lang.StructureValue;
+import dog.lang.NumberValue;
 import dog.lang.Function;
 import dog.lang.Signal;
 import dog.lang.StackFrame;
@@ -20,13 +23,38 @@ import dog.lang.annotation.Symbol;
 @Symbol("future.channel_with_size:")
 public class ChannelWithSize extends Function {
 
+	public int getRegisterCount() {
+		return 1;
+	}
+
 	public int getVariableCount() {
 		return 1;
 	}
 
 	public Signal resume(StackFrame frame) {
-		Value value = frame.variables[0];
-		System.out.println(value);
+
+		Value arg = frame.variables[0];
+
+		// TODO: Logging / Exceptions or something needed here to check for parameters types
+
+		if(arg instanceof NumberValue) {
+			NumberValue size = (NumberValue)arg;
+			
+			StructureValue value = new StructureValue();
+			value.pending = true;
+			value.channelMode = true;
+			value.channelSize = (Integer)size.getValue();
+
+			dog.lang.Future future = new dog.lang.Future(frame.getRuntime());
+			future.valueId = value.getId();
+			future.queueSize = value.channelSize;
+			future.save();
+
+			frame.registers[0] = value;
+		} else {
+			frame.registers[0] = new NullValue();
+		}
+
 		return new Signal(Signal.Type.RETURN);
 	}
 }

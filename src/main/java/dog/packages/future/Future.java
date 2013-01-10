@@ -31,6 +31,7 @@ public class Future extends Function {
 		value.channelMode = false;
 		value.channelSize = 0;
 
+		// TODO - Implement the garbage collection for futures
 		dog.lang.Future future = new dog.lang.Future(frame.getRuntime());
 		future.valueId = value.getId();
 		future.queueSize = 0;
