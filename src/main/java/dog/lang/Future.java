@@ -26,15 +26,15 @@ import org.bson.types.ObjectId;
 
 public class Future extends DatabaseObject {
 	
-	ObjectId valueId = null;
-	Value value = null;
+	public ObjectId valueId = null;
+	public Value value = null;
 	
-	ArrayList<Value> queue = new ArrayList<Value>();
-	int queueSize = 0;
+	public ArrayList<Value> queue = new ArrayList<Value>();
+	public int queueSize = 0;
 
-	ArrayList<Object> blockingStackFrames = new ArrayList<Object>();
-	ArrayList<Object> broadcastStackFrames = new ArrayList<Object>();
-	ArrayList<String> handlers = new ArrayList<String>();
+	public ArrayList<Object> blockingStackFrames = new ArrayList<Object>();
+	public ArrayList<Object> broadcastStackFrames = new ArrayList<Object>();
+	public ArrayList<String> handlers = new ArrayList<String>();
 
 	public Future(Runtime runtime) {
 		this.runtime = runtime;
@@ -45,7 +45,7 @@ public class Future extends DatabaseObject {
 	}
 
 	public static void removeBroadcastTrack(ObjectId trackId, Runtime runtime) {
-		String collectionName = new Future().collectionName();
+		String collectionName = new Future(null).collectionName();
 		DBCollection collection = runtime.database.getCollection(collectionName);
 
 		BasicDBObject query = new BasicDBObject("broadcast_tracks", trackId);
@@ -53,7 +53,7 @@ public class Future extends DatabaseObject {
 
 		collection.update(query, update, false, true);
 	}
-	
+
 	public Map toMap() {
 		return toMongo().toMap();
 	}
