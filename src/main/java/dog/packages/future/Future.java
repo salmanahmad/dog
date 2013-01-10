@@ -18,9 +18,6 @@ import dog.lang.Signal;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
 
-
-
-
 @Symbol("future.future")
 public class Future extends Function {
 
