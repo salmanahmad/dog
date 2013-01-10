@@ -167,7 +167,9 @@ public class Runtime {
 					newFrame.controlAncestors.add(frame);
 					frame = newFrame;
 				} else if (signal.type == Signal.Type.SCHEDULE) {
-
+					// TODO: Handle return values...
+					StackFrame newFrame = signal.stackFrame;
+					this.schedule(newFrame);
 				} else if (signal.type == Signal.Type.PAUSE) {
 
 				} else if (signal.type == Signal.Type.STOP) {

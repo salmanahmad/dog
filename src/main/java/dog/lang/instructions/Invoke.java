@@ -49,12 +49,21 @@ public class Invoke extends Instruction {
 		// TODO - Do I have to worry about waiting here if a value is pending or will I
 		// have already been waited before this point?
 		
+		// TODO - Strongly consider making this its own function instead of bytecode. The JIT
+		// will most likely inline it anyways and it makes it more robust and easier to deal with...
+
 		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv, instructionIndex);
 
 		mv.visitTypeInsn(NEW, "dog/lang/Signal");
 		mv.visitInsn(DUP);
-		mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "INVOKE", "Ldog/lang/Signal$Type;");
+
+		if(this.asynchronous) {
+			mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "SCHEDULE", "Ldog/lang/Signal$Type;");
+		} else {
+			mv.visitFieldInsn(GETSTATIC, "dog/lang/Signal$Type", "INVOKE", "Ldog/lang/Signal$Type;");
+		}
+		
 		mv.visitTypeInsn(NEW, "dog/lang/StackFrame");
 		mv.visitInsn(DUP);
 		mv.visitTypeInsn(NEW, Resolver.encodeSymbol(this.functionIdentifier));

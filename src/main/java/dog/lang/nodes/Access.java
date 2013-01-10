@@ -43,6 +43,14 @@ public class Access extends Node {
 		this.path = path;
 	}
 
+	public Identifier.Scope getScope() {
+		return this.scope;
+	}
+
+	public ArrayList<Object> getPath() {
+		return this.path;
+	}
+
 	public void compile(Symbol symbol) {
 		int outputRegister = -1;
 		int componentRegister = -1;

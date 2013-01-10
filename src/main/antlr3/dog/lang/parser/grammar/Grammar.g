@@ -194,8 +194,18 @@ call returns [Node node]
   ;
 
 spawnStatement returns [Node node]
+@init { ArrayList<String> path = new ArrayList<String>(); Access a = null; }
   : SPAWN
-    call                    {$node = $call.node; ((Call)$node).setAsynchronous(true); }
+    ( access                  { 
+                                a = (Access)$access.node;
+                                for(Object o : a.getPath()) {
+                                  path.add((String)o);
+                                }
+
+                                $node = new Call($start.getLine(), true, new Identifier(a.getScope(), path), new ArrayList<Node>()); 
+                              }
+    | call                    { $node = $call.node; ((Call)$node).setAsynchronous(true); }
+    )
   ;
 
 functionDefinition returns [Node node]
