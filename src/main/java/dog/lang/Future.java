@@ -44,6 +44,16 @@ public class Future extends DatabaseObject {
 		return "futures";
 	}
 
+	public static void removeBroadcastTrack(ObjectId trackId, Runtime runtime) {
+		String collectionName = new Future().collectionName();
+		DBCollection collection = runtime.database.getCollection(collectionName);
+
+		BasicDBObject query = new BasicDBObject("broadcast_tracks", trackId);
+		BasicDBObject update = new BasicDBObject("$pull", new BasicDBObject("broadcast_tracks", trackId));
+
+		collection.update(query, update, false, true);
+	}
+	
 	public Map toMap() {
 		return toMongo().toMap();
 	}
