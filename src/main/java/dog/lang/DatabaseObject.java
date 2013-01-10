@@ -20,8 +20,17 @@ import org.bson.types.ObjectId;
 
 public abstract class DatabaseObject implements Persistable {
 	Runtime runtime;
+	
+	ObjectId id;
 
-	public abstract ObjectId getId();
+	public ObjectId getId() {
+		if (this.id == null) {
+			this.id = new ObjectId();
+		}
+
+		return this.id;
+	}
+
 	public abstract String collectionName();
 
 	public void setRuntime(Runtime runtime) {

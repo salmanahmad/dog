@@ -33,7 +33,6 @@ public class StackFrame extends DatabaseObject {
 	public static String WAITING = "waiting";
 	public static String FINISHED = "finished";
 
-	ObjectId id;
 	ObjectId futureReturnId;
 
 	public Continuable symbol = null;
@@ -114,14 +113,6 @@ public class StackFrame extends DatabaseObject {
 
 	public String collectionName() {
 		return "stack_frames";
-	}
-
-	public ObjectId getId() {
-		if (this.id == null) {
-            this.id = new ObjectId();
-        }
-
-        return this.id;
 	}
 
 	public void setState(String state) {

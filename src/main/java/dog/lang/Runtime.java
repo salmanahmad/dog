@@ -82,8 +82,8 @@ public class Runtime {
 	}
 
 	public void restart(String startUpSymbol) {
-		String stackCollection = new StackFrame().collectionName();
-		database.getCollection(stackCollection).drop();
+		database.getCollection(new StackFrame().collectionName()).drop();
+		database.getCollection(new Future().collectionName()).drop();
 		this.start(startUpSymbol);
 	}
 
