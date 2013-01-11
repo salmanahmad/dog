@@ -121,6 +121,7 @@ public class Runtime {
 	}
 
 	public void schedule(StackFrame frame) {
+		// TODO - I need to set the StackFrame's status to PENDING...
 		for(StackFrame f : scheduledStackFrames) {
 			if(f.getId().equals(frame.getId())) {
 				return;
@@ -132,6 +133,8 @@ public class Runtime {
 
 	public ArrayList<StackFrame> resume() {
 		LinkedHashMap<ObjectId, StackFrame> stackTraceHeads = new LinkedHashMap<ObjectId, StackFrame>();
+
+		// TODO - I need to set the StackFrame's status to RUNNING...
 
 		while(!scheduledStackFrames.isEmpty()) {
 			StackFrame frame = scheduledStackFrames.poll();
