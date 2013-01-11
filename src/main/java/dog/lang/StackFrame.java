@@ -33,13 +33,13 @@ public class StackFrame extends DatabaseObject {
 	public static String WAITING = "waiting";
 	public static String FINISHED = "finished";
 
-	ObjectId futureReturnId;
+	public ObjectId futureReturnId;
 
 	public Continuable symbol = null;
 	public String symbolName = null;
 	
-	String state;
-	Date createdAt;
+	public String state;
+	public Date createdAt;
 
 	// TODO: If the return Register is -1 it means null...
 	public int returnRegister = -1;

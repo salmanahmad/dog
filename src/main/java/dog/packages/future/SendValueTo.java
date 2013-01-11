@@ -39,9 +39,16 @@ public class SendValueTo extends Function {
 		Value channel = frame.variables[1];
 
 		if(channel.pending) {
+			value.futureId = channel.getId();
 			dog.lang.Future future = new dog.lang.Future(runtime);
 
 			if(future.findOne(new BasicDBObject("value_id", channel.getId()))) {
+				// TODO - Respect the queue_size if it is full. We need several backoff strategies
+				// - Block
+				// - Ignore
+				// - Timeout
+				// - Rollover least recently inserted (?) <- this may be problematic
+
 				if(future.broadcastStackFrames.size() == 0 && future.handlers.size() == 0) {
 					if(future.queueSize > 0) {
 						future.queue.add(value);

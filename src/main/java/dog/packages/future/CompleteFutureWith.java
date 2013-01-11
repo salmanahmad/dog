@@ -39,7 +39,9 @@ public class CompleteFutureWith extends Function {
 		Value value = frame.variables[1];
 		
 		if(future.pending) {
+			value.futureId = future.getId();
 			Future f = new Future(runtime);
+
 			if(f.findOne(new BasicDBObject("value_id", future.getId()))) {
 
 				for(Object o : f.blockingStackFrames) {

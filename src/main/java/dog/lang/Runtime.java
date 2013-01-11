@@ -150,6 +150,22 @@ public class Runtime {
 
 							if(frame.isRoot()) {
 								frame.save();
+							} else {
+								if(frame.futureReturnId != null) {
+									StructureValue value = new StructureValue();
+									value.setId(frame.futureReturnId);
+									value.pending = true;
+
+									Value returnValue = new NullValue();
+									if(frame.returnRegister != -1) {
+										returnValue = frame.registers[frame.returnRegister];
+									}
+
+									StackFrame completeFutureStackFrame = new StackFrame("future.complete_future:with:", getResolver(), new Value[] {value, returnValue});
+									this.schedule(completeFutureStackFrame);
+								}
+
+								frame.remove();
 							}
 
 							break;
@@ -172,9 +188,20 @@ public class Runtime {
 						newFrame.controlAncestors.add(frame);
 						frame = newFrame;
 					} else if (signal.type == Signal.Type.SCHEDULE) {
-						// TODO: Handle return values...
+						StructureValue futureValue = new StructureValue();
+						futureValue.pending = true;
+						futureValue.channelMode = false;
+						futureValue.channelSize = 0;
+
+						Future future = new Future(this);
+						future.valueId = futureValue.getId();
+						future.save();
+
 						StackFrame newFrame = signal.stackFrame;
+						newFrame.futureReturnId = futureValue.getId();
 						this.schedule(newFrame);
+
+						frame.registers[frame.returnRegister] = futureValue;
 					} else if (signal.type == Signal.Type.PAUSE) {
 
 					} else if (signal.type == Signal.Type.STOP) {
