@@ -47,10 +47,15 @@ public abstract class DatabaseObject implements Persistable {
 		return database.getCollection(this.collectionName());
 	}
 
-	public void findOne(DBObject query) {
+	public boolean findOne(DBObject query) {
 		DBCollection collection = this.runtime.getDatabase().getCollection(this.collectionName());
 		DBObject object = collection.findOne(query);
-		this.fromMongo(object, this.runtime.getResolver());
+		if(object == null) {
+			return false;
+		} else {
+			this.fromMongo(object, this.runtime.getResolver());
+			return true;
+		}
 	}
 
 	public void remove() {
