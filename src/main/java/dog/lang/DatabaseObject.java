@@ -63,9 +63,7 @@ public abstract class DatabaseObject implements Persistable {
 			throw new RuntimeException("Cannot save a DatabaseObject without an associated Runtime");
 		}
 
-		BasicDBObject query = new BasicDBObject();
-		query.put("_id", this.getId());
-
+		BasicDBObject query = new BasicDBObject("_id", this.getId());
 		getCollection().remove(query);
 	}
 

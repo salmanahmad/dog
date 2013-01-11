@@ -44,12 +44,12 @@ public class Future extends DatabaseObject {
 		return "futures";
 	}
 
-	public static void removeBroadcastTrack(ObjectId trackId, Runtime runtime) {
+	public static void removeBroadcastStackFrame(ObjectId frameId, Runtime runtime) {
 		String collectionName = new Future(null).collectionName();
 		DBCollection collection = runtime.database.getCollection(collectionName);
 
-		BasicDBObject query = new BasicDBObject("broadcast_tracks", trackId);
-		BasicDBObject update = new BasicDBObject("$pull", new BasicDBObject("broadcast_tracks", trackId));
+		BasicDBObject query = new BasicDBObject("blocking_stack_frames", frameId);
+		BasicDBObject update = new BasicDBObject("$pull", new BasicDBObject("blocking_stack_frames", frameId));
 
 		collection.update(query, update, false, true);
 	}

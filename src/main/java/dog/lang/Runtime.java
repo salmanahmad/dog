@@ -140,45 +140,59 @@ public class Runtime {
 			StackFrame frame = scheduledStackFrames.poll();
 
 			while(true) {
-				frame.setRuntime(this);
-				Signal signal = frame.resume();
+				try {
+					frame.setRuntime(this);
+					Signal signal = frame.resume();
 
-				if(signal.type == Signal.Type.RETURN) {
-					if(frame.controlAncestors.size() == 0) {
-						stackTraceHeads.put(frame.getId(), frame);
+					if(signal.type == Signal.Type.RETURN) {
+						if(frame.controlAncestors.size() == 0) {
+							stackTraceHeads.put(frame.getId(), frame);
 
-						if(frame.isRoot()) {
-							frame.save();
-						}
-
-						break;
-					} else {
-						StackFrame returnFrame = (StackFrame)frame.controlAncestors.get(frame.controlAncestors.size() - 1);
-						if(returnFrame.returnRegister != -1) {
-							if(frame.returnRegister != -1) {
-								returnFrame.registers[returnFrame.returnRegister] = frame.registers[frame.returnRegister];
-							} else {
-								returnFrame.registers[returnFrame.returnRegister] = new NullValue();
+							if(frame.isRoot()) {
+								frame.save();
 							}
+
+							break;
+						} else {
+							StackFrame returnFrame = (StackFrame)frame.controlAncestors.get(frame.controlAncestors.size() - 1);
+							if(returnFrame.returnRegister != -1) {
+								if(frame.returnRegister != -1) {
+									returnFrame.registers[returnFrame.returnRegister] = frame.registers[frame.returnRegister];
+								} else {
+									returnFrame.registers[returnFrame.returnRegister] = new NullValue();
+								}
+							}
+
+							frame.remove();
+							frame = returnFrame;
 						}
-						
-						frame = returnFrame;
+					} else if (signal.type == Signal.Type.INVOKE) {
+						StackFrame newFrame = signal.stackFrame;
+						newFrame.controlAncestors = new ArrayList<Object>(frame.controlAncestors);
+						newFrame.controlAncestors.add(frame);
+						frame = newFrame;
+					} else if (signal.type == Signal.Type.SCHEDULE) {
+						// TODO: Handle return values...
+						StackFrame newFrame = signal.stackFrame;
+						this.schedule(newFrame);
+					} else if (signal.type == Signal.Type.PAUSE) {
+
+					} else if (signal.type == Signal.Type.STOP) {
+
+					} else if (signal.type == Signal.Type.EXIT) {
+
 					}
-				} else if (signal.type == Signal.Type.INVOKE) {
-					StackFrame newFrame = signal.stackFrame;
-					newFrame.controlAncestors = new ArrayList<Object>(frame.controlAncestors);
-					newFrame.controlAncestors.add(frame);
-					frame = newFrame;
-				} else if (signal.type == Signal.Type.SCHEDULE) {
-					// TODO: Handle return values...
-					StackFrame newFrame = signal.stackFrame;
-					this.schedule(newFrame);
-				} else if (signal.type == Signal.Type.PAUSE) {
+				} catch(WaitingException e) {
+					DBCollection collection = this.database.getCollection(new Future(this).collectionName());
 
-				} else if (signal.type == Signal.Type.STOP) {
+					BasicDBObject query = new BasicDBObject("value_id", e.futureValueId);
+					BasicDBObject update = new BasicDBObject("$push", new BasicDBObject("blocking_stack_frames", frame.getId()));
 
-				} else if (signal.type == Signal.Type.EXIT) {
+					collection.update(query, update, false, true);
 
+					frame.returnRegister = e.returnRegister;
+					frame.state = StackFrame.WAITING;
+					frame.save();
 				}
 			}
 		}

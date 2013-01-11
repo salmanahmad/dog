@@ -14,12 +14,12 @@ package dog.lang;
 import org.bson.types.ObjectId;
 
 public class WaitingException extends RuntimeException {
-	public ObjectId futureId;
+	public ObjectId futureValueId;
 	public int returnRegister;
 	
 
-	public WaitingException(ObjectId futureId, int returnRegister) {
-		this.futureId = futureId;
+	public WaitingException(ObjectId futureValueId, int returnRegister) {
+		this.futureValueId = futureValueId;
 		this.returnRegister = returnRegister;
 	}
 	
