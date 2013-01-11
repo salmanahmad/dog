@@ -434,11 +434,23 @@ timingStructure returns [Node node]
   ;
 
 waitStatement returns [Node node]
-  : WAIT ON
-    expression
+@init {
+  HashMap<Object, Node> value = new HashMap<Object, Node>(); 
+  double index = 0; 
+  Identifier type = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "array")));
+  Identifier call = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "wait:")));
+}
+  : WAIT ON         
+    head=expression        { value.put(index, $head.node); index++; }
     ( COMMA
-      expression
-    )*
+      tail=expression      { value.put(index, $tail.node); index++; }
+    )*                     {
+                            $node = new Call(
+                              $start.getLine(), 
+                              false, 
+                              call,
+                              new ArrayList<Node>(Arrays.asList(new StructureLiteral($start.getLine(), type, value))));
+                           }
   ;
 
 onEachStatement returns [Node node]
