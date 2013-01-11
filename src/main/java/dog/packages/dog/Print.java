@@ -26,6 +26,9 @@ public class Print extends Function {
 
 	public Signal resume(StackFrame frame) {
 		Value value = frame.variables[0];
+		if(value.pending) {
+			System.out.print("pending: ");
+		}
 		System.out.println(value);
 		return new Signal(Signal.Type.RETURN);
 	}

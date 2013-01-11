@@ -67,7 +67,12 @@ public class Future extends DatabaseObject {
 		hash.put("_id", this.getId());
 		
 		hash.put("value_id", this.valueId);
-		hash.put("value", this.value.toMongo());
+
+		if(this.value == null) {
+			hash.put("value", this.value);
+		} else {
+			hash.put("value", this.value.toMongo());
+		}
 
 		ArrayList<DBObject> queueList = new ArrayList<DBObject>();
 		for(Value v : queue) {
@@ -125,7 +130,12 @@ public class Future extends DatabaseObject {
 		this.id = (ObjectId)bson.get("_id");
 
 		this.valueId = (ObjectId)bson.get("value_id");
-		this.value = Value.createFromMongo((DBObject)bson.get("value"), resolver);
+
+		if(bson.get("value") == null) {
+			this.value = null;
+		} else {
+			this.value = Value.createFromMongo((DBObject)bson.get("value"), resolver);
+		}
 
 		for(Object o : (List)bson.get("queue")) {
 			this.queue.add(Value.createFromMongo((DBObject)o, resolver));

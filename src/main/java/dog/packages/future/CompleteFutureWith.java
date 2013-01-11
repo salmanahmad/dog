@@ -54,6 +54,7 @@ public class CompleteFutureWith extends Function {
 					// TODO: Consider having a similar thing to broadcast where you
 					// send the value back by using the returnRegister. That could
 					// be a useful calling convention.
+					stackFrame.registers[stackFrame.returnRegister] = value;
 
 					runtime.schedule(stackFrame);
 				}

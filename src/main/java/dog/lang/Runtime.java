@@ -220,6 +220,8 @@ public class Runtime {
 					frame.returnRegister = e.returnRegister;
 					frame.state = StackFrame.WAITING;
 					frame.save();
+
+					break;
 				}
 			}
 		}
