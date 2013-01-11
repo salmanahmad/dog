@@ -39,8 +39,84 @@ public class Value implements Persistable {
         this.id = id;
     }
 
+    public Object getValue(int register) {
+        checkForPendingValue(this, register);
+        return getValue();
+    }
+
     public Object getValue() { return null; }
     
+    public void checkForPendingValue(Value value, int register) {
+        if(value.pending) {
+            throw new WaitingException(value.getId(), register);
+        }
+    }
+
+    public void checkForPendingValues(Value value1, Value value2, int inputRegister1, int inputRegister2) {
+        checkForPendingValue(value1, inputRegister1);
+        checkForPendingValue(value2, inputRegister2);
+    }
+
+    public Value plus(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return plus(v);
+    }
+    
+    public Value minus(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return minus(v);
+    }
+    
+    public Value multiply(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return multiply(v);
+    }
+    
+    public Value divide(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return divide(v);
+    }
+    
+    public Value modulo(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return modulo(v);
+    }
+    
+    public Value raisedTo(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return raisedTo(v);
+    }
+    
+    public Value equalTo(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return equalTo(v);
+    }
+    
+    public Value notEqualTo(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return notEqualTo(v);
+    }
+    
+    public Value lessThan(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return lessThan(v);
+    }
+    
+    public Value greaterThan(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return greaterThan(v);
+    }
+    
+    public Value lessThanEqualTo(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return lessThanEqualTo(v);
+    }
+    
+    public Value greaterThanEqualTo(Value v, int inputRegister1, int inputRegister2) { 
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return greaterThanEqualTo(v);
+    }
+
     // Note: Binary operations are performed with double dispatch. This means that in 
     // dispatchPlus(NumberValue v) for a + b, 'this' is 'b' and 'v' is 'a'. The order is
     // reversed than what you might expect it to be. 'this' is the second argument.
@@ -159,6 +235,16 @@ public class Value implements Persistable {
     public boolean isString() { return false; }
     public boolean isStructure() { return false; }
 
+    public Value logicalInverse(int register) { 
+        checkForPendingValue(this, register);
+        return logicalInverse();
+    }
+    
+    public Value logicalEquivalent(int register) { 
+        checkForPendingValue(this, register);
+        return logicalEquivalent();   
+    }
+
     public Value logicalInverse() { 
         return new FalseValue(); 
     }
@@ -173,6 +259,16 @@ public class Value implements Persistable {
     
     public boolean booleanEquivalent() { 
         return true; 
+    }
+
+    public Value logicalAnd(Value v, int inputRegister1, int inputRegister2) {
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return logicalAnd(v);
+    } 
+
+    public Value logicalOr(Value v, int inputRegister1, int inputRegister2) {
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return logicalOr(v);
     }
 
     public Value logicalAnd(Value v) { 
@@ -190,7 +286,17 @@ public class Value implements Persistable {
         }
     }
 
-    public Value identicalTo(Value v) { 
+    public Value identicalTo(Value v, int inputRegister1, int inputRegister2) {
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return identicalTo(v);
+    }
+
+    public Value notIdenticalTo(Value v, int inputRegister1, int inputRegister2) {
+        checkForPendingValues(this, v, inputRegister1, inputRegister2);
+        return notIdenticalTo(v);
+    }
+
+    public Value identicalTo(Value v) {
         if(this.getId().equals(v.getId())) {
             return new TrueValue();
         } else {
@@ -198,7 +304,7 @@ public class Value implements Persistable {
         }
     }
     
-    public Value notIdenticalTo(Value v) { 
+    public Value notIdenticalTo(Value v) {
         if(!this.getId().equals(v.getId())) {
             return new TrueValue();
         } else {
@@ -206,9 +312,19 @@ public class Value implements Persistable {
         }
     }
 
+    public Value get(Object key, int register) {
+        checkForPendingValue(this, register);
+        return get(key);
+    }
+
     public Value get(Object key) {
         throw new RuntimeException("Cannot access key for non-structure type.");
     }
+
+    public void put(Object key, Value value, int register) {
+        checkForPendingValue(this, register);
+        put(key, value);
+    }    
 
     public void put(Object key, Value value) {
         throw new RuntimeException("Cannot assign key for non-structure type.");

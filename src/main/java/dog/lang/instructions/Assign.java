@@ -42,12 +42,14 @@ public class Assign extends Instruction {
 		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
 		mv.visitLdcInsn(this.keyRegister);
 		mv.visitInsn(AALOAD);
-		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "getValue", "()Ljava/lang/Object;");
+		mv.visitLdcInsn(this.keyRegister);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "getValue", "(I)Ljava/lang/Object;");
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
 		mv.visitLdcInsn(this.valueRegister);
 		mv.visitInsn(AALOAD);
-		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "put", "(Ljava/lang/Object;Ldog/lang/Value;)V");
+		mv.visitLdcInsn(this.outputRegister);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "put", "(Ljava/lang/Object;Ldog/lang/Value;I)V");
 
 		setReturnRegister(mv, this.outputRegister);
 		incrementProgramCounter(mv, instructionIndex);

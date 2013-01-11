@@ -45,8 +45,10 @@ public class Access extends Instruction {
 		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
 		mv.visitLdcInsn(this.keyRegister);
 		mv.visitInsn(AALOAD);
-		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "getValue", "()Ljava/lang/Object;");
-		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "get", "(Ljava/lang/Object;)Ldog/lang/Value;");
+		mv.visitLdcInsn(this.keyRegister);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "getValue", "(I)Ljava/lang/Object;");
+		mv.visitLdcInsn(this.valueRegister);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", "get", "(Ljava/lang/Object;I)Ldog/lang/Value;");
 		mv.visitInsn(AASTORE);
 
 		setReturnRegister(mv, this.outputRegister);

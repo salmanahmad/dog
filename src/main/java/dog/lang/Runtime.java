@@ -83,7 +83,7 @@ public class Runtime {
 
 	public void restart(String startUpSymbol) {
 		database.getCollection(new StackFrame().collectionName()).drop();
-		database.getCollection(new Future().collectionName()).drop();
+		database.getCollection(new Future(this).collectionName()).drop();
 		this.start(startUpSymbol);
 	}
 

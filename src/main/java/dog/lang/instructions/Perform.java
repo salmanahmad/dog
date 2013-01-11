@@ -82,7 +82,8 @@ public class Perform extends Instruction {
 			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
 			mv.visitIntInsn(SIPUSH, this.inputRegister1);
 			mv.visitInsn(AALOAD);
-			mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "()Ldog/lang/Value;");
+			mv.visitLdcInsn(this.inputRegister1);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "(I)Ldog/lang/Value;");
 			mv.visitInsn(AASTORE);
 		} else {
 			mv.visitVarInsn(ALOAD, 1);
@@ -96,7 +97,9 @@ public class Perform extends Instruction {
 			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
 			mv.visitIntInsn(SIPUSH, this.inputRegister2);
 			mv.visitInsn(AALOAD);
-			mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "(Ldog/lang/Value;)Ldog/lang/Value;");
+			mv.visitLdcInsn(this.inputRegister1);
+			mv.visitLdcInsn(this.inputRegister2);
+			mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Value", operationMethod, "(Ldog/lang/Value;II)Ldog/lang/Value;");
 			mv.visitInsn(AASTORE);
 		}
 		

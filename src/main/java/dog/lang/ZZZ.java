@@ -39,7 +39,7 @@ public class ZZZ extends dog.lang.Function {
 
 		switch(stack.programCounter) {
 			case 0:
-				stack.registers[999999] = stack.registers[5555].logicalInverse();
+				stack.registers[8888888].getValue(7777777);
 		}
 
 
