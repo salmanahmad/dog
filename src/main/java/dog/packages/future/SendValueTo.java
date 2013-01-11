@@ -40,7 +40,7 @@ public class SendValueTo extends Function {
 		Value channel = frame.variables[1];
 
 		if(channel.pending) {
-			dog.lang.Future future = new dog.lang.Future(frame.getRuntime());
+			dog.lang.Future future = new dog.lang.Future(runtime);
 
 			if(future.findOne(new BasicDBObject("value_id", channel.getId()))) {
 				if(future.broadcastStackFrames.size() == 0 && future.handlers.size() == 0) {
