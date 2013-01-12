@@ -11,15 +11,15 @@
 
 package dog.lang;
 
-import org.bson.types.ObjectId;
+import java.util.ArrayList;
 
-public class WaitingException extends RuntimeException {
-	public ObjectId futureValueId;
+public class WaitOnException extends RuntimeException {
+	public ArrayList<Future> awaitedFutures;
 	public int returnRegister;
 	
 
-	public WaitingException(ObjectId futureValueId, int returnRegister) {
-		this.futureValueId = futureValueId;
+	public WaitOnException(ArrayList<Future> awaitedFutures, int returnRegister) {
+		this.awaitedFutures = awaitedFutures;
 		this.returnRegister = returnRegister;
 	}
 	

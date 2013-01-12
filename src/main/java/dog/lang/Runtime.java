@@ -209,12 +209,11 @@ public class Runtime {
 					} else if (signal.type == Signal.Type.EXIT) {
 
 					}
-				} catch(WaitingException e) {
+				} catch(ImplicitWaitException e) {
 					DBCollection collection = this.database.getCollection(new Future(this).collectionName());
 
 					BasicDBObject query = new BasicDBObject("value_id", e.futureValueId);
 					BasicDBObject update = new BasicDBObject("$push", new BasicDBObject("blocking_stack_frames", frame.getId()));
-
 					collection.update(query, update, false, true);
 
 					frame.returnRegister = e.returnRegister;
@@ -222,6 +221,22 @@ public class Runtime {
 					frame.save();
 
 					break;
+				} catch(WaitOnException e) {
+					DBCollection collection = this.database.getCollection(new Future(this).collectionName());
+
+					ArrayList<Future> awaitedFutures = e.awaitedFutures;
+					
+					for(Future future : awaitedFutures) {
+						BasicDBObject query = new BasicDBObject("_id", future.getId());
+						BasicDBObject update = new BasicDBObject("$push", new BasicDBObject("broadcast_stack_frames", frame.getId()));
+						collection.update(query, update, false, true);
+					}
+					
+					frame.returnRegister = e.returnRegister;
+					frame.state = StackFrame.WAITING;
+					frame.save();
+
+					break;					
 				}
 			}
 		}

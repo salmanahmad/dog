@@ -48,7 +48,7 @@ public class Value implements Persistable {
     
     public void checkForPendingValue(Value value, int register) {
         if(value.pending) {
-            throw new WaitingException(value.getId(), register);
+            throw new ImplicitWaitException(value.getId(), register);
         }
     }
 
