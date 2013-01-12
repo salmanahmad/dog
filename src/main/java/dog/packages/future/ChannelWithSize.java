@@ -43,7 +43,8 @@ public class ChannelWithSize extends Function {
 			StructureValue value = new StructureValue();
 			value.pending = true;
 			value.channelMode = true;
-			value.channelSize = (Integer)size.getValue();
+
+			value.channelSize = ((Double)size.getValue()).intValue();
 
 			dog.lang.Future future = new dog.lang.Future(frame.getRuntime());
 			future.valueId = value.getId();
@@ -55,6 +56,7 @@ public class ChannelWithSize extends Function {
 			frame.registers[0] = new NullValue();
 		}
 
+		frame.returnRegister = 0;
 		return new Signal(Signal.Type.RETURN);
 	}
 }

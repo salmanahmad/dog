@@ -170,7 +170,7 @@ public class Runtime {
 
 							break;
 						} else {
-							StackFrame returnFrame = (StackFrame)frame.controlAncestors.get(frame.controlAncestors.size() - 1);
+							StackFrame returnFrame = frame.parentStackFrame();
 							if(returnFrame.returnRegister != -1) {
 								if(frame.returnRegister != -1) {
 									returnFrame.registers[returnFrame.returnRegister] = frame.registers[frame.returnRegister];

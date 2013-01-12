@@ -101,13 +101,14 @@ public class StackFrame extends DatabaseObject {
 	}
 
 	public StackFrame(ObjectId id, Runtime runtime) {
+		this.setRuntime(runtime);
+
 		BasicDBObject query = new BasicDBObject();
 		query.put("_id", id);
 
 		DBCollection collection = this.getCollection();
 		DBObject data = collection.findOne(query);
-
-		this.setRuntime(runtime);
+		
 		this.fromMongo(data, this.getRuntime().getResolver());
 	}
 

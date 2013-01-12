@@ -147,7 +147,7 @@ public class Future extends DatabaseObject {
 		}
 
 		for(Object object : (List)bson.get("broadcast_stack_frames")) {
-			this.blockingStackFrames.add(object);
+			this.broadcastStackFrames.add(object);
 		}
 
 		for(Object object : (List)bson.get("handlers")) {
