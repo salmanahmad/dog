@@ -340,16 +340,96 @@ elseStatement returns [Nodes nodes]
 
 
 forLoop returns [Node node]
-// TODO: Implement this once the native language integration bridge is created so I can get the
-// keys in a structure at runtime by calling dog.keys_for_structure: or something...
+@init {
+  String keysVariableName = "@keys" + dog.util.Helper.uniqueNumber();
+  String sizeVariableName = "@size" + dog.util.Helper.uniqueNumber();
+  String counterVariableName = "@counter" + dog.util.Helper.uniqueNumber();
+  String structureVariableName = "@structure" + + dog.util.Helper.uniqueNumber();
+  
+  String localLoopVariable = "";
+  Node expression = null;
+  Nodes body = null;
+  Nodes nodes = new Nodes();
+
+  Identifier keysId = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "structure_keys:")));
+  Identifier sizeId = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "structure_size:")));
+}
   : FOR EACH
-    IDENTIFIER
+    IDENTIFIER        { localLoopVariable = $IDENTIFIER.text; }
     IN
-    expression
+    expression        { expression = $expression.node; }
     DO terminator?
-    ( expressions
+    ( expressions     { body = $expressions.nodes; }
     )?
-    END
+    END               {
+
+      nodes.add(new Nodes(new ArrayList<Node>(Arrays.asList(
+        new Assign(
+          new ArrayList<Object>(Arrays.asList(structureVariableName)),
+          expression
+        ),
+        new Assign(
+          new ArrayList<Object>(Arrays.asList(keysVariableName)),
+          new Call(
+            false,
+            keysId,
+            new ArrayList<Node>(Arrays.asList(
+              new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(structureVariableName)))
+            ))
+          )
+        ),
+        new Assign(
+          new ArrayList<Object>(Arrays.asList(sizeVariableName)),
+          new Call(
+            false,
+            sizeId,
+            new ArrayList<Node>(Arrays.asList(
+              new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(keysVariableName)))
+            ))
+          )
+        ),
+        new Assign(
+          $start.getLine(), 
+          new ArrayList(Arrays.asList(counterVariableName)),
+          new NumberLiteral($start.getLine(), 0)
+        ),
+        new Loop(
+          new Nodes(new ArrayList<Node>(Arrays.asList(
+            new Branch(
+              new Operation(
+                new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(counterVariableName))),
+                new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(sizeVariableName))),
+                "<"
+              ),
+              new Nodes(new ArrayList<Node>(Arrays.asList(
+                new Assign(
+                  new ArrayList(Arrays.asList(localLoopVariable)),
+                  new Access(
+                    Identifier.Scope.LOCAL,
+                    new ArrayList<Object>(Arrays.asList(
+                      keysVariableName,
+                      new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(counterVariableName)))
+                    ))
+                  )
+                ),
+                body,
+                new Assign(
+                  new ArrayList(Arrays.asList(counterVariableName)),
+                  new Operation(
+                    new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(counterVariableName))),
+                    new NumberLiteral($start.getLine(), 1),
+                    "+"
+                  )
+                )
+              ))),
+              new Break(null)
+            )
+          )))
+        )
+      ))));
+
+      $node = nodes;
+    }
   ;
 
 whileLoop returns [Node node]
