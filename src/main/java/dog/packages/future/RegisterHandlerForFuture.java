@@ -32,6 +32,7 @@ public class RegisterHandlerForFuture extends Function {
 		Value future = frame.variables[1];
 
 		if(future.pending && handler instanceof StringValue) {
+			// TODO: Make this an atomic $push update...
 			dog.lang.Future f = new dog.lang.Future(frame.getRuntime());
 			f.findOne(new BasicDBObject("value_id", future.getId()));
 			f.handlers.add((String)handler.getValue());

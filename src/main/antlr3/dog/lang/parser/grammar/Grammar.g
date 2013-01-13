@@ -449,20 +449,72 @@ waitStatement returns [Node node]
                               $start.getLine(), 
                               false, 
                               call,
-                              new ArrayList<Node>(Arrays.asList(new StructureLiteral($start.getLine(), type, value))));
+                              new ArrayList<Node>(Arrays.asList(new StructureLiteral($start.getLine(), type, value)))
+                            );
                            }
   ;
 
 onEachStatement returns [Node node]
-  : ON EACH
-    IDENTIFIER
+@init {
+  String argument = "";
+  
+  Nodes nodes = new Nodes();
+  Node expression = null;
+  String functionName = "@anonymous_" + java.util.UUID.randomUUID().toString();
+  Identifier currentPackageIdentifer = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("reflect", "current_package")));
+  Identifier registerHandlerForFutureIdentifer = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("future", "register_handler:for_future:")));
+}
+  : ON EACH         
+    IDENTIFIER        { argument = $IDENTIFIER.text; }
+                      { expression = new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList(argument + "s"))); }
     ( IN
-      expression
-    )?
+      expression      { expression = $expression.node; }
+    )?                { 
+                        nodes.add(
+                          new Call(
+                            $start.getLine(),
+                            false,
+                            registerHandlerForFutureIdentifer,
+                            new ArrayList<Node>(
+                              Arrays.asList(
+                                new Operation(
+                                  $start.getLine(),
+                                  new Access(
+                                    $start.getLine(), 
+                                    Identifier.Scope.LOCAL,
+                                    new ArrayList<Object>(
+                                      Arrays.asList(
+                                        new Call(
+                                          $start.getLine(),
+                                          false,
+                                          currentPackageIdentifer,
+                                          new ArrayList<Node>()
+                                        ),
+                                        "name"
+                                      )
+                                    )
+                                  ),
+                                  new StringLiteral($start.getLine(), "." + functionName),
+                                  "+"
+                                ),
+                                expression
+                              )
+                            )
+                          )
+                        ); 
+                      }
     DO terminator?
-    ( expressions
+    ( expressions     { nodes.add(
+                          new FunctionDefinition(
+                            $start.getLine(), 
+                            functionName,
+                            new ArrayList<String>(Arrays.asList(argument)),
+                            $expressions.nodes
+                          )
+                        ); 
+                      }
     )?
-    END
+    END               { $node = nodes; }
   ;
 
 onStatement returns [Node node]
