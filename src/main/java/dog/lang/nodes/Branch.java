@@ -20,9 +20,9 @@ import dog.lang.instructions.JumpIfTrue;
 import java.util.ArrayList;
 
 public class Branch extends Node {
-	Node condition;
-	Node trueBranch;
-	Node falseBranch;
+	public Node condition;
+	public Node trueBranch;
+	public Node falseBranch;
 
 	public Branch(Node condition, Node trueBranch, Node falseBranch) {
 		this(-1, condition, trueBranch, falseBranch);

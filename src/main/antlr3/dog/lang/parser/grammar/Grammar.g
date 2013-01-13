@@ -518,27 +518,125 @@ onEachStatement returns [Node node]
   ;
 
 onStatement returns [Node node]
+@init { 
+  ArrayList<HashMap> items = new ArrayList<HashMap>(); 
+  HashMap item = new HashMap();
+  Nodes nodes = new Nodes();
+
+  HashMap<Object, Node> arrayMap = new HashMap<Object, Node>();
+  double index = 0;
+
+  String waitVariableName = "@wait" + dog.util.Helper.uniqueNumber();
+  String arrayVariableName = "@wait_array" + dog.util.Helper.uniqueNumber();
+
+  Identifier arrayId = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "array")));
+  Identifier callId = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("dog", "wait:")));
+  Identifier fromFutureId = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList<String>(Arrays.asList("future", "is_value:from_future:")));
+
+  Branch branch = null;
+  Branch tempBranch = null;
+  Branch branchPointer = null;
+}
   : ON
-    IDENTIFIER
+    IDENTIFIER           { item.put("identifier", $IDENTIFIER.text); }  
+                         { item.put("expression", new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList($IDENTIFIER.text + "s")))); }
+                         { item.put("body", null); }
     ( IN
-      expression
+      expression         { item.put("expression", $expression.node); }
     )?
     DO terminator?
-    ( expressions
-    )?
-    ( elseOnStatement
+    ( expressions        { item.put("body", $expressions.nodes); }
+    )?                   { items.add(item); }
+    ( elseOnStatement    { items.add($elseOnStatement.item); }
     )*
-    END
+    END                  {
+
+
+      for(HashMap map : items) {
+        arrayMap.put((Double)index, (Node)map.get("expression"));
+        index++;
+      }
+
+      nodes.add(
+        new Assign(
+          $start.getLine(),
+          new ArrayList<Object>(Arrays.asList(arrayVariableName)),
+          new StructureLiteral($start.getLine(), arrayId, arrayMap)
+        )
+      );
+
+      nodes.add(
+        new Assign(
+          $start.getLine(), 
+          new ArrayList<Object>(Arrays.asList(waitVariableName)),
+          new Call(
+            $start.getLine(), 
+            false, 
+            callId,
+            new ArrayList<Node>(Arrays.asList(
+              new Access(
+                $start.getLine(), 
+                Identifier.Scope.LOCAL,
+                new ArrayList<Object>(Arrays.asList(arrayVariableName))
+              )
+            ))
+          )
+        )
+      );
+
+      index = 0;
+      for(HashMap map : items) {
+
+        tempBranch = new Branch(
+          new Call(
+            $start.getLine(),
+            false,
+            fromFutureId,
+            new ArrayList<Node>(
+              Arrays.asList(
+                new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(waitVariableName))),
+                new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(arrayVariableName, (Double)index)))
+            ))
+          ),
+          new Nodes(
+            new ArrayList<Node>(Arrays.asList(
+              new Assign(
+                new ArrayList<Object>(Arrays.asList(map.get("identifier"))),
+                new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(waitVariableName)))
+              ),
+              (Nodes)map.get("body")
+            ))
+          ),
+          null
+        );
+
+        index++;
+      }
+
+      if(branch == null) {
+        branch = tempBranch;
+        branchPointer = branch;
+      } else {
+        branchPointer.falseBranch = tempBranch;
+        branchPointer = tempBranch;
+      }
+
+      nodes.add(branch);
+
+      $node = nodes;
+    }
   ;
 
-elseOnStatement returns [Node node]
-  : ELSE ON
-    IDENTIFIER
+elseOnStatement returns [HashMap item]
+  : ELSE ON              { $item = new HashMap(); }
+    IDENTIFIER           { $item.put("identifier", $IDENTIFIER.text); }
+                         { $item.put("expression", new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList($IDENTIFIER.text + "s")))); }
+                         { $item.put("body", null); }
     ( IN
-      expression
+      expression         { $item.put("expression", $expression.node); }
     )?
     DO terminator?
-    ( expressions
+    ( expressions        { $item.put("body", $expressions.nodes); }
     )?
   ;
 
