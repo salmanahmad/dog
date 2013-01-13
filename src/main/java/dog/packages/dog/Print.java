@@ -12,6 +12,7 @@
 package dog.packages.dog;
 
 import dog.lang.Value;
+import dog.lang.StringValue;
 import dog.lang.Function;
 import dog.lang.Signal;
 import dog.lang.StackFrame;
@@ -29,7 +30,13 @@ public class Print extends Function {
 		if(value.pending) {
 			System.out.print("pending: ");
 		}
-		System.out.println(value);
+
+		if(value instanceof StringValue) {
+			System.out.println(value.getValue());
+		} else {
+			System.out.println(value);
+		}
+		
 		return new Signal(Signal.Type.RETURN);
 	}
 }
