@@ -378,32 +378,37 @@ repeatLoop returns [Node node]
     ( expressions                 { body = $expressions.nodes; }
     )?
     END {
-      $node = new Nodes(new ArrayList<Node>(Arrays.asList(
-          new Assign($start.getLine(), 
+      $node = new Nodes(
+        new ArrayList<Node>(Arrays.asList(
+          new Assign(
+            $start.getLine(), 
             new ArrayList(Arrays.asList(counterVariable)),
             new NumberLiteral($start.getLine(), 0)
           ),
-          new Loop($start.getLine(), new Nodes(new ArrayList<Node>(Arrays.asList(
-            new Branch($start.getLine(),
-              new Operation($start.getLine(), 
-                new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList(counterVariable))),
-                $expression.node,
-                "<"
-              ),
-              new Nodes(new ArrayList<Node>(Arrays.asList(
-                new Assign($start.getLine(), 
-                  new ArrayList(Arrays.asList(counterVariable)),
-                  new Operation(
-                    new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList(counterVariable))),
-                    new NumberLiteral($start.getLine(), 1),
-                    "+"
-                  )
-                )
-              ))),
-              new Break($start.getLine(), null)
-            )
-          )))),
-          body
+          new Loop(
+            $start.getLine(), 
+            new Nodes(new ArrayList<Node>(Arrays.asList(
+              new Branch($start.getLine(),
+                new Operation($start.getLine(), 
+                  new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList(counterVariable))),
+                  $expression.node,
+                  "<"
+                ),
+                new Nodes(new ArrayList<Node>(Arrays.asList(
+                  new Assign($start.getLine(), 
+                    new ArrayList(Arrays.asList(counterVariable)),
+                    new Operation(
+                      new Access(Identifier.Scope.LOCAL, new ArrayList(Arrays.asList(counterVariable))),
+                      new NumberLiteral($start.getLine(), 1),
+                      "+"
+                    )
+                  ),
+                  body
+                ))),
+                new Break($start.getLine(), null)
+              )
+            )))
+          )
         ))
       );
     }
