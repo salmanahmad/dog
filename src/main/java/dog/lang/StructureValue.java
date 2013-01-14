@@ -46,9 +46,7 @@ public class StructureValue extends Value {
             map.put(key, v.toString());
         }
 
-        if(!(this.getClass().equals(StructureValue.class) || this.getClass().equals(Type.class))) {
-            type = Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(this.getClass().getName()));
-        }
+        type = Util.typeAsString(this);
 
         return type + " " + map.toString();
     }
@@ -176,7 +174,6 @@ public class StructureValue extends Value {
     public DBObject toMongo() {
         DBObject object = super.toMongo();
         ArrayList value = new ArrayList();
-        String type = "dog.structure";
 
         for(Object k : this.value.keySet()) {
             Value v = this.value.get(k);
@@ -188,9 +185,8 @@ public class StructureValue extends Value {
             value.add(o);
         }
 
-        if(!(this.getClass().equals(StructureValue.class) || this.getClass().equals(Type.class))) {
-            type = Resolver.decodeSymbol(Resolver.convertJavaClassNameToJVMClassName(this.getClass().getName()));
-        }
+        String type = "dog.structure";
+        type = Util.typeAsString(this);
 
         object.put("value", value);
         object.put("type", type);
