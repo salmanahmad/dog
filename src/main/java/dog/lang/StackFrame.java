@@ -121,6 +121,10 @@ public class StackFrame extends DatabaseObject {
 		this.state = state;
 	}
 
+	public Map<String, Value> getMetaData() {
+		return this.meta;
+	}
+
 	public Signal resume() {
 		return symbol.resume(this);
 	}
