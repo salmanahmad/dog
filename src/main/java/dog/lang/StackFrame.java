@@ -52,6 +52,7 @@ public class StackFrame extends DatabaseObject {
 
 	public Value[] registers = null;
 	public Value[] variables = null;
+	public HashMap<String, Value> meta = new HashMap<String, Value>();
 
 	public HashMap<String, Integer> variableTable = new HashMap<String, Integer>();
 	public ArrayList<Object> controlAncestors = new ArrayList<Object>();
@@ -199,6 +200,13 @@ public class StackFrame extends DatabaseObject {
         hash.put("registers", registers);
 		hash.put("variables", variables); 
 
+		DBObject meta = new BasicDBObject();
+		for(String key : this.meta.keySet()) {
+			meta.put(key, this.meta.get(key).toMongo());
+		}
+
+		hash.put("meta", meta);
+
 		ArrayList<ObjectId> controlAncestors = new ArrayList<ObjectId>();
 		for(Object controlAncestor : this.controlAncestors) {
 			if(controlAncestor instanceof StackFrame) {
@@ -270,6 +278,13 @@ public class StackFrame extends DatabaseObject {
 
 		this.variableTable = new HashMap<String, Integer>();
 		this.controlAncestors = new ArrayList<Object>();
+
+		DBObject meta = (DBObject)bson.get("meta");
+		this.meta = new HashMap<String, Value>();
+		for(String key : meta.keySet()) {
+			Value value = Value.createFromMongo((DBObject)meta.get(key), resolver);
+			this.meta.put(key, value);
+		}
 
 		Map variableTableMap = (Map)bson.get("variable_table");
 		for(Object key : variableTableMap.keySet()) {
