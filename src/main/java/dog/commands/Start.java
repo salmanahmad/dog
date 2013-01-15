@@ -20,6 +20,7 @@ import dog.util.StringList;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -37,8 +38,11 @@ public class Start extends Command {
 			Resolver resolver = new Resolver();
 			String startUpSymbol = null;
 			String applicationName = null;
+			String applicationPath = null;
 
 			for(String arg : args.strings) {
+				String originalArg = arg;
+
 				if(FilenameUtils.isExtension(arg, "dog") || FilenameUtils.isExtension(arg, "bark")) {
 					arg = FilenameUtils.removeExtension(arg);
 				}
@@ -51,13 +55,14 @@ public class Start extends Command {
 				if(startUpSymbol == null) {
 					startUpSymbol = bark.startUpSymbol;
 					applicationName = FilenameUtils.removeExtension(arg);
+					applicationPath = FilenameUtils.getPath(new File(originalArg).getAbsolutePath());
 				}
 			}
 
 			Runtime runtime = null;
 			
 			try {
-				runtime = new Runtime(applicationName, resolver);
+				runtime = new Runtime(applicationName, applicationPath, resolver);
 			} catch(Exception e) {
 				throw new RuntimeException("Could not create runtime.");
 			}
