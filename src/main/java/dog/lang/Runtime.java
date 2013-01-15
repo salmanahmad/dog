@@ -12,6 +12,7 @@
 package dog.lang;
 
 import dog.lang.*;
+import dog.lang.runtime.APIServlet;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.LinkedHashMap;
@@ -27,6 +28,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.ServerAddress;
 import org.bson.types.ObjectId;
+
+import org.eclipse.jetty.server.Server;
 
 public class Runtime {
 	String applicationName;
@@ -59,9 +62,9 @@ public class Runtime {
 	}
 
 	public void start(String startUpSymbol) {
-		BasicDBObject query = new BasicDBObject("symbol_name", startUpSymbol);
+		BasicDBObject rootQuery = new BasicDBObject("symbol_name", startUpSymbol);
 
-		if(database.getCollection(new StackFrame().collectionName()).findOne(query) == null) {
+		if(database.getCollection(new StackFrame().collectionName()).findOne(rootQuery) == null) {
 			StackFrame root = new StackFrame(startUpSymbol, this.resolver);
 			// TODO: Remove this and refactor the API
 			root.setRuntime(this);
@@ -79,6 +82,24 @@ public class Runtime {
 		}
 		
 		this.resume();
+
+		
+		frames = database.getCollection(new StackFrame().collectionName()).find(new BasicDBObject("state", StackFrame.WAITING));
+
+		StackFrame root = new StackFrame();
+		// TODO: Move the runtime into the constructor of the stackframe
+		root.setRuntime(this);
+		root.findOne(rootQuery);
+
+		if(frames.count() > 0 || root.getMetaData().get("listens") != null) {
+			Server server = APIServlet.createServer(4242, this);
+			try {
+				server.start();
+				server.join();
+			} catch(Exception e) {
+				System.out.println("Could not start API server.");
+			}
+		}
 	}
 
 	public void restart(String startUpSymbol) {
