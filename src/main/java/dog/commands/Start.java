@@ -55,7 +55,7 @@ public class Start extends Command {
 				if(startUpSymbol == null) {
 					startUpSymbol = bark.startUpSymbol;
 					applicationName = FilenameUtils.removeExtension(arg);
-					applicationPath = FilenameUtils.getPath(new File(originalArg).getAbsolutePath());
+					applicationPath = FilenameUtils.getFullPath(new File(originalArg).getAbsolutePath());
 				}
 			}
 

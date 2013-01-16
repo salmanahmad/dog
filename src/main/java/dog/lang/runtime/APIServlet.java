@@ -8,13 +8,18 @@ import javax.servlet.http.*;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.*;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.Handler;
+
+import org.apache.commons.io.FilenameUtils;
 
 public class APIServlet extends HttpServlet {
 
-	private Runtime runtime;
+	public Runtime runtime;
 
-	private String prefix;
-	private String filePath;
+	public String prefix;
+	public String filePath;
 
 	public APIServlet(Runtime runtime, String prefix, String filePath) {
 		this.runtime = runtime;
@@ -23,13 +28,8 @@ public class APIServlet extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-	    String path = req.getPathInfo();
-
-	    if(path == "" || path == "/") {
-	    	path = "index.html";
-	    }
-
 	    
+		resp.getWriter().println("Hello!");
 	}
 
 	public static Server createServer(int port, APIServlet servlet) {
@@ -53,11 +53,20 @@ public class APIServlet extends HttpServlet {
 
 		Server server = new Server(port);
 
+		ResourceHandler resourceHandler = new ResourceHandler();
+		resourceHandler.setDirectoriesListed(true);
+		resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
+		resourceHandler.setResourceBase(FilenameUtils.normalize(servlet.filePath));
+
+		System.out.println(servlet.filePath);
+
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");
-		server.setHandler(context);
-
 		context.addServlet(new ServletHolder(servlet), "/*");
+
+		HandlerList handlers = new HandlerList();
+		handlers.setHandlers(new Handler[] { resourceHandler, context });
+		server.setHandler(handlers);
 
 		return server;
 	}
