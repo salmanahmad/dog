@@ -35,6 +35,7 @@ import org.eclipse.jetty.server.Server;
 public class Runtime {
 	String applicationName;
 	String applicationPath;
+	String startUpSymbol;
 	Resolver resolver;
 	MongoClient mongoClient;
 	DB database;
@@ -72,7 +73,13 @@ public class Runtime {
 		return database;
 	}
 
+	public String getStartUpSymbol() {
+		return startUpSymbol;
+	}
+
 	public void start(String startUpSymbol) {
+		this.startUpSymbol = startUpSymbol;
+
 		BasicDBObject rootQuery = new BasicDBObject("symbol_name", startUpSymbol);
 
 		if(database.getCollection(new StackFrame().collectionName()).findOne(rootQuery) == null) {
@@ -178,6 +185,8 @@ public class Runtime {
 					Signal signal = frame.resume();
 
 					if(signal.type == Signal.Type.RETURN) {
+						frame.state = StackFrame.FINISHED;
+
 						if(frame.controlAncestors.size() == 0) {
 							stackTraceHeads.put(frame.getId(), frame);
 

@@ -1,6 +1,13 @@
 package dog.lang.runtime;
 
 import dog.lang.Runtime;
+import dog.lang.StackFrame;
+
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
+import org.bson.types.ObjectId;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -34,16 +41,27 @@ public class APIServlet extends HttpServlet {
 		this.prefix = FilenameUtils.normalize("/" + prefix);
 		this.filePath = filePath;
 
-		ACCOUNT_STATUS = Pattern.compile(String.format("^%s/account/status$", prefix));
-		ACCOUNT_LOGIN = Pattern.compile(String.format("^%s/account/login$", prefix));
-		ACCOUNT_LOGOUT = Pattern.compile(String.format("^%s/account/logout$", prefix));
-		FRAME_GET = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+)$", prefix));
+		ACCOUNT_STATUS = Pattern.compile(String.format("^%s/account/status$", this.prefix));
+		ACCOUNT_LOGIN = Pattern.compile(String.format("^%s/account/login$", this.prefix));
+		ACCOUNT_LOGOUT = Pattern.compile(String.format("^%s/account/logout$", this.prefix));
+		FRAME_GET = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+)$", this.prefix));
 	}
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String requestPath = req.getPathInfo();
 		String output = null;
 		Matcher match = null;
+
+		System.out.println(requestPath);
+
+		System.out.println(ACCOUNT_STATUS);
+
+		match = ACCOUNT_STATUS.matcher(requestPath);
+		if(match.matches()) {
+			System.out.println("Account status");
+		} else {
+			System.out.println("Else Account Status");
+		}
 
 		if((match = ACCOUNT_STATUS.matcher(requestPath)).matches()) {
 			output = "Account Status!";
@@ -52,11 +70,40 @@ public class APIServlet extends HttpServlet {
 		} else if((match = ACCOUNT_LOGOUT.matcher(requestPath)).matches()) {
 			output = "Account Logout!";
 		} else if((match = FRAME_GET.matcher(requestPath)).matches()) {
-			output = "Frame!";
+			System.out.println(requestPath);
+
+			String id = match.group(1);
+
+			// TODO: Remove this as well and move to the constructor.
+			StackFrame frame = new StackFrame();
+			frame.setRuntime(runtime);
+
+			Boolean found = false;
+			if(id.equals("root")) {
+				found = frame.findOne(new BasicDBObject("symbol_name", runtime.getStartUpSymbol()));
+			} else {
+				found = frame.findOne(new BasicDBObject("_id", new ObjectId(id)));
+			}
+
+			if(found) {
+				JSONObject object = new JSONObject();
+				try {
+					object.put("original_frame", Helper.stackFrameAsJsonForAPI(frame));
+					object.put("frame", Helper.stackFrameAsJsonForAPI(frame));	
+				} catch(JSONException e) {
+					System.out.println(e);
+				}
+				
+				output = object.toString();
+			} else {
+				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			}
 		} else {
 			resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
+
+		System.out.println(output);
 
 		resp.setContentType("application/json");
 		resp.getWriter().println(output);
