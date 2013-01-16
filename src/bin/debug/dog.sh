@@ -24,12 +24,14 @@ done
 
 # TODO - I need to switch over to the jar-with-dependencies at some point.
 DIR_NAME=`dirname "$PRG"`
-JAR_NAME="dog.jar"
+DEP_PATH="$DIR_NAME/../lib/dependency/*"
 
-DEP_PATH="$DIR_NAME/../../../target/dependency/*"
-JAR_PATH="$DIR_NAME/../../../target/lib/$JAR_NAME"
+JAR_NAME="dog.jar"
+JAR_PATH="$DIR_NAME/../lib/$JAR_NAME"
 
 CLASSPATH="$JAR_PATH:$DEP_PATH"
 COMMAND_NAME="dog.commands.Main"
 
 exec java -classpath "$CLASSPATH" "$COMMAND_NAME"  "$@"
+
+echo $CLASSPATH
