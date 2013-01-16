@@ -357,8 +357,8 @@ $.fn.serializeAnything = function() {
         }
       }
 
-      selector = selector.replace(/:/g,'-');
-      selector = selector.replace(/\./g,'--');
+      selector = selector.replace(/:/g,'-colon-');
+      selector = selector.replace(/\./g,'-dot-');
 
       console.log(selector);
 
@@ -536,6 +536,28 @@ $.fn.serializeAnything = function() {
   
   dog.run = function() {
     $(function() {
+      var templates = $("[type='text/x-dog-template']");
+
+      for (var i = 0; i < templates.length; i++) {
+        var template = templates[i];
+
+        oldTemplate = template;
+        template = $(template).clone()[0];
+
+        var id = $(template).attr("id");
+        id = id.replace(/:/g,'-colon-');
+        id = id.replace(/\./g,'-dot-');
+
+        $(template).attr("id", id);
+
+        if($("#" + id).length == 0) {
+          $("head").append(template);
+        }
+      }
+
+
+      
+
       dog.initialize();
       
       if(config.performRouting) {
@@ -597,6 +619,24 @@ $.fn.serializeAnything = function() {
   Handlebars.registerHelper('listenUrl', function(listen) {
     return dog.listenUrl(listen.frame_id, listen.name)
   });
+  
+  Handlebars.registerHelper('eachKeys', function(context, options) {
+    var fn = options.fn, inverse = options.inverse;
+    var ret = "";
+
+    var empty = true;
+    for (key in context) { empty = false; break; }
+
+    if (!empty) {
+      for (key in context) {
+          ret = ret + fn({ 'key': key, 'value': context[key]});
+      }
+    } else {
+      ret = inverse(this);
+    }
+    return ret;
+  });
+  
   
   scope.dog = dog;
   

@@ -17,6 +17,12 @@ import dog.lang.Signal;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
 
+import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import java.util.TreeSet;
+import java.util.SortedSet;
+
 @Symbol("dog.array")
 public class Array extends Type {
 
@@ -36,6 +42,19 @@ public class Array extends Type {
 
 		Signal signal = new Signal(Signal.Type.RETURN, frame);
 		return signal;
+	}
+
+	public Object toJSON() {
+		JSONArray array = new JSONArray();
+
+		SortedSet<Object> keys = new TreeSet<Object>(this.value.keySet());
+
+		for(Object key : keys) {
+			Object value = this.value.get(key).toJSON();
+			array.put(value);
+		}
+		
+		return array;
 	}
 }
 
