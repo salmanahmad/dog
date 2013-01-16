@@ -35,6 +35,7 @@ public class APIServlet extends HttpServlet {
 	Pattern ACCOUNT_LOGIN;
 	Pattern ACCOUNT_LOGOUT;
 	Pattern FRAME_GET;
+	Pattern FRAME_POST;
 
 	public APIServlet(Runtime runtime, String prefix, String filePath) {
 		this.runtime = runtime;
@@ -45,23 +46,13 @@ public class APIServlet extends HttpServlet {
 		ACCOUNT_LOGIN = Pattern.compile(String.format("^%s/account/login$", this.prefix));
 		ACCOUNT_LOGOUT = Pattern.compile(String.format("^%s/account/logout$", this.prefix));
 		FRAME_GET = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+)$", this.prefix));
+		FRAME_POST = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+/([a-zA-Z0-9]+)$", this.prefix));
 	}
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String requestPath = req.getPathInfo();
 		String output = null;
 		Matcher match = null;
-
-		System.out.println(requestPath);
-
-		System.out.println(ACCOUNT_STATUS);
-
-		match = ACCOUNT_STATUS.matcher(requestPath);
-		if(match.matches()) {
-			System.out.println("Account status");
-		} else {
-			System.out.println("Else Account Status");
-		}
 
 		if((match = ACCOUNT_STATUS.matcher(requestPath)).matches()) {
 			output = "Account Status!";
@@ -70,8 +61,6 @@ public class APIServlet extends HttpServlet {
 		} else if((match = ACCOUNT_LOGOUT.matcher(requestPath)).matches()) {
 			output = "Account Logout!";
 		} else if((match = FRAME_GET.matcher(requestPath)).matches()) {
-			System.out.println(requestPath);
-
 			String id = match.group(1);
 
 			// TODO: Remove this as well and move to the constructor.
@@ -103,10 +92,95 @@ public class APIServlet extends HttpServlet {
 			return;
 		}
 
-		System.out.println(output);
+		resp.setContentType("application/json");
+		resp.getWriter().println(output);
+	}
+
+	protected void goPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String requestPath = req.getPathInfo();
+		String output = null;
+		Matcher match = null;
+
+		if((match = FRAME_POST.matcher(requestPath)).matches()) {
+			String id = match.group(1);
+			String variable = match.group(2);
+
+			// TODO: Remove this as well and move to the constructor.
+			StackFrame frame = new StackFrame();
+			frame.setRuntime(runtime);
+
+			Boolean found = false;
+			if(id.equals("root")) {
+				found = frame.findOne(new BasicDBObject("symbol_name", runtime.getStartUpSymbol()));
+			} else {
+				found = frame.findOne(new BasicDBObject("_id", new ObjectId(id)));
+			}
+
+			if(found) {
+
+			} else {
+				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+		}
 
 		resp.setContentType("application/json");
 		resp.getWriter().println(output);
+
+
+/*
+
+		post prefix + '/track/:id/:variable' do |id, variable|
+          if id == "root" then
+            track = ::Dog::Track.root
+          else
+            track = ::Dog::Track.find_by_id(id)
+          end
+
+          if track.nil? || (!track.is_root? && track.state == ::Dog::Track::STATE::FINISHED) then
+            return 404
+          else
+            value = track.listens[variable]
+            value = value["value"] if value
+
+            request.body.rewind
+            data = JSON.parse(request.body.read) rescue nil
+
+            submitted_value = ::Dog::Value.from_ruby_value(data)
+            submitted_value.person = find_or_generate_current_user()
+
+            submission_track = ::Dog::Track.invoke("send:to:value", "future", [value, submitted_value])
+            
+            ::Dog::Runtime.schedule(submission_track)
+            tracks = ::Dog::Runtime.resume
+
+            spawns = []
+            progress_track = track.to_hash_for_api_user()
+            
+            for t in tracks do
+              if t.same_trace_as?(track) then
+                progress_track = t.to_hash_for_api_user()
+              elsif submission_track._id == t._id then
+                next
+              else
+                spawns << t.to_hash_for_api_user()
+              end
+            end
+
+            output = {
+              "original_track" => track.to_hash_for_api_user(),
+              "track" => progress_track,
+              "spawns" => spawns,
+              "account_status" => account_status
+            }
+
+            content_type 'application/json'
+            return output.to_json
+
+
+          end
+        end
+*/
 	}
 
 	public static Server createServer(int port, APIServlet servlet) {
@@ -134,8 +208,6 @@ public class APIServlet extends HttpServlet {
 		resourceHandler.setDirectoriesListed(true);
 		resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
 		resourceHandler.setResourceBase(FilenameUtils.normalize(servlet.filePath));
-
-		System.out.println(servlet.filePath);
 
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");
