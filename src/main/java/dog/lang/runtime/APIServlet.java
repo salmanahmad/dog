@@ -13,8 +13,12 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
+import java.io.StringWriter;
+import java.io.StringReader;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.*;
@@ -25,15 +29,20 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 
 import org.apache.commons.io.FilenameUtils;
 
+//import ro.isdc.wro.model.resource.processor.impl.js.JSMinProcessor;
+
 public class APIServlet extends HttpServlet {
 
 	public Runtime runtime;
 	public String prefix;
 	public String filePath;
 
+	public String dogJS;
+
 	Pattern ACCOUNT_STATUS;
 	Pattern ACCOUNT_LOGIN;
 	Pattern ACCOUNT_LOGOUT;
+	Pattern DOG_JS;
 	Pattern FRAME_GET;
 	Pattern FRAME_POST;
 
@@ -45,8 +54,26 @@ public class APIServlet extends HttpServlet {
 		ACCOUNT_STATUS = Pattern.compile(String.format("^%s/account/status$", this.prefix));
 		ACCOUNT_LOGIN = Pattern.compile(String.format("^%s/account/login$", this.prefix));
 		ACCOUNT_LOGOUT = Pattern.compile(String.format("^%s/account/logout$", this.prefix));
+		DOG_JS = Pattern.compile(String.format("^%s/dog.js$", this.prefix));
 		FRAME_GET = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+)$", this.prefix));
-		FRAME_POST = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+/([a-zA-Z0-9]+)$", this.prefix));
+		FRAME_POST = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)$", this.prefix));
+
+		this.dogJS = "";
+
+		ArrayList<String> files = new ArrayList<String>(Arrays.asList("jquery.js", "json2.js", "handlebars.js", "dog-base.js"));
+		for(String file : files) {
+			String contents = dog.util.Helper.readResource("/dog/server/javascripts/" + file);
+			this.dogJS += "\n\n\n" + contents;
+		}
+
+		/* TODO: Get this to work...
+		JSMinProcessor processor = new JSMinProcessor();
+		StringWriter output = new StringWriter();
+		StringReader input = new StringReader(this.dogJS);
+
+		processor.process(input, output);
+		this.dogJS = output.toString();
+		*/
 	}
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -87,6 +114,10 @@ public class APIServlet extends HttpServlet {
 			} else {
 				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}
+		} else if((match = DOG_JS.matcher(requestPath)).matches()) {
+			resp.setContentType("application/javascript");
+			resp.getWriter().println(this.dogJS);
+			return;
 		} else {
 			resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			return;
