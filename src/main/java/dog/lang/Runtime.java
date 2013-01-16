@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.net.UnknownHostException;
+import java.net.URL;
 
 import com.mongodb.MongoClient;
 import com.mongodb.DB;
@@ -33,6 +34,7 @@ import org.eclipse.jetty.server.Server;
 
 public class Runtime {
 	String applicationName;
+	String applicationPath;
 	Resolver resolver;
 	MongoClient mongoClient;
 	DB database;
@@ -40,11 +42,20 @@ public class Runtime {
 	LinkedBlockingQueue<StackFrame> scheduledStackFrames;	
 
 	public Runtime(String applicationName) throws UnknownHostException {
-		this(applicationName, new Resolver());
+		this(applicationName, System.getProperty("user.dir"), new Resolver());
 	}
 
 	public Runtime(String applicationName, Resolver resolver) throws UnknownHostException {
+		this(applicationName, System.getProperty("user.dir"), resolver);
+	}
+
+	public Runtime(String applicationName, String applicationPath) throws UnknownHostException {
+		this(applicationName, applicationPath, new Resolver());
+	}
+
+	public Runtime(String applicationName, String applicationPath, Resolver resolver) throws UnknownHostException {
 		this.applicationName = applicationName;
+		this.applicationPath = applicationPath;
 		this.resolver = resolver;
 		this.scheduledStackFrames = new LinkedBlockingQueue<StackFrame>();
 		this.mongoClient = new MongoClient(new ServerAddress("localhost", 27017));
@@ -92,7 +103,8 @@ public class Runtime {
 		root.findOne(rootQuery);
 
 		if(frames.count() > 0 || root.getMetaData().get("listens") != null) {
-			Server server = APIServlet.createServer(4242, this);
+			APIServlet servlet = new APIServlet(this, "dog", this.applicationPath + "/views");
+			Server server = APIServlet.createServer(4242, servlet);
 			try {
 				server.start();
 				server.join();
