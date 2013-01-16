@@ -2,23 +2,30 @@ package dog.lang.runtime;
 
 import dog.lang.Runtime;
 import dog.lang.StackFrame;
+import dog.lang.NullValue;
+import dog.lang.StructureValue;
+import dog.lang.Value;
 
 import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
+import java.io.BufferedReader;
 import java.io.StringWriter;
 import java.io.StringReader;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.List;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.*;
@@ -148,7 +155,66 @@ public class APIServlet extends HttpServlet {
 			}
 
 			if(found) {
+				Map<String, Value> meta = frame.getMetaData();
+				StructureValue listens = (StructureValue)meta.get("listens");
 
+				if(listens != null) {
+					Value value = listens.get(variable);
+					if(!(value instanceof NullValue)) {
+						Value submittedValue = null;
+
+						StringBuffer body = new StringBuffer();
+						String line = null;
+						
+						BufferedReader reader = req.getReader();
+						while ((line = reader.readLine()) != null) {
+							body.append(line);
+						}
+						
+						try {
+							JSONObject jsonBody = new JSONObject(body.toString());
+							submittedValue = Value.createFromJSON(jsonBody, this.runtime.getResolver());
+						} catch(JSONException e) {
+							System.out.println(e);
+							e.printStackTrace();
+						}
+
+						StackFrame submissionFrame = new StackFrame("future.send_value:to:", this.runtime.getResolver(), new Value[] {submittedValue, value});
+						/* Force it to generate an ObjectId. This may not be necessary */
+						submissionFrame.getId();
+						
+						this.runtime.schedule(submissionFrame);
+
+						ArrayList<StackFrame> frames = this.runtime.resume();
+
+						
+						List<JSONObject> spawns = new ArrayList<JSONObject>();
+						StackFrame progressFrame = null;
+
+						for(StackFrame f : frames) {
+							if(StackFrame.areFramesInSameTrace(frame, f)) {
+								progressFrame = f;
+							} else if(submissionFrame.getId().equals(f.getId())) {
+								continue;
+							} else {
+								spawns.add(Helper.stackFrameAsJsonForAPI(f));
+							}
+						}
+
+						JSONObject jsonOutput = new JSONObject();
+						
+						try {
+							jsonOutput.put("original_frame", Helper.stackFrameAsJsonForAPI(frame));
+							jsonOutput.put("frame",  Helper.stackFrameAsJsonForAPI(progressFrame));
+							jsonOutput.put("spawns", new JSONArray(spawns.toArray()));
+						} catch(JSONException e) {
+							System.out.println(e);
+							e.printStackTrace();
+						}
+
+						output = jsonOutput.toString();
+					}
+				}
 			} else {
 				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 				return;

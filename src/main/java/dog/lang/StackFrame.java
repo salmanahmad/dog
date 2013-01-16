@@ -113,6 +113,36 @@ public class StackFrame extends DatabaseObject {
 		this.fromMongo(data, this.getRuntime().getResolver());
 	}
 
+	public static boolean areFramesInSameTrace(StackFrame a, StackFrame b) {
+		for(Object o : a.controlAncestors) {
+			ObjectId id = null;
+			if(o instanceof ObjectId) {
+				id = (ObjectId)o;
+			} else if(o instanceof StackFrame) {
+				id = ((StackFrame)o).getId();
+			}
+
+			if(id.equals(b.getId())) {
+				return true;
+			}
+		}
+
+		for(Object o : b.controlAncestors) {
+			ObjectId id = null;
+			if(o instanceof ObjectId) {
+				id = (ObjectId)o;
+			} else if(o instanceof StackFrame) {
+				id = ((StackFrame)o).getId();
+			}
+
+			if(id.equals(a.getId())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public String collectionName() {
 		return "stack_frames";
 	}
