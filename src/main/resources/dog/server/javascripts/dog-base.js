@@ -62,7 +62,8 @@ $.fn.serializeAnything = function() {
   var routing = [];
   var initialized = false;
   
-  var streamClient = new Faye.Client('/dog/stream');
+  // TODO: Add this back in...
+  //var streamClient = new Faye.Client('/dog/stream');
   
   var didStartLoadingCallback = function() {};
   var didEndLoadingCallback = function() {};
@@ -193,13 +194,13 @@ $.fn.serializeAnything = function() {
       for(var i = 0; i < path.length; i++) {
         var viewport = path[i]
         i++
-        var trackId = path[i]
+        var frameId = path[i]
         
-        state[viewport] = trackId
+        state[viewport] = frameId
         
         var context = $("*[data-dog-viewport='" + viewport + "']:first")
         if($(context).size() > 0) {
-          dog.renderTrack(trackId, context)
+          dog.renderFrame(frameId, context)
         }
       }
       
@@ -315,18 +316,18 @@ $.fn.serializeAnything = function() {
     var originalData = data
     var originalContext = context
 
-    var tracks = [data.track]
+    var frames = [data.frame]
     if(data.spawns) {
       for(var i in data.spawns) {
-        tracks.push(data.spawns[i])
+        frames.push(data.spawns[i])
       }
     }
     
-    for(var i in tracks) {
-      var data = tracks[i]
+    for(var i in frames) {
+      var data = frames[i]
       var selector = "";
 
-      if (originalData.track._id == data._id) {
+      if (originalData.frame._id == data._id) {
         context = originalContext
       } else {
         context = $(originalContext).data("dog-spawn-viewport");
@@ -337,28 +338,32 @@ $.fn.serializeAnything = function() {
         continue;
       }
 
-      if(data.package_name != "") {
-        selector = data.package_name + ".";
+      //if(data.package_name != "") {
+      //  selector = data.package_name + ".";
+      //}
+
+      if(data.symbol_name.indexOf("@root") !== -1) {
+        data.symbol_name = config.rootSelector;
       }
 
-      if(data.function_name == "@root") {
-        data.function_name = config.rootSelector;
-      }
-
-      selector += data.function_name;
+      selector = data.symbol_name;
 
       for(var i in data.listens) {
         var listen = data.listens[i];
         data.listens[i] = {
-          "track_id":data._id,
+          "frame_id":data._id,
           "name":i,
           "listen":listen
         }
       }
 
       selector = selector.replace(/:/g,'-');
+      selector = selector.replace(/\./g,'--');
+
+      console.log(selector);
 
       if(selector.indexOf("@") == "-1" && $("#" + selector).length > 0) {
+
         var html = $("#" + selector + "[type='text/x-dog-template']").html()
         var source = "<div id='dog-" + data._id + "'>" + html + "</div>";
         var template = Handlebars.compile(source);
@@ -440,8 +445,8 @@ $.fn.serializeAnything = function() {
     }
   }
   
-  dog.loadTrack = function(track) {
-    var request = dog.request("GET", dog.trackUrl(track))
+  dog.loadFrame = function(frame) {
+    var request = dog.request("GET", dog.frameUrl(frame))
     return request
   }
   
@@ -455,8 +460,8 @@ $.fn.serializeAnything = function() {
     return dog.callListen(action, data);
   }
   
-  dog.renderTrack = function(track, context) {
-    var request = dog.request("GET", dog.trackUrl(track))
+  dog.renderFrame = function(frame, context) {
+    var request = dog.request("GET", dog.frameUrl(frame))
     didStartLoadingCallback();
     
     request.success(function(data) {
@@ -491,12 +496,12 @@ $.fn.serializeAnything = function() {
     return request
   }
   
-  dog.listenUrl = function(track, name) {
-    return dog.trackUrl(track) + "/" + name;
+  dog.listenUrl = function(frame, name) {
+    return dog.frameUrl(frame) + "/" + name;
   }
   
-  dog.trackUrl = function(track) {
-    return config.baseUrl + "/track/" + track
+  dog.frameUrl = function(frame) {
+    return config.baseUrl + "/frame/" + frame
   }
   
   dog.request = function(type, url, data) {
@@ -546,7 +551,7 @@ $.fn.serializeAnything = function() {
       }
       
       if(config.autoRun) {
-        dog.renderTrack("root")
+        dog.renderFrame("root")
         didLoadRootCallback();
       }
     })
@@ -571,7 +576,7 @@ $.fn.serializeAnything = function() {
   });
 
   Handlebars.registerHelper('listenLink', function(listen, options) {
-    var url = dog.listenUrl(listen.track_id, listen.name);
+    var url = dog.listenUrl(listen.frame_id, listen.name);
     var ret = "<a class='dog-link' href='" + url + "'>"
     ret += options.fn(this)
     ret += "</a>";
@@ -580,7 +585,7 @@ $.fn.serializeAnything = function() {
   });
   
   Handlebars.registerHelper('listenForm', function(listen, options) {
-    var url = dog.listenUrl(listen.track_id, listen.name);
+    var url = dog.listenUrl(listen.frame_id, listen.name);
     
     var ret = "<form action='" + url + "' class='dog-form' method='post' accept-charset='utf-8'>"
     ret += options.fn(this)
@@ -590,7 +595,7 @@ $.fn.serializeAnything = function() {
   });
   
   Handlebars.registerHelper('listenUrl', function(listen) {
-    return dog.listenUrl(listen.track_id, listen.name)
+    return dog.listenUrl(listen.frame_id, listen.name)
   });
   
   scope.dog = dog;

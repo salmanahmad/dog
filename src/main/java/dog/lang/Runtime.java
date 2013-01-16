@@ -181,8 +181,10 @@ public class Runtime {
 
 			while(true) {
 				try {
+					stackTraceHeads.remove(frame.getId());
 					frame.setRuntime(this);
 					Signal signal = frame.resume();
+
 
 					if(signal.type == Signal.Type.RETURN) {
 						frame.state = StackFrame.FINISHED;
@@ -262,6 +264,8 @@ public class Runtime {
 					frame.state = StackFrame.WAITING;
 					frame.save();
 
+					stackTraceHeads.put(frame.getId(), frame);
+
 					break;
 				} catch(WaitOnException e) {
 					DBCollection collection = this.database.getCollection(new Future(this).collectionName());
@@ -277,6 +281,8 @@ public class Runtime {
 					frame.returnRegister = e.returnRegister;
 					frame.state = StackFrame.WAITING;
 					frame.save();
+
+					stackTraceHeads.put(frame.getId(), frame);
 
 					break;					
 				}

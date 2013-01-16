@@ -31,8 +31,11 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.*;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.ContextHandler;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -63,7 +66,7 @@ public class APIServlet extends HttpServlet {
 		ACCOUNT_LOGOUT = Pattern.compile(String.format("^%s/account/logout$", this.prefix));
 		DOG_JS = Pattern.compile(String.format("^%s/dog.js$", this.prefix));
 		FRAME_GET = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+)$", this.prefix));
-		FRAME_POST = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)$", this.prefix));
+		FRAME_POST = Pattern.compile(String.format("^%s/frame/([a-zA-Z0-9]+)/([a-zA-Z0-9_]+)$", this.prefix));
 
 		this.dogJS = "";
 
@@ -83,6 +86,7 @@ public class APIServlet extends HttpServlet {
 		*/
 	}
 
+ 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String requestPath = req.getPathInfo();
 		String output = null;
@@ -133,8 +137,9 @@ public class APIServlet extends HttpServlet {
 		resp.setContentType("application/json");
 		resp.getWriter().println(output);
 	}
-
-	protected void goPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+ 	
+ 	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String requestPath = req.getPathInfo();
 		String output = null;
 		Matcher match = null;
@@ -161,6 +166,7 @@ public class APIServlet extends HttpServlet {
 				if(listens != null) {
 					Value value = listens.get(variable);
 					if(!(value instanceof NullValue)) {
+						value = value.get("channel");
 						Value submittedValue = null;
 
 						StringBuffer body = new StringBuffer();
@@ -187,11 +193,16 @@ public class APIServlet extends HttpServlet {
 
 						ArrayList<StackFrame> frames = this.runtime.resume();
 
-						
 						List<JSONObject> spawns = new ArrayList<JSONObject>();
-						StackFrame progressFrame = null;
+						StackFrame progressFrame = frame;
+
+						
 
 						for(StackFrame f : frames) {
+							if(f.symbolName.equals("dog.wait:")) {
+								f = f.parentStackFrame();
+							}
+
 							if(StackFrame.areFramesInSameTrace(frame, f)) {
 								progressFrame = f;
 							} else if(submissionFrame.getId().equals(f.getId())) {
@@ -223,61 +234,6 @@ public class APIServlet extends HttpServlet {
 
 		resp.setContentType("application/json");
 		resp.getWriter().println(output);
-
-
-/*
-
-		post prefix + '/track/:id/:variable' do |id, variable|
-          if id == "root" then
-            track = ::Dog::Track.root
-          else
-            track = ::Dog::Track.find_by_id(id)
-          end
-
-          if track.nil? || (!track.is_root? && track.state == ::Dog::Track::STATE::FINISHED) then
-            return 404
-          else
-            value = track.listens[variable]
-            value = value["value"] if value
-
-            request.body.rewind
-            data = JSON.parse(request.body.read) rescue nil
-
-            submitted_value = ::Dog::Value.from_ruby_value(data)
-            submitted_value.person = find_or_generate_current_user()
-
-            submission_track = ::Dog::Track.invoke("send:to:value", "future", [value, submitted_value])
-            
-            ::Dog::Runtime.schedule(submission_track)
-            tracks = ::Dog::Runtime.resume
-
-            spawns = []
-            progress_track = track.to_hash_for_api_user()
-            
-            for t in tracks do
-              if t.same_trace_as?(track) then
-                progress_track = t.to_hash_for_api_user()
-              elsif submission_track._id == t._id then
-                next
-              else
-                spawns << t.to_hash_for_api_user()
-              end
-            end
-
-            output = {
-              "original_track" => track.to_hash_for_api_user(),
-              "track" => progress_track,
-              "spawns" => spawns,
-              "account_status" => account_status
-            }
-
-            content_type 'application/json'
-            return output.to_json
-
-
-          end
-        end
-*/
 	}
 
 	public static Server createServer(int port, APIServlet servlet) {
@@ -306,13 +262,28 @@ public class APIServlet extends HttpServlet {
 		resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
 		resourceHandler.setResourceBase(FilenameUtils.normalize(servlet.filePath));
 
+	    //ContextHandler resourceContext = new ContextHandler();
+	    //resourceContext.setContextPath("/");
+	    //resourceContext.setHandler(resourceHandler);
+
+
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");
 		context.addServlet(new ServletHolder(servlet), "/*");
 
-		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[] { resourceHandler, context, new DefaultHandler() });
-		server.setHandler(handlers);
+
+		//HandlerList handlers = new HandlerList();
+		//handlers.setHandlers(new Handler[] { resourceHandler, context, new DefaultHandler() });
+		//server.setHandler(handlers);
+
+		//ContextHandlerCollection contexts = new ContextHandlerCollection();
+		//contexts.setHandlers(new Handler[] { context, resourceContext });
+		//server.setHandler(contexts);
+
+		HandlerCollection handlerList = new HandlerCollection();
+		handlerList.setHandlers(new Handler[]{resourceHandler, context});
+		server.setHandler(handlerList);
+
 
 		return server;
 	}
