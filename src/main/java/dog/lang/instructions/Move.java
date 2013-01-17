@@ -38,10 +38,16 @@ public class Move extends Instruction {
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
 		mv.visitIntInsn(SIPUSH, this.outputRegister);
-		mv.visitVarInsn(ALOAD, 1);
-		mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
-		mv.visitIntInsn(SIPUSH, this.inputRegister);
-		mv.visitInsn(AALOAD);
+		if(this.inputRegister == -1) {
+			mv.visitTypeInsn(NEW, "dog/lang/NullValue");
+			mv.visitInsn(DUP);
+			mv.visitMethodInsn(INVOKESPECIAL, "dog/lang/NullValue", "<init>", "()V");
+		} else {
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitFieldInsn(GETFIELD, "dog/lang/StackFrame", "registers", "[Ldog/lang/Value;");
+			mv.visitIntInsn(SIPUSH, this.inputRegister);
+			mv.visitInsn(AALOAD);
+		}
 		mv.visitInsn(AASTORE);
 
 		setReturnRegister(mv, this.outputRegister);

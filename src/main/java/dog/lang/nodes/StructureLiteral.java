@@ -58,9 +58,9 @@ public class StructureLiteral extends Node {
 
 				for(ArrayList<String> p : packagesToSearch) {
 					String identifier = StringUtils.join(p, ".") + "." + StringUtils.join(type.path, ".");
-					ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
+					dog.lang.Symbol s = symbol.getCompiler().searchForSymbol(identifier);
 
-					if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
+					if(s != null) {
 						typeIdentifier = identifier;
 						break;
 					}
@@ -69,9 +69,9 @@ public class StructureLiteral extends Node {
 
 			if(typeIdentifier == null && (type.scope == Identifier.Scope.CASCADE || type.scope == Identifier.Scope.EXTERNAL)) {
 				String identifier = StringUtils.join(type.path, ".");
-				ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
+				dog.lang.Symbol s = symbol.getCompiler().searchForSymbol(identifier);
 
-				if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
+				if(s != null) {
 					typeIdentifier = identifier;
 				}
 			}

@@ -114,6 +114,32 @@ public class StackFrame extends DatabaseObject {
 	}
 
 	public static boolean areFramesInSameTrace(StackFrame a, StackFrame b) {
+		ObjectId aId = a.getId();
+		if(a.controlAncestors.size() != 0) {
+			Object o = a.controlAncestors.get(0);
+			if(o instanceof StackFrame) {
+				aId = ((StackFrame)o).getId();
+			}
+
+			if(o instanceof ObjectId) {
+				aId = ((ObjectId)o);
+			}
+		}
+
+		ObjectId bId = b.getId();
+		if(b.controlAncestors.size() != 0) {
+			Object o = b.controlAncestors.get(0);
+			if(o instanceof StackFrame) {
+				bId = ((StackFrame)o).getId();
+			}
+
+			if(o instanceof ObjectId) {
+				bId = ((ObjectId)o);
+			}
+		}
+
+		return aId.equals(bId);
+		/*
 		for(Object o : a.controlAncestors) {
 			ObjectId id = null;
 			if(o instanceof ObjectId) {
@@ -141,6 +167,7 @@ public class StackFrame extends DatabaseObject {
 		}
 
 		return false;
+		*/
 	}
 
 	public String collectionName() {

@@ -100,10 +100,12 @@ public class Compiler {
 		symbols.add(symbol);
 	}
 
-	public ArrayList<dog.lang.Symbol> searchForSymbols(String name) {
+	public ArrayList<dog.lang.Symbol> searchForSymbolsStartingWith(String name) {
 		ArrayList<dog.lang.Symbol> list = new ArrayList<dog.lang.Symbol>();
 		for(Symbol symbol : symbols) {
+			
 			if(symbol.name.startsWith(name)) {
+
 				if(symbol instanceof Constant) {
 					list.add(new dog.lang.Symbol(symbol.name, dog.lang.Symbol.Kind.CONSTANT));
 				}
@@ -118,9 +120,21 @@ public class Compiler {
 			}
 		}
 		
-		ArrayList<dog.lang.Symbol> resolvedList = resolver.searchForSymbols(name);
+		ArrayList<dog.lang.Symbol> resolvedList = resolver.searchForSymbolsStartingWith(name);
 		list.addAll(resolvedList);
 
 		return list;
 	}
+
+	public dog.lang.Symbol searchForSymbol(String name) {
+		ArrayList<dog.lang.Symbol> symbols = searchForSymbolsStartingWith(name);
+		for(dog.lang.Symbol symbol : symbols) {
+			if(symbol.name.equals(name)) {
+				return symbol;
+			}
+		}
+
+		return null;
+	}
+
 }

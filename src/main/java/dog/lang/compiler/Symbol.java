@@ -97,6 +97,7 @@ public abstract class Symbol implements Opcodes {
 		AnnotationVisitor av0;
 
 		cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, Resolver.encodeSymbol(name), null, className, null);
+		cw.visitSource("app.dog", null);
 
 		// Add the default constructor
 		mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
@@ -165,6 +166,11 @@ public abstract class Symbol implements Opcodes {
 
 		for (int index = 0; index < instructions.size(); index++) {
 			Instruction instruction = instructions.get(index);
+
+			Label lineLabel = new Label();
+			mv.visitLabel(lineLabel);
+			mv.visitLineNumber(instruction.line, lineLabel);
+
 			instruction.assemble(mv, index, labels);
 		}
 

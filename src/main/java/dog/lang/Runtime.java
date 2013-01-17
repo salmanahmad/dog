@@ -183,6 +183,7 @@ public class Runtime {
 				try {
 					stackTraceHeads.remove(frame.getId());
 					frame.setRuntime(this);
+					frame.state = StackFrame.RUNNING;
 					Signal signal = frame.resume();
 
 
@@ -227,6 +228,8 @@ public class Runtime {
 							frame = returnFrame;
 						}
 					} else if (signal.type == Signal.Type.INVOKE) {
+						frame.state = StackFrame.CALLING;
+
 						StackFrame newFrame = signal.stackFrame;
 						newFrame.controlAncestors = new ArrayList<Object>(frame.controlAncestors);
 						newFrame.controlAncestors.add(frame);

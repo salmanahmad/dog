@@ -59,9 +59,9 @@ public class Call extends Node {
 
 			for(ArrayList<String> p : packagesToSearch) {
 				String identifier = StringUtils.join(p, ".") + "." + StringUtils.join(function.path, ".");
-				ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
+				dog.lang.Symbol s = symbol.getCompiler().searchForSymbol(identifier);
 
-				if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
+				if(s != null) {
 					functionIdentifier = identifier;
 					break;
 				}
@@ -70,9 +70,9 @@ public class Call extends Node {
 
 		if(functionIdentifier == null && (function.scope == Identifier.Scope.CASCADE || function.scope == Identifier.Scope.EXTERNAL)) {
 			String identifier = StringUtils.join(function.path, ".");
-			ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(identifier);
+			dog.lang.Symbol s = symbol.getCompiler().searchForSymbol(identifier);
 
-			if(symbols.size() == 1 && symbols.get(0).name.equals(identifier)) {
+			if(s != null) {
 				functionIdentifier = identifier;
 			}
 		}

@@ -128,7 +128,7 @@ public class Resolver extends ClassLoader implements Opcodes {
 	}
 
 	public boolean containsSymbol(String name) {
-		ArrayList<dog.lang.Symbol> list = searchForSymbols(name);
+		ArrayList<dog.lang.Symbol> list = searchForSymbolsStartingWith(name);
 
 		if(list.size() == 1 && list.get(0).name.equals(name)) {
 			return true;
@@ -137,7 +137,7 @@ public class Resolver extends ClassLoader implements Opcodes {
 		}
 	}
 
-	public ArrayList<dog.lang.Symbol> searchForSymbols(String name) {
+	public ArrayList<dog.lang.Symbol> searchForSymbolsStartingWith(String name) {
 		ArrayList<dog.lang.Symbol> list = new ArrayList<dog.lang.Symbol>();
 
 		Reflections reflections = new Reflections("");

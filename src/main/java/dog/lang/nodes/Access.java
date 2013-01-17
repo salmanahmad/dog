@@ -102,20 +102,18 @@ public class Access extends Node {
 
 					for(int i = 1; i <= prefix.size(); i++) {
 						String symbolIdentifier = StringUtils.join(p, ".") + "." + StringUtils.join(prefix.subList(0, i).toArray(), ".");
-						
-						ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(symbolIdentifier);
-						if(symbols.size() == 0) {
-							break;
-						} else if(symbols.size() == 1 && symbols.get(0).name.equals(symbolIdentifier)) {
+
+						dog.lang.Symbol s = symbol.getCompiler().searchForSymbol(symbolIdentifier);
+						if(s != null) {
 							outputRegister = symbol.registerGenerator.generate();
 
-							if(symbols.get(0).kind == dog.lang.Symbol.Kind.CONSTANT) {
+							if(s.kind == dog.lang.Symbol.Kind.CONSTANT) {
 								ReadConstant constant = new ReadConstant(this.line, outputRegister, symbolIdentifier);
 								symbol.instructions.add(constant);
-							} else if(symbols.get(0).kind == dog.lang.Symbol.Kind.TYPE) {
+							} else if(s.kind == dog.lang.Symbol.Kind.TYPE) {
 								Build build = new Build(this.line, outputRegister, symbolIdentifier);
 								symbol.instructions.add(build);
-							} else if(symbols.get(0).kind == dog.lang.Symbol.Kind.FUNCTION) {
+							} else if(s.kind == dog.lang.Symbol.Kind.FUNCTION) {
 								Invoke invoke = new Invoke(this.line, outputRegister, false, symbolIdentifier, new ArrayList<Integer>());
 								symbol.instructions.add(invoke);
 							}
@@ -134,19 +132,17 @@ public class Access extends Node {
 				for(int i = 1; i <= prefix.size(); i++) {
 					String symbolIdentifier = StringUtils.join(prefix.subList(0, i).toArray(), ".");
 					
-					ArrayList<dog.lang.Symbol> symbols = symbol.getCompiler().searchForSymbols(symbolIdentifier);
-					if(symbols.size() == 0) {
-						break;
-					} else if(symbols.size() == 1 && symbols.get(0).name.equals(symbolIdentifier)) {
+					dog.lang.Symbol s = symbol.getCompiler().searchForSymbol(symbolIdentifier);
+					if(s != null) {
 						outputRegister = symbol.registerGenerator.generate();
 
-						if(symbols.get(0).kind == dog.lang.Symbol.Kind.CONSTANT) {
+						if(s.kind == dog.lang.Symbol.Kind.CONSTANT) {
 							ReadConstant constant = new ReadConstant(this.line, outputRegister, symbolIdentifier);
 							symbol.instructions.add(constant);
-						} else if(symbols.get(0).kind == dog.lang.Symbol.Kind.TYPE) {
+						} else if(s.kind == dog.lang.Symbol.Kind.TYPE) {
 							Build build = new Build(this.line, outputRegister, symbolIdentifier);
 							symbol.instructions.add(build);
-						} else if(symbols.get(0).kind == dog.lang.Symbol.Kind.FUNCTION) {
+						} else if(s.kind == dog.lang.Symbol.Kind.FUNCTION) {
 							Invoke invoke = new Invoke(this.line, outputRegister, false, symbolIdentifier, new ArrayList<Integer>());
 							symbol.instructions.add(invoke);
 						}

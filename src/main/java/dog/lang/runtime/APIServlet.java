@@ -106,13 +106,34 @@ public class APIServlet extends HttpServlet {
 			frame.setRuntime(runtime);
 
 			Boolean found = false;
+			BasicDBObject query = new BasicDBObject("state", StackFrame.WAITING);
+
 			if(id.equals("root")) {
 				found = frame.findOne(new BasicDBObject("symbol_name", runtime.getStartUpSymbol()));
+				if(found) {
+					id = frame.getId().toString();
+
+					ArrayList<BasicDBObject> conditions = new ArrayList<BasicDBObject>();
+					conditions.add(new BasicDBObject("_id", new ObjectId(id)));
+					conditions.add(new BasicDBObject("control_ancestors", new ObjectId(id)));
+
+					query.put("$or", conditions);
+					found = frame.findOne(query);
+				}
 			} else {
-				found = frame.findOne(new BasicDBObject("_id", new ObjectId(id)));
+				ArrayList<BasicDBObject> conditions = new ArrayList<BasicDBObject>();
+				conditions.add(new BasicDBObject("_id", new ObjectId(id)));
+				conditions.add(new BasicDBObject("control_ancestors", new ObjectId(id)));
+
+				query.put("$or", conditions);
+				found = frame.findOne(query);
 			}
 
 			if(found) {
+				if(frame.symbolName.equals("dog.wait:")) {
+					frame = frame.parentStackFrame();
+				}
+
 				JSONObject object = new JSONObject();
 				try {
 					object.put("original_frame", Helper.stackFrameAsJsonForAPI(frame));
@@ -196,14 +217,19 @@ public class APIServlet extends HttpServlet {
 						List<JSONObject> spawns = new ArrayList<JSONObject>();
 						StackFrame progressFrame = frame;
 
-						
+						System.out.println("\n\n\n\n");
+						System.out.println(frame.getId().toString() + ":" + frame.symbolName);
 
 						for(StackFrame f : frames) {
 							if(f.symbolName.equals("dog.wait:")) {
 								f = f.parentStackFrame();
 							}
 
+							System.out.println(f.getId().toString() + ":" + f.symbolName);
+
+
 							if(StackFrame.areFramesInSameTrace(frame, f)) {
+								System.out.println("Same Trace!");
 								progressFrame = f;
 							} else if(submissionFrame.getId().equals(f.getId())) {
 								continue;
