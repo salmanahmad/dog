@@ -13,9 +13,12 @@ package dog.lang.compiler;
 
 import dog.lang.instructions.Instruction;
 import dog.lang.instructions.Throw;
+import dog.lang.instructions.ScopeStart;
+import dog.lang.instructions.ScopeEnd;
 import dog.lang.nodes.Node;
 import dog.lang.Resolver;
 
+import java.util.Stack;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.ByteArrayOutputStream;
@@ -197,6 +200,32 @@ public abstract class Symbol implements Opcodes {
 	}
 
 	public void convertThrows() {
+		this.scopes = new ArrayList<Scope>();
+
+		Stack<Object[]> starts = new Stack<Object[]>();
+
+		for(int i = 0; i < instructions.size(); i++) {
+			Instruction instruction = instructions.get(i);
+			if(instruction instanceof ScopeStart) {
+				starts.push(new Object[] { instruction, i });
+			}
+
+			if(instruction instanceof ScopeEnd) {
+				Object[] start = starts.pop();
+				ScopeStart scopeStart = (ScopeStart)start[0];
+
+				Scope scope = new Scope();
+				scope.start = (Integer)start[1];
+				scope.end = i;
+				
+				scope.label = scopeStart.label;
+				scope.returnRegister = scopeStart.returnRegister;
+				scope.offsetFromEnd = scopeStart.offsetFromEnd;
+
+				scopes.add(scope);
+			}
+		}
+
 		for(int i = 0; i < instructions.size(); i++) {
 			Instruction instruction = instructions.get(i);
 

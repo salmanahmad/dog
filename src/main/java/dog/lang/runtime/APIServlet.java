@@ -217,15 +217,15 @@ public class APIServlet extends HttpServlet {
 						List<JSONObject> spawns = new ArrayList<JSONObject>();
 						StackFrame progressFrame = frame;
 
-						System.out.println("\n\n\n\n");
-						System.out.println(frame.getId().toString() + ":" + frame.symbolName);
+						//System.out.println("\n\n\n\n");
+						//System.out.println(frame.getId().toString() + ":" + frame.symbolName);
 
 						for(StackFrame f : frames) {
 							if(f.symbolName.equals("dog.wait:")) {
 								f = f.parentStackFrame();
 							}
 
-							System.out.println(f.getId().toString() + ":" + f.symbolName);
+							//System.out.println(f.getId().toString() + ":" + f.symbolName);
 
 
 							if(StackFrame.areFramesInSameTrace(frame, f)) {

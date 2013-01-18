@@ -17,4 +17,8 @@ public class Scope {
 	public String label;
 	public int offsetFromEnd;
 	public int returnRegister;
+
+	public String toString() {
+		return "Scope: " + start + " to " + end;
+	}
 }

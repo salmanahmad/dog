@@ -81,7 +81,7 @@ public class Compile extends Command {
 			System.out.println("-------------");
 
 			for(Symbol s : compiler.getSymbols()) {
-				System.out.println(s.toJVMBytecodeString());
+				//System.out.println(s.toJVMBytecodeString());
 			}
 		} else {
 			try {

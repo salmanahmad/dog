@@ -16,6 +16,8 @@ import dog.lang.compiler.Symbol;
 import dog.lang.compiler.Scope;
 import dog.lang.instructions.LoadNull;
 import dog.lang.instructions.Jump;
+import dog.lang.instructions.ScopeStart;
+import dog.lang.instructions.ScopeEnd;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,9 +48,12 @@ public class Loop extends Node {
 
 			Jump jumpToStart = new Jump(this.line, 0 - nested.instructions.size());
 
+			symbol.instructions.add(new ScopeStart("break", outputRegister, 1));
 			symbol.instructions.addAll(nested.instructions);
 			symbol.instructions.add(jumpToStart);
+			symbol.instructions.add(new ScopeEnd("break"));
 
+			/*
 			Scope scope = new Scope();
 			scope.start = (symbol.instructions.size() - 1) - (nested.instructions.size() + 1);
 			scope.end = symbol.instructions.size() - 1;
@@ -56,9 +61,9 @@ public class Loop extends Node {
 			scope.offsetFromEnd = 1;
 			scope.returnRegister = outputRegister;
 			symbol.scopes.add(scope);
+			*/
 
 			symbol.registerGenerator.release(nestedRegister);
-			
 			symbol.currentOutputRegister = outputRegister;
 		}
 	}
