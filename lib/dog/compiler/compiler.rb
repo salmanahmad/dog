@@ -29,37 +29,38 @@ module Dog
     end
 
     def initialize
-      # TODO - Set the default package name from the project.config?
       self.bundle = Bundle.new
       self.errors = []
     end
 
     def compile(node, filename = "")
-      package_name = ""
-
-      # TODO - Fix this
-      #::Dog::Nodes::Node.each_descendant(node) do |d|
-      #  d.filename = filename
-      #  if d.kind_of? ::Dog::Nodes::Package then
-      #    package_name = d.name
-      #  end
-      #end
+      if node && node.package then
+        package_name = node.package
+      else
+        package_name = ""
+      end
 
       package = self.bundle.packages[package_name]
 
       unless package then
-        package = ::Dog::Package.new(package_name)
+        package = ::Dog::Package.new(package_name, filename)
         self.bundle.link(package)
       end
 
+      # TODO - Reintroduce the rule architecture
       #::Dog::Nodes::Node.each_descendant(node) do |d|
       #  rule = Rules::Rule.new(self)
       #  rule.apply(d)
       #end
 
       if errors.empty? && node then
+        package.current_filename = filename
         node.compile(package)
       end
+    end
+
+    def startup_package(package_name)
+      self.bundle.startup_package = package_name
     end
 
     def finalize

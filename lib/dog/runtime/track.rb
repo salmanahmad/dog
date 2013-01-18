@@ -15,10 +15,12 @@ module Dog
     module STATE
       RUNNING = "running"
       CALLING = "calling"
-      ASKING = "asking"
       WAITING = "waiting"
-      LISTENING = "listening"
       FINISHED = "finished"
+      
+      # TODO - Remove the following from the code base
+      ASKING = "asking"
+      LISTENING = "listening"
       ERROR = "error"
       DELETED = "deleted"
     end
@@ -32,12 +34,18 @@ module Dog
     
     attr_accessor :current_instruction
     attr_accessor :next_instruction
-    attr_accessor :next_track
     
     attr_accessor :stack
     attr_accessor :variables
-    attr_accessor :futures
     attr_accessor :state
+    
+    # TODO - Do I actually need this? I don't think that I am using
+    # Track#futures at all at this point. I need to add my garbage collection
+    # but that is a seperate issue.
+    attr_accessor :futures
+    
+    attr_accessor :displays
+    attr_accessor :listens
     
     attr_accessor :access_ancestors
     attr_accessor :control_ancestors
@@ -46,7 +54,39 @@ module Dog
     attr_accessor :has_listen
     attr_accessor :asking_id
     
+    def self.invoke(function, package, arguments = [], parent = nil)
+      # TODO - This should be largely unnecssary. I should update the parser / compiler
+      # so that it assigns the function arguments by immediately poping the values off
+      # of the stack. Now only is that more performant, it also makes this code largely
+      # disappear.
+      implementation = 0
+      
+      new_track = ::Dog::Track.new
+      new_track.package_name = package
+      new_track.function_name = function
+      new_track.implementation_name = implementation
+
+      symbol = ::Dog::Runtime.bundle.packages[package].symbols[function]["implementations"][implementation]
+      symbol_arguments = symbol["arguments"]
+
+      arguments.each_index do |index|
+        argument = arguments[index]
+        variable_name = symbol_arguments[index]
+        new_track.variables[variable_name] = argument
+      end
+      
+      if parent then
+        new_track.control_ancestors = parent.control_ancestors.clone
+        new_track.control_ancestors << parent
+      end
+      
+      return new_track
+    end
+    
     def initialize(function_name = nil, package_name = "", implementation_name = 0)
+      self._id = ::BSON::ObjectId.new
+      self.future_return_id = nil
+      
       self.package_name = package_name
       self.function_name = function_name
       self.implementation_name = implementation_name
@@ -59,10 +99,17 @@ module Dog
       self.futures = {}
       self.state = STATE::RUNNING
       
+      self.displays = {}
+      self.listens = {}
+      
       self.access_ancestors = []
       self.control_ancestors = []
     end
-    
+
+    def context=(c)
+      @context = c
+    end
+
     def context
       return @context if @context
       
@@ -71,12 +118,38 @@ module Dog
       @context = symbol["implementations"][implementation_name]
     end
     
+    def filename
+      package = ::Dog::Runtime.bundle.packages[self.package_name]
+      symbol = package.symbols[self.function_name]
+      symbol["filename"]
+    end
+    
     def finish
-      if self.has_listen then
-        self.state = ::Dog::Track::STATE::LISTENING
-      else
-        self.state = ::Dog::Track::STATE::FINISHED
+      self.state = ::Dog::Track::STATE::FINISHED
+    end
+    
+    def same_trace_as?(other)
+      for track in self.control_ancestors do
+        if track.kind_of? ::Dog::Track then
+          track = track._id
+        end
+        
+        if other._id == track then
+          return true
+        end
       end
+      
+      for track in other.control_ancestors do
+        if track.kind_of? ::Dog::Track then
+          track = track._id
+        end
+        
+        if self._id == track then
+          return true
+        end
+      end
+      
+      return false
     end
     
     def self.from_hash(hash)
@@ -96,8 +169,26 @@ module Dog
         futures[key] = ::Dog::Value.from_hash(value)
       end
       
+      displays = {}
+      for key, value in object.displays do
+        displays[key] = {
+          "value" => ::Dog::Value.from_hash(value["value"]),
+          "routing" => ::Dog::Value.from_hash(value["routing"])
+        }
+      end
+      
+      listens = {}
+      for key, value in object.listens do
+        listens[key] = {
+          "value" => ::Dog::Value.from_hash(value["value"]),
+          "routing" => ::Dog::Value.from_hash(value["routing"])
+        }
+      end
+      
       object.stack = stack
       object.variables = variables
+      object.displays = displays
+      object.listens = listens
       object.futures = futures
       
       return object
@@ -117,8 +208,24 @@ module Dog
         if value.kind_of? ::Dog::Value then
           variables[key] = value.to_hash
         else
-          raise "A non-value was present on the stack"
+          raise "A non-value was present in the variables"
         end
+      end
+      
+      displays = {}
+      for key, value in self.displays do
+        displays[key] = {
+          "value" => value["value"].to_hash,
+          "routing" => value["routing"].to_hash
+        }
+      end
+      
+      listens = {}
+      for key, value in self.listens do
+        listens[key] = {
+          "value" => value["value"].to_hash,
+          "routing" => value["routing"].to_hash
+        }
       end
       
       futures = {}
@@ -158,6 +265,9 @@ module Dog
         "variables" => variables,
         "futures" => futures,
         
+        "displays" => displays,
+        "listens" => listens,
+        
         "access_ancestors" => access_ancestors,
         "control_ancestors" => control_ancestors,
         
@@ -166,26 +276,37 @@ module Dog
       }
     end
 
-    def to_hash_for_stream
-      api_state = case self.state
-      when ::Dog::Track::STATE::FINISHED,
-        ::Dog::Track::STATE::ERROR,
-        ::Dog::Track::STATE::DELETED
-        'closed'
-      when ::Dog::Track::STATE::LISTENING
-        'listening'
-      else
-        'open'
+    def to_hash_for_api_user(user = nil)
+      displays = {}
+      for key, value in self.displays do
+        displays[key] = value["value"].ruby_value
       end
-      stream_hash = {
-        "id" => self._id.to_s,
-        "name" => self.function_name.split('.'),
-        "type" => "track",
-        "state" => api_state
+      
+      listens = {}
+      for key, value in self.listens do
+        # TODO - Handle the schema for listens
+        listens[key] = {}
+      end
+      
+      returns = nil
+      if self.state == ::Dog::Track::STATE::FINISHED then
+        returns = self.stack.last.ruby_value rescue nil
+      end
+      
+      hash = {
+        "_id" => self._id.to_s,
+        "state" => self.state,
+        "function_name" => self.function_name,
+        "package_name" => self.package_name,
+        "displays" => displays,
+        "listens" => listens,
+        "returns" => returns
       }
-      return stream_hash
+      
+      return hash
+      
     end
-    
+
     def self.root
       root = self.find_one({
         "control_ancestors" => {

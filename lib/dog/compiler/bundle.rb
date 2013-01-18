@@ -35,8 +35,6 @@ module Dog
       self.dog_version_codename = VERSION::CODENAME
       self.time = Time.now
       self.signature = ""
-      
-      # TODO - Compute signature
     end
     
     def link(package)
@@ -99,96 +97,6 @@ module Dog
       
       return dump
     end
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-=begin TODO - Remove these
-    def read_package(package)
-      name = package
-      package = self.packages[package]
-      
-      return ::Dog::Value.null_value unless package
-      
-      value = ::Dog::Value.new("package", {})
-      
-      for symbol, path in package["symbols"] do
-        node = node_at_path(path, name)
-        value.value["s:#{symbol}"] = node.read_definition rescue ::Dog::Value.null_value
-      end
-      
-      return value
-    end
-
-    def contains_symbol_in_package?(symbol, package)
-      self.packages[package]["symbols"].include?(symbol) rescue false
-    end
-
-    def add_symbol_to_package(symbol, path, package)
-      self.packages[package] ||= {}
-      self.packages[package]["symbols"] ||= {}
-      self.packages[package]["symbols"][symbol] = path
-    end
-
-    def path_for_symbol(symbol, package = nil)
-      package ||= Runtime.bundle.startup_package
-      symbol = self.packages[package]["symbols"][symbol] rescue nil
-      
-      if symbol then
-        return symbol.clone
-      else
-        return nil
-      end
-    end
-
-    def node_at_path(path, package = nil)
-      package ||= Runtime.bundle.startup_package
-      
-      node = self.packages[package]["code"]
-
-      for index in path do
-        node = node[index]
-      end
-
-      return node
-    end
-
-    def node_for_symbol(symbol, package = nil)
-      path = path_for_symbol(symbol, package)
-      node = node_at_path(path, package)
-      return node
-    end
-=end
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
   end
   

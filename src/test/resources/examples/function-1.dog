@@ -1,0 +1,10 @@
+
+
+define foo: a bar: b do
+	i = a + b
+	return 7 
+end
+
+
+foo: 4 bar: 9
+

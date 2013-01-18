@@ -10,13 +10,19 @@
 module Dog
   class Package
     attr_accessor :name
+    attr_accessor :imports
     attr_accessor :symbols
-    attr_accessor :symbols_stack
 
-    def initialize(name = nil)
+    attr_accessor :symbols_stack
+    attr_accessor :current_filename
+
+    def initialize(name = nil, filename = "")
       self.name = name
+      self.imports = []
       self.symbols = {}
       self.symbols_stack = []
+      self.current_filename = filename
+      
       self.push_symbol("@root")
       self.add_implementation
     end
@@ -45,6 +51,7 @@ module Dog
       
       return {
         "name" => self.name,
+        "imports" => self.imports,
         "symbols" => processed_symbols
       }
     end
@@ -52,6 +59,7 @@ module Dog
     def self.from_hash(hash)
       package = self.new
       package.name = hash["name"]
+      package.imports = hash["imports"]
       package.symbols = hash["symbols"]
       
       for name, symbol in package.symbols do
@@ -114,6 +122,7 @@ module Dog
 
     def push_symbol(symbol)
       self.symbols[symbol] ||= {
+        "filename" => self.current_filename,
         "name" => symbol,
         "value" => nil,
         "implementations" => [],

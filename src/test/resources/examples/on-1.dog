@@ -1,0 +1,3 @@
+on each response do
+  print: 'hello, world!'
+end

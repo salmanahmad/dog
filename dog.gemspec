@@ -19,6 +19,7 @@ spec = Gem::Specification.new do |s|
   #s.default_executable = 'dog'
 
   s.has_rdoc = false
+  s.add_dependency 'sprockets', '~> 2.7.0'
   s.add_dependency 'pony', '~> 1.4'
   s.add_dependency 'mail', '~> 2.4.4'
   s.add_dependency 'treetop', '~> 1.4.10'
@@ -31,10 +32,12 @@ spec = Gem::Specification.new do |s|
   s.add_dependency 'thin', '~> 1.4.1'
   s.add_dependency 'sinatra', '~> 1.3.2'
   s.add_dependency 'async_sinatra', '~> 1.0.0'
+  s.add_dependency 'faye', '~> 0.8.6'
+  
   s.add_dependency 'tilt', '~> 1.3.3'
-  s.add_dependency 'uuid', '~> 2.3.5'
   s.add_dependency 'rack-test', '~> 0.6.1'
   s.add_dependency 'httparty', '~> 0.8.3'
+  s.add_dependency 'rb-readline', '~> 0.4.2'
 
   s.add_dependency 'blather', '~> 0.8.0'
 

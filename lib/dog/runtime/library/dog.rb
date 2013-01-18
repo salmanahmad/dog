@@ -13,6 +13,22 @@ module Dog::Library
 
     name "dog"
 
+    structure "array" do
+
+    end
+
+    structure "structure" do
+
+    end
+
+    structure "function" do
+
+    end
+
+    structure "type" do
+
+    end
+
     structure "query" do
       property "container"
       property "predicate"
@@ -23,7 +39,7 @@ module Dog::Library
       property "body"
     end
 
-    implementation "id" do
+    implementation "id:on" do
       argument "value"
       
       body do |track|
@@ -32,80 +48,56 @@ module Dog::Library
       end
     end
 
+    implementation "listen:to:for" do
+      # TODO - Support type information for sub-keys, etc.
+      argument "routing"
+      argument "identifier"
 
-    implementation "ask" do
-      # TODO - Right now, this is implemented directly inside the AsyncCall
-      # isntruction. Do I want to keep it there or can I actually move it
-      # over here?
-    end
+      body do |track|
+        identifier = variable("identifier")
+        routing = variable("routing")
+        current_track = track.control_ancestors.last
 
-    implementation "listen" do
-      argument "type"
-      argument "query"
-      argument "via"
+        if routing.is_null? then
+          ::Dog::Helper.warn("I was told to listen to 'null'. Is this what you wanted?")
+          current_track.listens.delete(identifier.ruby_value)
+          dog_return(::Dog::Value.null_value)
+        end
 
-      body do |original_track|
-        # TODO
-        type = variable("type")
-        query = variable("query")
-        via = variable("via")
-        
-        
-        structure_type = nil
-        properties = []
+        checkpoint do
+          dog_call("channel:buffer", "future", [::Dog::Value.number_value(0)])
+        end
 
-        unless type["name"].value == "string" && type["package"].value == "system"
-          track = ::Dog::Track.new(type["name"].ruby_value, type["package"].ruby_value)
-          
-          ::Dog::Runtime.run_track(track)
+        checkpoint do
           value = track.stack.pop
 
-          structure_type = value.type
+          current_track.listens[identifier.ruby_value] = {
+            "value" => value,
+            "routing" => routing
+          }
 
-          properties = value.keys
-          properties.map! do |name|
-            p = ::Dog::Property.new
-            p.identifier = name
-            p.direction = "input"
-            p
-          end
-        else
-          property = ::Dog::Property.new
-          property.identifier = "*value"
-          property.direction = "input"
-
-          structure_type = "string"
-          properties = [property]
+          dog_return(value)
         end
-
-        channel = ::Dog::Value.new("structure", {})
-        channel.pending = true
-        channel.buffer_size = 0
-        channel.channel_mode = true
-
-        if via.value == "email" then
-          event = ::Dog::MailedEvent.new
-          event.channel_id = channel._id
-          event.routing = nil # TODO
-          event.created_at = Time.now.utc
-          event.save
-        else
-          event = ::Dog::RoutedEvent.new
-          event.name = structure_type
-          event.properties = properties
-          event.channel_id = channel._id
-
-          event.track_id = original_track.control_ancestors.last
-          event.track_id = event.track_id._id if event.track_id.kind_of? ::Dog::Track
-
-          #event.track_id = track.id # TODO
-          #event.routing = nil # TODO
-          event.created_at = Time.now.utc
-          event.save
-        end
-
-        dog_return(channel)
       end
+    end
+
+    implementation "display:value:as:to" do
+      argument "value"
+      argument "identifier"
+      argument "routing"
+      
+      body do |track|
+        value = variable("value")
+        identifier = variable("identifier")
+        routing = variable("routing")
+        
+        current_track = track.control_ancestors.last
+        current_track.displays[identifier.ruby_value] = {
+          "value" => value,
+          "routing" => routing
+        }
+      end
+      
     end
 
     implementation "notify" do
@@ -153,7 +145,7 @@ module Dog::Library
               body = body.ruby_value.to_s
             end
 
-          elsif value.type == "string" then
+          elsif value.type == "dog.string" then
             body = value.ruby_value
           else
             body = value.ruby_value.inspect
@@ -179,67 +171,35 @@ module Dog::Library
           
           Pony.mail(envelope)
           dog_return
-        end
-
-        ruby_value = value.mongo_value
-
-        message = ::Dog::RoutedMessage.new
-        properties = []
-
-        if ruby_value.kind_of? Hash then
-          message.name = value.type
-
-          for k, v in ruby_value do
-            p = ::Dog::Property.new
-            p.direction = "output"
-            p.identifier = k
-            p.value = v
-            properties << p
+        elsif via.ruby_value == "stream"
+          
+          if query.type == "dog.string" then
+            channel = query.ruby_value
+            if channel[0,1] != "/" then
+              channel = "/" + channel
+            end
+            
+            client = ::Dog::Server.stream_client
+            client.publish(channel, "value" => value.ruby_value)
           end
-        else
-          message.name = "primitive"
-
-          p = ::Dog::Property.new
-          p.direction = "output"
-          p.identifier = "*value"
-          p.value = ruby_value
-          properties << p
         end
         
-        
-        
-        if track.id == nil then
-          # TODO - Fix this. I need to do this here so I can get a track.id
-          # which is assigned when I call DatabaseObject#save. Instead, "id" 
-          # should be automatically generated as a UUID or ObjectID or something
-          # and DatabaseObject#save should be updated so it always does an upsert 
-          # rather than checking the _id itself like a retard...
-          track.save
-        end
-        
-        
-        message.track_id = track.control_ancestors.last
-        message.track_id = message.track_id._id if message.track_id.kind_of? ::Dog::Track
-        
-        message.routing = nil # TODO
-        message.created_at = Time.now.utc
-        message.properties = properties
-        message.save
       end
     end
 
-    implementation "add" do
-      argument "container"
+    implementation "add:value:to" do
       argument "value"
+      argument "container"
+      
 
       body do |current_track|
         container = variable("container")
         value = variable("value")
 
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           collection = container["name"].ruby_value
 
-          value._id = UUID.new.generate
+          value._id = BSON::ObjectId.new
           ::Dog.database[collection].insert(value.to_hash)
           dog_return(value)
         else
@@ -247,7 +207,7 @@ module Dog::Library
           if container.pending then
             future = ::Dog::Future.find_one("value_id" => container._id)
 
-            if value.type == "close" then
+            if value.type == "dog.close" then
               ::Dog::Future.remove("value_id" => container._id)
               
               future.value.pending = false
@@ -344,9 +304,9 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
         
-        if container.type == "collection" then
-          if value.type == "string" then
-            value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value.ruby_value})
+        if container.type == "dog.collection" then
+          if value.type == "dog.string" then
+            value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => BSON::ObjectId.from_string(value.ruby_value)})
           else
             value = ::Dog::database[container["name"].ruby_value].find_one({"_id" => value._id})
           end
@@ -362,16 +322,32 @@ module Dog::Library
 
       body do |track|
         query = variable("query")
-        container = query["container"]
-        selector = query["predicate"].ruby_value
-
-        if container.type == "collection" then
+        
+        if query.type == "dog.collection" then
+          container = query
+          selector = {}
+        else
+          container = query["container"]
+          selector = query["predicate"].ruby_value
+        end
+        
+        if selector.nil? then
+          selector = {}
+        end
+        
+        if selector["_id"] && selector["_id"].kind_of?(String) then
+          selector["_id"] = BSON::ObjectId.from_string(selector["_id"])
+        end
+        
+        if container.type == "dog.collection" then
           results = ::Dog::database[container["name"].ruby_value].find(selector)
           value = ::Dog::Value.empty_array
           
           i = 0
           for result in results do
-            value[i] = ::Dog::Value.from_hash(result)
+            result = ::Dog::Value.from_hash(result)
+            result["_id"] = ::Dog::Value.string_value(result._id)
+            value[i] = result
             i += 1
           end
           
@@ -388,8 +364,24 @@ module Dog::Library
         query = variable("query")
         container = query["container"]
         selector = query["predicate"].ruby_value
-
-        if container.type == "collection" then
+        
+        if query.type == "dog.collection" then
+          container = query
+          selector = {}
+        else
+          container = query["container"]
+          selector = query["predicate"].ruby_value
+        end
+        
+        if selector.nil? then
+          selector = {}
+        end
+        
+        if selector["_id"] && selector["_id"].kind_of?(String) then
+          selector["_id"] = BSON::ObjectId.from_string(selector["_id"])
+        end
+        
+        if container.type == "dog.collection" then
           results = ::Dog::database[container["name"].ruby_value].remove(selector)
           dog_return(::Dog::Value.true_value)
         end
@@ -404,7 +396,7 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
 
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           ::Dog::database[container["name"].ruby_value].update({"_id" => value._id}, value.to_hash, {:safe => true})
         end
 
@@ -420,9 +412,9 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
         
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           ::Dog::database[container["name"].ruby_value].save(value.to_hash, {:safe => true, :upsert => true})
-        elsif container.type == "community" && value.type == "people.person"
+        elsif container.type == "dog.community" && value.type == "people.person"
           # TODO - I need to add the community profile properties to the person object as a result of saving them TO a communtiy.
           
           community = container["name"]
@@ -437,7 +429,7 @@ module Dog::Library
           track.variables["container"] = value["communities"]
           track.variables["value"] = community
           
-          proc = ::Dog::Library::Dog.package.symbols["add"]["implementations"][0]["instructions"]
+          proc = ::Dog::Library::Dog.package.symbols["add:value:to"]["implementations"][0]["instructions"]
           proc.call(track)
           
           output = track.stack.last
@@ -458,58 +450,9 @@ module Dog::Library
         container = variable("container")
         value = variable("value")
 
-        if container.type == "collection" then
+        if container.type == "dog.collection" then
           ::Dog::database[container["name"].ruby_value].remove({"_id" => value._id}, {:safe => true})
         end
-
-        dog_return(value)
-      end
-    end
-
-    implementation "register_handler" do
-      argument "structure"
-      argument "type"
-
-      body do |track|
-        structure = variable("structure")
-        type = variable("type")
-
-        future = ::Dog::Future.find_one("value_id" => structure._id)
-
-        if future.nil? then
-          future = ::Dog::Future.new(structure._id, structure)
-        end
-
-        future.handlers << type
-        future.save
-      end
-    end
-
-    implementation "pending_structure" do
-      argument "type"
-      argument "buffer_size"
-      argument "channel_mode"
-
-      body do |track|
-        value = nil
-
-        type = variable("type")
-        size = variable("buffer_size").ruby_value
-        channel = variable("channel_mode").ruby_value
-
-        if type.value == "structure" then
-          value = ::Dog::Value.new("structure", {})
-        elsif type.type == "type" then
-          track = ::Dog::Track.new(type["name"], type["package"])
-          ::Dog::Runtime.run_track(track)
-          value = track.stack.pop
-        else
-          raise "Invalid type for pending structure"
-        end
-
-        value.pending = true
-        value.buffer_size = size
-        value.channel_mode = channel
 
         dog_return(value)
       end

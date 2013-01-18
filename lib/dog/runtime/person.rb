@@ -8,6 +8,10 @@
 #
 
 module Dog
+  # TODO - Strongly consider removing this. I am not removing it now
+  # because it has a lot of utilities and helpful methods that I may
+  # want to repurpose in the future. In particular "accepts_routing"
+  
   class Person < DatabaseObject
     include Dog::FacebookPerson
 
@@ -136,7 +140,10 @@ module Dog
     end
 
     def self.find_by_email(email)
-      self.find_one({"value.s:email.value" => email})
+      self.find_one({"value" => {"$elemMatch" => {
+        "key" => "email",
+        "value.value" => email
+      }}})
     end
 
     def self.find_ids_for_predicate(conditions)

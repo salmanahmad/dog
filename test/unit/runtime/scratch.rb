@@ -15,7 +15,7 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
 
   def print_helper(expression)
     ::Dog::Nodes::Call.new(
-      ::Dog::Nodes::Access.new(["system", "print"]),
+      ::Dog::Nodes::Access.new(["system", "print:on"]),
       [expression]
     )
   end
@@ -33,7 +33,7 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
 
   def test_function_call
     program = Nodes::Nodes.new([
-      Nodes::FunctionDefinition.new("foo", Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("foo", [], Nodes::Nodes.new([
         print_helper(Nodes::StringLiteral.new("Foo Called!"))
       ])),
       Nodes::Call.new(Nodes::Access.new(["foo"]))
@@ -45,7 +45,7 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
   
   def test_function_returns
     program = Nodes::Nodes.new([
-      Nodes::FunctionDefinition.new("foo", Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("foo", [], Nodes::Nodes.new([
         print_helper(Nodes::StringLiteral.new("Foo Called!")),
         Nodes::Return.new(Nodes::NumberLiteral.new(3.14))
       ])),
@@ -60,9 +60,9 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
   
   def test_function_arguments
     program = Nodes::Nodes.new([
-      Nodes::FunctionDefinition.new("add", Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("add", ["a", "b"], Nodes::Nodes.new([
         Nodes::Return.new(Nodes::Operation.new(Nodes::Access.new(["a"]), Nodes::Access.new(["b"]), "+"))
-      ]), ["a", "b"]),
+      ])),
       Nodes::Call.new(Nodes::Access.new(["add"]), [Nodes::NumberLiteral.new(5), Nodes::NumberLiteral.new(4)])
     ])
     
@@ -72,9 +72,9 @@ class RuntimeTests::ScratchTest < Test::Unit::TestCase
   
   def test_function_implicit_returns
     program = Nodes::Nodes.new([
-      Nodes::FunctionDefinition.new("add", Nodes::Nodes.new([
+      Nodes::FunctionDefinition.new("add", ["a", "b"], Nodes::Nodes.new([
         Nodes::Operation.new(Nodes::Access.new(["a"]), Nodes::Access.new(["b"]), "+")
-      ]), ["a", "b"]),
+      ])),
       Nodes::Call.new(Nodes::Access.new(["add"]), [Nodes::NumberLiteral.new(5), Nodes::NumberLiteral.new(4)])
     ])
     

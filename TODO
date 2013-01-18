@@ -1,13 +1,258 @@
 
 
+
+=============================================
+
+JVM TODO:
+
+
+
+Handle nested function definition appropariated  especially with the resolver and compiler symbol table.
+
+Dynamic late binding option for packages.
+
+2 issues with class naming:
+	If I want dynamic capabilities or other features to suit my needs - I will add those when java packages are no longer suitable
+	When to subclass for compilation and runtime (custom class loaders)???
+	Utility methods to translate between dog and jvm symbols - how to handle nested - # and $hash$
+
+Explore V8 and Mono instead of JVM 
+
+Explore faster startup time and 2-level JIT like JRuby with Compile to JVM and the JVM to native code
+
+Explore aliasing / renaming namespaces to avoid collisions. Perhaps that works with the import command like python?
+
+=============================================
+
+
+
+
+
+Look into why printing is so slow
+
+
+== Mounting Packages and Dog Middleware ==
+
+We also may want to consider and explore the idea of "mounting" packages. So we move all of
+the standard API end points into a Dog package that are provided by the Dog standard libraries. If
+the developer wants to, they can add in the packages to their configuration file, much like
+include Rack or Java middleware.
+
+
+
+
+== Concurrency ==
+
+Spawn schedules a thread to run.
+
+The current thread must finish or must "wait" (or yield) and then the spawned thread will start.
+
+Threads will yield whenever their state switches to "waiting". There are two important cases. (1) WAIT or ON ... DO (2) System calls. Technically, whenever you call a system call (even like PRINT or TIME) it will yield the thread and allow another a slice to run. (3) Yield -- see below. This will cause me to have to think about system calls and how they are performed.
+
+It will not run in parallel as of v0.3. We may introduce a PROC_COUNT in the future that will automatically schedule the threads to run immediately and truly in parallel but for now, they are just an abstraction and execute single threadedly.
+
+When we address PROC_COUNT we will also want to address or CLUSTER notion where threads can run on another machine completely.
+
+We will also have a YIELD (perhaps COMPUTE system.yield) that will say, "stop running me, and run something else." It basically tells the scheduler to skip me for now and come back. If there is no other threads running, then the current thread will resume naturally.
+
+
+
+
+== Type system ==
+
+Type type
+
+Structure Type
+
+Function Type
+
+Array Type
+
+Symbol table can hold anything, but definitely holds Type types for many cases.
+
+It may not hold 
+
+
+
+
+== Futures and Garbage Collection ==
+
+When you create a future, a record is always created in the futures table. Whenever you access a future, this future table is consulated either for queued up messages or for the actual value itself.
+
+Access algorithm is to: Check for queued messages. If none, check value. If nil, wait.
+
+The trick now, is when to remove the record from the futures table. We remove this record when no one else has that future in scope. How do we do this? We track assignments. DogValue's have another property called "futures_inside". For an actual future, this array is of size 1 (contains itself). Whenever you assign a value to another value in a structure you remove the old "futures_inside" and add the new "futures_inside". Keep in mind that futures_inside is an array, not a set so duplicates are okay and removing value is fine because if someone else has that same value we are okay. 
+
+Then, whenever a track returns it check to see if any of it is the "last" holder of any future and then remove that future accordingly. To check, we search all of the tracks to see if "futures_inside" in any of the variables or the stack contain the future we are looking for. Obviously we do not found the futures that are being returned.
+
+Note: The problem with this approach is that we may miss some futures because they were existing in a variable but then we remove them. They will no longer appear in the "futures_inside" list of the track. Thus, we may only be left with one alternative:
+
+Alternatively, we run the garbage collector once every couple of hours to clear this up.
+
+Note: When returning from a function, the "returner" should only attempt to reap the futures that it has but it is not returning. (for obvious reasons). 
+
+Note: We may want to use a "futures_inside" field in tracks that write_variable and stack/push/pop operate on to make things a bit easier.
+
+
+
+
+== Channel Functionality == 
+
+Channels behave like Publisher / Subscriber when multiple people are listening and Producer / Consumer when you are going back and forth with one person. You Acheieve a worker queue and gauaranteed Producer / Consumer model by having a broker in the middle.
+
+We will have an API that will allow you to ADD to a channel and have various compensation actions if the buffer is full - blocking - block for timeout - ignore.
+
+
+
+
+== Track Expiration ==
+
+Right now, tracks never expire and they never go away. A couple of ways to deal with storing tracks (continuations) in a scalable manner. 
+
+Think about scalability with continuation passing. How does that work? If I wait to click submit, do I risk losing the stuff if it expires?
+
+An open question right now is - can it be possible to store these track indefinitely??? I'm not sure right now.
+
+* Exponential back off for when to delete tracks. This will reduce the amount of data that is needed to be stored on disk
+
+* Use Redis to store the tracks so that it is faster and never hits disk
+
+* Use a memory pool with a consistent hashing load balancer to send the same request to the same machine
+
+* Use client-side storage to store tracks up to a certain size (512kb). And then use server-side storage. This is similar to VIEWSTATE. I will need to encrypt the data and pad it with random data so they cannot decrypt it. THIS WILL NOT WORK. I AM SUCEPTIBLE TO REPLAY ATTACKS. I may need to implement a "nonce" server side. Whenever I use a nonce I store it. I remove it once I use that nonce once. If it is not in the table then I don't trust it. I can still then, store the nonce server side without a problem. 
+
+The problem is that I could still get DDoS because they script a path that creates server-side storage and not client side. I could solve this problem by supporting tail recursion to compress the stack size.
+
+
+
+
+== Track API ==
+
+Many times you want to model a long running collaborative workflow in which one person does something and then it is handed off to someone else working on it. We have two ways to do this:
+
+(1) The old way of storing a state-field in the database and model the state machine similar to "acts_as_statemachine" plugin in rails
+
+(2) Actually saving the stack trace. And resuming the tracks. 
+
+
+deal with client-side stored tracks
+
+
+
+
+== Done ==
+
+
+
+
+Obvious idea - Optional parameters can be passed on the stack by simply counting how large the stack and allocating unused parameters to whatever is leftover on the stack...
+
+
+
+- TODO
+
+Logger / Debugger log
+
+Default template generation for dogjs
+
+Client API (Authentication and account creation)
+
+Return from ON EACH
+
+PERFORM
+
+Package format
+
+GridFS
+
+Change the default package from "" to "default" and have an error message restricting "default" from being used...?
+
+Better error reporting 
+  Special case "no function found" and "could not access path"
+  "Undefined operation"
+
+Build system libraries
+  Date
+  Array
+  String
+  File
+  Location API
+  etc.
+
+Are native functions being passed by reference or value? It should be value...I think...maybe...
+
+Collections should be package scoped
+
+Implement the '?' operator
+
+possibly include === in the predicate format to make it easier to find structures)
+
+Pople.public should be a DEFINEd value, not a type
+
+Add support for DEFINEd values (and channels)
+
+Implement garbage collection for the futures.
+
+Track expiration
+
+Atomic Semantics for tracks and Collections (perhaps find_and_modify)
+
+Add client side caching capabilities to API. That way instead of sending new requests i can just use cached values. This is useful for iPhone applications to minimze network usage. At what point so I just create my own protocol instead of HTTP and just tunnel for Web apps?
+
+Explore GCC front ends
+
+Security Concerns: CSRF attacks, Other rails security things that it handles for you.
+
+Explore re-working channels by incorporating the following techniques and the following models: http://www.mongodb.org/display/DOCS/Tailable+Cursors, http://www.mongodb.org/display/DOCS/Capped+Collections, http://blog.mongodb.org/post/29495793738/pub-sub-with-mongodb. I think the model is pretty similar to what I already have i the sense that channels have a maximum queue size that is enforced - is that similar to capped collections? Perhaps not - "Once the limit is reached, items roll out on a least recently inserted basis." - so this only supports a single use case required by Dog channels.
+
+Support closures / anonymous functions in some way or the other. Support ON EACH message WITH arg, arg3, arg3 DO ... END
+
+
+- DONE
+
+Default package
+
+Import / Package
+
+Stream with NOTIFY
+
+Value format
+
+Clean up the Dog CLI
+
+UUID to Object Ids
+
+Spawn returns a future
+
+== and === semantics
+
+Pause, Stop, Exit
+
+Listen / Display
+
+WAIT
+
+ON EACH DO
+
+ON DO
+
+Figure out futures with new stuff
+
+Spawn
+
+Spawned-from information (for debugging purposes, I guess?)
+
+Native libraries
+
 === v0.3 Changes ===
-
-
 
 Embed an IMAP and an SMTP server just like Sinatra
 
-
 === End ===
+
+
+
+
 
 
 
@@ -399,13 +644,10 @@ Add a package-level configuration functionality that also breaks out side effect
 
 
 
-
-
-
 Ruby API (similar to the C api for ruby)
 	Perhaps an "Init_MODULE_NAME" function that manipulates the AST (or perhaps just manipulates the function map...)
 
-How do you "require" a C module in ruby and what woudl that look like for Dog???
+How do you "require" a C module in ruby and what would that look like for Dog???
 	Do these do what we expect: "require 'hello'" vs "require 'hello.so'" vs "require 'hello.rb'"
 	Should we have the similar approach???
 

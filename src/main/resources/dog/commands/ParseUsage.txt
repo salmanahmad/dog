@@ -1,0 +1,4 @@
+
+Usage: dog parse [FILE]
+
+  Parse a Dog source file and return the resulting syntax tree.

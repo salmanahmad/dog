@@ -39,7 +39,7 @@ module Dog
             end
           elsif options["clear_state"] then
             temp_db = connection.db(database_name)
-            state_collections = [ StreamObject.collection_name, Track.collection_name, Future.collection_name ]
+            state_collections = [Track.collection_name, Future.collection_name]
             for collection in temp_db.collections
               if state_collections.include? collection.name then
                 collection.drop rescue nil
@@ -54,16 +54,6 @@ module Dog
         end
 
         # TODO - Add compound indices for queries.
-
-        ::Dog.database[Community.collection_name].ensure_index("name", {unique:true})
-
-        ::Dog.database[StreamObject.collection_name].ensure_index("type")
-        ::Dog.database[StreamObject.collection_name].ensure_index("name")
-        ::Dog.database[StreamObject.collection_name].ensure_index("created_at")
-
-        # Indices for Tasks. Perhaps I should break this out into different collections?
-        ::Dog.database[StreamObject.collection_name].ensure_index("replication")
-        ::Dog.database[StreamObject.collection_name].ensure_index("responses")
 
         ::Dog.database[Person.collection_name].ensure_index("handle", { unique:true, sparse:true })
         ::Dog.database[Person.collection_name].ensure_index("email", { unique:true, sparse:true })

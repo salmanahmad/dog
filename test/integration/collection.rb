@@ -21,7 +21,7 @@ class IntegrationTests::CollectionTest < Test::Unit::TestCase
     EOD
     
     tracks = run_source(program)
-    assert_equal("type", tracks.last.variables["type"].type)
+    assert_equal("dog.type", tracks.last.variables["type"].type)
     assert_equal("car", tracks.last.variables["type"]["name"].ruby_value)
     assert_equal("", tracks.last.variables["type"]["package"].ruby_value)
   end

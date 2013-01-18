@@ -1,0 +1,6 @@
+
+a = dog.date {
+	month = 7
+}
+
+dog.print: a

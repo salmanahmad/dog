@@ -39,6 +39,10 @@ module Dog
       return object
     end
     
+    def self.update(selector, document, opts = {})
+      ::Dog::database[self.collection_name].update(selector, document, opts)
+    end
+    
     def self.remove(selector = {}, opts = {})
       ::Dog::database[self.collection_name].remove(selector, opts)
     end
@@ -81,22 +85,25 @@ module Dog
     def reload
       if self._id then
         document = ::Dog::database[self.collection_name].find_one({"_id" => self._id})
-        self.from_hash(document)
+        return self.class.from_hash(document)
+      end
+    end
+    
+    def remove
+      if self._id then
+        self.class.remove({"_id" => self._id})
       end
     end
     
     def save
+      hash = self.to_hash
       if self._id then
-        # TODO - Consider using Collection#find_and_modify for atomic semantics.
-        # TODO - Use the mongo ruby driver method #save - use the actual mongo save method - it actually does exactly this...
-        # TODO - Also consider creating a UUID for database-objects using UUID or ObjectIds
-        # http://api.mongodb.org/ruby/current/Mongo/Collection.html#find_and_modify-instance_method
-
-        ::Dog::database[self.collection_name].update({"_id" => self._id}, self.to_hash, {:safe => true})
+        hash["_id"] = self._id
       else
-        id = ::Dog::database[self.collection_name].insert(self.to_hash, {:safe => true})
-        self._id = id
+        raise "Attempting to save a database object without an _id"
       end
+      
+      ::Dog::database[self.collection_name].save(hash, {:safe => true})
     end
     
   end    

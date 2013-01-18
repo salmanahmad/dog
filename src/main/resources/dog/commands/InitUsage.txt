@@ -1,0 +1,4 @@
+
+Usage: dog init [DIRECTORY]
+
+  Create a new Dog application directory with an application file.

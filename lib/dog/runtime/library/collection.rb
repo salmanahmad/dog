@@ -13,25 +13,24 @@ module Dog::Library
 
     name "collection"
 
-    implementation "type" do
+    implementation "type:on" do
       argument "collection"
       
       body do
-        collection = variable("collection").ruby_value
+        checkpoint do
+          collection = variable("collection").ruby_value
+          dog_call(collection["name"], collection["package"])
+        end
         
-        # TODO - Have a better way to call Dog functions which handles checkpoints, etc.
-        # Currenlty this is really really unsafe. I have no idea how this will work and it
-        # very well may crash and burn
-        track = ::Dog::Track.new(collection["name"], collection["package"])
-        ::Dog::Runtime.run_track(track)
-        type = track.stack.pop
-        
-        dog_return(type)
+        checkpoint do
+          type = track.stack.pop
+          dog_return(type)
+        end
       end
     end
     
     
-    implementation "size" do
+    implementation "size:on" do
       argument "collection"
       
       body do |track|

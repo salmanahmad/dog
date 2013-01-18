@@ -1,0 +1,83 @@
+car {}
+
+
+define car {
+
+model = "hi"
+}
+
+{}
+
+
+{ name = "name", string = "String" }
+
+
+{ name = "name"       ,      string = "String" }
+
+{
+name = "Name",
+
+,,,,
+
+string = "string"
+}
+
+{
+  name = "Name",
+  string = "string"
+}
+
+
+
+{
+	name = "Name",,,
+	string = "string"
+}
+
+
+{
+name = "Name"
+string = "string"
+}
+
+
+{
+
+name = "Name"
+
+
+string = "string"
+}
+
+
+{
+  name = "Name"
+
+  ,,   ,      
+
+  string = "string"
+
+  5 = 7
+
+}
+
+{name = "Name"
+
+,,   ,      
+
+string = "string"
+
+,,, 
+}
+
+
+person {name = "Name"
+
+	,,   ,      
+
+	string = "string"
+
+,,, 
+}
+
+

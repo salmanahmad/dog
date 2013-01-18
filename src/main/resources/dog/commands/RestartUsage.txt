@@ -1,0 +1,6 @@
+
+Usage: dog restart [FILE] [options]
+
+  Compile a Dog program and execute the resulting bite code. If this program has already been executed
+  previously, 'restart' will clear that database so the code is run from a 'clean slate'. This command 
+  takes the same options as the 'start' command.

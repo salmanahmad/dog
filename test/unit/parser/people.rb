@@ -13,36 +13,27 @@ class ParserTests::PeopleTest < Test::Unit::TestCase
   
   def setup
     @parser = Dog::Parser.new
-    @parser.parser.root = :user
   end
   
   def test_simple
-    @parser.parse("PEOPLE FROM mit")
+    @parser.parse("people FROM mit")
     @parser.parse("PERSON FROM mit")
     @parser.parse("PERSON FROM mit WHERE user.id == 7")
     @parser.parse("PERSON FROM mit WHERE id == 7 AND age < 25")
-    @parser.parse("PEOPLE FROM communities['mit']")
+    @parser.parse("people FROM communities['mit']")
   end
   
   def test_person
     @parser.parse("PERSON FROM lottery_entry")
   end
   
-  def test_person_and_people
-    @parser.parse("PEOPLE")
-    # TODO - Clean up?
-    #@parser.parse("PERSON")
-  end
-  
   def test_from_optional
-    @parser.parse("PEOPLE WHERE age > 7")
-    # TODO - Clean up?
-    #@parser.parse("PERSON WHERE age > 7")
+    @parser.parse("people WHERE age > 7")
   end
   
   def test_assignment
     @parser.parser.root = :program
-    @parser.parse("potential_matches = PEOPLE FROM learners WHERE learnables == interests.teachables OR teachables == interests.learables")
+    @parser.parse("potential_matches = people FROM learners WHERE learnables == interests.teachables OR teachables == interests.learables")
   end
   
 end

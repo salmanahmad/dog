@@ -16,9 +16,13 @@ class ParserTests::AssignmentTest < Test::Unit::TestCase
     @parser.parser.root = :assignment
   end
   
+  def test_sequential_assignment
+    @parser.parse("i = j = 10")
+  end
+  
   def test_assignment
     
-    @parser.parse("i = ASK ME VIA email TO rank")
+    @parser.parse("i = ASK me TO rank")
     @parser.parse("i = j = k = 5")
     @parser.parse("i = 0")
     @parser.parse("i = 1")

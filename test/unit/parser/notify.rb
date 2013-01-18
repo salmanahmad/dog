@@ -17,18 +17,16 @@ class ParserTests::NotifyTest < Test::Unit::TestCase
   end
   
   def test_users
-    @parser.parse("NOTIFY ME VIA email OF 'message'")
-    @parser.parse("NOTIFY PUBLIC VIA email OF 'message'")
-    @parser.parse("NOTIFY PEOPLE FROM mit VIA email OF 'message'")
-    @parser.parse("NOTIFY PEOPLE FROM mit WHERE major == 'CS' VIA email OF 'message'")
+    @parser.parse("NOTIFY me VIA email OF 'message'")
+    @parser.parse("NOTIFY public VIA email OF 'message'")
+    @parser.parse("NOTIFY people FROM mit VIA email OF 'message'")
+    @parser.parse("NOTIFY people FROM mit WHERE major == 'CS' VIA email OF 'message'")
   end
   
   def test_of_clause
     @parser.parse("NOTIFY users VIA email OF message")
     @parser.parse("NOTIFY users VIA email OF 'message'")
     
-    # TODO - The semantics here are that notify of a literal constant will 
-    # create a default message with the to_string() as the body...
     @parser.parse("NOTIFY users VIA email OF '5'")
     @parser.parse("NOTIFY users VIA email OF 5")
   end

@@ -1,0 +1,3 @@
+on each offer in offers do
+  print: 'hello, world!'
+end

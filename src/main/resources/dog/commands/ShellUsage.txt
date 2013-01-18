@@ -1,0 +1,11 @@
+
+Usage: dog shell [options] [statement]
+
+  Starts a Dog shell with a current application. You can optionally pass in a statement to
+  execute.  If you pass in a statement it will execute the statement and then immediately
+  return.
+
+Options include: 
+  -u url           # Specify the url of the Dog application to connect to with the shell
+  -d database      # Specify the database on the local machine to use. This overwrites -u.
+  -t track_id      # Specify the track to use. Default: a new track will be created and returned

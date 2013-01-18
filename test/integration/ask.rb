@@ -16,58 +16,33 @@ class IntegrationTests::AskTest < Test::Unit::TestCase
     program = <<-EOD
 
     DEFINE label FOR people ON message DO
-      PERFORM "Label these pictures"
-      RETURN images
+      PRINT message
     END
 
     ASK people.public TO label ON "Hello!"
 
     EOD
 
-    tracks = run_source(program)
-    tasks = ::Dog::RoutedTask.find().to_a
-    task = tasks.first
-    
-    assert_equal(1, tasks.size)
-    assert_equal(3, task["properties"].size)
-    assert_equal(["instructions", "message", "images"], task["properties"].map { |p| p["identifier"] })
-
+    tracks, output = run_source(program, true)
+    assert_equal("Hello!", output)
   end
 
   def test_simple_2
     program = <<-EOD
 
-    DEFINE label FOR people ON message DO
-      PERFORM "Label these pictures"
-      RETURN images
+    DEFINE label FOR people ON message RATING rating DO
+      PRINT message
+      PRINT rating
     END
 
-    ASK people.public TO label ON "Hello!" USING rating = 7
+    ASK people.public TO label ON "Hello!" RATING 7
 
     EOD
 
-    tracks = run_source(program)
-    tasks = ::Dog::RoutedTask.find().to_a
-    task = tasks.first
-    
-    assert_equal(1, tasks.size)
-    assert_equal(4, task["properties"].size)
-    assert_equal(["instructions", "message", "rating", "images"], task["properties"].map { |p| p["identifier"] })
+    tracks, output = run_source(program, true)
+    assert_equal("Hello!\n7.0", output)
   end
-  
-  def test_replication_count
-    program = <<-EOD
-      WAIT ON ASK 5 people.people TO "Draw a curved line from one corner to another"
-    EOD
-    
-    tracks = run_source(program)
-    tasks = ::Dog::RoutedTask.find().to_a
-    task = tasks.first
-    
-    assert_equal(1, tasks.size)
-    assert_equal(5, task["replication"])
-    
-    
-  end
-  
+
+  # TODO - Add a test for PERFORM "Label these pictures" RETURN images
+
 end

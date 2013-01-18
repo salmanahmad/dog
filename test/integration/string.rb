@@ -31,4 +31,25 @@ class IntegrationTests::StringTest < Test::Unit::TestCase
     assert_equal("Hello!", output)
   end
   
+  def test_newline
+    program = <<-EOD
+       i = "Hello\nWorld"
+    EOD
+    
+    tracks = run_source(program)
+    assert_equal("Hello\nWorld", tracks.last.variables["i"].value)
+    
+    
+    program = <<-EOD
+       i = "Hello"
+       i = i + "\n"
+       i = i + "World"
+       
+       PRINT i
+    EOD
+    
+    tracks, output = run_source(program, true)
+    assert_equal("Hello\nWorld", output)
+  end
+  
 end

@@ -11,12 +11,13 @@ require 'digest/sha1'
 require 'set'
 require 'open3'
 
+require 'sprockets'
 require 'pony'
 require 'thin'
 require 'eventmachine'
 require 'sinatra/base'
 require 'sinatra/async'
-require 'uuid'
+require 'faye'
 require 'json'
 require 'mongo'
 require 'httparty'
@@ -26,24 +27,18 @@ require 'json'
 #require 'blather/client/client'
 
 require File.join(File.dirname(__FILE__), 'runtime/database_object.rb')
-require File.join(File.dirname(__FILE__), 'runtime/routability.rb')
-require File.join(File.dirname(__FILE__), 'runtime/stream_object.rb')
 
 require File.join(File.dirname(__FILE__), 'runtime/external/facebook_helpers.rb')
 require File.join(File.dirname(__FILE__), 'runtime/external/facebook_person.rb')
 
-require File.join(File.dirname(__FILE__), 'runtime/community.rb')
 require File.join(File.dirname(__FILE__), 'runtime/config.rb')
 require File.join(File.dirname(__FILE__), 'runtime/database.rb')
-require File.join(File.dirname(__FILE__), 'runtime/event.rb')
 require File.join(File.dirname(__FILE__), 'runtime/future.rb')
 require File.join(File.dirname(__FILE__), 'runtime/kernel_ext.rb')
 require File.join(File.dirname(__FILE__), 'runtime/library.rb')
-require File.join(File.dirname(__FILE__), 'runtime/message.rb')
 require File.join(File.dirname(__FILE__), 'runtime/person.rb')
-require File.join(File.dirname(__FILE__), 'runtime/property.rb')
 require File.join(File.dirname(__FILE__), 'runtime/server.rb')
-require File.join(File.dirname(__FILE__), 'runtime/task.rb')
+require File.join(File.dirname(__FILE__), 'runtime/signal.rb')
 require File.join(File.dirname(__FILE__), 'runtime/track.rb')
 require File.join(File.dirname(__FILE__), 'runtime/value.rb')
 require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
@@ -51,27 +46,54 @@ require File.join(File.dirname(__FILE__), 'runtime/vet.rb')
 Dir[File.join(File.dirname(__FILE__), "runtime/library", "*.rb")].each { |file| require file }
 
 module Dog
+  
+  class RuntimeError < RuntimeError
+    attr_accessor :dog_backtrace
+    attr_accessor :ruby_exception
+    attr_accessor :failure_reason
+    
+    def summary
+      s = ""
+      
+      s += "Dog error: #{@ruby_exception.to_s}\n"
+      s += "\n"
+      s += "Dog's backtrace:\n"
+      for item in self.dog_backtrace do
+        function_name = item["function"]
+        if function_name == "@root" then
+          function_name = "top-level"
+        end
+        
+        s += "#{item["file"]}:#{item["line"]} in '#{function_name}' of package '#{item["package"]}'.\n"
+      end
+      
+      s += "\n"
+      s += "Ruby's backtrace:\n"
+      s += @ruby_exception.backtrace.join("\n")
+      s
+    end
+  end
+  
   class Runtime
     class << self
-      
-      # TODO - Do I need this anymore?
-      attr_accessor :save_set
-      
       attr_accessor :bundle
       attr_accessor :bundle_filename
       attr_accessor :bundle_directory
+      attr_accessor :scheduled_tracks
       
       def initialize(bundle, bundle_filename = nil, options = {})
-        self.save_set = Set.new
         self.bundle = bundle
         self.bundle_filename = File.expand_path(bundle_filename) rescue nil
         self.bundle_directory = File.dirname(File.expand_path(bundle_filename)) rescue Dir.pwd
         
         self.bundle.link(::Dog::Library::System)
         self.bundle.link(::Dog::Library::Collection)
+        self.bundle.link(::Dog::Library::Future)
         self.bundle.link(::Dog::Library::Community)
         self.bundle.link(::Dog::Library::People)
         self.bundle.link(::Dog::Library::Dog)
+        
+        self.scheduled_tracks = Set.new
         
         options = {
           "config_file" => nil,
@@ -114,305 +136,240 @@ module Dog
         end
         
         tracks = Track.find({"state" => Track::STATE::RUNNING}, :sort => ["created_at", Mongo::DESCENDING])
-        
         tracks = tracks.to_a.map do |track|
           track = Track.from_hash(track)
         end
-        
+
         for track in tracks do
-          run_track(track)
+          self.schedule(track)
         end
-        
+
+        tracks = self.resume
         start_stop_server
+
         return tracks
       end
-      
-      def run_track(track)
-        # TODO - I need to know when I need to save
-        
-        return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
-        
-        instructions = track.context["instructions"]
-        
-        loop do
-          track.next_instruction = nil
-          track.next_track = nil
-          
-          if instructions.kind_of? Proc then
-            instructions.call(track)
-          else
-            instruction = instructions[track.current_instruction]
-            
-            if instruction.nil? then
-              track.finish
-            else
-              
-              begin
-                instruction.execute(track)
-              rescue Exception => e
-                exception = Exception.new("Dog error on line: #{instruction.line} in file: #{instruction.file}.\n\nThe ruby error was: #{e.to_s}")
-                exception.set_backtrace(e.backtrace)
-                raise exception
-              end
-              
-              if track.next_instruction then
-                track.current_instruction = track.next_instruction
-              else
-                track.current_instruction += 1
-              end
-            end
-          end
 
-          if track.state == Track::STATE::WAITING then
-            track.save
+      def invoke(function, package, args, track = nil)
+        track = ::Dog::Track.invoke(function, package, args, track)
+        self.schedule(track)
+        self.resume
+      end
+
+      def schedule(track)
+        for t in self.scheduled_tracks do
+          return if t._id == track._id
+        end
+        
+        self.scheduled_tracks.add(track)
+      end
+
+      def resume
+        trace_heads = {}
+
+        loop do
+          tracks = self.scheduled_tracks.to_a
+          if tracks.size == 0
             break
           end
 
-          if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
-            return_value = track.stack.last || ::Dog::Value.null_value
-            return_track = track.control_ancestors.last
-            
-            if return_track then
-              
-              if return_track.kind_of?(::BSON::ObjectId) then
-                return_track = Track.find_by_id(return_track)
-              end
-              
-              for name, future in track.futures do
-                future = future.to_hash
-                future = ::Dog::Future.from_hash(future)
-                return_track.futures[name] = future
+          self.scheduled_tracks = Set.new
+          tracks_remaining = Set.new(tracks.clone)
+
+          for track in tracks do
+            trace_heads.delete(track._id)
+            tracks_remaining.delete(track)
+            next if track.state != Track::STATE::RUNNING
+
+            loop do
+              instructions = track.context["instructions"]
+              track.next_instruction = nil
+
+              if instructions.kind_of? Proc then
+                signal = instructions.call(track)
+              else
+                instruction = instructions[track.current_instruction]
+
+                if instruction.nil? then
+                  track.finish
+                else
+                  begin
+                    signal = instruction.execute(track)
+                  rescue Exception => e
+                    backtrace = []
+                    
+                    backtrace_tracks = [track]
+                    backtrace_tracks.concat(track.control_ancestors.reverse)
+                    
+                    backtrace_tracks.each_index do |index|
+                      t = backtrace_tracks[index]
+                      
+                      if t.kind_of? ::BSON::ObjectId then
+                        t = ::Dog::Track.find_by_id(t)
+                      end
+                      
+                      the_current_instruction = t.current_instruction
+                      
+                      unless index == 0
+                        the_current_instruction -= 1
+                      end
+                      
+                      backtrace << {
+                        "line" => t.context["instructions"][the_current_instruction].line,
+                        "file" => t.filename,
+                        "function" => t.function_name,
+                        "package" => t.package_name
+                      }
+                    end
+
+                    exception = ::Dog::RuntimeError.new
+                    exception.dog_backtrace = backtrace
+                    exception.ruby_exception = e
+                    raise exception
+                  end
+
+                  if track.next_instruction then
+                    track.current_instruction = track.next_instruction
+                  else
+                    track.current_instruction += 1
+                  end
+                end
               end
 
-              return_track.stack.push(return_value)
-              return_track.state = Track::STATE::RUNNING
+              if signal.kind_of?(Signal) && signal.call_track then
+                track = signal.call_track
+              end
 
-              run_track(return_track)
-              return
-            else
-              track.save
-              break
+              if signal.kind_of?(Signal) && signal.schedule_tracks then
+                for t in signal.schedule_tracks do
+                  self.schedule(t)
+                end
+              end
+
+              if signal.kind_of?(Signal) && signal.stop then
+                track.state = Track::STATE::WAITING
+                trace_heads[track._id] = track
+                track.save
+                break
+              end
+
+              if signal.kind_of?(Signal) && signal.pause then
+                track.save
+                self.schedule(track)
+                break
+              end
+
+              if signal.kind_of?(Signal) && signal.exit then
+                tracks_to_save = []
+
+                for t in self.scheduled_tracks do
+                  add_to_set = true
+                  for t2 in tracks_to_save do
+                    if t2._id == t._id then
+                      add_to_set = false
+                      break
+                    end
+                  end
+
+                  tracks_to_save << t if add_to_set
+                end
+
+                for t in tracks_remaining do
+                  add_to_set = true
+                  for t2 in tracks_to_save do
+                    if t2._id == t._id then
+                      add_to_set = false
+                      break
+                    end
+                  end
+
+                  tracks_to_save << t if add_to_set
+                end
+
+                for t in tracks_to_save do
+                  t.save
+                end
+
+                track.save
+
+                EM.next_tick do
+                  Process.kill('INT', Process.pid)
+                end
+                return
+              end
+
+              if track.state == Track::STATE::WAITING then
+                trace_heads[track._id] = track
+                track.save
+                break
+              end
+
+              if track.state == Track::STATE::FINISHED then
+                return_value = track.stack.last || ::Dog::Value.null_value
+                return_track = track.control_ancestors.last
+
+                if return_track then
+                  if return_track.kind_of?(::BSON::ObjectId) then
+                    return_track = Track.find_by_id(return_track)
+                  end
+
+                  for name, future in track.futures do
+                    # TODO
+                    # Question: What the crapper is going on here?
+                    # Answer: This was the old way I used to pass future
+                    # around. It is not needed anymore but I don't want to
+                    # remove it until I implement my future "garbage collector"
+                    future = future.to_hash
+                    future = ::Dog::Future.from_hash(future)
+                    return_track.futures[name] = future
+                  end
+
+                  return_track.stack.push(return_value)
+                  return_track.state = Track::STATE::RUNNING
+
+                  track.remove
+                  track = return_track
+                else
+                  trace_heads[track._id] = track
+
+                  if track.is_root? then
+                    track.save
+                  else
+                    if track.future_return_id then
+                      value = ::Dog::Value.empty_structure
+                      value._id = track.future_return_id
+                      value.pending = true
+                      
+                      resume_track = ::Dog::Track.invoke("complete:future:with", "future", [value, return_value])
+                      self.schedule(resume_track)
+                    end
+
+                    track.remove
+                  end
+
+                  break
+                end
+              end
             end
           end
-
-          if track.next_track then
-            next_track = track.next_track
-            track.next_track = nil
-
-            run_track(next_track)
-            return
-          end
         end
-        
-        if track.is_root? && track.state == ::Dog::Track::STATE::FINISHED then
-          start_stop_server
-        end
+
+        return trace_heads.values
       end
-      
+
       def start_stop_server
-        tracks = Track.find({"state" => { 
-          "$in" => [Track::STATE::WAITING, Track::STATE::LISTENING, Track::STATE::ASKING]
-          }
-        }, :sort => ["created_at", Mongo::DESCENDING])
+        tracks = Track.find({"state" => Track::STATE::WAITING}, :sort => ["created_at", Mongo::DESCENDING])
         
-        if tracks.count != 0 then
+        root_track = Track.root
+        if root_track.displays.keys.count > 0 || root_track.listens.keys.count > 0 then
+          root_has_listen = true
+        else
+          root_has_listen = false
+        end
+
+        if tracks.count > 0 || root_has_listen then
           Server.run
-        else
-          futures = ::Dog::Future.find()
-          if futures.count != 0 then
-            Server.run
-          else
-            EM.next_tick do
-              Process.kill('INT', Process.pid)
-            end
-          end
         end
-      end
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      # TODO - Consider removing below this line:
-      
-=begin
-      def run_track(track)
-        # TODO - check for state first
-        # TODO - Right now I have poor support for tail recursion. I may run out of stack space before too long
-        # TODO - When do I queue up the tracks that I should save?
-        # TODO - When do I delete old tracks?
-        
-        next_track = nil
-        
-        return if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING
-        
-        loop do
-          node = Runtime.bundle.node_at_path(track.current_node_path, track.function_package)
-          next_track = node.visit(track)
-          
-          self.save_set.add(track)
-          
-          if track.state == Track::STATE::ASKING then
-            break
-          end
-          
-          if track.state == Track::STATE::FINISHED || track.state == Track::STATE::LISTENING then
-            # TODO - Strongly consider moving this logic into track.finish and just return the parent node to be
-            # executed through next_track. This will simplify this logic here and keep it cleaner...
-            parent_track = Track.find_by_id(track.control_ancestors.last)
-            
-            if parent_track && !(parent_track.state == Track::STATE::FINISHED || parent_track.state == Track::STATE::LISTENING) then
-              
-              parent_current_node = Runtime.bundle.node_at_path(parent_track.current_node_path, parent_track.function_package)
-              parent_track.write_stack(parent_current_node.path, track.read_return_value)
-              
-              parent_track.current_node_path = parent_current_node.parent.path
-              parent_track.state = Track::STATE::RUNNING
-              
-              run_track(parent_track)
-              return
-            else
-              break
-            end
-          end
-          
-          if next_track && next_track.class == Track then
-            run_track(next_track)
-            return
-          end
-        end
-        
-        for t in self.save_set do
-          t.save
-        end
-        
-        if track.is_root? && track.state == Track::STATE::FINISHED then
-          start_stop_server
-        end
-        
-      end
-=end
-
-      
-      def symbol_exists?(name = [])
-        self.bundle.packages[self.bundle.startup_package].symbols.include? name.join(".")
-      end
-
-      def symbol_info(name = [])
-        symbol_value = self.bundle.packages[self.bundle.startup_package].symbols[name.join(".")]
-        symbol_value = symbol_value["value"]
-        type = self.typeof_symbol(symbol_value)
-
-        if type then
-          return self.to_hash_for_stream(name, type)
-        else
-          return nil
-        end
-      end
-
-      def symbol_descendants(name = [], depth = 1)
-        descendants = []
-        name = name.join(".")
-
-        # special case root
-        name = '' if name == '@root'
-
-        symbols = self.bundle.packages[self.bundle.startup_package].symbols
-
-        for symbol, path in symbols do
-          if symbol.start_with?(name) then
-            level = symbol[name.length, symbol.length].count(".")
-            level += 1 if name == '' # implied root. in every name
-
-            if level > 0 && (depth == -1 || level <= depth) then
-              path = path.clone
-              path.shift
-
-              #node = self.node_at_path_for_filename(path, self.bite_code["main_filename"])
-              #node = self.bundle.node_for_symbol(symbol, self.bundle.startup_package)
-              #type = self.typeof_node(node)
-
-              if symbol == "@root" then
-                type = "function"
-              else
-                symbol_value = self.bundle.packages[self.bundle.startup_package].symbols[symbol]
-                symbol_value = symbol_value["value"]
-                type = typeof_symbol(symbol_value)
-              end
-
-              if type then
-                descendants << self.to_hash_for_stream(symbol.split('.'), type)
-              end
-            end
-          end
-        end
-
-        return descendants
-      end
-      
-      # TODO - Remove this
-      #def node_at_path_for_filename(path, file)
-      #  # TODO - I need to raise an error if the node is not found.
-      #  node = self.bite_code["code"][file]
-      #  
-      #  for index in path do
-      #    node = node[index]
-      #  end
-      #  
-      #  return node
-      #end
-
-      def typeof_symbol(symbol)
-        return case
-        when symbol.type == "external_function" || symbol.type == "function"
-          if /^@each:/.match(symbol["name"].ruby_value) then
-            "oneach"
-          else
-            "function"
-          end
-        when symbol.type == "type"
-          "structure"
-        else
-          nil
-        end
-      end
-
-      def to_hash_for_stream(name, type)
-        bag = {
-          "id" => name.join("."),
-          "name" => name,
-          "type" => type
-        }
-        # TODO - Fixme - hack to get name right
-        # if type == 'oneach'
-        #   bag["name"] = bag["name"]["@each:".length, bag["name"].length]
-        # end
-        return bag
       end
 
     end

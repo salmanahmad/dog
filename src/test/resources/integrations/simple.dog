@@ -1,0 +1,14 @@
+
+define one do
+	1
+end
+
+define fac: n do
+	if n == 0 then
+		one
+	else
+		n * (fac: n - 1)
+	end
+end
+
+i = fac: 5

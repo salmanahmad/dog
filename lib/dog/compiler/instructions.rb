@@ -91,7 +91,7 @@ module Dog::Instructions
     end
     
     def execute(track)
-      @value._id = UUID.new.generate
+      @value._id = BSON::ObjectId.new
       track.stack.push(@value)
     end
     
@@ -131,7 +131,7 @@ module Dog::Instructions
     attribute :value
 
     def initialize(value)
-      @value = value
+      @value = value.to_f
     end
 
     def execute(track)
@@ -162,30 +162,51 @@ module Dog::Instructions
       track.stack.push(::Dog::Value.empty_structure())
     end
   end
-  
-  class Wait < Instruction
-    def execute(track)
-      value = track.stack.pop
 
-      if value.pending then
-        if track.futures[value._id] then
-          value = track.futures[value._id]
-          track.state = ::Dog::Track::STATE::RUNNING
+  class Wait < Instruction
+    attribute :future_count
+
+    def initialize(future_count)
+      @future_count = future_count
+    end
+
+    def execute(track)
+      futures = track.stack.pop(@future_count)
+
+      for value in futures do
+        if value.pending then
+          future = ::Dog::Future.find_one({"value_id" => value._id})
+          
+          if future.nil?
+            raise "Runtime error: Could not find the future"
+          end
+          
+          if future.queue.kind_of?(Array) && future.queue.size > 0 then
+            value = future.queue.shift
+            future.save
+            track.stack.push(value)
+            
+            track.state = ::Dog::Track::STATE::RUNNING
+            return
+          elsif !future.value.nil? then
+            value = future.value
+            track.stack.push(value)
+            
+            track.state = ::Dog::Track::STATE::RUNNING
+            return
+          else
+            future.broadcast_tracks << track
+            future.save
+            
+            track.state = ::Dog::Track::STATE::WAITING
+          end
         else
           track.stack.push(value)
-
-          future = ::Dog::Future.find_one({"value_id" => value._id})
-          future = ::Dog::Future.new(value._id, value) if future.nil?
-          future.tracks << track
-          future.save
-
-          track.next_instruction = track.current_instruction
-          track.state = ::Dog::Track::STATE::WAITING
+          
+          track.state = ::Dog::Track::STATE::RUNNING
           return
         end
       end
-      
-      track.stack.push(value)
     end
   end
   
@@ -200,73 +221,55 @@ module Dog::Instructions
       if @path_size > 1 then
         path = track.stack.pop(@path_size)
 
-        if path.first.pending then
-          id = path.first._id
-          if track.futures[id] then
-            new_value = track.futures[id].to_hash
-            new_value = ::Dog::Value.from_hash(new_value)
+        pointer = nil
 
-            path.shift
-            path.unshift(new_value)
+        count = -1
+        for item in path do
+          count += 1
 
-            track.state = ::Dog::Track::STATE::RUNNING
+          if count == 0 then
+            pointer = item
           else
-            track.stack.concat(path)
+            key = ""
 
-            value = path.first
+            item_value = item
+            item_value = item.value if item.kind_of? ::Dog::Value
 
-            future = ::Dog::Future.find_one({"value_id" => value._id})
-            future = ::Dog::Future.new(value._id, value) if future.nil?
-            future.tracks << track
-            future.save
-
-            track.next_instruction = track.current_instruction
-            track.state = ::Dog::Track::STATE::WAITING
-            return
-          end
-        end
-
-        pointer = path.first
-
-        for item in path[1, path.size - 1] do
-          key = ""
-
-          item_value = item
-          item_value = item.value if item.kind_of? ::Dog::Value
-
-          if item_value.kind_of? String then
-            key = item_value.to_s
-          elsif item_value.kind_of? Numeric then
-            key = item_value.to_f
-          else
-            raise "Runtime error"
-          end
-
-          if pointer.pending then
-            if track.futures[pointer._id] then
-              pointer = track.futures[pointer._id]
-              track.state = ::Dog::Track::STATE::RUNNING
+            if item_value.kind_of? String then
+              key = item_value.to_s
+            elsif item_value.kind_of? Numeric then
+              key = item_value.to_f
             else
-              track.stack.concat(path)
-
-              future = ::Dog::Future.find_one({"value_id" => pointer._id})
-              future = ::Dog::Future.new(pointer._id, pointer) if future.nil?
-              future.tracks << track
-              future.save
-
-              track.next_instruction = track.current_instruction
-              track.state = ::Dog::Track::STATE::WAITING
-              return
+              raise "Access error"
             end
+
+            pointer = pointer[key]
+            pointer = ::Dog::Value.null_value if pointer.nil?
           end
 
-          pointer = pointer[key]
-          pointer = ::Dog::Value.null_value if pointer.nil?
-        end
+          if count >= path.size - 1 then
+            break
+          else
+            if pointer.pending then
+              # TODO - Refactor this with Perform and Wait and Access
+              future = ::Dog::Future.find_one({"value_id" => pointer._id})
 
-        if pointer.pending then
-          if track.futures[pointer._id] then
-            pointer = track.futures[pointer._id]
+              if future.nil? then
+                raise "Runtime error: Could not find the future"
+              end
+
+              if !future.value.nil? then
+                pointer = future.value
+              else
+                future.blocking_tracks << track
+                future.save
+
+                track.stack.concat(path)
+                track.next_instruction = track.current_instruction
+                track.state = ::Dog::Track::STATE::WAITING
+                return
+              end
+            end
           end
         end
 
@@ -287,12 +290,17 @@ module Dog::Instructions
       path = track.stack.pop(@path_size)
 
       if @path_size == 1 then
-        track.stack.push(value)
+        # TODO - I need to make sure that the values are always
+        # cloned when they are pushed onto the stack
+        track.stack.push(value.clone)
       else
         variable = path.shift
         pointer = variable
-
+        
+        count = -1
         for item in path do
+          count += 1
+          
           key = ""
           
           item_value = item
@@ -300,15 +308,13 @@ module Dog::Instructions
           
           if item_value.kind_of? String then
             key = item_value
-            #key = item_value.to_s
           elsif item_value.kind_of? Numeric then
             key = item_value
-            #key = item_value.to_s
           else
             raise "Runtime error"
           end
 
-          if item == path.last then
+          if count == path.size - 1 then
             pointer[key] = value
           else
             pointer = pointer[key]
@@ -322,38 +328,68 @@ module Dog::Instructions
 
   class ReadVariable < Instruction
     attribute :variable_name
+    attribute :scope
 
-    def initialize(variable_name)
+    def initialize(variable_name, scope = "cascade")
       @variable_name = variable_name
+      @scope = scope
     end
 
     def execute(track)
-      # TODO - Handle scope modifiers: internal, external, local
-      if track.variables.include? @variable_name then
-        value = track.variables[@variable_name]
-      else
+      value = nil
+      
+      if value.nil? && ["cascade", "local"].include?(scope) then
+        if track.variables.include? @variable_name then
+          value = track.variables[@variable_name]
+        end
+      end
+      
+      if value.nil? && ["cascade", "internal"].include?(scope) then
         package = track.package_name
         symbol = ::Dog::Runtime.bundle.packages[package].symbols[@variable_name]
         if symbol && !symbol["value"].nil? then
           value = symbol["value"]
-        else
-          package = ::Dog::Runtime.bundle.packages[@variable_name]
+        end
+      end
+      
+      if value.nil? && ["cascade", "internal"].include?(scope) then
+        package = track.package_name
+        imports = ::Dog::Runtime.bundle.packages[package].imports
+        for import in imports do
+          package = ::Dog::Runtime.bundle.packages[import]
           if package then
-            value = ::Dog::Value.new("package", {})
-            
-            for name, symbol in package.symbols do
-              if symbol["value"] then
-                value[name] = symbol["value"]
-              else
-                value[name] = ::Dog::Value.null_value
-              end
+            symbol = package.symbols[@variable_name]
+            if symbol && !symbol["value"].nil? then
+              value = symbol["value"]
+              break
             end
-          else
-            value = ::Dog::Value.null_value
           end
         end
       end
       
+      if value.nil? && ["cascade", "external"].include?(scope) then
+        package = ::Dog::Runtime.bundle.packages[@variable_name]
+        
+        if package then
+          value = ::Dog::Value.new("dog.package", {})
+          
+          for name, symbol in package.symbols do
+            if symbol["value"] then
+              value[name] = symbol["value"]
+            else
+              value[name] = ::Dog::Value.null_value
+            end
+          end
+        end
+      end
+      
+      if value.nil? then
+        value = ::Dog::Value.null_value
+      end
+      
+      # TODO - Do I actually need this? I don't think that I am using
+      # Track#futures at all at this point. I need to add my garbage collection
+      # but that is a seperate issue
       if value.pending then
         if track.futures[value._id] then
           value = track.futures[value._id]
@@ -386,21 +422,104 @@ module Dog::Instructions
     end
 
     def execute(track)
+      operands = []
+
+      if @operation == "!"
+        operands << track.stack.pop
+      else
+        operands << track.stack.pop
+        operands << track.stack.pop
+      end
+
+      new_operands = []
+
+      for operand in operands do
+        if operand.pending then
+          # TODO - Refactor this with Perform and Wait and Access
+          future = ::Dog::Future.find_one({"value_id" => operand._id})
+
+          if future.nil? then
+            raise "Runtime error: Could not find the future"
+          end
+
+          if !future.value.nil? then
+            new_operands << future.value
+          else
+            future.blocking_tracks << track
+            future.save
+
+            track.stack.concat(operands.reverse)
+            track.next_instruction = track.current_instruction
+            track.state = ::Dog::Track::STATE::WAITING
+            return
+          end
+        else
+          new_operands << operand
+        end
+
+      end
+
+      track.stack.concat(new_operands.reverse)
+
       case @operation
       when "OR"
         arg2 = track.stack.pop.ruby_value
         arg1 = track.stack.pop.ruby_value
-        
+
         value = arg1 || arg2
         value = ::Dog::Value.from_ruby_value(value)
         track.stack.push(value)
       when "AND"
         arg2 = track.stack.pop.ruby_value
         arg1 = track.stack.pop.ruby_value
-        
+
         value = arg1 && arg2
         value = ::Dog::Value.from_ruby_value(value)
         track.stack.push(value)
+      when "==", "!="
+        inverse = @operation == "!="
+
+        arg2 = track.stack.pop
+        arg1 = track.stack.pop
+
+        if arg1.primitive? && arg2.primitive? then
+          equal = (arg1.value == arg2.value)
+          equal = !equal if inverse
+          value = ::Dog::Value.from_ruby_value(equal)
+          track.stack.push(value)
+        elsif (arg1.primitive? && !arg2.primitive?) || (!arg1.primitive? && arg2.primitive?)
+          if inverse then
+            equal = ::Dog::Value.true_value
+          else
+            equal = ::Dog::Value.false_value
+          end
+
+          track.stack.push(equal)
+        else
+          equal = ::Dog::Helper.structures_equal?(arg1, arg2)
+          equal = !equal if inverse
+          value = ::Dog::Value.from_ruby_value(equal)
+          track.stack.push(value)
+        end
+      when "===", "!=="
+        inverse = @operation == "!=="
+
+        arg2 = track.stack.pop
+        arg1 = track.stack.pop
+        
+        if inverse then
+          if arg1._id == arg2._id then
+            track.stack.push(::Dog::Value.false_value)
+          else
+            track.stack.push(::Dog::Value.true_value)
+          end
+        else
+          if arg1._id == arg2._id then
+            track.stack.push(::Dog::Value.true_value)
+          else
+            track.stack.push(::Dog::Value.false_value)
+          end
+        end
       when "!"
         arg1 = track.stack.pop
 
@@ -409,7 +528,12 @@ module Dog::Instructions
         arg2 = track.stack.pop.ruby_value
         arg1 = track.stack.pop.ruby_value
 
-        value = arg1.send(@operation, arg2)
+        if @operation == "+" && arg1.class == String || arg2.class == String 
+          value = arg1.to_s + arg2.to_s
+        else
+          value = arg1.send(@operation, arg2)
+        end
+
         value = ::Dog::Value.from_ruby_value(value)
         track.stack.push(value)
       end
@@ -493,232 +617,81 @@ module Dog::Instructions
     end
   end
 
-  class Call < Instruction
-    attribute :arg_count
-    attribute :has_optionals
-
-    def initialize(arg_count, has_optionals)
-      @arg_count = arg_count
-      @has_optionals = has_optionals
+  class Signal < Instruction
+    attribute :symbol
+    
+    def initialize(symbol)
+      @symbol = symbol
     end
     
     def execute(track)
-      optionals = nil
-      optionals = track.stack.pop if has_optionals
+      signal = ::Dog::Signal.new
       
+      if symbol == "stop" then
+        signal.stop = true
+        return signal
+      elsif symbol == "pause" then
+        signal.pause = true
+        return signal
+      elsif symbol == "exit" then
+        signal.exit = true
+        return signal
+      else
+        return nil
+      end
+      
+    end
+    
+  end
+
+  class Call < Instruction
+    attribute :arg_count
+    attribute :async
+
+    def initialize(arg_count, async = false)
+      @arg_count = arg_count
+      @async = async
+    end
+
+    def execute(track)
       arguments = track.stack.pop(arg_count)
       function = track.stack.pop
-      
-      if function.type == "function" then
+
+      if function.type == "dog.function" then
         package = function["package"].value
         name = function["name"].value
-        implementation = 0
         
-        # TODO - Handle default values
-        # Perhaps the default values for optional args are handled
-        # by the runtime libraries and not the VM
+        signal = ::Dog::Signal.new
         
-        new_track = ::Dog::Track.new
-        new_track.control_ancestors = track.control_ancestors.clone
-        new_track.control_ancestors << track
-        
-        new_track.package_name = package
-        new_track.function_name = name
-        new_track.implementation_name = implementation
-        
-        symbol = ::Dog::Runtime.bundle.packages[package].symbols[name]["implementations"][implementation]
-        symbol_arguments = symbol["arguments"]
-        
-        arguments.each_index do |index|
-          argument = arguments[index]
-          variable_name = symbol_arguments[index]
-          new_track.variables[variable_name] = argument
-        end
-        
-        track.state = ::Dog::Track::STATE::CALLING
-        track.next_track = new_track
-      elsif function.type == "external_function"
-        actor = function["actor"].ruby_value
-        if actor == "shell"
+        if @async then
+          # TODO - Refactor this block and reuse it between here and 
+          # the future.future function
+          value = ::Dog::Value.empty_structure
+          value.pending = true
+          value.buffer_size = 0
+          value.channel_mode = false
           
-          input = {
-            "argv" => [],
-            "kwargs" => {},
-            "name" => function["name"].ruby_value
-          }
+          # TODO - Implement the garbage collection for futures
+          future = ::Dog::Future.new(value._id)
+          future.queue_size = 0
+          future.save
           
-          arguments.each_index do |index|
-            argument = arguments[index]
-            input["argv"] << argument.ruby_value
-          end
+          new_track = ::Dog::Track.invoke(name, package, arguments)
+          new_track.future_return_id = value._id
+          signal.schedule_tracks = [new_track]
           
-          if optionals then
-            for key in optionals.keys do
-              optional = optionals[key].ruby_value
-              input["argv"][key] << argument.ruby_value
-            end
-          end
-          
-          output = {}
-          
-          Open3.popen3(function["instructions"].ruby_value) { |stdin, stdout, stderr, process|
-            stdin.puts(input.to_json) if input
-            stdin.close
-                
-            exit_status = process.value
-            shell_output = stdout.read
-                
-            begin
-              output = JSON.parse(shell_output)
-              output = output["output"]
-            rescue
-              output = shell_output
-            end
-                
-            stdout.close
-            stderr.close
-          }
-              
-          output = ::Dog::Value.from_ruby_value(output)
-          track.stack.push(output)
+          track.stack.push(value)
         else
-          raise "I cannot synchronously call an external function for '#{actor}'"
+          new_track = ::Dog::Track.invoke(name, package, arguments, track)
+          signal.call_track = new_track
+          
+          track.state = ::Dog::Track::STATE::CALLING
         end
+        
+        return signal
       else
         raise "I don't know how to call a non-function"
       end
-    end
-  end
-
-  class AsyncCall < Instruction
-    attribute :arg_count
-    attribute :has_optionals
-    attribute :replication
-    
-    def initialize(arg_count, has_optionals, replication = 1)
-      @arg_count = arg_count
-      @has_optionals = has_optionals
-      @replication = replication || 1
-    end
-    
-    def execute(track)
-      optionals = nil
-      optionals = track.stack.pop if has_optionals
-      
-      arguments = track.stack.pop(arg_count)
-      function = track.stack.pop
-      actor = track.stack.pop
-      
-      future = ::Dog::Value.new("structure", {})
-      future.pending = true
-      future.buffer_size = 0
-      future.channel_mode = true
-      
-      if function.type == "function" then
-        # TODO
-      elsif function.type == "external_function" || function.type == "string" then
-        # TODO - Propertly handle string literals rather than hard coding results here. It should be possible to call a shell command as well.
-        function_actor = function["actor"].ruby_value rescue nil
-        
-        if function_actor == "shell" then
-          # TODO
-        elsif function_actor == "people" || function_actor == "person" || function.type == "string" then
-          properties = []
-          
-          if function.type == "string" then
-            property = ::Dog::Property.new
-            property.identifier = "instructions"
-            property.direction = "output"
-            property.required = true
-            property.value = function.ruby_value
-            properties << property
-            
-            property = ::Dog::Property.new
-            property.identifier = "*value"
-            property.direction = "input"
-            property.required = true
-            property.value = nil
-            properties << property
-          else
-            property = ::Dog::Property.new
-            property.identifier = "instructions"
-            property.direction = "output"
-            property.required = true
-            property.value = function["instructions"].ruby_value
-            properties << property
-          
-            arguments.each_index do |index|
-              argument = arguments[index]
-              variable_name = function["arguments"][index].ruby_value
-            
-              property = ::Dog::Property.new
-              property.identifier = variable_name
-              property.direction = "output"
-              property.required = true
-              property.value = argument.ruby_value
-              properties << property
-            end
-          
-            if optionals then
-              for key in optionals.keys do
-                optional = optionals[key].ruby_value
-                
-                property = ::Dog::Property.new
-                property.identifier = key
-                property.direction = "output"
-                property.required = false
-                property.value = optional
-                properties << property
-              end
-            end
-            
-            return_values = function["output"]
-            return_values.value.keys.each_index do |index|
-              return_value = return_values[index].ruby_value
-              
-              property = ::Dog::Property.new
-              property.identifier = return_value
-              property.direction = "input"
-              property.required = true
-              property.value = nil
-              properties << property
-            end
-          end
-          
-          task = ::Dog::RoutedTask.new
-          # TODO - This rescue is here because of inline - string functions for ASKs. Deal with it at some point. Okay?
-          task.name = function["name"].ruby_value rescue "@inline_code"
-          task.replication = @replication
-          task.duplication = 1
-          task.properties = properties
-          task.channel_id = future._id
-          
-          if track.id == nil then
-            # TODO - Fix this. I need to do this here so I can get a track.id
-            # which is assigned when I call DatabaseObject#save. Instead, "id" 
-            # should be automatically generated as a UUID or ObjectID or something
-            # and DatabaseObject#save should be updated so it always does an upsert 
-            # rather than checking the _id itself like a retard...
-            track.save
-          end
-          task.track_id = track.id
-          
-          
-          #task.track_id = track.control_ancestors.last
-          #task.routing = nil
-          
-          
-          task.routing = ::Dog::Helper.routing_for_actor(actor)
-          task.created_at = Time.now.utc
-          task.save
-        else
-          raise "I cannot asynchronously call an external function for '#{function_actor}'"
-        end
-      else
-        raise "Unable to perform an async call on type '#{function.type}'"
-      end
-      
-      track.stack.push(future)
     end
   end
   
@@ -726,7 +699,7 @@ module Dog::Instructions
     def execute(track)
       type = track.stack.pop
       
-      if type.type != "type" then
+      if type.type != "dog.type" then
         raise "I don't know how to build a non-type"
       end
       
@@ -739,7 +712,10 @@ module Dog::Instructions
       new_track.implementation_name = 0
       
       track.state = ::Dog::Track::STATE::CALLING
-      track.next_track = new_track
+      
+      signal = ::Dog::Signal.new
+      signal.call_track = new_track
+      return signal
     end
   end
 

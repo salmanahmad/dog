@@ -43,32 +43,10 @@ END
       a = a + 1
     END
     EOD
-    # TODO -- IN CLAUSE IS NOT COMPILING TO ANYTHING AT THE MOMENT!!!
+
     @parser.parse(program.strip)
 
   end
-
-  def test_until
-    # TODO - Bring this back maybe?
-    #program = <<-EOD
-    #FOR EACH a IN b DO
-    #  c = a + 1
-    #UNTIL c == 7
-    #EOD
-    #
-    #@parser.parse(program.strip)
-    #
-    #program = <<-EOD
-    #FOR EACH a IN b DO
-    #  c = a + 1
-    #UNTIL c + 7 - 9
-    #EOD
-    #
-    #@parser.parse(program.strip)
-
-  end
-
-
   
   
 end

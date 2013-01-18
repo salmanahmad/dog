@@ -113,17 +113,53 @@ module Dog
       
       class Helper
         attr_accessor :track
+        attr_accessor :signal
+        
+        attr_accessor :checkpoint_index
+        attr_accessor :processing_checkpoint
         
         def initialize(track)
           @track = track
+          self.checkpoint_index = 0
         end
         
         def variable(name)
           track.variables[name]
         end
         
+        def checkpoint(&block)
+          if self.processing_checkpoint then
+            raise "Checkpoint cannot be nested"
+          end
+          
+          self.processing_checkpoint = true
+          
+          if self.checkpoint_index == self.track.current_instruction then
+            block.call
+            self.track.current_instruction += 1
+          else
+          end
+          
+          self.checkpoint_index += 1
+          self.processing_checkpoint = false
+        end
+        
+        def dog_call(function, package, args = [])
+          call_track = ::Dog::Track.invoke(function, package, args, track)
+          
+          self.signal = ::Dog::Signal.new
+          self.signal.call_track = call_track
+          
+          self.track.current_instruction += 1
+          throw :signal
+        end
+        
+        def set_signal(signal)
+          self.signal = signal
+        end
+        
         def dog_return(value = ::Dog::Value.null_value)
-          # TODO - Handle multiple returns
+          
           if value.kind_of? ::Dog::Value then
             track.stack.push(value)
           else
@@ -154,12 +190,12 @@ module Dog
         c = Collection.new
         c.instance_eval(&block)
         
-        value = ::Dog::Value.new("collection", {})
+        value = ::Dog::Value.new("dog.collection", {})
         value["name"] = ::Dog::Value.string_value(symbol)
         value["package"] = ::Dog::Value.string_value(self.package.name)
         
         instructions = Proc.new do |track|
-          type = ::Dog::Value.new("type", {})
+          type = ::Dog::Value.new("dog.type", {})
           type["name"] = ::Dog::Value.string_value(c.type_name)
           type["package"] = ::Dog::Value.string_value(c.type_package)
           
@@ -178,7 +214,7 @@ module Dog
         s = Structure.new
         s.instance_eval(&block)
         
-        value = ::Dog::Value.new("type", {})
+        value = ::Dog::Value.new("dog.type", {})
         value["name"] = ::Dog::Value.string_value(symbol)
         value["package"] = ::Dog::Value.string_value(self.package.name)
         
@@ -207,7 +243,7 @@ module Dog
         i = Implementation.new
         i.instance_eval(&block)
         
-        value = ::Dog::Value.new("function", {})
+        value = ::Dog::Value.new("dog.function", {})
         value["name"] = ::Dog::Value.string_value(symbol)
         value["package"] = ::Dog::Value.string_value(self.package.name)
         
@@ -218,12 +254,18 @@ module Dog
         self.package.add_implementation
         self.package.implementation["arguments"] = i.arguments
         self.package.implementation["optional_arguments"] = i.optional_arguments
-        self.package.implementation["instructions"] = Proc.new do |track|
-          catch :return do
-            Helper.new(track).instance_exec(track, &i.instructions)
-            track.stack.push(::Dog::Value.null_value)
+        self.package.implementation["instructions"] = lambda do |track|
+          helper = Helper.new(track)
+          catch :signal do
+            catch :return do
+              helper.instance_exec(track, &i.instructions)
+              track.stack.push(::Dog::Value.null_value)
+            end
+
+            track.finish
+            return helper.signal
           end
-          track.finish
+          return helper.signal
         end
         
         self.package.pop_symbol

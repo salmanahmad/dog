@@ -7,10 +7,6 @@
 # above copyright notice is included.
 #
 
-# TODO - This file is no longer necessary. It is being kept because
-# it has an interesting scaffolding on how to test a RACK-based app.
-# The actual test cases need to be updated in the future.
-
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_helper.rb'))
 
 class RuntimeTests::PersonTest < Test::Unit::TestCase  
@@ -62,7 +58,7 @@ class RuntimeTests::PersonTest < Test::Unit::TestCase
     p2 = ::Dog::Person.find_by_email("salman@example.com")
     
     id = p2.id
-    assert_equal(String, id.class)
+    assert_equal(BSON::ObjectId, id.class)
     
     p3 = ::Dog::Person.find_by_id(id)
     assert_equal(p3.id, p2.id)

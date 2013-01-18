@@ -9,32 +9,6 @@
 
 module Dog::Nodes
   class Treetop::Runtime::SyntaxNode
-    def external_instructions
-      instructions = nil
-      
-      if elements then
-        for element in elements do
-          instructions = element.external_instructions
-          break unless instructions.nil?
-        end
-      end
-      
-      return instructions
-    end
-    
-    def external_output
-      output = nil
-      
-      if elements then
-        for element in elements do
-          output = element.external_output
-          break unless output.nil?
-        end
-      end
-      
-      return output
-    end
-    
     def root
       pointer = self
       while pointer.parent do
@@ -83,7 +57,14 @@ module Dog::Nodes
   class Node
     attr_accessor :line
     attr_accessor :file
-
+    attr_accessor :package
+    
+    def self.new_with_context(line, *args)
+      node = self.new(*args)
+      node.line = line
+      return node
+    end
+    
     def compile(package)
       raise "Node#compile must be overridden by a subclass."
     end
@@ -121,90 +102,40 @@ module Dog::Nodes
       @name = name
     end
     
-    def compile
-      nil
+    def compile(package)
+      package.name = name
     end
   end
-
-  class ExternalFunctionDefinition < Node
+  
+  class Import < Node
     attr_accessor :name
-    attr_accessor :actor
-    attr_accessor :instructions
-    attr_accessor :arguments
-    attr_accessor :optional_arguments
-    attr_accessor :output
-
-    def initialize(name, actor, instructions = nil, arguments = nil, optional_arguments = nil, output = nil)
+    
+    def initialize(name)
       @name = name
-      @actor = actor
-      @instructions = instructions
-      @arguments = arguments
-      @optional_arguments = optional_arguments
-      @output = output
     end
     
     def compile(package)
-      package.push_symbol(@name)
-      
-      value = ::Dog::Value.new("external_function", {})
-      value["package"] = ::Dog::Value.string_value(package.name)
-      value["name"] = ::Dog::Value.string_value(@name)
-      value["actor"] = ::Dog::Value.string_value(@actor)
-      value["instructions"] = ::Dog::Value.string_value(@instructions)
-      
-      value["arguments"] = ::Dog::Value.empty_structure
-      value["optional_arguments"] = ::Dog::Value.empty_structure
-      value["output"] = ::Dog::Value.empty_structure
-      
-      if @arguments then
-        @arguments.each_index do |index|
-          argument = @arguments[index]
-          value["arguments"][index] = ::Dog::Value.string_value(argument)
-        end
+      unless package.imports.include? @name then
+        package.imports << @name
       end
-      
-      if @optional_arguments then
-        @optional_arguments.each_index do |index|
-          optional_argument = @optional_arguments[index]
-          value["optional_arguments"][index] = ::Dog::Value.string_value(optional_argument)
-        end
-      end
-      
-      if @output then
-        @output.each_index do |index|
-          return_value = @output[index]
-          value["output"][index] = ::Dog::Value.string_value(return_value)
-        end
-      end
-      
-      package.current_context["value"] = value
-      
-      package.pop_symbol
-      
-      # TODO - Push.new(value) instead of PushNull?
-      null = ::Dog::Instructions::PushNull.new
-      set_instruction_context(null)
-      package.add_to_instructions([null])
     end
   end
-
+  
   class FunctionDefinition < Node
     attr_accessor :name
-    attr_accessor :implementation
     attr_accessor :arguments
-    attr_accessor :optional_arguments
+    attr_accessor :implementation
     
-    def initialize(name, implementation = nil, arguments = nil, optional_arguments = nil)
+    def initialize(name, arguments = nil, implementation = nil)
       @name = name
-      @implementation = implementation
       @arguments = arguments
-      @optional_arguments = optional_arguments
+      @implementation = implementation
     end
     
     def compile(package)
       package.push_symbol(@name)
       
-      value = ::Dog::Value.new("function", {})
+      value = ::Dog::Value.new("dog.function", {})
       value["name"] = ::Dog::Value.string_value(@name)
       value["package"] = ::Dog::Value.string_value(package.name)
       
@@ -213,13 +144,11 @@ module Dog::Nodes
       if @implementation then
         package.add_implementation
         package.implementation["arguments"] = @arguments
-        package.implementation["optional_arguments"] = @optional_arguments
         @implementation.compile(package)
       end
       
       package.pop_symbol
       
-      # TODO - Push.new(value) instead of PushNull?
       null = ::Dog::Instructions::PushNull.new
       set_instruction_context(null)
       package.add_to_instructions([null])
@@ -238,7 +167,7 @@ module Dog::Nodes
     def compile(package)
       package.push_symbol(@name)
       
-      value = ::Dog::Value.new("type", {})
+      value = ::Dog::Value.new("dog.type", {})
       value["name"] = ::Dog::Value.string_value(name)
       value["package"] = ::Dog::Value.string_value(package.name)
       
@@ -253,7 +182,6 @@ module Dog::Nodes
       
       if @properties then
         for property in @properties do
-          # TODO - Handle "type"
           name = property["name"]
           default = property["default"]
           
@@ -290,89 +218,18 @@ module Dog::Nodes
       package.add_to_instructions([null])
     end
   end
-  
-  class CommunityDefinition < Node
-    attr_accessor :name
-    attr_accessor :profile_name
-    attr_accessor :properties
-    
-    def initialize(name, profile_name, properties = [])
-      @name = name
-      @profile_name = profile_name
-      @properties = properties
-    end
-    
-    def compile(package)
-      # TODO - Abstract this with structure definition
-      package.push_symbol(@name)
-      
-      value = ::Dog::Value.new("community", {})
-      value["name"] = ::Dog::Value.string_value(@name)
-      value["profile"] = ::Dog::Value.string_value(@profile_name)
-      value["package"] = ::Dog::Value.string_value(package.name)
-      
-      package.current_context["value"] = value
-      
-      package.add_implementation
-      
-      value = ::Dog::Value.new("profile", {})
-      structure = ::Dog::Instructions::Push.new(value)
-      set_instruction_context(structure)
-      package.add_to_instructions([structure])
-      
-      if @properties then
-        for property in @properties do
-          # TODO - Handle "type"
-          name = property["name"]
-          default = property["default"]
-          
-          if name.kind_of? String then
-            push_string = ::Dog::Instructions::PushString.new(name)
-            set_instruction_context(push_string)
-            package.add_to_instructions([push_string])
-          elsif name.kind_of? Numeric then
-            push_number = ::Dog::Instructions::PushNumber.new(name)
-            set_instruction_context(push_number)
-            package.add_to_instructions([push_number])
-          else
-            raise "Compilation error"
-          end
-          
-          if default then
-            default.compile(package)
-          else
-            null = ::Dog::Instructions::PushNull.new
-            set_instruction_context(null)
-            package.add_to_instructions([null])
-          end
-          
-          assign = ::Dog::Instructions::Assign.new(2)
-          set_instruction_context(assign)
-          package.add_to_instructions([assign])
-        end
-      end
-      
-      package.pop_symbol
-      
-      null = ::Dog::Instructions::PushNull.new
-      set_instruction_context(null)
-      package.add_to_instructions([null])
-    end
-  end
-  
+
   class Definition < Node
     attr_accessor :name
     attr_accessor :value
-    attr_accessor :implementation
     attr_accessor :arguments
-    attr_accessor :optional_arguments
+    attr_accessor :implementation
     
-    def initialize(name, value = nil, implementation = nil, arguments = nil, optional_arguments = nil)
+    def initialize(name, value = nil, arguments = nil, implementation = nil)
       @name = name
       @value = value
-      @implementation = implementation
       @arguments = arguments
-      @optional_arguments = optional_arguments
+      @implementation = implementation
     end
     
     def compile(package)
@@ -385,13 +242,11 @@ module Dog::Nodes
       if @implementation then
         package.add_implementation
         package.implementation["arguments"] = @arguments
-        package.implementation["optional_arguments"] = @optional_arguments
         @implementation.compile(package)
       end
       
       package.pop_symbol
       
-      # TODO - Push.new(value) instead of PushNull?
       null = ::Dog::Instructions::PushNull.new
       set_instruction_context(null)
       package.add_to_instructions([null])
@@ -408,28 +263,20 @@ module Dog::Nodes
     end
 
     def compile(package)
-      # TODO - Clean up this entire thing. StructureLiteral and ValueLiteral are really
-      # hacky at the moment and are in a need of a good clean up.
       if @type then
-        if @type.kind_of? String then
-          structure = ::Dog::Instructions::Push.new(::Dog::Value.new("array", {}))
-          set_instruction_context(structure)
-          package.add_to_instructions([structure])
+        if @type.kind_of? Node then
+          @type.compile(package)
+        elsif @type.kind_of? ::Dog::Value
+          push = ::Dog::Nodes::Push.new(@type)
+          set_instruction_context(push)
+          package.add_to_instructions([push])
         else
-          if @type.kind_of? Node then
-            @type.compile(package)
-          elsif @type.kind_of? ::Dog::Value
-            push = ::Dog::Nodes::Push.new(@type)
-            set_instruction_context(push)
-            package.add_to_instructions([push])
-          else
-            raise "Compilation error - Structure literal type: #{@type}"
-          end
-
-          build = ::Dog::Instructions::Build.new
-          set_instruction_context(build)
-          package.add_to_instructions([build])
+          raise "Compilation error - Structure literal type: #{@type}"
         end
+
+        build = ::Dog::Instructions::Build.new
+        set_instruction_context(build)
+        package.add_to_instructions([build])
       else
         structure = ::Dog::Instructions::PushStructure.new
         set_instruction_context(structure)
@@ -493,7 +340,7 @@ module Dog::Nodes
     attr_accessor :value
 
     def initialize(value)
-      @value = value
+      @value = value.to_f
     end
 
     def compile(package)
@@ -534,9 +381,6 @@ module Dog::Nodes
   class Assign < Node
     attr_accessor :path
     attr_accessor :value
-    attr_accessor :scope
-
-    # TODO - Handle scope
 
     def initialize(path, value)
       @path = path
@@ -544,8 +388,10 @@ module Dog::Nodes
     end
 
     def compile(package)
+      count = -1
       for item in path do
-        if item == path.first then
+        count += 1
+        if count == 0 then
           read_variable = ::Dog::Instructions::ReadVariable.new(item)
           set_instruction_context(read_variable)
           package.add_to_instructions([read_variable])
@@ -582,10 +428,15 @@ module Dog::Nodes
     attr_accessor :path
     attr_accessor :scope
 
-    # TODO - Handle scope
-
-    def initialize(path)
+    # Options for scope:
+    # - cascade
+    # - local
+    # - external
+    # - internal
+    
+    def initialize(path, scope = "cascade")
       @path = path
+      @scope = scope
     end
 
     def compile(package)
@@ -594,11 +445,9 @@ module Dog::Nodes
         count += 1
         if count == 0 then
           if item.kind_of? Node then
-            # TODO - This is special cased for literals. This may be
-            # something that should be fixed in the grammar.
             item.compile(package)
           else
-            read_variable = ::Dog::Instructions::ReadVariable.new(item)
+            read_variable = ::Dog::Instructions::ReadVariable.new(item, scope)
             set_instruction_context(read_variable)
             package.add_to_instructions([read_variable])
           end
@@ -737,18 +586,20 @@ module Dog::Nodes
   end
 
   class Wait < Node
-    attr_accessor :expression
-    
-    def initialize(expression)
-      @expression = expression
+    attr_accessor :expressions
+
+    def initialize(expressions)
+      @expressions = expressions
     end
-    
+
     def compile(package)
-      expression.compile(package)
-      
-      wait = ::Dog::Instructions::Wait.new
+      for expression in @expressions do
+        expression.compile(package)
+      end
+
+      wait = ::Dog::Instructions::Wait.new(@expressions.size)
       set_instruction_context(wait)
-      
+
       package.add_to_instructions([wait])
     end
   end
@@ -777,54 +628,45 @@ module Dog::Nodes
     end
   end
 
-  class AsyncCall < Node
-    attr_accessor :actor
-    attr_accessor :identifier
-    attr_accessor :arguments
-    attr_accessor :optional_arguments
-    attr_accessor :replication
-    
-    def initialize(actor, identifier, arguments = nil, optional_arguments = nil, replication = 1)
-      @actor = actor
-      @identifier = identifier
-      @arguments = arguments
-      @optional_arguments = optional_arguments
-      @replication = replication || 1
-    end
-    
+  class Pause < Node
     def compile(package)
-      # TODO - check if identifier is not an access and create a function type automatically
-      # This would be similar to StructureLiteral in many ways
-      @actor.compile(package)
-      @identifier.compile(package)
-      
-      @arguments ||= []
-      for argument in @arguments do
-        argument.compile(package)
-      end
-      
-      @optional_arguments.compile(package) if @optional_arguments
-      
-      call = ::Dog::Instructions::AsyncCall.new(@arguments.count, !@optional_arguments.nil?, @replication)
-      set_instruction_context(call)
-      package.add_to_instructions([call])
+      s = ::Dog::Instructions::Signal.new("pause")
+      set_instruction_context(s)
+
+      package.add_to_instructions([s])
     end
   end
   
+  class Stop < Node
+    def compile(package)
+      s = ::Dog::Instructions::Signal.new("stop")
+      set_instruction_context(s)
+
+      package.add_to_instructions([s])
+    end
+  end
+
+  class Exit < Node
+    def compile(package)
+      s = ::Dog::Instructions::Signal.new("exit")
+      set_instruction_context(s)
+
+      package.add_to_instructions([s])
+    end
+  end
+
   class Call < Node
     attr_accessor :identifier
     attr_accessor :arguments
-    attr_accessor :optional_arguments
+    attr_accessor :async
     
-    def initialize(identifier, arguments = nil, optional_arguments = nil)
+    def initialize(identifier, arguments = nil, async = false)
       @identifier = identifier
       @arguments = arguments
-      @optional_arguments = optional_arguments
+      @async = async
     end
     
     def compile(package)
-      # TODO - check if identifier is not an access and create a function type automatically
-      # This would be similar to StructureLiteral in many ways
       @identifier.compile(package)
       
       @arguments ||= []
@@ -832,9 +674,7 @@ module Dog::Nodes
         argument.compile(package)
       end
       
-      @optional_arguments.compile(package) if @optional_arguments
-      
-      call = ::Dog::Instructions::Call.new(@arguments.count, !@optional_arguments.nil?)
+      call = ::Dog::Instructions::Call.new(@arguments.count, @async)
       set_instruction_context(call)
       package.add_to_instructions([call])
     end
@@ -861,42 +701,5 @@ module Dog::Nodes
       package.add_to_instructions([r])
     end
   end
-  
-#  Missing:
-#  
-#  Package
-#  FunctionDefinition
-#  RemoteCall
-# 
-#  SystemCalls:
-#  
-#  Listen
-#  Notify
-#  Import(?)
-#  
-#  ReWrite:
-#  
-#  If
-#  While
-#  For
-#  Break
-#  
-#  OnEachDefinition - Create a function and rewrite as a system call that sets the call back
-#  
-#  StructureDefinition - Rewrite to a function definition that creates the structure and returns it
-#  StructureDefinitionProperty
-#  
-#  CommunityDefinition - Rewrite to a function definition that houses a system call that create a community if it does not exists and returns a meta structure...
-#  CollectionDefinition
-#  
-#  ExternalDefinitions - Rewrite this as a function definition that returns a external function meta structure
-#  
-#  Remove:
-#  
-#  Inspect
-#  Perform
-#  StructureInstantiation
-  
-  
-  
+
 end

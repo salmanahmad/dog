@@ -1,0 +1,7 @@
+    if (i == 9) && (d == 7) then
+
+    a = 5
+    b = a + 5
+    c = 'Hello, World!'
+
+    end
