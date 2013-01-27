@@ -60,7 +60,7 @@ public class Compiler {
 		return bark;
 	}
 
-       public void addCompilationUnit(Nodes ast, String sourceFileName) {
+	public void addCompilationUnit(Nodes ast, String sourceFileName) {
 		ArrayList<String> packageName = ast.getPackageName();
 		ArrayList<ArrayList<String>> includedPackages = ast.getIncludedPackages();
 		ArrayList<ArrayList<String>> loadedPackages = ast.getLoadedPackages();

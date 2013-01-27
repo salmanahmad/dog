@@ -19,13 +19,13 @@ import java.util.ArrayList;
 
 public abstract class Node {
 	public int line;
-        public String filePath;
+	public String filePath;
 	public ArrayList<String> packageName;
 	public ArrayList<ArrayList<String>> includedPackages;
 	public ArrayList<ArrayList<String>> loadedPackages;
 
 	public Node parent;
-	
+
 	public Node() {
 		this.line = -1;
 	}
@@ -77,9 +77,7 @@ public abstract class Node {
 	public abstract void compile(Symbol symbol);
 	public abstract ArrayList<Node> children();
 
-        public CompileError compileError(String message){
-	    return new CompileError(message, this.filePath, this.line);
+	public CompileError compileError(String message){
+		return new CompileError(message, this.filePath, this.line);
 	}
 }
-
-
