@@ -55,28 +55,28 @@ public class Compile extends Command {
 				sourceFilename = FilenameUtils.removeExtension(sourceFilename);
 			}
 
-        	sourceFilename += ".dog";
+			sourceFilename += ".dog";
 
-        	String sourceString = Helper.readFile(sourceFilename);
-        	
-        	if(sourceString == null) {
-        		System.out.println("Could not open file: " + sourceFilename + ".");
-        		System.exit(1);
-        	}
+			String sourceString = Helper.readFile(sourceFilename);
 
-        	Nodes ast = parser.parse(sourceString);
-		if (ast == null){
-		    System.out.println(sourceFilename + " is empty.");
-		    System.exit(1);
-		}
-        	compiler.addCompilationUnit(ast, sourceFilename);
+			if(sourceString == null) {
+				System.out.println("Could not open file: " + sourceFilename + ".");
+				System.exit(1);
+			}
+
+			Nodes ast = parser.parse(sourceString);
+			if (ast == null){
+				System.out.println(sourceFilename + " is empty.");
+				System.exit(1);
+			}
+			compiler.addCompilationUnit(ast, sourceFilename);
 		}
 
 		try {
-		    compiler.compile();
+			compiler.compile();
 		} catch(CompileError e) {
-		    System.out.println("Compiler error at " + e.file + ":" + e.line + ": " + e.getMessage());
-		    System.exit(-1);
+			System.out.println("Compiler error at " + e.file + ":" + e.line + ": " + e.getMessage());
+			System.exit(-1);
 		}
 
 		if(dump) {
@@ -105,7 +105,3 @@ public class Compile extends Command {
 		}
 	}
 }
-
-
-
-
