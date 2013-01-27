@@ -65,6 +65,10 @@ public class Compile extends Command {
         	}
 
         	Nodes ast = parser.parse(sourceString);
+		if (ast == null){
+		    System.out.println(sourceFilename + " is empty.");
+		    System.exit(1);
+		}
         	compiler.addCompilationUnit(ast, sourceFilename);
 		}
 
