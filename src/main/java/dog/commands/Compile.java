@@ -17,6 +17,8 @@ import dog.lang.Resolver;
 import dog.lang.parser.Parser;
 import dog.lang.compiler.Compiler;
 import dog.lang.compiler.CompileError;
+import dog.lang.parser.ParseError;
+import dog.lang.parser.LexError;
 import dog.lang.compiler.Symbol;
 import dog.lang.nodes.*;
 import dog.util.Helper;
@@ -34,6 +36,63 @@ public class Compile extends Command {
 		return "Compile a Dog source file or application";
 	}
 
+	Parser parser;
+	Compiler compiler;
+
+	void loadFile(String sourceFilename){
+		try{
+			if(FilenameUtils.isExtension(sourceFilename, "dog") || FilenameUtils.isExtension(sourceFilename, "bark")) {
+				sourceFilename = FilenameUtils.removeExtension(sourceFilename);
+			}
+
+			sourceFilename += ".dog";
+
+			String sourceString = Helper.readFile(sourceFilename);
+
+			if(sourceString == null) {
+				throw new ParseError("Could not open file");
+			}
+			Nodes ast = this.parser.parse(sourceString);
+			if (ast == null){
+				throw new ParseError("File is empty.");
+			}
+			this.compiler.addCompilationUnit(ast, sourceFilename);
+		} catch (ParseError e){
+			throw new ParseError("in " + sourceFilename + ": " + e.getMessage());
+		} catch (LexError e){
+			throw new LexError("in " + sourceFilename + ": " + e.getMessage());
+		}
+	}
+
+	void dumpByteCode(){
+		System.out.println("Dog Bytecode:");
+		System.out.println("-------------");
+
+		for(Symbol s : this.compiler.getSymbols()) {
+			System.out.println(s.toDogBytecodeString());
+		}
+
+		System.out.println("JVM Bytecode:");
+		System.out.println("-------------");
+
+		for(Symbol s : this.compiler.getSymbols()) {
+			//System.out.println(s.toJVMBytecodeString());
+		}
+	}
+
+	String barkFileName(StringList args){
+		String name = FilenameUtils.removeExtension(args.strings.get(0));
+		return name + ".bark";
+	}
+
+	void saveBarkFile(String name){
+		try {
+			this.compiler.getBark().writeToFile(new FileOutputStream(name));
+		} catch(Exception e) {
+			System.out.println("An error took place when writing the bark file to disk.");
+		}
+	}
+
 	public void run(StringList args) {
 		boolean dump = false;
 
@@ -44,64 +103,27 @@ public class Compile extends Command {
 			dump = false;
 		}
 
-		Resolver resolver = new Resolver();
-		Compiler compiler = new Compiler(resolver);
-		Parser parser = new Parser();
-
-		for(String arg : args.strings) {
-			String sourceFilename = arg;
-
-			if(FilenameUtils.isExtension(sourceFilename, "dog") || FilenameUtils.isExtension(sourceFilename, "bark")) {
-				sourceFilename = FilenameUtils.removeExtension(sourceFilename);
-			}
-
-			sourceFilename += ".dog";
-
-			String sourceString = Helper.readFile(sourceFilename);
-
-			if(sourceString == null) {
-				System.out.println("Could not open file: " + sourceFilename + ".");
-				System.exit(1);
-			}
-
-			Nodes ast = parser.parse(sourceString);
-			if (ast == null){
-				System.out.println(sourceFilename + " is empty.");
-				System.exit(1);
-			}
-			compiler.addCompilationUnit(ast, sourceFilename);
-		}
+		this.compiler = new Compiler(new Resolver());
+		this.parser = new Parser();
 
 		try {
-			compiler.compile();
+			for(String arg : args.strings) {
+				this.loadFile(arg);
+			}
+			this.compiler.compile();
+			if(dump) {
+				this.dumpByteCode();
+			} else {
+				this.saveBarkFile(this.barkFileName(args));
+			}
+			return;
 		} catch(CompileError e) {
 			System.out.println("Compiler error at " + e.file + ":" + e.line + ": " + e.getMessage());
-			System.exit(-1);
+		} catch(ParseError e){
+			System.out.println("Parse error " + e.getMessage());
+		} catch(LexError e){
+			System.out.println("Lex error " + e.getMessage());
 		}
-
-		if(dump) {
-			System.out.println("Dog Bytecode:");
-			System.out.println("-------------");
-
-			for(Symbol s : compiler.getSymbols()) {
-				System.out.println(s.toDogBytecodeString());
-			}
-
-			System.out.println("JVM Bytecode:");
-			System.out.println("-------------");
-
-			for(Symbol s : compiler.getSymbols()) {
-				//System.out.println(s.toJVMBytecodeString());
-			}
-		} else {
-			try {
-				String name = FilenameUtils.removeExtension(args.strings.get(0));
-				name += ".bark";
-
-				compiler.getBark().writeToFile(new FileOutputStream(name));
-			} catch(Exception e) {
-				System.out.println("An error took place when writing the bark file to disk.");
-			}
-		}
+		System.exit(1);
 	}
 }
