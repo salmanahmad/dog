@@ -27,7 +27,8 @@ import dog.lang.nodes.*;
 @parser::members {
     // TODO - Better error reporting here --- http://www.antlr.org/wiki/display/ANTLR3/Error+reporting+and+recovery
     public void emitErrorMessage(String message) {
-        throw new RuntimeException(message);
+        System.out.println("Parser error at " + message);
+        System.exit(-1);
     }
 }
 
@@ -35,7 +36,8 @@ import dog.lang.nodes.*;
 @lexer::members {
     // TODO - Better error reporting here --- http://www.antlr.org/wiki/display/ANTLR3/Error+reporting+and+recovery
     public void emitErrorMessage(String message) {
-        throw new RuntimeException(message);
+        System.out.println("Lexer error at " + message);
+        System.exit(-1);
     }
 }
 
