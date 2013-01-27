@@ -90,7 +90,7 @@ public class Helper {
 		Resolver resolver = new Resolver();
 
     	dog.lang.compiler.Compiler compiler = new dog.lang.compiler.Compiler(resolver);
-    	compiler.processNodes(program);
+    	compiler.addCompilationUnit(program, "<eval>");
     	Bark bark = compiler.compile();
 
     	//for(dog.lang.compiler.Symbol s : compiler.getSymbols()) {

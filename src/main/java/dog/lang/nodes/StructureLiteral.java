@@ -77,7 +77,7 @@ public class StructureLiteral extends Node {
 			}
 
 			if(typeIdentifier == null) {
-				throw new RuntimeException("Unable to unique identify the type symbol: " + StringUtils.join(type.path, "."));
+				throw compileError("Unable to unique identify the type symbol: " + StringUtils.join(type.path, "."));
 			}
 
 			Build structure = new Build(this.line, structureRegister, typeIdentifier);
@@ -100,7 +100,7 @@ public class StructureLiteral extends Node {
 				LoadString loadKey = new LoadString(property.line, keyRegister, string);
 				symbol.instructions.add(loadKey);
 			} else {
-				throw new RuntimeException("Invalid structure key.");
+				throw compileError("Invalid structure key.");
 			}
 
 			property.compile(symbol);

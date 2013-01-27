@@ -16,6 +16,7 @@ import dog.lang.Bark;
 import dog.lang.Resolver;
 import dog.lang.parser.Parser;
 import dog.lang.compiler.Compiler;
+import dog.lang.compiler.CompileError;
 import dog.lang.compiler.Symbol;
 import dog.lang.nodes.*;
 import dog.util.Helper;
@@ -64,10 +65,15 @@ public class Compile extends Command {
         	}
 
         	Nodes ast = parser.parse(sourceString);
-        	compiler.processNodes(ast);
+        	compiler.addCompilationUnit(ast, sourceFilename);
 		}
 
-		compiler.compile();
+		try {
+		    compiler.compile();
+		} catch(CompileError e) {
+		    System.out.println("Compiler error at " + e.file + ":" + e.line + ": " + e.getMessage());
+		    System.exit(-1);
+		}
 
 		if(dump) {
 			System.out.println("Dog Bytecode:");
