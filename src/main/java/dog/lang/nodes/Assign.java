@@ -77,7 +77,7 @@ public class Assign extends Node {
 				((Node)component).compile(symbol);
 				componentRegister = symbol.currentOutputRegister;
 			} else {
-				throw new RuntimeException("Invalid assign path during compilation");
+				throw compileError("Invalid assign path during compilation");
 			}
 
 			if(i != (path.size() - 1)) {

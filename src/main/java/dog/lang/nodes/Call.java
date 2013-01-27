@@ -81,7 +81,7 @@ public class Call extends Node {
 			// TODO: Explore the ability to make function calls dynamic with late binding. One idea is that
 			// if the compiler cannot find a function it will assume that the function identifier is a local variable
 			// and convert it into a dynamic invocation with a warning.
-			throw new RuntimeException("Unable to find the function symbol: " + StringUtils.join(function.path, "."));
+			throw compileError("Unable to find the function symbol: " + StringUtils.join(function.path, "."));
 		}
 
 		Invoke invocation = new Invoke(this.line, outputRegister, asynchronous, functionIdentifier, argumentRegisters);

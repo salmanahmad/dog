@@ -12,6 +12,7 @@ package dog.lang.parser.grammar;
 
 import dog.lang.nodes.*;
 import dog.lang.compiler.Identifier;
+import dog.lang.parser.ParseError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,12 +23,13 @@ import java.util.Arrays;
 @lexer::header {
 package dog.lang.parser.grammar;
 import dog.lang.nodes.*;
+import dog.lang.parser.LexError;
 }
 
 @parser::members {
     // TODO - Better error reporting here --- http://www.antlr.org/wiki/display/ANTLR3/Error+reporting+and+recovery
     public void emitErrorMessage(String message) {
-        throw new RuntimeException(message);
+        throw new ParseError(message);
     }
 }
 
@@ -35,7 +37,7 @@ import dog.lang.nodes.*;
 @lexer::members {
     // TODO - Better error reporting here --- http://www.antlr.org/wiki/display/ANTLR3/Error+reporting+and+recovery
     public void emitErrorMessage(String message) {
-        throw new RuntimeException(message);
+        throw new LexError(message);
     }
 }
 

@@ -58,7 +58,7 @@ public class StructureDefinition extends Definition {
 					LoadString loadKey = new LoadString(property.line, keyRegister, string);
 					symbol.instructions.add(loadKey);
 				} else {
-					throw new RuntimeException("Invalid structure key.");
+					throw compileError("Invalid structure key.");
 				}
 
 				property.compile(symbol);

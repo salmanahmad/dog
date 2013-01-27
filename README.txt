@@ -19,7 +19,7 @@ To build Dog locally with Maven:
 
 To run:
 	
-	After building, execute the appropriate script in
-	target/bin for your platform.
+	After building, execute src/bin/release/dog or
+	src/bin/debug/dog.
 
 
