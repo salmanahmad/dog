@@ -114,9 +114,10 @@ primaryExpression returns [Node node]
   | waitStatement             { $node = $waitStatement.node; }
   | spawnStatement            { $node = $spawnStatement.node; }
   | packageDeclaration        { $node = $packageDeclaration.node; }
-  | includeStatement           { $node = $includeStatement.node; }
+  | includeStatement          { $node = $includeStatement.node; }
   | onEachStatement           { $node = $onEachStatement.node; }
   | onStatement               { $node = $onStatement.node; }
+  | predicateStatement        { $node = $predicateStatement.node; }
   ;
 
 assignment returns [Node node]
@@ -725,6 +726,51 @@ elseOnStatement returns [HashMap item]
     )?
   ;
 
+predicateStatement returns [Node node]
+  : WHERE predicateExpression
+  ;
+
+predicateExpression returns [Node node]
+  : predicateUnary
+  | predicateBinary
+  | predicatePrimary
+  ;
+
+predicateUnary returns [Node node]
+  : NOT predicatePrimary
+  ;
+
+predicateBinary returns [Node node]
+  : predicatePrimary
+    ( AND
+    | OR
+    )
+    predicateExpression
+  ;
+
+predicatePrimary returns [Node node]
+  : predicateParenthesis
+  | predicateConditional
+  ;
+
+predicateParenthesis returns [Node node]
+  : OPEN_PAREN predicateExpression CLOSE_PAREN
+  ;
+
+predicateConditional returns [Node node]
+  : predicatePath 
+    relationalOperator 
+    access
+  ;
+
+predicatePath returns [ArrayList path]
+  : UNDERSCORE? 
+    IDENTIFIER
+    ( DOT
+      IDENTIFIER
+    )*
+  ;
+
 packageDeclaration returns [Node node]
   : PACKAGE packageIdentifier  { $node = new dog.lang.nodes.Package($start.getLine(), $packageIdentifier.identifier); }
   ;
@@ -829,6 +875,7 @@ ON:		  		        'on';
 IN:                 'in';
 EACH:               'each';
 
+WHERE:              'where';
 SPAWN:              'spawn';
 
 THEN:               'then';
@@ -874,6 +921,7 @@ COLON:              ':';
 SEMICOLON:          ';';
 DOT:                '.';
 COMMA:              ',';
+UNDERSCORE:         '_';
 
 OPEN_BRACKET:       '[';
 CLOSE_BRACKET:      ']';
