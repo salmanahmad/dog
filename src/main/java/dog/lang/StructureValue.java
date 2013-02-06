@@ -24,6 +24,9 @@ public class StructureValue extends Value {
 
 	public HashMap<Object, Value> value = new HashMap<Object, Value>();
 
+    public double minNumericKey = 0.0;
+    public double maxNumericKey = 0.0;
+
     public StructureValue() {
         super();
     }
@@ -191,6 +194,9 @@ public class StructureValue extends Value {
         object.put("value", value);
         object.put("type", type);
 
+        object.put("min_numeric_key", minNumericKey);
+        object.put("max_numeric_key", maxNumericKey);
+
         return object;
     }
 
@@ -226,6 +232,9 @@ public class StructureValue extends Value {
         super.fromMongo(bson, resolver);
 
         ArrayList values = (ArrayList)bson.get("value");
+
+        this.minNumericKey = (Double)bson.get("min_numeric_key");
+        this.maxNumericKey = (Double)bson.get("max_numeric_key");
 
         for(Object item : values) {
             DBObject hash = (DBObject)item;
