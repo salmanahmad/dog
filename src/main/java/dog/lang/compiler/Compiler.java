@@ -60,8 +60,7 @@ public class Compiler {
 		return bark;
 	}
 
-	// TODO: Rename to addCompilationUnit
-	public void processNodes(Nodes ast) {
+	public void addCompilationUnit(Nodes ast, String sourceFileName) {
 		ArrayList<String> packageName = ast.getPackageName();
 		ArrayList<ArrayList<String>> includedPackages = ast.getIncludedPackages();
 		ArrayList<ArrayList<String>> loadedPackages = ast.getLoadedPackages();
@@ -71,6 +70,7 @@ public class Compiler {
 		ArrayList<Node> nodes = Helper.descendantsOfNode(ast);
 
 		for (Node node : nodes) {
+			node.filePath = sourceFileName;
 			node.packageName = packageName;
 			node.includedPackages = includedPackages;
 			node.loadedPackages = loadedPackages;

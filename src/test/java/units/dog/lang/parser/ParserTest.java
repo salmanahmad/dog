@@ -58,7 +58,7 @@ public class ParserTest {
         Compiler compiler = new Compiler();
         
         Nodes program = parser.parse("5 + (5 + 10) + 11 + 14");
-        compiler.processNodes(program);
+        compiler.addCompilationUnit(program, "test");
         
         //System.out.println(compiler.compile());
     }
@@ -71,7 +71,7 @@ public class ParserTest {
         Compiler compiler = new Compiler();
         
         Nodes program = parser.parse("i = 5 + 5 + 10 + 11 + 14");
-        compiler.processNodes(program);
+        compiler.addCompilationUnit(program, "test");
         
         //System.out.println(compiler.compile());
     }
@@ -83,7 +83,7 @@ public class ParserTest {
         Compiler compiler = new Compiler();
         
         Nodes program = parser.parse("\"Hello, \\\" Worlrd\" + \"Foo\"");
-        compiler.processNodes(program);
+        compiler.addCompilationUnit(program, "test");
         
         //System.out.println(compiler.compile());
 
