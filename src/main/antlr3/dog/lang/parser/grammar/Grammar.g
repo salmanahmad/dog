@@ -778,6 +778,8 @@ predicateConditional returns [Node node]
   StructureLiteral point;
 
   String operator = "";
+  String last = "";
+  String valueKey = "";
 
   int count;
 
@@ -791,7 +793,7 @@ predicateConditional returns [Node node]
   operatorMapping.put(">", "\$gt");
   operatorMapping.put("<", "\$lt");
 
-  ArrayList path;
+  ArrayList path = new ArrayList();
 
   Identifier predicateIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "predicate")));
   Identifier arrayIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "array")));
@@ -799,10 +801,8 @@ predicateConditional returns [Node node]
   : predicatePath {
       path = $predicatePath.path;
 
-      predicate = new StructureLiteral(predicateIdentifier); 
-      predicate.value.put("value", new StructureLiteral());
-
-      pointer = (StructureLiteral)predicate.value.get("value");
+      predicate = new StructureLiteral();
+      pointer = predicate;
 
       count = 0;
       for (Object p : path) {
@@ -829,37 +829,61 @@ predicateConditional returns [Node node]
       operator = operatorMapping.get($relationalOperator.text);
     }
     access {
-      if(operator == null) {
-        elemMatch = new HashMap<Object, Node>();
-        elemMatch.put("key", new StringLiteral((String)$predicatePath.path.get($predicatePath.path.size() - 1)));
-        elemMatch.put("value.value", $access.node);
+      last = (String)path.get(path.size() - 1);
 
-        pointer.value = new HashMap<Object, Node>();
-        pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+      if(last.equals("_id") && path.size() == 1) {
+        $node = new StructureLiteral(predicateIdentifier);
+        if(operator == null) {
+          ((StructureLiteral)$node).value.put("_id", $access.node);
+        } else {
+          relationalMatch = new HashMap<Object, Node>();
+          relationalMatch.put(operator, $access.node);
+
+          ((StructureLiteral)$node).value.put("_id", new StructureLiteral(relationalMatch));
+        }
       } else {
-        relationalMatch = new HashMap<Object, Node>();
-        relationalMatch.put(operator, $access.node);
+        if(last.equals("_id")) {
+          valueKey = "value._id";
+        } else {
+          valueKey = "value.value";
+        }
 
-        elemMatch = new HashMap<Object, Node>();
-        elemMatch.put("key", new StringLiteral((String)$predicatePath.path.get($predicatePath.path.size() - 1)));
-        elemMatch.put("value.value", new StructureLiteral(relationalMatch));
+        if(operator == null) {
+          elemMatch = new HashMap<Object, Node>();
+          elemMatch.put("key", new StringLiteral(last));
+          elemMatch.put(valueKey, $access.node);
 
-        pointer.value = new HashMap<Object, Node>();
-        pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+          pointer.value = new HashMap<Object, Node>();
+          pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+        } else {
+          relationalMatch = new HashMap<Object, Node>();
+          relationalMatch.put(operator, $access.node);
+
+          elemMatch = new HashMap<Object, Node>();
+          elemMatch.put("key", new StringLiteral(last));
+          elemMatch.put(valueKey, new StructureLiteral(relationalMatch));
+
+          pointer.value = new HashMap<Object, Node>();
+          pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+        }
+
+        $node = new StructureLiteral(predicateIdentifier);
+        ((StructureLiteral)$node).value.put("value", predicate);
       }
-      
-      $node = predicate;
     }
   ;
 
 predicatePath returns [ArrayList path]
-@init { ArrayList list = new ArrayList(); String firstItem = ""; }
-  : (UNDERSCORE           { firstItem += "_"; }
+@init { ArrayList list = new ArrayList(); String item = ""; }
+  : ( UNDERSCORE           { item = "_"; }
     )? 
-    firstId=IDENTIFIER    { firstItem += $firstId.text; }
-                          { list.add(firstItem); }
-    ( DOT
-      id=IDENTIFIER       { list.add($id.text); }
+    firstId=IDENTIFIER    { item += $firstId.text; }
+                          { list.add(item); }
+    ( DOT                 { item = ""; }
+      ( UNDERSCORE        { item += "_"; }
+      )?
+      id=IDENTIFIER       { item += $id.text; }
+                          { list.add(item); }
     )*                    { $path = list; }
   ;
 
