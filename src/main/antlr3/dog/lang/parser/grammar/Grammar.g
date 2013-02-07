@@ -727,13 +727,13 @@ elseOnStatement returns [HashMap item]
   ;
 
 predicateStatement returns [Node node]
-  : WHERE predicateExpression
+  : WHERE predicateExpression { $node = $predicateExpression.node; }
   ;
 
 predicateExpression returns [Node node]
-  : predicateUnary
-  | predicateBinary
-  | predicatePrimary
+  : predicateUnary        { $node = $predicateUnary.node; }
+  | predicateBinary       { $node = $predicateBinary.node; }
+  | predicatePrimary      { $node = $predicatePrimary.node; }
   ;
 
 predicateUnary returns [Node node]
@@ -741,34 +741,126 @@ predicateUnary returns [Node node]
   ;
 
 predicateBinary returns [Node node]
-  : predicatePrimary
-    ( AND
-    | OR
-    )
-    predicateExpression
+@init { 
+  String operator = ""; 
+  HashMap<Object, Node> binaryExpressionMap = new HashMap<Object, Node>();
+  HashMap<Object, Node> arrayMap = new HashMap<Object, Node>();
+
+  Identifier predicateIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "predicate")));
+  Identifier arrayIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "array")));
+
+}
+  : first=predicatePrimary     { arrayMap.put(0.0, $first.node); }
+    ( AND                      { operator = "\$and"; }
+    | OR                       { operator = "\$or"; }
+    )                          
+    second=predicateExpression { arrayMap.put(1.0, $second.node); }
+
+    { binaryExpressionMap.put(operator, new StructureLiteral($start.getLine(), arrayIdentifier, arrayMap)); }
+    { $node = new StructureLiteral($start.getLine(), predicateIdentifier, binaryExpressionMap); }
   ;
 
 predicatePrimary returns [Node node]
-  : predicateParenthesis
-  | predicateConditional
+  : predicateParenthesis   { $node = $predicateParenthesis.node; }
+  | predicateConditional   { $node = $predicateConditional.node; }
   ;
 
 predicateParenthesis returns [Node node]
-  : OPEN_PAREN predicateExpression CLOSE_PAREN
+  : OPEN_PAREN 
+    predicateExpression 
+    CLOSE_PAREN           { $node = $predicateExpression.node; }
   ;
 
 predicateConditional returns [Node node]
-  : predicatePath 
-    relationalOperator 
-    access
+@init {
+  StructureLiteral predicate = null;
+  StructureLiteral pointer = null;
+  StructureLiteral point;
+
+  String operator = "";
+
+  int count;
+
+  HashMap<Object, Node> elemMatch;
+  HashMap<Object, Node> relationalMatch;
+
+  HashMap<String, String> operatorMapping = new HashMap<String, String>();
+  operatorMapping.put("!=", "\$ne");
+  operatorMapping.put(">=", "\$gte");
+  operatorMapping.put("<=", "\$lte");
+  operatorMapping.put(">", "\$gt");
+  operatorMapping.put("<", "\$lt");
+
+  ArrayList path;
+
+  Identifier predicateIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "predicate")));
+  Identifier arrayIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "array")));
+}
+  : predicatePath {
+      path = $predicatePath.path;
+
+      predicate = new StructureLiteral(predicateIdentifier); 
+      predicate.value.put("value", new StructureLiteral());
+
+      pointer = (StructureLiteral)predicate.value.get("value");
+
+      count = 0;
+      for (Object p : path) {
+        String item = (String)p;
+        count += 1;
+        
+        if(!(count < path.size() - 1)) {
+          break;
+        }
+        
+        point = new StructureLiteral($start.getLine());
+
+        elemMatch = new HashMap<Object, Node>();
+        elemMatch.put("key", new StringLiteral(item));
+        elemMatch.put("value", point);
+
+        pointer.value = new HashMap<Object, Node>();
+        pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+        
+        pointer = point;
+      }
+    }
+    relationalOperator {
+      operator = operatorMapping.get($relationalOperator.text);
+    }
+    access {
+      if(operator == null) {
+        elemMatch = new HashMap<Object, Node>();
+        elemMatch.put("key", new StringLiteral((String)$predicatePath.path.get($predicatePath.path.size() - 1)));
+        elemMatch.put("value.value", $access.node);
+
+        pointer.value = new HashMap<Object, Node>();
+        pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+      } else {
+        relationalMatch = new HashMap<Object, Node>();
+        relationalMatch.put(operator, $access.node);
+
+        elemMatch = new HashMap<Object, Node>();
+        elemMatch.put("key", new StringLiteral((String)$predicatePath.path.get($predicatePath.path.size() - 1)));
+        elemMatch.put("value.value", new StructureLiteral(relationalMatch));
+
+        pointer.value = new HashMap<Object, Node>();
+        pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+      }
+      
+      $node = predicate;
+    }
   ;
 
 predicatePath returns [ArrayList path]
-  : UNDERSCORE? 
-    IDENTIFIER
+@init { ArrayList list = new ArrayList(); String firstItem = ""; }
+  : (UNDERSCORE           { firstItem += "_"; }
+    )? 
+    firstId=IDENTIFIER    { firstItem += $firstId.text; }
+                          { list.add(firstItem); }
     ( DOT
-      IDENTIFIER
-    )*
+      id=IDENTIFIER       { list.add($id.text); }
+    )*                    { $path = list; }
   ;
 
 packageDeclaration returns [Node node]
