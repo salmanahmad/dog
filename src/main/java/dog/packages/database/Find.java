@@ -1,5 +1,5 @@
 
-package dog.packages.dog;
+package dog.packages.collection;
 
 import dog.lang.Value;
 import dog.lang.FalseValue;
@@ -10,8 +10,8 @@ import dog.lang.Signal;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
 
-@Symbol("collection.save:to:")
-public class Add extends Function {
+@Symbol("database.find:")
+public class Find extends Function {
 
 	public int getRegisterCount() {
 		return 1;
