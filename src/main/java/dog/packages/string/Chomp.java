@@ -31,7 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 public class Chomp extends Function {
 
 	public int getVariableCount() {
-		return 1;
+		 return 1;
 	}
 
 	public int getRegisterCount() {
