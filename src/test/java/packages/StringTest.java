@@ -18,29 +18,19 @@ import org.junit.*;
 import java.util.*;
 
 public class StringTest {
-    
-    @Test
-    public void testUppercaseSimple() {
-		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.upper_case: \"hello\"").get(0);
-
-		StringValue xValue = (StringValue)frame.getVariableNamed("x");
-		Assert.assertEquals("HELLO", xValue.value);
-    }
-	
-	@Test
-	public void testSubstringSimple(){
-		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.substring: \"hello\" starting: 0 ending:2").get(0);
-
-		StringValue xValue = (StringValue)frame.getVariableNamed("x");
-		Assert.assertEquals("he", xValue.value);
-    }
-	
 	@Test
 	public void testChompSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
 		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.chomp: \"hello\\n\"").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("hello", xValue.value);
+    }
+	
+	@Test
+	public void testChompNoDiff(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.chomp: \"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hello", xValue.value);
@@ -56,9 +46,36 @@ public class StringTest {
     }
 	
 	@Test
+	public void testContainsFalse(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.contains: \"hello\" substring: \"le\"").get(0);
+
+		FalseValue xValue = (FalseValue)frame.getVariableNamed("x");
+		Assert.assertEquals(false, xValue.getValue());
+    }
+	
+	@Test
+	public void testContainsTrueMultiple(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.contains: \"hello\" substring: \"l\"").get(0);
+
+		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
+		Assert.assertEquals(true, xValue.getValue());
+    }
+	
+	@Test
 	public void testDeleteWhitespaceSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
 		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.delete_whitespace: \"h e  l l o \" ").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("hello", xValue.value);
+    }
+	
+	@Test
+	public void testDeleteWhitespaceNoDiff(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.delete_whitespace: \"hello\" ").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hello", xValue.value);
@@ -74,6 +91,24 @@ public class StringTest {
     }
 	
 	@Test
+	public void testDifferenceMore(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.difference: \"hellotest\" from: \"hello\"").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("", xValue.value);
+    }
+	
+	@Test
+	public void testDifferenceSame(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.difference: \"hello\" from: \"hello\"").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("", xValue.value);
+    }
+	
+	@Test
 	public void testEndsWithTrue(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
 		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.ends_with: \"hello\" suffix:\"lo\"").get(0);
@@ -85,7 +120,7 @@ public class StringTest {
 	@Test
 	public void testEndsWithFalse(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.ends_with: \"hello\" suffix:\"yo\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.ends_with: \"hello\" suffix:\"ll\"").get(0);
 
 		FalseValue xValue = (FalseValue)frame.getVariableNamed("x");
 		Assert.assertEquals(false, xValue.getValue());
@@ -94,10 +129,10 @@ public class StringTest {
 	@Test
 	public void testIndexOfFound(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"hello\" search:\"l\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"hello\" search:\"h\"").get(0);
 
 		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
-		Assert.assertEquals(2.0, xValue.getValue());
+		Assert.assertEquals(0.0, xValue.getValue());
     }
 	
 	@Test
@@ -107,6 +142,15 @@ public class StringTest {
 
 		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
 		Assert.assertEquals(-1.0, xValue.getValue());
+    }
+	
+	@Test
+	public void testIndexOfMultiple(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"hello\" search:\"l\"").get(0);
+
+		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
+		Assert.assertEquals(2.0, xValue.getValue());
     }
 	
 	@Test
@@ -247,6 +291,15 @@ public class StringTest {
 	@Test
 	public void testLastIndexOfSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.last_index_of: \"hello\" search:\"e\"").get(0);
+
+		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
+		Assert.assertEquals(1.0, xValue.getValue());
+    }
+	
+	@Test
+	public void testLastIndexOfMultiple(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
 		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.last_index_of: \"hello\" search:\"l\"").get(0);
 
 		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
@@ -260,6 +313,15 @@ public class StringTest {
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hel", xValue.getValue());
+    }
+	
+	@Test
+	public void testLeftTooLarge(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.left: \"hello\" length:7").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("hello", xValue.getValue());
     }
 	
 	@Test
@@ -371,6 +433,15 @@ public class StringTest {
     }
 	
 	@Test
+	public void testRightTooLarge(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.right: \"hello\" length:7").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("hello", xValue.getValue());
+    }
+	
+	@Test
 	public void testRightPadSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
 		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.right_pad: \"hello\" length:8").get(0);
@@ -404,5 +475,41 @@ public class StringTest {
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hello", xValue.getValue());
+    }
+	
+	@Test
+	public void testSubstringSimple(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.substring: \"hello\" starting: 0 ending:2").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("he", xValue.value);
+    }
+	
+	@Test
+	public void testSubstringLargeFirst(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.substring: \"hello\" starting: 2 ending:0").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("", xValue.value);
+    }
+	
+	@Test
+    public void testUppercaseSimple() {
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.upper_case: \"hello\"").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("HELLO", xValue.value);
+    }
+	
+	@Test
+    public void testUppercaseAlreadyUp() {
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.upper_case: \"HELLO\"").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("HELLO", xValue.value);
     }
 }
