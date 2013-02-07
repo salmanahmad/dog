@@ -23,7 +23,7 @@ public class Find extends Function {
 
 	public Signal resume(StackFrame frame) {
 		Value returnValue = new TrueValue();
-		Value value = frame.variables[0];
+		Value arg = frame.variables[0];
 		
 		frame.returnRegister = 0;
 		frame.registers[0] = returnValue;
