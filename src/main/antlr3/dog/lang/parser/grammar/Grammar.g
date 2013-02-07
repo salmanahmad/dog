@@ -99,7 +99,27 @@ multiplicativeExpression returns [Node node]
 
 unaryExpresion returns [Node node]
   : NOT node1=unaryExpresion      { $node = new Operation($start.getLine(), $node1.node, null, "!"); }
-  | primaryExpression             { $node = $primaryExpression.node; }
+  | queryExpression               { $node = $queryExpression.node; }
+  ;
+
+queryExpression returns [Node node] 
+@init {
+  Identifier predicateIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "predicate")));
+  Identifier queryIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "query")));
+  Identifier arrayIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "array"))); 
+
+  HashMap<Object, Node> query = new HashMap<Object, Node>();
+}
+  : primaryExpression 
+    predicateStatement {
+      query.put("container", $primaryExpression.node);
+      query.put("predicate", $predicateStatement.node);
+
+      $node = new StructureLiteral(queryIdentifier, query);
+    }
+  | primaryExpression { 
+      $node = $primaryExpression.node; 
+    }
   ;
 
 primaryExpression returns [Node node]
@@ -991,6 +1011,7 @@ ON:		  		        'on';
 IN:                 'in';
 EACH:               'each';
 
+FROM:               'from';
 WHERE:              'where';
 SPAWN:              'spawn';
 
