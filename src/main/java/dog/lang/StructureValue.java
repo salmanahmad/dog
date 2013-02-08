@@ -36,6 +36,10 @@ public class StructureValue extends Value {
         value = v;
     }
     
+    public StructureValue(Object ... items) {
+        this.putAll(items);
+    }
+
     public Object getValue() {
         return value;
     }
@@ -75,6 +79,19 @@ public class StructureValue extends Value {
 
             this.value.put(key, value);
 		}
+    }
+
+    public void putAll(Object... items) {
+        if(items.length % 2 != 0) {
+            throw new RuntimeException("Varargs to StructureValue.build must have an even number of arguments.");
+        }
+
+        for(int i = 0; i < items.length; i += 2) {
+            Object first = items[i];
+            Object second = items[i + 1];
+            
+            this.put(first, (Value)second);
+        }
     }
 
     public boolean isStructure() {

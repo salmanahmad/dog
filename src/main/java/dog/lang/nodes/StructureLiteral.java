@@ -24,11 +24,27 @@ import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
 
 public class StructureLiteral extends Node {
-	Identifier type;
-	HashMap<Object, Node> value;
+	public Identifier type;
+	public HashMap<Object, Node> value;
+
+	public StructureLiteral() {
+		this(-1, null, new HashMap<Object, Node>());
+	}
 
 	public StructureLiteral(HashMap<Object, Node> value) {
-		this(null, value);
+		this(-1, value);
+	}
+
+	public StructureLiteral(Identifier type) {
+		this(-1, type, new HashMap<Object, Node>());
+	}
+
+	public StructureLiteral(int line) {
+		this(line, null, new HashMap<Object, Node>());
+	}
+
+	public StructureLiteral(int line, HashMap<Object, Node> value) {
+		this(line, null, value);
 	}
 
 	public StructureLiteral(Identifier type, HashMap<Object, Node> value) {

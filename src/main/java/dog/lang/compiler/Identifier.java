@@ -30,6 +30,24 @@ public class Identifier {
 		this.path = p;
 	}
 
+	public boolean equals(Identifier other) {
+		if(this.scope != other.scope) {
+			return false;
+		}
+
+		if(this.path.size() == other.path.size()) {
+			for(int i = 0; i < path.size(); i++) {
+				if(!this.path.get(i).equals(other.path.get(i))) {
+					return false;
+				}
+			}
+		} else {
+			return false;
+		}
+
+		return true;
+	}
+
 	public Scope scope = Scope.CASCADE;
 	public ArrayList<String> path = new ArrayList<String>();
 }
