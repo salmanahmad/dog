@@ -3,12 +3,53 @@ package dog.lang.runtime;
 import dog.lang.*;
 
 import java.util.Map;
+import java.util.ArrayList;
+import com.mongodb.BasicDBObject;
+import java.util.TreeSet;
+import java.util.SortedSet;
 
 import org.json.JSONObject;
 import org.json.JSONException;
 import org.apache.commons.io.FilenameUtils;
 
 public class Helper {
+	public static BasicDBObject dogStructureAsMongoQuery(StructureValue structure) {
+		BasicDBObject query = new BasicDBObject();
+
+		for(Object key : structure.value.keySet()) {
+			Value value = structure.value.get(key);
+
+			if(value instanceof dog.packages.dog.Array) {
+				query.put(key.toString(), dogArrayAsJavaList((dog.packages.dog.Array)value));
+			} else if (value instanceof StructureValue) {
+				query.put(key.toString(), dogStructureAsMongoQuery((StructureValue)value));
+			} else {
+				query.put(key.toString(), value.getValue());
+			}
+		}
+
+		return query;
+	}
+
+	public static ArrayList dogArrayAsJavaList(dog.packages.dog.Array array) {
+		ArrayList list = new ArrayList();
+		SortedSet<Object> keys = new TreeSet<Object>(array.value.keySet());
+
+		for(Object key : keys) {
+			Value value = array.value.get(key);
+
+			if(value instanceof dog.packages.dog.Array) {
+				list.add(dogArrayAsJavaList((dog.packages.dog.Array)value));
+			} else if (value instanceof StructureValue) {
+				list.add(dogStructureAsMongoQuery((StructureValue)value));
+			} else {
+				list.add(value.getValue());
+			}
+		}
+
+		return list;
+	}
+
 	public static JSONObject stackFrameAsJsonForAPI(StackFrame frame) {
 		JSONObject object = new JSONObject();
 		try {

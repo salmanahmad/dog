@@ -101,7 +101,27 @@ multiplicativeExpression returns [Node node]
 
 unaryExpresion returns [Node node]
   : NOT node1=unaryExpresion      { $node = new Operation($start.getLine(), $node1.node, null, "!"); }
-  | primaryExpression             { $node = $primaryExpression.node; }
+  | queryExpression               { $node = $queryExpression.node; }
+  ;
+
+queryExpression returns [Node node] 
+@init {
+  Identifier predicateIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "predicate")));
+  Identifier queryIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "query")));
+  Identifier arrayIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "array"))); 
+
+  HashMap<Object, Node> query = new HashMap<Object, Node>();
+}
+  : primaryExpression 
+    predicateStatement {
+      query.put("container", $primaryExpression.node);
+      query.put("predicate", $predicateStatement.node);
+
+      $node = new StructureLiteral(queryIdentifier, query);
+    }
+  | primaryExpression { 
+      $node = $primaryExpression.node; 
+    }
   ;
 
 primaryExpression returns [Node node]
@@ -116,9 +136,10 @@ primaryExpression returns [Node node]
   | waitStatement             { $node = $waitStatement.node; }
   | spawnStatement            { $node = $spawnStatement.node; }
   | packageDeclaration        { $node = $packageDeclaration.node; }
-  | includeStatement           { $node = $includeStatement.node; }
+  | includeStatement          { $node = $includeStatement.node; }
   | onEachStatement           { $node = $onEachStatement.node; }
   | onStatement               { $node = $onStatement.node; }
+  | predicateStatement        { $node = $predicateStatement.node; }
   ;
 
 assignment returns [Node node]
@@ -727,6 +748,168 @@ elseOnStatement returns [HashMap item]
     )?
   ;
 
+predicateStatement returns [Node node]
+  : WHERE predicateExpression { $node = $predicateExpression.node; }
+  ;
+
+predicateExpression returns [StructureLiteral node]
+  // predicateUnary        { $node = $predicateUnary.node; }
+  : predicateBinary       { $node = $predicateBinary.node; }
+  | predicatePrimary      { $node = $predicatePrimary.node; }
+  ;
+
+// TODO: Revive the unary operator in predicates
+//predicateUnary returns [StructureLiteral node]
+//  : NOT predicatePrimary { $node = dog.lang.compiler.Helper.invertPredicateConditions($predicatePrimary.node); }
+//  ;
+
+predicateBinary returns [StructureLiteral node]
+@init { 
+  String operator = ""; 
+  HashMap<Object, Node> binaryExpressionMap = new HashMap<Object, Node>();
+  HashMap<Object, Node> arrayMap = new HashMap<Object, Node>();
+
+  Identifier predicateIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "predicate")));
+  Identifier arrayIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "array")));
+
+}
+  : first=predicatePrimary     { arrayMap.put(0.0, $first.node); }
+    ( AND                      { operator = "\$and"; }
+    | OR                       { operator = "\$or"; }
+    )                          
+    second=predicateExpression { arrayMap.put(1.0, $second.node); }
+
+    { binaryExpressionMap.put(operator, new StructureLiteral($start.getLine(), arrayIdentifier, arrayMap)); }
+    { $node = new StructureLiteral($start.getLine(), predicateIdentifier, binaryExpressionMap); }
+  ;
+
+predicatePrimary returns [StructureLiteral node]
+  : predicateParenthesis   { $node = $predicateParenthesis.node; }
+  | predicateConditional   { $node = $predicateConditional.node; }
+  ;
+
+predicateParenthesis returns [StructureLiteral node]
+  : OPEN_PAREN 
+    predicateExpression 
+    CLOSE_PAREN           { $node = $predicateExpression.node; }
+  ;
+
+predicateConditional returns [StructureLiteral node]
+@init {
+  StructureLiteral predicate = null;
+  StructureLiteral pointer = null;
+  StructureLiteral point;
+
+  String operator = "";
+  String last = "";
+  String valueKey = "";
+
+  int count;
+
+  HashMap<Object, Node> elemMatch;
+  HashMap<Object, Node> relationalMatch;
+
+  HashMap<String, String> operatorMapping = new HashMap<String, String>();
+  operatorMapping.put("!=", "\$ne");
+  operatorMapping.put(">=", "\$gte");
+  operatorMapping.put("<=", "\$lte");
+  operatorMapping.put(">", "\$gt");
+  operatorMapping.put("<", "\$lt");
+
+  ArrayList path = new ArrayList();
+
+  Identifier predicateIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "predicate")));
+  Identifier arrayIdentifier = new Identifier(Identifier.Scope.EXTERNAL, new ArrayList(Arrays.asList("dog", "array")));
+}
+  : predicatePath {
+      path = $predicatePath.path;
+
+      predicate = new StructureLiteral();
+      pointer = predicate;
+
+      count = 0;
+      for (Object p : path) {
+        String item = (String)p;
+        count += 1;
+        
+        if(!(count < path.size() - 1)) {
+          break;
+        }
+        
+        point = new StructureLiteral($start.getLine());
+
+        elemMatch = new HashMap<Object, Node>();
+        elemMatch.put("key", new StringLiteral(item));
+        elemMatch.put("value", point);
+
+        pointer.value = new HashMap<Object, Node>();
+        pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+        
+        pointer = point;
+      }
+    }
+    relationalOperator {
+      operator = operatorMapping.get($relationalOperator.text);
+    }
+    access {
+      last = (String)path.get(path.size() - 1);
+
+      if(last.equals("_id") && path.size() == 1) {
+        $node = new StructureLiteral(predicateIdentifier);
+        if(operator == null) {
+          ((StructureLiteral)$node).value.put("_id", $access.node);
+        } else {
+          relationalMatch = new HashMap<Object, Node>();
+          relationalMatch.put(operator, $access.node);
+
+          ((StructureLiteral)$node).value.put("_id", new StructureLiteral(relationalMatch));
+        }
+      } else {
+        if(last.equals("_id")) {
+          valueKey = "value._id";
+        } else {
+          valueKey = "value.value";
+        }
+
+        if(operator == null) {
+          elemMatch = new HashMap<Object, Node>();
+          elemMatch.put("key", new StringLiteral(last));
+          elemMatch.put(valueKey, $access.node);
+
+          pointer.value = new HashMap<Object, Node>();
+          pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+        } else {
+          relationalMatch = new HashMap<Object, Node>();
+          relationalMatch.put(operator, $access.node);
+
+          elemMatch = new HashMap<Object, Node>();
+          elemMatch.put("key", new StringLiteral(last));
+          elemMatch.put(valueKey, new StructureLiteral(relationalMatch));
+
+          pointer.value = new HashMap<Object, Node>();
+          pointer.value.put("\$elemMatch", new StructureLiteral(elemMatch));
+        }
+
+        $node = new StructureLiteral(predicateIdentifier);
+        ((StructureLiteral)$node).value.put("value", predicate);
+      }
+    }
+  ;
+
+predicatePath returns [ArrayList path]
+@init { ArrayList list = new ArrayList(); String item = ""; }
+  : ( UNDERSCORE           { item = "_"; }
+    )? 
+    firstId=IDENTIFIER    { item += $firstId.text; }
+                          { list.add(item); }
+    ( DOT                 { item = ""; }
+      ( UNDERSCORE        { item += "_"; }
+      )?
+      id=IDENTIFIER       { item += $id.text; }
+                          { list.add(item); }
+    )*                    { $path = list; }
+  ;
+
 packageDeclaration returns [Node node]
   : PACKAGE packageIdentifier  { $node = new dog.lang.nodes.Package($start.getLine(), $packageIdentifier.identifier); }
   ;
@@ -831,6 +1014,8 @@ ON:		  		        'on';
 IN:                 'in';
 EACH:               'each';
 
+FROM:               'from';
+WHERE:              'where';
 SPAWN:              'spawn';
 
 THEN:               'then';
@@ -876,6 +1061,7 @@ COLON:              ':';
 SEMICOLON:          ';';
 DOT:                '.';
 COMMA:              ',';
+UNDERSCORE:         '_';
 
 OPEN_BRACKET:       '[';
 CLOSE_BRACKET:      ']';

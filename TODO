@@ -1,11 +1,13 @@
 
+Dynamic predicates --- look at Linq for inspiration?
 
+Explore actual arrays in Dog
+
+Explore actual integers and floats in Dog
 
 =============================================
 
 JVM TODO:
-
-
 
 Handle nested function definition appropariated  especially with the resolver and compiler symbol table.
 
@@ -18,17 +20,14 @@ Dynamic late binding option for packages.
 
 Explore V8 and Mono instead of JVM 
 
+Explore GCC front ends
+
 Explore faster startup time and 2-level JIT like JRuby with Compile to JVM and the JVM to native code
 
 Explore aliasing / renaming namespaces to avoid collisions. Perhaps that works with the import command like python?
 
 =============================================
 
-
-
-
-
-Look into why printing is so slow
 
 
 == Mounting Packages and Dog Middleware ==
@@ -54,24 +53,6 @@ It will not run in parallel as of v0.3. We may introduce a PROC_COUNT in the fut
 When we address PROC_COUNT we will also want to address or CLUSTER notion where threads can run on another machine completely.
 
 We will also have a YIELD (perhaps COMPUTE system.yield) that will say, "stop running me, and run something else." It basically tells the scheduler to skip me for now and come back. If there is no other threads running, then the current thread will resume naturally.
-
-
-
-
-== Type system ==
-
-Type type
-
-Structure Type
-
-Function Type
-
-Array Type
-
-Symbol table can hold anything, but definitely holds Type types for many cases.
-
-It may not hold 
-
 
 
 
@@ -135,137 +116,11 @@ Many times you want to model a long running collaborative workflow in which one 
 (2) Actually saving the stack trace. And resuming the tracks. 
 
 
-deal with client-side stored tracks
+Deal with client-side stored tracks
 
 
-
-
-== Done ==
-
-
-
-
-Obvious idea - Optional parameters can be passed on the stack by simply counting how large the stack and allocating unused parameters to whatever is leftover on the stack...
-
-
-
-- TODO
-
-Logger / Debugger log
-
-Default template generation for dogjs
-
-Client API (Authentication and account creation)
-
-Return from ON EACH
-
-PERFORM
-
-Package format
-
-GridFS
-
-Change the default package from "" to "default" and have an error message restricting "default" from being used...?
-
-Better error reporting 
-  Special case "no function found" and "could not access path"
-  "Undefined operation"
-
-Build system libraries
-  Date
-  Array
-  String
-  File
-  Location API
-  etc.
-
-Are native functions being passed by reference or value? It should be value...I think...maybe...
-
-Collections should be package scoped
-
-Implement the '?' operator
-
-possibly include === in the predicate format to make it easier to find structures)
-
-Pople.public should be a DEFINEd value, not a type
-
-Add support for DEFINEd values (and channels)
-
-Implement garbage collection for the futures.
-
-Track expiration
-
-Atomic Semantics for tracks and Collections (perhaps find_and_modify)
-
-Add client side caching capabilities to API. That way instead of sending new requests i can just use cached values. This is useful for iPhone applications to minimze network usage. At what point so I just create my own protocol instead of HTTP and just tunnel for Web apps?
-
-Explore GCC front ends
-
-Security Concerns: CSRF attacks, Other rails security things that it handles for you.
-
-Explore re-working channels by incorporating the following techniques and the following models: http://www.mongodb.org/display/DOCS/Tailable+Cursors, http://www.mongodb.org/display/DOCS/Capped+Collections, http://blog.mongodb.org/post/29495793738/pub-sub-with-mongodb. I think the model is pretty similar to what I already have i the sense that channels have a maximum queue size that is enforced - is that similar to capped collections? Perhaps not - "Once the limit is reached, items roll out on a least recently inserted basis." - so this only supports a single use case required by Dog channels.
-
-Support closures / anonymous functions in some way or the other. Support ON EACH message WITH arg, arg3, arg3 DO ... END
-
-
-- DONE
-
-Default package
-
-Import / Package
-
-Stream with NOTIFY
-
-Value format
-
-Clean up the Dog CLI
-
-UUID to Object Ids
-
-Spawn returns a future
-
-== and === semantics
-
-Pause, Stop, Exit
-
-Listen / Display
-
-WAIT
-
-ON EACH DO
-
-ON DO
-
-Figure out futures with new stuff
-
-Spawn
-
-Spawned-from information (for debugging purposes, I guess?)
-
-Native libraries
-
-=== v0.3 Changes ===
-
-Embed an IMAP and an SMTP server just like Sinatra
-
-=== End ===
-
-
-
-
-
-
-
-PRINT should resolve futures
-fix $not, $and, $or with predicates
-people
-  Routing
-  
-Whatever is used to maintain session state isn't cleared when I restart the process. So it still thinks i'm logged in, when it shouldn't.
-  
-
-optional_arguments - function side
-async call
+ 
+== Async call proposal ==
 	Internal functions have yield / return
 		This proposal need much more work.
 	
@@ -316,16 +171,69 @@ async call
 		do
 			return
 		end
-		
-		
 
-	External functions have to be re-written in the grammar
-	so they create the default values for optional parameters
-	and in addition they pass in the current_future_return_id to
-	special framework function for "ask" and "compute". If these 
-	functions recieve "null" as the future_return_id they obviously
-	assume that the function is being called synchronously.
+== Done ==
 
+
+
+- TODO
+
+Logger / Debugger log
+
+Default template generation for dogjs
+
+Client API (Authentication and account creation)
+
+Return from ON EACH
+
+GridFS
+
+Change the default package from "" to "default" and have an error message restricting "default" from being used...?
+
+Better error reporting 
+  Special case "no function found" and "could not access path"
+  "Undefined operation"
+
+Build system libraries
+  Date
+  Array
+  String
+  File
+  Location API
+  etc.
+
+Are native functions being passed by reference or value? It should be value...I think...maybe...
+
+Collections should be package scoped
+
+Implement the '?' operator
+
+possibly include === in the predicate format to make it easier to find structures)
+
+Pople.public should be a DEFINEd value, not a type
+
+Add support for DEFINEd values (and channels)
+
+Implement garbage collection for the futures.
+
+Track expiration
+
+Atomic Semantics for tracks and Collections (perhaps find_and_modify)
+
+Add client side caching capabilities to API. That way instead of sending new requests i can just use cached values. This is useful for iPhone applications to minimze network usage. At what point so I just create my own protocol instead of HTTP and just tunnel for Web apps?
+
+
+Explore re-working channels by incorporating the following techniques and the following models: http://www.mongodb.org/display/DOCS/Tailable+Cursors, http://www.mongodb.org/display/DOCS/Capped+Collections, http://blog.mongodb.org/post/29495793738/pub-sub-with-mongodb. I think the model is pretty similar to what I already have i the sense that channels have a maximum queue size that is enforced - is that similar to capped collections? Perhaps not - "Once the limit is reached, items roll out on a least recently inserted basis." - so this only supports a single use case required by Dog channels.
+
+Support closures / anonymous functions in some way or the other. Support ON EACH message WITH arg, arg3, arg3 DO ... END
+
+Stream with NOTIFY
+
+Pause, Stop, Exit
+
+Spawned-from information (for debugging purposes, I guess?)
+
+Embed an IMAP and an SMTP server just like Sinatra
 
 Plan:
 
@@ -370,228 +278,15 @@ Plan:
 
 	Implement CRUD operators
 
-
-	Access Scope Modifiers
-		Properties
-		Update compute and function calls to just use access - this paves the road for having dynamic properties for structures - think about collections and doing COMPUTE cars.type
-
-	INCLUDE / Testing PACKAGE
-
-	Calling Dog code from ruby - handling checkpoints, etc.
-	
-
-
-Things that are bothering me:
-
-	Call and build use the stack to invoke functions - it feels weird to use "Access" to call a function
-	Parameter passing for functions - Especially optional parameters with default values
-	Access to the package name in the parser - Right now I am allow it but it does not feel right because the parser should not need to understand the semantics of the language. Consider being flexible in adding additional nodes. And determine where the "cut off" is. Obviously somethings (like for loops) are more easily done in the parser than the compiler because nodes are easier to work with than instructions.
-	Nested function names / type names / access paths?
-	Bootstraping the Type type
-	External functions - how safe is my "custom method" solution like external_parameters
-	Transpiling langauges: tamejs and coffeescript
-	Can I compile down to JVM? Is it possible to have the asynchronous stuff *NOT* at the VM level. Basically, how much of Dog could I re-implement ontop of a general purpose programming language with good framework support?
-
-
-
-Two special "types"
-	Type "type"
-	Function "type"
-	
-	You can invoke these with call and build.
-	Byte code verifier
-		Checks for duplicate functions
-		Checks for types with multiple stuff
-
-	How do I handle the persistence capabilities of Dog when calling a native function from the API?
-
-"Macro System"
-
-	Dog VM
-		Symbol table organization:
-			{
-				name
-				value: {
-					type: function
-					value: {
-						name: <@naother_+symbol>
-					}
-				}
-				implementations: [
-					{
-						catch_table,
-						instructions:
-						mandatory_arguments:
-						optional_arguments:
-						type: {human | machine}
-					}
-				]
-			}
-			
-	
-	
-	build
-	
-	Create a small but complete set of "nodes"
-		StructureLiteral
-		StringLiteral
-		NumberLiteral
-		TrueLiteral
-		FalseLiteral
-		NullLiteral
-		Assign
-		Access
-		Operation
-		Branch
-		Loop
-		Break
-		Call
-		Return
-	
-	Down the road create instructions:
-
-		Pop
-		Push(value=null)
-		PushString(value=null)
-		PushNumber(value=null)
-		PushTrue
-		PushFalse
-		PushNil
-		PushStructure(type=nil)
-		Access(path_size)
-		Assign(path_size)
-		ReadVariable
-		WriteVariable
-		Perform(operation)
-		Jump(offset)
-		JumpIfTrue(offset)
-		JumpIfFalse(offset)
-		Call(function, package, arg_count=0)
-		Return
-		Throw(name)
-
-
-		
-		# Pseudo instructions
-		label(name) # nop
-		seek(label, direction)
-		
-		Each node has a compile method and we call those recursively from the top.
-		Each nodes returns an array of the instructions that it (and its descendants)
-		compile down to. These are then combined by the parent, and recusively returned
-		as you would expect.
-		
-		Once the instructions for the current function is over, I then scan over it and
-		convert / replace any pseudo instructions. Right now, all this would be is seek.
-		Seek will be converted to jumps with their jump distances computed at compile time.
-		
-		Consider adding an exception table (like JVM / YARV). This will handle
-		exceptions as well as possibly provide a workaround for converting seeks.
-		That is how YARV implements retry / next / break / throw. In which case, I may
-		want to remove the "seek" command and instead implement a "throw" command
-		instead. See: http://yarvinstructions.heroku.com/notes
-		
-	Re-write much of the syntax in terms of these nodes instead of creating your own
-		There is no longer a While node, just a loop with a branch and break
-		There is no longer an unless, just a branch that is re-written to be negated
-		Etc.
-		
-	This it much easier to test, manage, iterate and optimize
-	
-	Issues:
-	
-		It may be hard to write the equivalent node structure for a given expression. I need some syntax to make it easier
-	
-		Can I have reused higher-level rules? For example, create a util expression by reusing a while expression instead of remaking it. I would need to expose a node to do that, right?
-	
-		How do I implement things like PRINT or LISTEN which need to do stuff. I would have to expose a node to do that, right?
-			Pair stuff with functions. The PRINT expression should be a rewrite of COMPUTE print ON "val"
-			This means that I need to make function calls VERY efficient
-			
-			Why would I want to do this?
-				It keeps the VM simple and small
-				It keeps the language core consistent without adding more
-				Separation of UI (syntax) and backend (runtime)
-		
-		Add additional nodes only if you cannot do things as a function or for performance reasons (either function call overhead or node-rewrite overhead)
-		
-		General performance with stack and has_path, etc.
-
-
-
-
-
-
 Virtual Properties
 
 Macros
 	Do I feel okay about macros and side-effects?
 
-Criticisms of Dog:
-	It is a new language (security issues, performance problems, lack of stability)
-	The syntax is not the easiest or most conducive for building large applications - and do we have the property suitable abstraction capabilities?
-	The lack of library support
-	It is a special purpose language - however, it that purpose too broad or too constrained? What if I wanted to build something off the trodden path --- can I? Do I have low level enough support to do things like implement a bookmarklet or a TCP handling mechanism?
-	Semantics --- are they useful? How hard will the client-side javascript be?
-
 Pending structures
 	- Are they able to be shared? How do you pass in a channel to another function for call backs?
 	- Investigate the API with Go channels (especially timers)
 	- Investigate the API with Python yield
-
-
-Things left to implement:
-
-	Import
-
-	Communities
-
-	Predicates
-
-	External functions
-
-	Implement unary operator
-
-	Dog error reporting
-
-	Dog unit test cases
-
-	Add support for nested collections and nested functions inside of "ACCESS" - this would be the so called "cascasing" scope modifier.
-
-	Update COMPUTE, ASK, LISTEN, etc to take an expression rather than just an identifier. Note: This does mean augmenting defintions with package information
-
-	using @state instead of track.has_visited?
-
-	Evaluator / Interpretter (related to bite code)
-
-	Decide on anonymous functions vs blocks vs channels
-
-Done:
-
-	Organiation of the bite code and symbol table (filenames)
-
-	System libraries (The ability to implement dog functions in Ruby)
-
-	Scopes when ACCESSing
-
-	Add a "type", "definition" or "symbol" structure to refer to definitions and box it as a value.
-
-	Collections API
-
-	People
-
-	Null Pointer references for symbol look ups. Don't seem to be handled too well. Try to use system.add and it will not work.
-
-
-
-Add unit parser tests for:
-	import
-	config
-	
-dog compile and dog run
-	Extensions are optional..
-
-Dog restart instead of Dog debug
 
 Error codes
 	Integration with a discussion page
@@ -600,8 +295,10 @@ Error codes
 
 Abreviate file paths to relative paths in error message
 
-Configuration file should be called:
-	project.config
+Configuration 
+	Add a package-level configuration functionality that also breaks out side effect rules and is linked to the project.config file? Useful for common things like file paths, or flags, etc.? Perhaps not writeable while the project is running, but at the very least standardized for package developers.
+
+	Config file should be called project.config
 	
 	Dog init will add in project.config
 	
@@ -614,72 +311,10 @@ Right now we have static linked libraries (with import). We may want to introduc
 
 Right now import will always import files relative to the current file. In this way it acts much like require_relative in ruby instead of plain require. We may want a way to add a non-relative import that uses a LOAD_PATH to use shared libraries in a common system location.
 
-Potentially reorgnize the directory structure. Basically, reduce right now there are a lot of dependcies between the main folders.
-
 Multiple VMs per process
 
-Organize the symbol table hierarchically
-	- Makes it easier to find stuff by the funciton scopes
-	- Maybe something like this will work:
-		symbols: {
-			"foo": {
-				"@path": [1,2,3]
-				"bar": {
-					"@path": [1,2,3,4]
-				}
-			}
-		}
 
 
-
-
-
-
-
-Add a package-level configuration functionality that also breaks out side effect rules and is linked to the project.config file? Useful for common things like file paths, or flags, etc.? Perhaps not writeable while the project is running, but at the very least standardized for package developers.
-
-
-
-
-
-
-
-Ruby API (similar to the C api for ruby)
-	Perhaps an "Init_MODULE_NAME" function that manipulates the AST (or perhaps just manipulates the function map...)
-
-How do you "require" a C module in ruby and what would that look like for Dog???
-	Do these do what we expect: "require 'hello'" vs "require 'hello.so'" vs "require 'hello.rb'"
-	Should we have the similar approach???
-
-functional languages
-	Everything in the language is immutable
-	
-	Objects / Methods exist from a syntax standpoint
-	
-	Manipulating an object create a new version thus preserving immutability
-	
-	You can hold references to the same object but it is your "view" of the object
-	
-		You cannot "synchronize" an object down its timeline...
-		
-		It may not make a lot of sense for an object to store a value that does not compose it
-		
-	There is no "canonical" view of an object - just "your" view of the object
-	
-		You can however, check for identity and equality. Objects can:
-		
-			equal and identical
-		
-			equal but not identical
-		
-			not equal and not identical
-		
-			identical but not equal (aka different versions of the same thing)
-		
-	In Dog, we have a problem of wanting the public to see the "up to date" version of a resource --- but there i not way to merge different views.
-	
-		Perhaps we model the outside world as an actor that does have a "view" and that view is constructed by the event stream
-	
 
 
 

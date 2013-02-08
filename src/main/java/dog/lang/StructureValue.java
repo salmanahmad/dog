@@ -24,6 +24,9 @@ public class StructureValue extends Value {
 
 	public HashMap<Object, Value> value = new HashMap<Object, Value>();
 
+    public double minNumericKey = 0.0;
+    public double maxNumericKey = 0.0;
+
     public StructureValue() {
         super();
     }
@@ -33,6 +36,10 @@ public class StructureValue extends Value {
         value = v;
     }
     
+    public StructureValue(Object ... items) {
+        this.putAll(items);
+    }
+
     public Object getValue() {
         return value;
     }
@@ -63,8 +70,28 @@ public class StructureValue extends Value {
 
     public void put(Object key, Value value) {
         if((key instanceof Number) || (key instanceof String)) {
-			this.value.put(key, value);
+			if(key instanceof Number) {
+                Double keyDoubleValue = ((Number)key).doubleValue();
+
+                minNumericKey = Math.min(this.minNumericKey, keyDoubleValue);
+                maxNumericKey = Math.max(this.maxNumericKey, keyDoubleValue);
+            }
+
+            this.value.put(key, value);
 		}
+    }
+
+    public void putAll(Object... items) {
+        if(items.length % 2 != 0) {
+            throw new RuntimeException("Varargs to StructureValue.build must have an even number of arguments.");
+        }
+
+        for(int i = 0; i < items.length; i += 2) {
+            Object first = items[i];
+            Object second = items[i + 1];
+            
+            this.put(first, (Value)second);
+        }
     }
 
     public boolean isStructure() {
@@ -191,6 +218,9 @@ public class StructureValue extends Value {
         object.put("value", value);
         object.put("type", type);
 
+        object.put("min_numeric_key", minNumericKey);
+        object.put("max_numeric_key", maxNumericKey);
+
         return object;
     }
 
@@ -226,6 +256,9 @@ public class StructureValue extends Value {
         super.fromMongo(bson, resolver);
 
         ArrayList values = (ArrayList)bson.get("value");
+
+        this.minNumericKey = (Double)bson.get("min_numeric_key");
+        this.maxNumericKey = (Double)bson.get("max_numeric_key");
 
         for(Object item : values) {
             DBObject hash = (DBObject)item;
