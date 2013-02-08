@@ -16,6 +16,8 @@ import dog.lang.compiler.Compiler;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
+
 public abstract class Definition extends Node {
 	String name;
 
@@ -31,6 +33,6 @@ public abstract class Definition extends Node {
 	// TODO: This currently does not work with nested functions because the fullyQualified name
 	// does not look into Symbol that it is defined in. How do I fix that?
 	public String fullyQualifiedName() {
-		return this.packageName + "." + this.name;
+		return StringUtils.join(this.packageName, ".") + "." + this.name;
 	}
 }
