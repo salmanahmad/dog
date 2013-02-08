@@ -750,17 +750,18 @@ predicateStatement returns [Node node]
   : WHERE predicateExpression { $node = $predicateExpression.node; }
   ;
 
-predicateExpression returns [Node node]
-  : predicateUnary        { $node = $predicateUnary.node; }
-  | predicateBinary       { $node = $predicateBinary.node; }
+predicateExpression returns [StructureLiteral node]
+  // predicateUnary        { $node = $predicateUnary.node; }
+  : predicateBinary       { $node = $predicateBinary.node; }
   | predicatePrimary      { $node = $predicatePrimary.node; }
   ;
 
-predicateUnary returns [Node node]
-  : NOT predicatePrimary
-  ;
+// TODO: Revive the unary operator in predicates
+//predicateUnary returns [StructureLiteral node]
+//  : NOT predicatePrimary { $node = dog.lang.compiler.Helper.invertPredicateConditions($predicatePrimary.node); }
+//  ;
 
-predicateBinary returns [Node node]
+predicateBinary returns [StructureLiteral node]
 @init { 
   String operator = ""; 
   HashMap<Object, Node> binaryExpressionMap = new HashMap<Object, Node>();
@@ -780,18 +781,18 @@ predicateBinary returns [Node node]
     { $node = new StructureLiteral($start.getLine(), predicateIdentifier, binaryExpressionMap); }
   ;
 
-predicatePrimary returns [Node node]
+predicatePrimary returns [StructureLiteral node]
   : predicateParenthesis   { $node = $predicateParenthesis.node; }
   | predicateConditional   { $node = $predicateConditional.node; }
   ;
 
-predicateParenthesis returns [Node node]
+predicateParenthesis returns [StructureLiteral node]
   : OPEN_PAREN 
     predicateExpression 
     CLOSE_PAREN           { $node = $predicateExpression.node; }
   ;
 
-predicateConditional returns [Node node]
+predicateConditional returns [StructureLiteral node]
 @init {
   StructureLiteral predicate = null;
   StructureLiteral pointer = null;
