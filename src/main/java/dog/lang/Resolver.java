@@ -77,7 +77,11 @@ public class Resolver extends ClassLoader implements Opcodes {
 	}
 
 	protected void linkNativeCode() {
-		Reflections reflections = new Reflections("dog.packages");
+		Reflections reflections = new Reflections(new ConfigurationBuilder()
+		     .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix("dog")))
+		     .setUrls(ClasspathHelper.forJavaClassPath())
+		);
+
         Set<Class<?>> allClasses = reflections.getTypesAnnotatedWith(dog.lang.annotation.Symbol.class);
 
         for (Class<?> klass : allClasses) {
@@ -152,7 +156,11 @@ public class Resolver extends ClassLoader implements Opcodes {
 	public ArrayList<dog.lang.Symbol> searchForSymbolsStartingWith(String name) {
 		ArrayList<dog.lang.Symbol> list = new ArrayList<dog.lang.Symbol>();
 
-		Reflections reflections = new Reflections("dog");
+		Reflections reflections = new Reflections(new ConfigurationBuilder()
+		     .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix("dog")))
+		     .setUrls(ClasspathHelper.forJavaClassPath())
+		);
+
 		Set<Class<? extends Continuable>> classes = reflections.getSubTypesOf(Continuable.class);
 
         for (Class<?> c : classes) {
