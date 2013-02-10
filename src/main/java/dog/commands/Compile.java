@@ -85,6 +85,11 @@ public class Compile extends Command {
 		return name + ".bark";
 	}
 
+	String jarFileName(StringList args){
+		String name = FilenameUtils.removeExtension(args.strings.get(0));
+		return name + ".jar";
+	}
+
 	void saveBarkFile(String name){
 		try {
 			this.compiler.getBark().writeToFile(new FileOutputStream(name));
@@ -95,26 +100,40 @@ public class Compile extends Command {
 
 	public void run(StringList args) {
 		boolean dump = false;
+		boolean useJar = false;
 
-		if (args.get(0).equals("--show-bytecode")) {
-			dump = true;
-			args.shift();
-		} else {
-			dump = false;
+		StringList remainingArgs = new StringList(new String[] {});
+
+		for(String arg : args.strings) {
+			if(arg.startsWith("--")) {
+				if(arg.equals("--jar")) {
+					useJar = true;
+					continue;
+				} if(arg.equals("--show-bytecode")) {
+					dump = true;
+					continue;
+				}
+			}
+
+			remainingArgs.strings.add(arg);
 		}
 
 		this.compiler = new Compiler(new Resolver());
 		this.parser = new Parser();
 
 		try {
-			for(String arg : args.strings) {
+			for(String arg : remainingArgs.strings) {
 				this.loadFile(arg);
 			}
 			this.compiler.compile();
 			if(dump) {
 				this.dumpByteCode();
 			} else {
-				this.saveBarkFile(this.barkFileName(args));
+				if(useJar) {
+					this.saveBarkFile(this.jarFileName(remainingArgs));
+				} else {
+					this.saveBarkFile(this.barkFileName(remainingArgs));
+				}
 			}
 			return;
 		} catch(CompileError e) {
