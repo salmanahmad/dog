@@ -5,5 +5,6 @@
    can then be executed with 'dog run', 'dog start', or 'dog restart'.
 
  Options include:
-   --jar 			  # Use the .jar extension instead of .bark for the output file
+   --jar              # Use the .jar extension instead of .bark for the output file
+   --output NAME      # Create the archive named NAME instead of defaulting to the first file
    --show-bytecode    # Show the compiled byte code instead. Useful for debugging purposes.
