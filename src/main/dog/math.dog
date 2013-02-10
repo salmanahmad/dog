@@ -1,0 +1,6 @@
+
+package math
+
+define add: arg1 to: arg2 do
+	return arg1 + arg2;
+end

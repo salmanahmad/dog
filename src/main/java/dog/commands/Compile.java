@@ -80,9 +80,20 @@ public class Compile extends Command {
 		}
 	}
 
-	String barkFileName(StringList args){
-		String name = FilenameUtils.removeExtension(args.strings.get(0));
+	String barkFileName(StringList args, String name){
+		if(name == null) {
+			name = FilenameUtils.removeExtension(args.strings.get(0));
+		}
+
 		return name + ".bark";
+	}
+
+	String jarFileName(StringList args, String name){
+		if(name == null) {
+			name = FilenameUtils.removeExtension(args.strings.get(0));
+		}
+
+		return name + ".jar";
 	}
 
 	void saveBarkFile(String name){
@@ -95,26 +106,51 @@ public class Compile extends Command {
 
 	public void run(StringList args) {
 		boolean dump = false;
+		boolean useJar = false;
+		String name = null;
 
-		if (args.get(0).equals("--show-bytecode")) {
-			dump = true;
-			args.shift();
-		} else {
-			dump = false;
+		StringList remainingArgs = new StringList(new String[] {});
+
+		for(int i = 0; i < args.strings.size(); i++) {
+			String arg = args.strings.get(i);
+
+			if(arg.startsWith("--")) {
+				if(arg.equals("--jar")) {
+					useJar = true;
+					continue;
+				}
+
+				if(arg.equals("--show-bytecode")) {
+					dump = true;
+					continue;
+				} 
+
+				if(arg.equals("--output")) {
+					name = args.strings.get(i + 1);
+					i++;
+					continue;
+				}
+			}
+
+			remainingArgs.strings.add(arg);
 		}
 
 		this.compiler = new Compiler(new Resolver());
 		this.parser = new Parser();
 
 		try {
-			for(String arg : args.strings) {
+			for(String arg : remainingArgs.strings) {
 				this.loadFile(arg);
 			}
 			this.compiler.compile();
 			if(dump) {
 				this.dumpByteCode();
 			} else {
-				this.saveBarkFile(this.barkFileName(args));
+				if(useJar) {
+					this.saveBarkFile(this.jarFileName(remainingArgs, name));
+				} else {
+					this.saveBarkFile(this.barkFileName(remainingArgs, name));
+				}
 			}
 			return;
 		} catch(CompileError e) {
