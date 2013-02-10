@@ -1,4 +1,41 @@
 
+
+When saving a stack frame I should create a "value_set" field that has a set of ALL the object_ids of all the registers and the variables. This makes garbage collection really easy.
+
+listen_to:for: just creates a listener which wraps a future. It is not added to the frame's meta field until a wait_on: call is executed.
+
+A future has an expiration date. When it expires, any stack frames that are handling it are removed if that was the only future that it was waiting on. In the future, an exception should be throw and the function should be able to handle that. But until the error reporting mechanism is finalized, the stack frame just dies. (Again, only if that was the last future it was waiting on...) Okay?
+
+Another way to handle timeouts in user-land code: http://blog.golang.org/2010/09/go-concurrency-patterns-timing-out-and.html
+
+Future expiration is handled during garbage collection.
+
+
+
+
+
+
+
+
+I need a Timer library
+
+I need an I/O library
+
+I need a GridFS library
+
+I think I need actual arrays
+
+
+
+
+
+
+
+
+
+
+
+
 Dynamic predicates --- look at Linq for inspiration?
 
 Explore actual arrays in Dog

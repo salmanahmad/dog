@@ -106,7 +106,8 @@ public class APIServlet extends HttpServlet {
 			frame.setRuntime(runtime);
 
 			Boolean found = false;
-			BasicDBObject query = new BasicDBObject("state", StackFrame.WAITING);
+			//BasicDBObject query = new BasicDBObject("state", StackFrame.WAITING);
+			BasicDBObject query = new BasicDBObject();
 
 			if(id.equals("root")) {
 				found = frame.findOne(new BasicDBObject("symbol_name", runtime.getStartUpSymbol()));
@@ -145,6 +146,7 @@ public class APIServlet extends HttpServlet {
 				output = object.toString();
 			} else {
 				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				return;
 			}
 		} else if((match = DOG_JS.matcher(requestPath)).matches()) {
 			resp.setContentType("application/javascript");
