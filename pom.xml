@@ -152,6 +152,11 @@
         <version>2.4</version>
         <executions>
           <execution>
+            <id>copy-dependencies-for-compilation</id>
+            <phase>compile</phase>
+            <goals><goal>copy-dependencies</goal></goals>
+          </execution>
+          <execution>
             <id>copy-dependencies</id>
             <phase>package</phase>
             <goals><goal>copy-dependencies</goal></goals>
@@ -182,7 +187,7 @@
           </execution>
           <execution>
             <id>build-standard-package</id>
-            <phase>package</phase>
+            <phase>compile</phase>
             <configuration>
               <target>
                 <fileset id="files" dir="${basedir}/src/main/dog/" includes="*.dog"/>
@@ -193,12 +198,12 @@
                     <fileset dir="${project.build.directory}/dependency">
                       <include name="**/*.jar"/>
                     </fileset>
-                    <pathelement location="${project.build.directory}/${project.build.finalName}.jar"/>
+                    <pathelement location="${project.build.outputDirectory}"/>
                   </classpath>
                   <arg value="compile" />
-                  <arg value="--jar" />
-                  <arg value="--output" />
-                  <arg value="${project.build.directory}/dependency/dog-stdlib" />
+                  <arg value="--classes" />
+                  <arg value="--target" />
+                  <arg value="${project.build.outputDirectory}" />
                   <arg line="${files}" />
                 </java>
               </target>

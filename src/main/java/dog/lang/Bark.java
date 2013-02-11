@@ -16,9 +16,13 @@ import java.util.ArrayList;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.objectweb.asm.ClassReader;
+import org.apache.commons.io.IOUtils;
 
 public class Bark {
 
@@ -58,6 +62,19 @@ public class Bark {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void writeClassesToDirectory(String targetDirectory) throws FileNotFoundException, IOException {
+		for(byte[] b : symbols) {
+			ClassReader reader = new ClassReader(b);
+			String fileName = reader.getClassName() + ".class";
+			
+			File file = new File(targetDirectory, fileName);
+			file.getParentFile().mkdirs();
+
+			FileOutputStream output = new FileOutputStream(file);
+			IOUtils.write(b, output);
+		}	
 	}
 
 	public void writeToFile(OutputStream stream) {
