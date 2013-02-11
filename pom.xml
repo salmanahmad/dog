@@ -180,6 +180,33 @@
               <goal>run</goal>
             </goals>
           </execution>
+          <execution>
+            <id>build-standard-package</id>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                <fileset id="files" dir="${basedir}/src/main/dog/" includes="*.dog"/>
+                <pathconvert pathsep=" " property="files" refid="files"/>
+
+                <java classname="dog.commands.Main" fork="true">
+                  <classpath>
+                    <fileset dir="${project.build.directory}/dependency">
+                      <include name="**/*.jar"/>
+                    </fileset>
+                    <pathelement location="${project.build.directory}/${project.build.finalName}.jar"/>
+                  </classpath>
+                  <arg value="compile" />
+                  <arg value="--jar" />
+                  <arg value="--output" />
+                  <arg value="${project.build.directory}/dependency/dog-stdlib" />
+                  <arg line="${files}" />
+                </java>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
       <plugin>

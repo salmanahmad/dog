@@ -66,9 +66,13 @@ public class Invoke extends Instruction {
 		
 		mv.visitTypeInsn(NEW, "dog/lang/StackFrame");
 		mv.visitInsn(DUP);
-		mv.visitTypeInsn(NEW, Resolver.encodeSymbol(this.functionIdentifier));
-		mv.visitInsn(DUP);
-		mv.visitMethodInsn(INVOKESPECIAL, Resolver.encodeSymbol(this.functionIdentifier), "<init>", "()V");
+
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/StackFrame", "getRuntime", "()Ldog/lang/Runtime;");
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Runtime", "getResolver", "()Ldog/lang/Resolver;");
+		mv.visitLdcInsn(this.functionIdentifier);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "dog/lang/Resolver", "resolveSymbol", "(Ljava/lang/String;)Ljava/lang/Object;");
+		mv.visitTypeInsn(CHECKCAST, "dog/lang/Continuable");
 		
 		mv.visitLdcInsn(arguments.size());
 		mv.visitTypeInsn(ANEWARRAY, "dog/lang/Value");
