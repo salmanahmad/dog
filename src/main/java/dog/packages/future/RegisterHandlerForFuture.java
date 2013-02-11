@@ -27,6 +27,9 @@ public class RegisterHandlerForFuture extends Function {
 		return 2;
 	}
 
+
+	// TODO: This should expose the listen to the meta...
+	
 	public Signal resume(StackFrame frame) {
 		Value handler = frame.variables[0];
 		Value future = frame.variables[1];

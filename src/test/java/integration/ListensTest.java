@@ -15,7 +15,7 @@ public class ListensTest {
 
 
         StructureValue i = (StructureValue)frame.getVariableNamed("i");
-        Assert.assertEquals("monkies", i.get("name").getValue());
+        Assert.assertEquals("monkies", i.get("identifier").getValue());
         Assert.assertFalse(i.get("channel") instanceof NullValue);
         Assert.assertFalse(i.get("routing") instanceof NullValue);
     }
