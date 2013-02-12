@@ -1,0 +1,1 @@
+Implement an iTunes-esque interface where you can click on elements on the side and have the main content area update with the appropriate view.

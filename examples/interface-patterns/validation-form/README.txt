@@ -1,0 +1,1 @@
+A simple pattern for validating form fields when a user submits the form.
