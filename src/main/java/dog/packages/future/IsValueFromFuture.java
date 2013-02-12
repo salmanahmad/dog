@@ -36,6 +36,11 @@ public class IsValueFromFuture extends Function {
 
 		Value returnValue = null;
 
+		Class listenerClass = frame.getRuntime().getResolver().classForSymbol("dog.listener");
+		if(listenerClass.isAssignableFrom(future.getClass())) {
+			future = future.get("channel");
+		}
+
 		if(future.getId().equals(value.futureId) || future.getId().equals(value.getId())) {
 			returnValue = new TrueValue();
 		} else {

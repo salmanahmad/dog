@@ -659,7 +659,6 @@ onStatement returns [Node node]
     )*
     END                  {
 
-
       for(HashMap map : items) {
         arrayMap.put((Double)index, (Node)map.get("expression"));
         index++;
@@ -717,16 +716,16 @@ onStatement returns [Node node]
           ),
           null
         );
+        
+        if(branch == null) {
+          branch = tempBranch;
+          branchPointer = branch;
+        } else {
+          branchPointer.falseBranch = tempBranch;
+          branchPointer = tempBranch;
+        }
 
         index++;
-      }
-
-      if(branch == null) {
-        branch = tempBranch;
-        branchPointer = branch;
-      } else {
-        branchPointer.falseBranch = tempBranch;
-        branchPointer = tempBranch;
       }
 
       nodes.add(branch);
