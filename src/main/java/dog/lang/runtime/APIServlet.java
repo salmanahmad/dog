@@ -106,8 +106,7 @@ public class APIServlet extends HttpServlet {
 			frame.setRuntime(runtime);
 
 			Boolean found = false;
-			//BasicDBObject query = new BasicDBObject("state", StackFrame.WAITING);
-			BasicDBObject query = new BasicDBObject();
+			BasicDBObject query = new BasicDBObject("state", StackFrame.WAITING);
 
 			if(id.equals("root")) {
 				found = frame.findOne(new BasicDBObject("symbol_name", runtime.getStartUpSymbol()));
@@ -118,8 +117,7 @@ public class APIServlet extends HttpServlet {
 					conditions.add(new BasicDBObject("_id", new ObjectId(id)));
 					conditions.add(new BasicDBObject("control_ancestors", new ObjectId(id)));
 
-					query.put("$or", conditions);
-					found = frame.findOne(query);
+					found = frame.findOne(new BasicDBObject("$or", conditions));
 				}
 			} else {
 				ArrayList<BasicDBObject> conditions = new ArrayList<BasicDBObject>();
@@ -219,8 +217,6 @@ public class APIServlet extends HttpServlet {
 						List<JSONObject> spawns = new ArrayList<JSONObject>();
 						StackFrame progressFrame = frame;
 
-						//System.out.println("\n\n\n\n");
-						//System.out.println(frame.getId().toString() + ":" + frame.symbolName);
 
 						for(StackFrame f : frames) {
 							if(f.symbolName.equals("dog.wait:")) {
@@ -229,13 +225,28 @@ public class APIServlet extends HttpServlet {
 
 							//System.out.println(f.getId().toString() + ":" + f.symbolName);
 
-
 							if(StackFrame.areFramesInSameTrace(frame, f)) {
-								System.out.println("Same Trace!");
 								progressFrame = f;
 							} else if(submissionFrame.getId().equals(f.getId())) {
 								continue;
 							} else {
+//								StackFrame spawnedFrame = new StackFrame();
+//
+//								BasicDBObject query = new BasicDBObject("state", StackFrame.WAITING);
+//								ArrayList<BasicDBObject> conditions = new ArrayList<BasicDBObject>();
+//								conditions.add(new BasicDBObject("_id", new ObjectId(f.id)));
+//								conditions.add(new BasicDBObject("control_ancestors", new ObjectId(id)));
+//
+//								query.put("$or", conditions);
+//								found = frame.findOne(query);
+//
+//								if(!found) {
+//									spawnedFrame = f;
+//								} else {
+//									System.out.println("Could not fast-forward stackframe");
+//								}
+//
+//								spawns.add(Helper.stackFrameAsJsonForAPI(spawnedFrame));
 								spawns.add(Helper.stackFrameAsJsonForAPI(f));
 							}
 						}
@@ -286,6 +297,7 @@ public class APIServlet extends HttpServlet {
 		Server server = new Server(port);
 
 		ResourceHandler resourceHandler = new ResourceHandler();
+		resourceHandler.setAliases(true);
 		resourceHandler.setDirectoriesListed(true);
 		resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
 		resourceHandler.setResourceBase(FilenameUtils.normalize(servlet.filePath));

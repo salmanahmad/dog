@@ -60,12 +60,18 @@ public class SendValueTo extends Function {
 						
 						StackFrame f = new StackFrame();
 						f.setRuntime(runtime);
-						f.findOne(new BasicDBObject("_id", trackId));
+						boolean found = f.findOne(new BasicDBObject("_id", trackId));
+
+						if(!found) {
+							// TODO: Remove this _id from the future for the next function calls...
+							continue;
+						}
 
 						// TODO: Ensure that my code is correct here. When I am waiting do I
 						// use returnRegister to specify the register that I am expecting to be
 						// filled out?
-						f.registers[f.returnRegister] = value;
+						int register = f.returnRegister;
+						f.registers[register] = value;
 
 						runtime.schedule(f);
 					}
