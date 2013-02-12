@@ -1,1 +1,65 @@
-An application that allows you to move forward and backwards through pages of results.
+
+package app
+include dog
+
+define build_data do
+	data = []
+	index = 0
+
+	repeat 1000 times
+		data[index] = "Message " + index
+		index = index + 1
+	end
+	
+	return data
+end
+
+define paginate: data page: page size: size do
+	r = []
+
+	index = page * size
+	start = page * size
+	finish = page * size + size
+
+	while index < finish do
+		r[index - start] = data[index]
+		index = index + 1
+	end
+
+	return r
+end
+
+define view do
+	next = listen_to: dog.everyone for: "next"
+	prev = listen_to: dog.everyone for: "prev"
+	jump = listen_to: dog.everyone for: "jump"
+
+	data = build_data
+	page_number = 1
+
+	forever do
+		page = paginate: data page: page_number size: 10
+
+		display: page to: everyone as: "data"
+		display: page_number to: everyone as: "page_number"
+
+		on r in next do
+			page_number = page_number + 1
+		else on r in prev do
+			page_number = page_number - 1
+			if page_number == 0 then
+				page_number = 1
+			end
+		else on r in jump do
+			page_number = r.page_number
+		end
+	end
+end
+
+
+views = listen_to: everyone for: "views"
+
+on each request in views do
+	print: "I am here!"
+	view
+end

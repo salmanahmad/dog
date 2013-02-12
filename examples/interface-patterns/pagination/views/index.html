@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>Pagination</title>
+  
+  <script src="/dog/dog.js" type="text/javascript" charset="utf-8"></script>
+  <script src="assets/bootstrap/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css" type="text/css" media="screen" charset="utf-8">
+  <link rel="stylesheet" href="assets/stylesheets/style.css" type="text/css" media="screen" charset="utf-8">
+  
+  <link href='http://fonts.googleapis.com/css?family=Courgette' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Cantora+One' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Carrois+Gothic' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Raleway+Dots' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Racing+Sans+One' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript" charset="utf-8">
+    dog.initialize({
+      autoPermalink:false
+    })  
+  </script>
+  
+</head>
+<body>
+  <div id="templates">
+    <script id="root" type="text/x-dog-template">
+    <ul>
+      <li>
+        {{#listenLink listens.views}}
+          Pagination Demo
+        {{/listenLink}}
+      </li>
+    </ul>    
+    </script>
+
+    <script id="app.view" type="text/x-dog-template">
+      <h3>Current Page: {{displays.page_number}}</h3>
+      <ul>
+          {{#each displays.data}}
+            <li>{{this}}</li>
+          {{/each}}
+      </ul>   
+      {{#listenLink listens.prev}}
+        Previous
+      {{/listenLink}}
+      {{#listenLink listens.next}}
+        Next
+      {{/listenLink}}
+    </script>
+
+
+  </div>
+  
+  <div id="page">
+    <div id="header">
+      <h1>Pagination</h1>
+    </div>
+
+    <div id="navigation" data-dog-viewport="root" data-dog-spawn-viewport="content" ></div>
+    <div id="content" data-dog-viewport="content"></div>
+    
+    <div id="footer">
+      Powered by Dog.
+    </div>
+  </div>
+</body>
+</html>
