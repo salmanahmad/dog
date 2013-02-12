@@ -13,8 +13,8 @@ package dog.packages.string;
 
 import dog.lang.Value;
 import dog.lang.StringValue;
-import dog.lang.NullValue;
 import dog.lang.NumberValue;
+import dog.lang.NullValue;
 import dog.lang.Function;
 import dog.lang.Signal;
 import dog.lang.Resolver;
@@ -24,11 +24,13 @@ import dog.lang.annotation.Symbol;
 import java.util.Arrays;
 import java.util.ArrayList;
 
+import java.lang.String;
+
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.right_pad:with_length:")
-public class RightPad extends Function {
+@Symbol("string.character_at_index:from:")
+public class CharacterAtIndex extends Function {
 
 	public int getVariableCount() {
 		return 2;
@@ -39,14 +41,19 @@ public class RightPad extends Function {
 	}
 	
 	public Signal resume(StackFrame frame) {
-		Value value = frame.variables[0];
-		Value len = frame.variables[1];
+		Value value = frame.variables[1];
+		Value index = frame.variables[0];
 		Value returnValue;
 
-		if(value instanceof StringValue && len instanceof NumberValue) {
+		if(value instanceof StringValue && index instanceof NumberValue) {
 			StringValue string = (StringValue)value;
-			NumberValue strlen = (NumberValue)len;
-			returnValue = new StringValue(StringUtils.rightPad(string.value, (int)strlen.value));
+			NumberValue theIndex = (NumberValue)index;
+			int intIndex = (int)theIndex.value;
+			try{
+				returnValue = new StringValue(Character.toString(string.value.charAt(intIndex)));
+			}catch(Exception e){
+				returnValue = new NullValue();
+			}
 		} else {
 			returnValue = new NullValue();
 		}

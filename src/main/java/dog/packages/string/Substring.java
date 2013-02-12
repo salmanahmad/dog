@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.substring:starting:ending:")
+@Symbol("string.substring:from_index:to_index:")
 public class Substring extends Function {
 
 	public int getVariableCount() {

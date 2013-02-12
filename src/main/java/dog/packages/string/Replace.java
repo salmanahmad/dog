@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.replace:search:replace_with:")
+@Symbol("string.replace_all:with:in:")
 public class Replace extends Function {
 
 	public int getVariableCount() {
@@ -38,9 +38,9 @@ public class Replace extends Function {
 	}
 	
 	public Signal resume(StackFrame frame) {
-		Value value = frame.variables[0];
-		Value search = frame.variables[1];
-		Value replace = frame.variables[2];
+		Value value = frame.variables[2];
+		Value search = frame.variables[0];
+		Value replace = frame.variables[1];
 		Value returnValue;
 
 		if(value instanceof StringValue && search instanceof StringValue && replace instanceof StringValue) {

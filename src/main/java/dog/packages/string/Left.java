@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.left:length:")
+@Symbol("string.left_string_of:with_length:")
 public class Left extends Function {
 
 	public int getVariableCount() {

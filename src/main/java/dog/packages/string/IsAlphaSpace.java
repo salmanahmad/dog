@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.is_alpha_space:")
+@Symbol("string.is_alpha_or_space:")
 public class IsAlphaSpace extends Function {
 
 	public int getVariableCount() {

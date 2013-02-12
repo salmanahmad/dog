@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.starts_with:prefix:")
+@Symbol("string.does:start_with:")
 public class StartsWith extends Function {
 
 	public int getVariableCount() {

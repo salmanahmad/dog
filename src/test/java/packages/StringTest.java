@@ -13,11 +13,30 @@ import dog.lang.*;
 import dog.lang.compiler.*;
 import dog.lang.nodes.*;
 import dog.util.Helper;
+import dog.packages.dog.Array;
 
 import org.junit.*;
 import java.util.*;
 
 public class StringTest {
+	@Test
+	public void testCharAtSimple(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.character_at_index:2from:\"hello\"").get(0);
+
+		StringValue xValue = (StringValue)frame.getVariableNamed("x");
+		Assert.assertEquals("l", xValue.value);
+    }
+	
+	@Test
+	public void testCharAtOOB(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.character_at_index:7from:\"hello\"").get(0);
+
+		NullValue xValue = (NullValue)frame.getVariableNamed("x");
+		Assert.assertNull(xValue.getValue());
+    }
+	
 	@Test
 	public void testChompSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
@@ -39,7 +58,7 @@ public class StringTest {
 	@Test
 	public void testContainsTrue(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.contains: \"hello\" substring: \"el\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.does: \"hello\" contain: \"el\"").get(0);
 
 		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
 		Assert.assertEquals(true, xValue.getValue());
@@ -48,7 +67,7 @@ public class StringTest {
 	@Test
 	public void testContainsFalse(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.contains: \"hello\" substring: \"le\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.does: \"hello\" contain: \"le\"").get(0);
 
 		FalseValue xValue = (FalseValue)frame.getVariableNamed("x");
 		Assert.assertEquals(false, xValue.getValue());
@@ -57,7 +76,7 @@ public class StringTest {
 	@Test
 	public void testContainsTrueMultiple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.contains: \"hello\" substring: \"l\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.does: \"hello\" contain: \"l\"").get(0);
 
 		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
 		Assert.assertEquals(true, xValue.getValue());
@@ -84,7 +103,7 @@ public class StringTest {
 	@Test
 	public void testDifferenceSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.difference: \"hello\" from: \"hellotest\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.difference_between: \"hello\" and: \"hellotest\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("test", xValue.value);
@@ -93,7 +112,7 @@ public class StringTest {
 	@Test
 	public void testDifferenceMore(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.difference: \"hellotest\" from: \"hello\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.difference_between: \"hellotest\" and: \"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("", xValue.value);
@@ -102,7 +121,7 @@ public class StringTest {
 	@Test
 	public void testDifferenceSame(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.difference: \"hello\" from: \"hello\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.difference_between: \"hello\" and: \"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("", xValue.value);
@@ -111,7 +130,7 @@ public class StringTest {
 	@Test
 	public void testEndsWithTrue(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.ends_with: \"hello\" suffix:\"lo\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.does: \"hello\" end_with:\"lo\"").get(0);
 
 		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
 		Assert.assertEquals(true, xValue.getValue());
@@ -120,7 +139,7 @@ public class StringTest {
 	@Test
 	public void testEndsWithFalse(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.ends_with: \"hello\" suffix:\"ll\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.does: \"hello\" end_with:\"ll\"").get(0);
 
 		FalseValue xValue = (FalseValue)frame.getVariableNamed("x");
 		Assert.assertEquals(false, xValue.getValue());
@@ -129,7 +148,7 @@ public class StringTest {
 	@Test
 	public void testIndexOfFound(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"hello\" search:\"h\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"h\" in:\"hello\"").get(0);
 
 		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
 		Assert.assertEquals(0.0, xValue.getValue());
@@ -138,7 +157,7 @@ public class StringTest {
 	@Test
 	public void testIndexOfNotFound(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"hello\" search:\"k\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"k\" in:\"hello\"").get(0);
 
 		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
 		Assert.assertEquals(-1.0, xValue.getValue());
@@ -147,7 +166,7 @@ public class StringTest {
 	@Test
 	public void testIndexOfMultiple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"hello\" search:\"l\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.index_of: \"l\" in:\"hello\"").get(0);
 
 		NumberValue xValue = (NumberValue)frame.getVariableNamed("x");
 		Assert.assertEquals(2.0, xValue.getValue());
@@ -228,7 +247,7 @@ public class StringTest {
 	@Test
 	public void testIsAlphanumericSpaceTrue(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.is_alphanumeric_space: \"hello123 \"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.is_alphanumeric_or_space: \"hello123 \"").get(0);
 
 		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
 		Assert.assertEquals(true, xValue.getValue());
@@ -237,7 +256,7 @@ public class StringTest {
 	@Test
 	public void testIsAlphanumericSpaceFalse(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.is_alphanumeric_space: \"Hello.123  \"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.is_alphanumeric_or_space: \"Hello.123  \"").get(0);
 
 		FalseValue xValue = (FalseValue)frame.getVariableNamed("x");
 		Assert.assertEquals(false, xValue.getValue());
@@ -246,7 +265,7 @@ public class StringTest {
 	@Test
 	public void testIsAlphaSpaceTrue(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.is_alpha_space: \"hello \"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.is_alpha_or_space: \"hello \"").get(0);
 
 		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
 		Assert.assertEquals(true, xValue.getValue());
@@ -255,7 +274,7 @@ public class StringTest {
 	@Test
 	public void testIsAlphaSpaceFalse(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.is_alpha_space: \"Hello123  \"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.is_alpha_or_space: \"Hello123  \"").get(0);
 
 		FalseValue xValue = (FalseValue)frame.getVariableNamed("x");
 		Assert.assertEquals(false, xValue.getValue());
@@ -309,7 +328,7 @@ public class StringTest {
 	@Test
 	public void testLeftSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.left: \"hello\" length:3").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.left_string_of: \"hello\" with_length:3").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hel", xValue.getValue());
@@ -318,7 +337,7 @@ public class StringTest {
 	@Test
 	public void testLeftTooLarge(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.left: \"hello\" length:7").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.left_string_of: \"hello\" with_length:7").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hello", xValue.getValue());
@@ -327,7 +346,7 @@ public class StringTest {
 	@Test
 	public void testLeftPadSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.left_pad: \"hello\" length:8").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.left_pad: \"hello\" with_length:8").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("   hello", xValue.getValue());
@@ -354,7 +373,7 @@ public class StringTest {
 	@Test
     public void testRemoveSimple() {
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.remove: \"hello\" substring:\"hel\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.remove_substring: \"hel\" from:\"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("lo", xValue.value);
@@ -372,7 +391,7 @@ public class StringTest {
 	@Test
     public void testReplaceFoundOnce() {
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace: \"hello\" search:\"hel\" replace_with:\"yo\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace_all: \"hel\" with:\"yo\" in:\"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("yolo", xValue.value);
@@ -381,7 +400,7 @@ public class StringTest {
 	@Test
     public void testReplaceFoundMultiple() {
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace: \"hello\" search:\"l\" replace_with:\"yo\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace_all: \"l\" with:\"yo\" in:\"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("heyoyoo", xValue.value);
@@ -390,7 +409,7 @@ public class StringTest {
 	@Test
     public void testReplaceNotFound() {
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace: \"hello\" search:\"null\" replace_with:\"yo\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace_all: \"nope\" with:\"yo\" in:\"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hello", xValue.value);
@@ -399,7 +418,7 @@ public class StringTest {
 	@Test
     public void testReplaceOnceFound() {
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace_once: \"hello\" search:\"l\" replace_with:\"yo\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace_first: \"l\" with:\"yo\" in:\"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("heyolo", xValue.value);
@@ -408,7 +427,7 @@ public class StringTest {
 	@Test
     public void testReplaceOnceNotFound() {
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace_once: \"hello\" search:\"null\" replace_with:\"yo\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.replace_first: \"nope\" with:\"yo\" in:\"hello\"").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hello", xValue.value);
@@ -426,7 +445,7 @@ public class StringTest {
 	@Test
 	public void testRightSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.right: \"hello\" length:3").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.right_string_of: \"hello\" with_length:3").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("llo", xValue.getValue());
@@ -435,7 +454,7 @@ public class StringTest {
 	@Test
 	public void testRightTooLarge(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.right: \"hello\" length:7").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.right_string_of: \"hello\" with_length:7").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hello", xValue.getValue());
@@ -444,16 +463,58 @@ public class StringTest {
 	@Test
 	public void testRightPadSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.right_pad: \"hello\" length:8").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.right_pad: \"hello\" with_length:8").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("hello   ", xValue.getValue());
     }
 	
 	@Test
+	public void testSplitSimple(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.split: \"hello world 1\" using_separator:\" \"").get(0);
+
+		Array xValue = (Array)frame.getVariableNamed("x");
+		StringValue firstValue = (StringValue)xValue.get(0);
+		StringValue secondValue = (StringValue)xValue.get(1);
+		StringValue thirdValue = (StringValue)xValue.get(2);
+		Assert.assertEquals("hello", firstValue.getValue());
+		Assert.assertEquals("world", secondValue.getValue());
+		Assert.assertEquals("1", thirdValue.getValue());
+	}
+	
+	@Test
+	public void testSplitRepeat(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.split: \"hello  world 1\" using_separator:\" \"").get(0);
+
+		Array xValue = (Array)frame.getVariableNamed("x");
+		StringValue firstValue = (StringValue)xValue.get(0);
+		StringValue secondValue = (StringValue)xValue.get(1);
+		StringValue thirdValue = (StringValue)xValue.get(2);
+		Assert.assertEquals("hello", firstValue.getValue());
+		Assert.assertEquals("world", secondValue.getValue());
+		Assert.assertEquals("1", thirdValue.getValue());
+	}
+	
+	@Test
+	public void testSplitMultiple(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.split: \"xhellopworldx1p\" using_separator:\"xp\"").get(0);
+
+		Array xValue = (Array)frame.getVariableNamed("x");
+		StringValue firstValue = (StringValue)xValue.get(0);
+		StringValue secondValue = (StringValue)xValue.get(1);
+		StringValue thirdValue = (StringValue)xValue.get(2);
+		Assert.assertEquals("hello", firstValue.getValue());
+		Assert.assertEquals("world", secondValue.getValue());
+		Assert.assertEquals("1", thirdValue.getValue());
+	}
+	
+	@Test
 	public void testStartsWithTrue(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.starts_with: \"hello\" prefix:\"hel\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.does: \"hello\" start_with:\"hel\"").get(0);
 
 		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
 		Assert.assertEquals(true, xValue.getValue());
@@ -462,7 +523,7 @@ public class StringTest {
 	@Test
 	public void testStartsWithFalse(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.starts_with: \"hello\" prefix:\"yo\"").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.does: \"hello\" start_with:\"yo\"").get(0);
 
 		FalseValue xValue = (FalseValue)frame.getVariableNamed("x");
 		Assert.assertEquals(false, xValue.getValue());
@@ -480,7 +541,7 @@ public class StringTest {
 	@Test
 	public void testSubstringSimple(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.substring: \"hello\" starting: 0 ending:2").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.substring: \"hello\" from_index:0 to_index:2").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("he", xValue.value);
@@ -489,7 +550,7 @@ public class StringTest {
 	@Test
 	public void testSubstringLargeFirst(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.substring: \"hello\" starting: 2 ending:0").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = string.substring: \"hello\" from_index:2 to_index:0").get(0);
 
 		StringValue xValue = (StringValue)frame.getVariableNamed("x");
 		Assert.assertEquals("", xValue.value);

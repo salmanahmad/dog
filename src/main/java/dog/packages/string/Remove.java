@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
 
-@Symbol("string.remove:substring:")
+@Symbol("string.remove_substring:from:")
 public class Remove extends Function {
 
 	public int getVariableCount() {
@@ -37,8 +37,8 @@ public class Remove extends Function {
 	}
 
 	public Signal resume(StackFrame frame) {
-		Value value = frame.variables[0];
-		Value svalue = frame.variables[1];
+		Value value = frame.variables[1];
+		Value svalue = frame.variables[0];
 		Value returnValue;
 
 		if(value instanceof StringValue && svalue instanceof StringValue) {

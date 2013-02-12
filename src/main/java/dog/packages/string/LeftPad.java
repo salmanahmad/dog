@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.left_pad:length:")
+@Symbol("string.left_pad:with_length:")
 public class LeftPad extends Function {
 
 	public int getVariableCount() {

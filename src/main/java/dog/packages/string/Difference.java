@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.difference:from:")
+@Symbol("string.difference_between:and:")
 public class Difference extends Function {
 
 	public int getVariableCount() {

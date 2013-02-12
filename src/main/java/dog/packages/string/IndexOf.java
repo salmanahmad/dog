@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.index_of:search:")
+@Symbol("string.index_of:in:")
 public class IndexOf extends Function {
 
 	public int getVariableCount() {
@@ -39,8 +39,8 @@ public class IndexOf extends Function {
 	}
 	
 	public Signal resume(StackFrame frame) {
-		Value value = frame.variables[0];
-		Value search = frame.variables[1];
+		Value value = frame.variables[1];
+		Value search = frame.variables[0];
 		Value returnValue;
 
 		if(value instanceof StringValue && search instanceof StringValue) {

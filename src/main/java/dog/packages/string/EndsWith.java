@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.ends_with:suffix:")
+@Symbol("string.does:end_with:")
 public class EndsWith extends Function {
 
 	public int getVariableCount() {

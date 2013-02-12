@@ -14,12 +14,15 @@ package dog.packages.string;
 import dog.lang.Value;
 import dog.lang.StringValue;
 import dog.lang.NullValue;
-import dog.lang.NumberValue;
+import dog.lang.TrueValue;
+import dog.lang.FalseValue;
 import dog.lang.Function;
 import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
+
+import dog.packages.dog.Array;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -27,8 +30,8 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.right_pad:with_length:")
-public class RightPad extends Function {
+@Symbol("string.split:using_separator:")
+public class Split extends Function {
 
 	public int getVariableCount() {
 		return 2;
@@ -40,13 +43,17 @@ public class RightPad extends Function {
 	
 	public Signal resume(StackFrame frame) {
 		Value value = frame.variables[0];
-		Value len = frame.variables[1];
+		Value separator = frame.variables[1];
 		Value returnValue;
 
-		if(value instanceof StringValue && len instanceof NumberValue) {
+		if(value instanceof StringValue && separator instanceof StringValue) {
 			StringValue string = (StringValue)value;
-			NumberValue strlen = (NumberValue)len;
-			returnValue = new StringValue(StringUtils.rightPad(string.value, (int)strlen.value));
+			StringValue separate = (StringValue)separator;
+			String[] splitarray = StringUtils.split(string.value, separate.value);
+			returnValue = new Array();
+			for (int i=0; i<splitarray.length; i++){
+				returnValue.put(i, new StringValue(splitarray[i]));
+			}
 		} else {
 			returnValue = new NullValue();
 		}
