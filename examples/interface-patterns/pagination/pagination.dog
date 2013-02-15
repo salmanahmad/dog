@@ -2,6 +2,8 @@
 package app
 include dog
 
+# Data Manipulation Functions
+
 define build_data do
 	data = []
 	index = 0
@@ -25,9 +27,11 @@ define paginate: data page: page size: size do
 		r[index - start] = data[index]
 		index = index + 1
 	end
-
+	
 	return r
 end
+
+# The Main View Function
 
 define view do
 	next = listen_to: dog.everyone for: "next"
@@ -56,6 +60,7 @@ define view do
 	end
 end
 
+# Start Up Logic
 
 views = listen_to: everyone for: "views"
 
