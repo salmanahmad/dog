@@ -1,0 +1,3 @@
+theAnswer = 42
+dog.eval: "theAnswer = 43"
+theAnswer
