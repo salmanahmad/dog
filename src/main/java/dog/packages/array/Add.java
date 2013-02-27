@@ -9,8 +9,7 @@
  *
  */
 
-
-package dog.packages.string;
+package dog.packages.array;
 
 import dog.lang.Value;
 import dog.lang.StringValue;
