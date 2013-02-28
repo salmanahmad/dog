@@ -29,8 +29,8 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.ArrayUtils;
 
 
-@Symbol("array.does:contain:")
-public class Contains extends Function {
+@Symbol("array.index_of:in:")
+public class IndexOf extends Function {
 
 	public int getVariableCount() {
 		return 2;
@@ -45,10 +45,10 @@ public class Contains extends Function {
 		Value search = frame.variables[1];
 		Value returnValue;
 
-		if(value instanceof Array && search instanceof Object) {
-			Array array = (Array)value;
-			Object searchvalue = (Object)search;
-			returnValue = (ArrayUtils.contains(array, searchvalue.value))?(new TrueValue()):(new FalseValue());
+		if(value instanceof Object && search instanceof Array) {
+			Object search = (Object)value;
+			Array array = (Array)search;
+			returnValue = new NumberValue(ArrayUtils.indexOf(array, search));
 		} else {
 			returnValue = new NullValue();
 		}

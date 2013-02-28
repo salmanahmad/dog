@@ -8,12 +8,15 @@
  *  above copyright notice is included.
  *
  */
+
+
 package dog.packages.array;
 
 import dog.lang.Value;
 import dog.lang.StringValue;
-import dog.lang.NumberValue;
 import dog.lang.NullValue;
+import dog.lang.TrueValue;
+import dog.lang.FalseValue;
 import dog.lang.Function;
 import dog.lang.Signal;
 import dog.lang.Resolver;
@@ -23,16 +26,14 @@ import dog.lang.annotation.Symbol;
 import java.util.Arrays;
 import java.util.ArrayList;
 
-import java.lang.String;
-
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 
-@Symbol("array.get_value_at:")
-public class GetValue extends Function {
+@Symbol("array.add:and:")
+public class AddTogether extends Function {
 
 	public int getVariableCount() {
-		return 1;
+		return 2;
 	}
 
 	public int getRegisterCount() {
@@ -40,17 +41,14 @@ public class GetValue extends Function {
 	}
 
 	public Signal resume(StackFrame frame) {
-		Value index = frame.variables[0];
+		Value value = frame.variables[0];
+		Value search = frame.variables[1];
 		Value returnValue;
 
-		if(index instanceof NumberValue) {
-			NumberValue theIndex = (NumberValue)index;
-			int intIndex = (int)theIndex.value;
-			try{
-				returnValue = new StringValue(Character.toString(array.value.charAt(intIndex)));
-			}catch(Exception e){
-				returnValue = new NullValue();
-			}
+		if(value instanceof Array && search instanceof Array) {
+			Array array1 = (Array)value;
+			Array array2 = (Array)search;
+			returnValue = new Array(ArrayUtils.addAll(array1, array2));
 		} else {
 			returnValue = new NullValue();
 		}

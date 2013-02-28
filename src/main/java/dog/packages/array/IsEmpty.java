@@ -10,7 +10,7 @@
  */
 
 
-package dog.packages.string;
+package dog.packages.array;
 
 import dog.lang.Value;
 import dog.lang.StringValue;
@@ -22,7 +22,38 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.ArrayUtils;
+
+
+@Symbol("array.is_empty:")
+public class IsEmpty extends Function {
+
+	public int getVariableCount() {
+		return 1;
+	}
+
+	public int getRegisterCount() {
+		return 1;
+	}
+
+	public Signal resume(StackFrame frame) {
+		Value value = frame.variables[0];
+		Value returnValue;
+
+		if(value instanceof Array) {
+			Array array = (Array)value;
+			returnValue = (ArrayUtils.isEmpty(array))?(new TrueValue()):(new FalseValue());
+		} else {
+			returnValue = new NullValue();
+		}
+
+		frame.registers[0] = returnValue;
+		frame.returnRegister = 0;
+
+		return new Signal(Signal.Type.RETURN);
+	}
+}

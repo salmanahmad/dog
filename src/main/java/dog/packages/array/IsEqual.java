@@ -29,8 +29,8 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.ArrayUtils;
 
 
-@Symbol("array.does:contain:")
-public class Contains extends Function {
+@Symbol("array.is:equal_to:")
+public class IsEqual extends Function {
 
 	public int getVariableCount() {
 		return 2;
@@ -42,13 +42,13 @@ public class Contains extends Function {
 
 	public Signal resume(StackFrame frame) {
 		Value value = frame.variables[0];
-		Value search = frame.variables[1];
+		Value value2 = frame.variables[1];
 		Value returnValue;
 
-		if(value instanceof Array && search instanceof Object) {
-			Array array = (Array)value;
-			Object searchvalue = (Object)search;
-			returnValue = (ArrayUtils.contains(array, searchvalue.value))?(new TrueValue()):(new FalseValue());
+		if(value instanceof Array && value2 instanceof Array) {
+			Array array1 = (Array)value;
+			Array array2 = (Array)value2;
+			returnValue = (ArrayUtils.isEquals(array1, array2))?(new TrueValue()):(new FalseValue());
 		} else {
 			returnValue = new NullValue();
 		}
