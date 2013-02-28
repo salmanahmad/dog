@@ -1,0 +1,2 @@
+dog.eval: "newVariable = 43"
+dog.eval: "newVariable"

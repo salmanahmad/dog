@@ -13,6 +13,7 @@
 package dog.commands;
 
 import dog.util.StringList;
+import dog.util.Helper;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class Shell extends Command {
 	}
 
 	public void run(StringList args) {
-
+		Helper.eval("<eval>", "forever do;input = console.readLine: \"> \";if input == null then;return;end;dog.print: (dog.eval: input);end");
 	}
 }
 

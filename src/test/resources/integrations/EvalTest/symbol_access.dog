@@ -1,0 +1,5 @@
+define theAnswer do
+  42
+end
+
+dog.eval: "1+theAnswer"
