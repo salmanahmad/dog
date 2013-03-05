@@ -21,8 +21,13 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
+import dog.lang.runtime.Helper;
+
 import java.util.Arrays;
 import java.util.ArrayList;
+import dog.packages.dog.Array;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -42,10 +47,14 @@ public class Add extends Function {
 		Value value = frame.variables[1];
 		Value returnValue;
 
+
 		if(toadd instanceof Object && value instanceof Array) {
 			Object addobj = (Object)toadd;
 			Array array = (Array)value;
-			returnValue = new Array(ArrayUtils.add(array, addobj));
+
+			ArrayList temparray = Helper.dogArrayAsJavaList(array);
+			temparray.add(addobj);
+			returnValue = Helper.javaListAsArray(temparray);
 		} else {
 			returnValue = new NullValue();
 		}

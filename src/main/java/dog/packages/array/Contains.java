@@ -12,6 +12,7 @@
 
 package dog.packages.array;
 
+import dog.lang.*;
 import dog.lang.Value;
 import dog.lang.StringValue;
 import dog.lang.NullValue;
@@ -22,9 +23,13 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
-
+import dog.lang.runtime.Helper;
+import dog.packages.dog.Array;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -47,8 +52,10 @@ public class Contains extends Function {
 
 		if(value instanceof Array && search instanceof Object) {
 			Array array = (Array)value;
+			ArrayList temparray = new ArrayList(Helper.dogArrayAsJavaList(array));
+
 			Object searchvalue = (Object)search;
-			returnValue = (ArrayUtils.contains(array, searchvalue.value))?(new TrueValue()):(new FalseValue());
+			returnValue = (ArrayUtils.contains(temparray.toArray(), searchvalue))?(new TrueValue()):(new FalseValue());
 		} else {
 			returnValue = new NullValue();
 		}

@@ -22,6 +22,9 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
+import dog.lang.runtime.Helper;
+
+import dog.packages.dog.Array;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -48,7 +51,17 @@ public class AddTogether extends Function {
 		if(value instanceof Array && search instanceof Array) {
 			Array array1 = (Array)value;
 			Array array2 = (Array)search;
-			returnValue = new Array(ArrayUtils.addAll(array1, array2));
+
+			ArrayList temp1 = Helper.dogArrayAsJavaList(array1);
+			ArrayList temp2 = Helper.dogArrayAsJavaList(array2);
+
+			Object[] t1 = temp1.toArray();
+			Object[] t2 = temp2.toArray();
+
+			Object[] result = ArrayUtils.addAll(t1,t2);
+			ArrayList listresult = new ArrayList(Arrays.asList(result));
+			
+			returnValue = Helper.javaListAsArray(listresult);
 		} else {
 			returnValue = new NullValue();
 		}

@@ -22,7 +22,7 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
-
+import dog.packages.dog.Array;
 import java.util.Arrays;
 import java.util.ArrayList;
 

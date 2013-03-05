@@ -22,7 +22,8 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
-
+import dog.lang.runtime.Helper;
+import dog.packages.dog.Array;
 import java.util.Arrays;
 import java.util.ArrayList;
 
@@ -46,7 +47,9 @@ public class IsEmpty extends Function {
 
 		if(value instanceof Array) {
 			Array array = (Array)value;
-			returnValue = (ArrayUtils.isEmpty(array))?(new TrueValue()):(new FalseValue());
+			ArrayList temparray = Helper.dogArrayAsJavaList(array);
+			Object[] tarray = temparray.toArray();
+			returnValue = (ArrayUtils.isEmpty(tarray))?(new TrueValue()):(new FalseValue());
 		} else {
 			returnValue = new NullValue();
 		}

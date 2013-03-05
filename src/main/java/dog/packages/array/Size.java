@@ -15,6 +15,7 @@ package dog.packages.array;
 import dog.lang.Value;
 import dog.lang.StringValue;
 import dog.lang.NullValue;
+import dog.lang.NumberValue;
 import dog.lang.TrueValue;
 import dog.lang.FalseValue;
 import dog.lang.Function;
@@ -22,7 +23,7 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
-
+import dog.packages.dog.Array;
 import java.util.Arrays;
 import java.util.ArrayList;
 

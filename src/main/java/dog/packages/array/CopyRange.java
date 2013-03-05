@@ -16,15 +16,17 @@ import dog.lang.Value;
 import dog.lang.StringValue;
 import dog.lang.NullValue;
 import dog.lang.TrueValue;
+import dog.lang.NumberValue;
 import dog.lang.FalseValue;
 import dog.lang.Function;
 import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
+import dog.lang.runtime.Helper;
 import java.util.Arrays;
 import java.util.ArrayList;
-
+import dog.packages.dog.Array;
 import org.apache.commons.lang3.ArrayUtils;
 
 @Symbol("array.copy:from:to:")
@@ -46,9 +48,19 @@ public class CopyRange extends Function {
 
 		if(value instanceof Array && start instanceof NumberValue && end instanceof NumberValue) {
 			Array array = (Array)value;
-			NumberValue startintinclusive = (NumberValue)start;
-			NumberValue endintexclusive = (NumberValue)end;
-			returnValue = new Array(ArrayUtils.subarray(array, startintinclusive.value, endintexclusive.value));
+			NumberValue s = (NumberValue) start;
+			NumberValue e = (NumberValue) end;
+
+			int startintinclusive = (int) s.value;
+			int endintexclusive = (int) e.value;
+
+			ArrayList temparray = Helper.dogArrayAsJavaList(array);
+			Object[] tarray = temparray.toArray();
+			Object[] result = ArrayUtils.subarray(tarray, startintinclusive, endintexclusive);
+			
+			ArrayList resultarray = new ArrayList(Arrays.asList(result));
+
+			returnValue = Helper.javaListAsArray(resultarray);
 		} else {
 			returnValue = new NullValue();
 		}

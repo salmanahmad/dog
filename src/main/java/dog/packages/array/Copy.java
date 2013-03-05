@@ -22,9 +22,10 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
+import dog.lang.runtime.Helper;
 import java.util.Arrays;
 import java.util.ArrayList;
-
+import dog.packages.dog.Array;
 import org.apache.commons.lang3.ArrayUtils;
 
 @Symbol("array.copy:")
@@ -44,7 +45,13 @@ public class Copy extends Function {
 
 		if(value instanceof Array) {
 			Array array = (Array)value;
-			returnValue = new Array(ArrayUtils.clone(array));
+
+			ArrayList temparray = Helper.dogArrayAsJavaList(array);
+			Object[] toarray = temparray.toArray();
+			Object[] newarray = ArrayUtils.clone(toarray);
+
+			ArrayList result = new ArrayList(Arrays.asList(newarray));
+			returnValue = Helper.javaListAsArray(result);
 		} else {
 			returnValue = new NullValue();
 		}

@@ -24,7 +24,7 @@ import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
 import java.util.Arrays;
 import java.util.ArrayList;
-
+import dog.packages.dog.Array;
 import org.apache.commons.lang3.ArrayUtils;
 
 @Symbol("array.to_string:")

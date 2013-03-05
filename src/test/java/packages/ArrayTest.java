@@ -22,7 +22,15 @@ public class ArrayTest{
 	@Test
 	public void testContainsTrue(){
 		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
-		StackFrame frame = Helper.eval("dog_unit_tests", "x = array.does: [1,2,3] contain: 2").get(0);
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = array.does:[1,2,3] contain:2").get(0);
+
+		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
+		Assert.assertEquals(true, xValue.getValue());
+    }
+    @Test
+	public void testContainsFalse(){
+		String source = Helper.readResource("/integrations/StructureTest/simple.dog");
+		StackFrame frame = Helper.eval("dog_unit_tests", "x = array.does:[1,2,3,6,7,10,9] contain:8").get(0);
 
 		TrueValue xValue = (TrueValue)frame.getVariableNamed("x");
 		Assert.assertEquals(true, xValue.getValue());

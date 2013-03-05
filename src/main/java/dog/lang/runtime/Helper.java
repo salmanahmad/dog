@@ -1,12 +1,14 @@
 package dog.lang.runtime;
 
 import dog.lang.*;
+import dog.packages.dog.Array;
 
 import java.util.Map;
 import java.util.ArrayList;
 import com.mongodb.BasicDBObject;
 import java.util.TreeSet;
 import java.util.SortedSet;
+import java.util.Arrays;
 
 import org.json.JSONObject;
 import org.json.JSONException;
@@ -48,6 +50,20 @@ public class Helper {
 		}
 
 		return list;
+	}
+	public static dog.packages.dog.Array javaListAsArray(ArrayList array){
+		ArrayList toConvert = array;
+		int size = toConvert.size();
+
+		Array dogArray = new Array();
+
+		for (int i = 0; i < size; i++){
+			Value temp = (Value) toConvert.get(i);
+			Object index = (double) i;
+			dogArray.put(index, temp);
+		}
+
+		return dogArray;
 	}
 
 	public static JSONObject stackFrameAsJsonForAPI(StackFrame frame) {

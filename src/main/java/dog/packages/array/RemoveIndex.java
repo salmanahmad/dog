@@ -15,6 +15,7 @@ package dog.packages.array;
 import dog.lang.Value;
 import dog.lang.StringValue;
 import dog.lang.NullValue;
+import dog.lang.NumberValue;
 import dog.lang.TrueValue;
 import dog.lang.FalseValue;
 import dog.lang.Function;
@@ -22,7 +23,8 @@ import dog.lang.Signal;
 import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
-
+import dog.lang.runtime.Helper;
+import dog.packages.dog.Array;
 import java.util.Arrays;
 import java.util.ArrayList;
 
@@ -48,7 +50,14 @@ public class RemoveIndex extends Function {
 		if(value instanceof NumberValue && search instanceof Array) {
 			NumberValue index = (NumberValue)value;
 			Array array = (Array)search;
-			returnValue = new Array(ArrayUtils.remove(array, index.value));
+
+			int indexnum = (int) index.value;
+			ArrayList temparray = Helper.dogArrayAsJavaList(array);
+			Object[] tarray = temparray.toArray();
+			Object[] tempresult = ArrayUtils.remove(tarray, indexnum);
+
+			ArrayList result = new ArrayList(Arrays.asList(tempresult));
+			returnValue = Helper.javaListAsArray(result);
 		} else {
 			returnValue = new NullValue();
 		}
