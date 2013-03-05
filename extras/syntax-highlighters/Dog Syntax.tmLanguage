@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string>dog</string>
+	</array>
+	<key>name</key>
+	<string>Dog</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>comment</key>
+			<string>Primitive-numbers</string>
+			<key>match</key>
+			<string>[-]?[0123456789.]+</string>
+			<key>name</key>
+			<string>constant.numeric.source.dog</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Primitive-boolean, null</string>
+			<key>match</key>
+			<string>(true)|(false)|(null)</string>
+			<key>name</key>
+			<string>constant.language.source.dog</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Comments</string>
+			<key>match</key>
+			<string>#(.)+</string>
+			<key>name</key>
+			<string>comment.line.source.dog</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Control Statements</string>
+			<key>match</key>
+			<string>(\bwhile\b)|(\bend\b)|(\bif\b)|(\belse\b)|(\bthen\b)|(\blength\b)|(\blisten\b)|(\bto\b)|(\bwait\b)|(\bdisplay\b)|(\band\b)|(\bon\b)|(\bdo\b)|(\bforever\b)|(\brepeat\b)|(\btimes\b)|(\bfor\b)|(\beach\b)|(\bin\b)|(\bvalue\b)|(\breturn\b)|(\bbreak\b)|(\badd\b)|(\bto\b)|(\bfind\b)|(\bremove\b)|(\bfrom\b)|(\bsave\b)|(\bdelete\b)|(\bwhere\b)|(\bor\b)</string>
+			<key>name</key>
+			<string>keyword.control.source.dog</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Operators</string>
+			<key>match</key>
+			<string>\+|\-|\/|\*|=|!|&lt;|&gt;|\[|\]|\.|&amp;|\|\||\?|\:</string>
+			<key>name</key>
+			<string>keyword.operator.source.dog</string>
+		</dict>
+		<dict>
+			<key>begin</key>
+			<string>(")|(')</string>
+			<key>comment</key>
+			<string>Strings (using quotes to mark strings)</string>
+			<key>end</key>
+			<string>(")|(')</string>
+			<key>name</key>
+			<string>string.quoted.source.dog</string>
+		</dict>
+		<dict>
+			<key>begin</key>
+			<string>(define)</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.source.dog</string>
+				</dict>
+			</dict>
+			<key>comment</key>
+			<string>Variables--declaring variables</string>
+			<key>end</key>
+			<string>\:</string>
+			<key>name</key>
+			<string>storage.type.source.dog</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>source.dog</string>
+	<key>uuid</key>
+	<string>2b7b2ea1-8caf-4a95-ab94-88dc4a516321</string>
+</dict>
+</plist>

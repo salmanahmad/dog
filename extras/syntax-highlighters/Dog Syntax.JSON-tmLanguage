@@ -1,0 +1,40 @@
+{ "name": "Dog",
+  "scopeName": "source.dog",
+  "fileTypes": ["dog"],
+  "patterns": [
+  	{ "match": "[-]?[0123456789.]+",
+  	  "name": "constant.numeric.source.dog",
+  	  "comment": "Primitive-numbers"
+  	},
+    { "match": "(true)|(false)|(null)",
+      "name": "constant.language.source.dog",
+      "comment": "Primitive-boolean, null"
+    },
+    { "match": "#(.)+",
+      "name": "comment.line.source.dog",
+      "comment": "Comments"
+    },
+    { "name": "keyword.control.source.dog",
+      "match": "(\\bwhile\\b)|(\\bend\\b)|(\\bif\\b)|(\\belse\\b)|(\\bthen\\b)|(\\blength\\b)|(\\blisten\\b)|(\\bto\\b)|(\\bwait\\b)|(\\bdisplay\\b)|(\\band\\b)|(\\bon\\b)|(\\bdo\\b)|(\\bforever\\b)|(\\brepeat\\b)|(\\btimes\\b)|(\\bfor\\b)|(\\beach\\b)|(\\bin\\b)|(\\bvalue\\b)|(\\breturn\\b)|(\\bbreak\\b)|(\\badd\\b)|(\\bto\\b)|(\\bfind\\b)|(\\bremove\\b)|(\\bfrom\\b)|(\\bsave\\b)|(\\bdelete\\b)|(\\bwhere\\b)|(\\bor\\b)",
+      "comment": "Control Statements"
+    },
+    { "name": "keyword.operator.source.dog",
+      "match": "\\+|\\-|\\/|\\*|=|!|<|>|\\[|\\]|\\.|&|\\|\\||\\?|\\:",
+      "comment": "Operators"
+    },
+    { "name": "string.quoted.source.dog",
+      "begin": "(\")|(')",
+      "end": "(\")|(')",
+      "comment": "Strings (using quotes to mark strings)"
+    },
+    { "name": "storage.type.source.dog",
+      "begin": "(define)",
+      "beginCaptures": {
+       "1": { "name": "keyword.source.dog" }
+       },
+      "end": "\\:",
+      "comment": "Variables--declaring variables"
+    }
+  ],
+  "uuid": "2b7b2ea1-8caf-4a95-ab94-88dc4a516321"
+}
