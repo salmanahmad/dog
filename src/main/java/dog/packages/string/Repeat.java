@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
 
-@Symbol("string.repeat:times:")
+@Symbol("string.with:repeat:")
 public class Repeat extends Function {
 
 	public int getVariableCount() {

@@ -29,7 +29,7 @@ import java.lang.String;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.character_at_index:from:")
+@Symbol("string.with:character_at_index:")
 public class CharacterAtIndex extends Function {
 
 	public int getVariableCount() {
@@ -41,8 +41,8 @@ public class CharacterAtIndex extends Function {
 	}
 	
 	public Signal resume(StackFrame frame) {
-		Value value = frame.variables[1];
-		Value index = frame.variables[0];
+		Value value = frame.variables[0];
+		Value index = frame.variables[1];
 		Value returnValue;
 
 		if(value instanceof StringValue && index instanceof NumberValue) {

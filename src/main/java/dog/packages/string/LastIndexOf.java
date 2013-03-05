@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.last_index_of:search:")
+@Symbol("string.with:last_index_of:")
 public class LastIndexOf extends Function {
 
 	public int getVariableCount() {

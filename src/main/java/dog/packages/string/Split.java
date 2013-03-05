@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.split:using_separator:")
+@Symbol("string.with:split_with:")
 public class Split extends Function {
 
 	public int getVariableCount() {

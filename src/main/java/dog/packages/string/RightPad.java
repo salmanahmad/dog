@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 
 
-@Symbol("string.right_pad:with_length:")
+@Symbol("string.with:right_pad_with_length:")
 public class RightPad extends Function {
 
 	public int getVariableCount() {
