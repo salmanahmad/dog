@@ -694,6 +694,13 @@ onStatement returns [Node node]
 
       index = 0;
       for(HashMap map : items) {
+        ArrayList<Node> trueBranch = new ArrayList<Node>();
+        trueBranch.add(new Assign(new ArrayList<Object>(Arrays.asList(map.get("identifier"))),
+                            new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(waitVariableName)))
+                            ));
+        if (map.get("body")!=null){
+            trueBranch.add((Nodes)map.get("body"));
+        }
 
         tempBranch = new Branch(
           new Call(
@@ -706,15 +713,7 @@ onStatement returns [Node node]
                 new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(arrayVariableName, (Double)index)))
             ))
           ),
-          new Nodes(
-            new ArrayList<Node>(Arrays.asList(
-              new Assign(
-                new ArrayList<Object>(Arrays.asList(map.get("identifier"))),
-                new Access(Identifier.Scope.LOCAL, new ArrayList<Object>(Arrays.asList(waitVariableName)))
-              ),
-              (Nodes)map.get("body")
-            ))
-          ),
+          new Nodes(trueBranch),
           null
         );
 
