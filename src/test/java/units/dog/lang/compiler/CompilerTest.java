@@ -15,6 +15,7 @@ import java.util.*;
 
 import dog.lang.*;
 import dog.lang.compiler.*;
+import dog.lang.parser.Parser;
 import dog.lang.nodes.*;
 
 public class CompilerTest {
@@ -55,4 +56,12 @@ public class CompilerTest {
     public void testRuntime() {
         
     }
+
+	@Test
+	public void testEmptyOnStatement() {
+        dog.lang.compiler.Compiler c = new dog.lang.compiler.Compiler();
+        c.addCompilationUnit(new Parser().parse("things = [5]; on thing do; end"), "test");
+        c.compile();
+	}
+
 }
