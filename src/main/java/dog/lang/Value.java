@@ -17,6 +17,7 @@ import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
+import dog.lang.StructureValue;
 
 public class Value implements Persistable {
 
@@ -26,6 +27,7 @@ public class Value implements Persistable {
     public boolean pending = false;
     public boolean channelMode = false;
     public int channelSize = 0;
+	public StructureValue request;
 
     public ObjectId getId() {
         if (this.id == null) {
@@ -346,7 +348,9 @@ public class Value implements Persistable {
         object.put("pending", this.pending);
         object.put("channel_mode", this.channelMode);
         object.put("channel_size", this.channelSize);
-
+		if (this.request!=null){
+			object.put("request", this.request.toMongo());
+		}
         return object;
     }
 
@@ -365,6 +369,10 @@ public class Value implements Persistable {
         this.pending = (Boolean)bson.get("pending");
         this.channelMode = (Boolean)bson.get("channel_mode");
         this.channelSize = (Integer)bson.get("channel_size");
+		if (bson.get("request")!=null){
+			this.request = new StructureValue();
+			this.request.fromMongo((DBObject)bson.get("request"), resolver);
+		}
     }
 
     public static Value createFromMap(Map map, Resolver resolver) {

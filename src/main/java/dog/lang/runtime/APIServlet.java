@@ -5,6 +5,7 @@ import dog.lang.StackFrame;
 import dog.lang.NullValue;
 import dog.lang.StructureValue;
 import dog.lang.Value;
+import dog.lang.StringValue;
 
 import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
+import java.util.Enumeration;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.*;
@@ -203,6 +205,7 @@ public class APIServlet extends HttpServlet {
 						try {
 							JSONObject jsonBody = new JSONObject(body.toString());
 							submittedValue = Value.createFromJSON(jsonBody, this.runtime.getResolver());
+							submittedValue.request = requestDetails(req);
 						} catch(JSONException e) {
 							System.out.println(e);
 							e.printStackTrace();
@@ -262,6 +265,41 @@ public class APIServlet extends HttpServlet {
 
 		resp.setContentType("application/json");
 		resp.getWriter().println(output);
+	}
+
+	private StructureValue requestHeaders(HttpServletRequest req) {
+		StructureValue headers = new StructureValue();
+		for (Enumeration names = req.getHeaderNames(); names.hasMoreElements();){
+			String headerName = (String)names.nextElement();
+			String separator = "";
+			StringBuilder value = new StringBuilder();
+			for (Enumeration values = req.getHeaders(headerName); values.hasMoreElements();){
+				value.append(separator);
+				value.append((String)values.nextElement());
+				separator = ",";
+			}
+			headers.value.put(headerName, new StringValue(value.toString()));
+		}
+		return headers;
+	}
+
+    private StructureValue requestParams(HttpServletRequest req){
+		StructureValue params = new StructureValue();
+		for (Enumeration names = req.getParameterNames(); names.hasMoreElements();){
+			String name = (String)names.nextElement();
+			params.value.put(name, new StringValue(req.getParameter(name)));
+		}
+		return params;
+	}
+
+	private StructureValue requestDetails(HttpServletRequest req){
+		StructureValue details = new StructureValue();
+		details.value.put("source_address", new StringValue(req.getRemoteAddr()));
+		details.value.put("scheme", new StringValue(req.getScheme()));
+		details.value.put("uri", new StringValue(req.getRequestURI()));
+		details.value.put("headers", requestHeaders(req));
+		details.value.put("params", requestParams(req));
+		return details;
 	}
 
 	public static Server createServer(int port, APIServlet servlet) {
