@@ -27,14 +27,11 @@ public class Print extends Function {
 
 	public Signal resume(StackFrame frame) {
 		Value value = frame.variables[0];
-		if(value.pending) {
-			System.out.print("pending: ");
-		}
-
+		
 		if(value instanceof StringValue) {
-			System.out.println(value.getValue());
+			System.out.print(value.getValue());
 		} else {
-			System.out.println(value);
+			System.out.print(value);
 		}
 		
 		return new Signal(Signal.Type.RETURN);

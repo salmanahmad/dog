@@ -1,3 +1,11 @@
 
 package dog
 
+define println do
+	print: "\n"
+end
+
+define println: value do
+	print: value
+	print: "\n"
+end
