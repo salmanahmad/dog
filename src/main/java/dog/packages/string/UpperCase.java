@@ -9,31 +9,47 @@
  *
  */
 
-package dog.packages.dog;
+package dog.packages.string;
 
 import dog.lang.Value;
 import dog.lang.StringValue;
+import dog.lang.NullValue;
 import dog.lang.Function;
 import dog.lang.Signal;
+import dog.lang.Resolver;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
 
-@Symbol("dog.print:")
-public class Print extends Function {
+import java.util.Arrays;
+import java.util.ArrayList;
+
+import org.apache.commons.lang3.StringUtils;
+
+@Symbol("string.upper_case:")
+public class UpperCase extends Function {
 
 	public int getVariableCount() {
 		return 1;
 	}
 
+	public int getRegisterCount() {
+		return 1;
+	}
+
 	public Signal resume(StackFrame frame) {
 		Value value = frame.variables[0];
-		
+		Value returnValue;
+
 		if(value instanceof StringValue) {
-			System.out.print(value.getValue());
+			StringValue string = (StringValue)value;
+			returnValue = new StringValue(StringUtils.upperCase(string.value));
 		} else {
-			System.out.print(value);
+			returnValue = new NullValue();
 		}
-		
+
+		frame.registers[0] = returnValue;
+		frame.returnRegister = 0;
+
 		return new Signal(Signal.Type.RETURN);
 	}
 }

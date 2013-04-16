@@ -36,6 +36,19 @@ public class Resolver extends ClassLoader implements Opcodes {
 		linkNativeCode();
 	}
 
+	// Creates a child resolver that delegates symbol lookups to its
+	// parent.
+	public Resolver(Resolver parent){
+		super(parent);
+	}
+
+	public Resolver getParentResolver(){
+		if (Resolver.class.isInstance(this.getParent())){
+			return (Resolver)this.getParent();
+		}
+		return null;
+	}
+
 	public Class loadClass(byte[] b) {
 		Class klass = null;
 
@@ -194,12 +207,27 @@ public class Resolver extends ClassLoader implements Opcodes {
 			}
         }
 
+		for (dog.lang.Symbol linkedSymbol : this.getLinkedSymbols(name)){
+			list.add(linkedSymbol);
+		}
+
+		Resolver parent = this.getParentResolver();
+		if (parent != null){
+			for (dog.lang.Symbol linkedSymbol : parent.getLinkedSymbols(name)){
+				list.add(linkedSymbol);
+			}
+		}
+
+		return list;
+	}
+
+	public ArrayList<dog.lang.Symbol> getLinkedSymbols(String namePrefix){
+		ArrayList<dog.lang.Symbol> list = new ArrayList<dog.lang.Symbol>();
         for(dog.lang.Symbol linkedSymbol: linkedSymbols) {
-        	if(linkedSymbol.name.startsWith(name)) {
+        	if(linkedSymbol.name.startsWith(namePrefix)) {
 				list.add(linkedSymbol);
         	}
         }
-
 		return list;
 	}
 
