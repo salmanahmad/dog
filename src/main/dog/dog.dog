@@ -1,3 +1,18 @@
 
 package dog
 
+define listener {
+	identifier = null
+	channel = null
+	routing = null
+}
+
+define listen_to: routing for: identifier do
+	listener = listener {
+		identifier = identifier
+		channel = future.channel_with_size: 0
+		routing = routing
+	}
+
+	return listener
+end

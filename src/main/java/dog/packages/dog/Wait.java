@@ -19,6 +19,7 @@ import dog.lang.Signal;
 import dog.lang.StackFrame;
 import dog.lang.annotation.Symbol;
 
+import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -41,6 +42,8 @@ public class Wait extends Function {
 			// First time being called.
 			frame.programCounter++;
 
+			Class listenerClass = frame.getRuntime().getResolver().classForSymbol("dog.listener");
+
 			Value arg = frame.variables[0];
 			if(arg instanceof StructureValue) {
 				StructureValue array = (StructureValue)arg;
@@ -50,10 +53,15 @@ public class Wait extends Function {
 
 				for(Object key : ((HashMap<Object, Value>)array.getValue()).keySet()) {
 					Value value = array.get(key);
+
+					if(listenerClass.isAssignableFrom(value.getClass())) {
+						value = value.get("channel");
+					}
+
 					if(!value.pending) {
 						frame.registers[0] = value;
 						frame.returnRegister = 0;
-						return new Signal(Signal.Type.RETURN);				
+						return new Signal(Signal.Type.RETURN);
 					}
 				}
 
@@ -61,7 +69,16 @@ public class Wait extends Function {
 				ArrayList<Future> awaitedFutures = new ArrayList<Future>();
 
 				for(Object key : ((HashMap<Object, Value>)array.getValue()).keySet()) {
-					Value value = array.get(key);
+					Value originalValue = array.get(key);
+					Value value = null;
+					boolean isListen = false;
+
+					if(listenerClass.isAssignableFrom(originalValue.getClass())) {
+						value = originalValue.get("channel");
+						isListen = true;
+					} else {
+						value = originalValue;
+					}
 
 					Future future = new Future(frame.getRuntime());
 					future.findOne(new BasicDBObject("value_id", value.getId()));
@@ -82,6 +99,20 @@ public class Wait extends Function {
 					} else {
 						awaitedValues.add(value);
 						awaitedFutures.add(future);
+
+						if(isListen) {
+							StackFrame currentFrame = frame.parentStackFrame();
+							Map<String, Value> meta = currentFrame.getMetaData();
+
+							if(meta.get("listens") == null) {
+								meta.put("listens", new StructureValue());
+							}
+
+							StructureValue listens = (StructureValue)meta.get("listens");
+							StructureValue listen = (StructureValue)originalValue;
+
+							listens.put(listen.get("identifier").getValue(), listen);
+						}
 					}
 				}
 

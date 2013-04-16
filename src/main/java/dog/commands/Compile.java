@@ -96,6 +96,14 @@ public class Compile extends Command {
 		return name + ".jar";
 	}
 
+	void saveClassFiles(String target) {
+		try {
+			this.compiler.getBark().writeClassesToDirectory(target);
+		} catch(Exception e) {
+			System.out.println("An error took place when writing the JVM class files to disk.");
+		}
+	}
+
 	void saveBarkFile(String name){
 		try {
 			this.compiler.getBark().writeToFile(new FileOutputStream(name));
@@ -107,7 +115,8 @@ public class Compile extends Command {
 	public void run(StringList args) {
 		boolean dump = false;
 		boolean useJar = false;
-		String name = null;
+		boolean useClasses = false;
+		String target = null;
 
 		StringList remainingArgs = new StringList(new String[] {});
 
@@ -120,13 +129,18 @@ public class Compile extends Command {
 					continue;
 				}
 
+				if(arg.equals("--classes")) {
+					useClasses = true;
+					continue;
+				}
+
 				if(arg.equals("--show-bytecode")) {
 					dump = true;
 					continue;
 				} 
 
-				if(arg.equals("--output")) {
-					name = args.strings.get(i + 1);
+				if(arg.equals("--target")) {
+					target = args.strings.get(i + 1);
 					i++;
 					continue;
 				}
@@ -145,11 +159,15 @@ public class Compile extends Command {
 			this.compiler.compile();
 			if(dump) {
 				this.dumpByteCode();
+			} 
+
+			if(useClasses) {
+				this.saveClassFiles(target);
 			} else {
 				if(useJar) {
-					this.saveBarkFile(this.jarFileName(remainingArgs, name));
+					this.saveBarkFile(this.jarFileName(remainingArgs, target));
 				} else {
-					this.saveBarkFile(this.barkFileName(remainingArgs, name));
+					this.saveBarkFile(this.barkFileName(remainingArgs, target));
 				}
 			}
 			return;

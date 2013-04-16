@@ -144,6 +144,16 @@ public class Resolver extends ClassLoader implements Opcodes {
 		}
 	}
 
+	public Class classForSymbol(String symbol) {
+		try {
+			symbol = Resolver.convertJVMClassNameToJavaClassName(Resolver.encodeSymbol(symbol));
+			Class klass = this.loadClass(symbol);
+			return klass;
+		} catch(Exception e) {
+			return null;
+		}
+	}
+
 	public boolean containsSymbol(String name) {
 		ArrayList<dog.lang.Symbol> list = searchForSymbolsStartingWith(name);
 

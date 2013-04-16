@@ -6,9 +6,12 @@ listen_to:for: just creates a listener which wraps a future. It is not added to 
 
 A future has an expiration date. When it expires, any stack frames that are handling it are removed if that was the only future that it was waiting on. In the future, an exception should be throw and the function should be able to handle that. But until the error reporting mechanism is finalized, the stack frame just dies. (Again, only if that was the last future it was waiting on...) Okay?
 
+A future (or channel) that has been closed (aka Completed) should never be expired. It should get garbage collected but not expired.
+
 Another way to handle timeouts in user-land code: http://blog.golang.org/2010/09/go-concurrency-patterns-timing-out-and.html
 
 Future expiration is handled during garbage collection.
+
 
 
 
