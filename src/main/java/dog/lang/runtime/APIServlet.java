@@ -99,7 +99,8 @@ public class APIServlet extends HttpServlet {
 		} else if((match = ACCOUNT_LOGOUT.matcher(requestPath)).matches()) {
 			output = "Account Logout!";
 		} else if((match = FRAME_GET.matcher(requestPath)).matches()) {
-			String id = match.group(1);
+			String taskId = match.group(1);
+			ObjectId id = null;
 
 			// TODO: Remove this as well and move to the constructor.
 			StackFrame frame = new StackFrame();
@@ -108,25 +109,18 @@ public class APIServlet extends HttpServlet {
 			Boolean found = false;
 			BasicDBObject query = new BasicDBObject("state", StackFrame.WAITING);
 
-			if(id.equals("root")) {
-				found = frame.findOne(new BasicDBObject("symbol_name", runtime.getStartUpSymbol()));
-				if(found) {
-					id = frame.getId().toString();
-
-					ArrayList<BasicDBObject> conditions = new ArrayList<BasicDBObject>();
-					conditions.add(new BasicDBObject("_id", new ObjectId(id)));
-					conditions.add(new BasicDBObject("control_ancestors", new ObjectId(id)));
-
-					found = frame.findOne(new BasicDBObject("$or", conditions));
-				}
+			if(taskId.equals("root")) {
+				id = runtime.getRootTaskId();
 			} else {
-				ArrayList<BasicDBObject> conditions = new ArrayList<BasicDBObject>();
-				conditions.add(new BasicDBObject("_id", new ObjectId(id)));
-				conditions.add(new BasicDBObject("control_ancestors", new ObjectId(id)));
-
-				query.put("$or", conditions);
-				found = frame.findOne(query);
+				id = new ObjectId(taskId);
 			}
+
+			ArrayList<BasicDBObject> conditions = new ArrayList<BasicDBObject>();
+			conditions.add(new BasicDBObject("_id", id));
+			conditions.add(new BasicDBObject("control_ancestors", id));
+
+			query.put("$or", conditions);
+			found = frame.findOne(query);
 
 			if(found) {
 				if(frame.symbolName.equals("dog.wait:")) {
@@ -166,9 +160,40 @@ public class APIServlet extends HttpServlet {
 		Matcher match = null;
 
 		if((match = FRAME_POST.matcher(requestPath)).matches()) {
-			String id = match.group(1);
+			String taskId = match.group(1);
 			String variable = match.group(2);
+			ObjectId id = null;
 
+			// TODO: Remove this as well and move to the constructor.
+			StackFrame frame = new StackFrame();
+			frame.setRuntime(runtime);
+
+			Boolean found = false;
+			BasicDBObject query = new BasicDBObject("state", StackFrame.WAITING);
+
+			if(taskId.equals("root")) {
+				id = runtime.getRootTaskId();
+			} else {
+				id = new ObjectId(taskId);
+			}
+
+			ArrayList<BasicDBObject> conditions = new ArrayList<BasicDBObject>();
+			conditions.add(new BasicDBObject("_id", id));
+			conditions.add(new BasicDBObject("control_ancestors", id));
+
+			query.put("$or", conditions);
+			found = frame.findOne(query);
+
+
+
+
+
+
+
+
+			
+			
+			/*
 			// TODO: Remove this as well and move to the constructor.
 			StackFrame frame = new StackFrame();
 			frame.setRuntime(runtime);
@@ -179,8 +204,21 @@ public class APIServlet extends HttpServlet {
 			} else {
 				found = frame.findOne(new BasicDBObject("_id", new ObjectId(id)));
 			}
+			*/
+
+
+
+
+
+
+
+
 
 			if(found) {
+				if(frame.symbolName.equals("dog.wait:")) {
+					frame = frame.parentStackFrame();
+				}
+
 				Map<String, Value> meta = frame.getMetaData();
 				StructureValue listens = (StructureValue)meta.get("listens");
 

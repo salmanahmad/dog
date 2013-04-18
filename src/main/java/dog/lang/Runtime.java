@@ -36,6 +36,7 @@ public class Runtime {
 	String applicationName;
 	String applicationPath;
 	String startUpSymbol;
+	ObjectId rootTaskId = null;
 	Resolver resolver;
 	MongoClient mongoClient;
 	DB database;
@@ -75,6 +76,20 @@ public class Runtime {
 
 	public String getStartUpSymbol() {
 		return startUpSymbol;
+	}
+
+	public ObjectId getRootTaskId() {
+		if(rootTaskId == null) {
+			StackFrame frame = new StackFrame();
+			frame.setRuntime(this);
+
+			Boolean found = frame.findOne(new BasicDBObject("symbol_name", this.getStartUpSymbol()));
+			if(found) {
+				rootTaskId = frame.getId();
+			}
+		}
+		
+		return rootTaskId;
 	}
 
 	public void start(String startUpSymbol) {
