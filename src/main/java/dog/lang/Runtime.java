@@ -33,6 +33,9 @@ import org.bson.types.ObjectId;
 import org.eclipse.jetty.server.Server;
 
 public class Runtime {
+	public String serverPrefix = "dog";
+	public int serverPort = 4242;
+
 	String applicationName;
 	String applicationPath;
 	String startUpSymbol;
@@ -125,8 +128,8 @@ public class Runtime {
 		root.findOne(rootQuery);
 
 		if(frames.count() > 0 || root.getMetaData().get("listens") != null) {
-			APIServlet servlet = new APIServlet(this, "dog", this.applicationPath + "/views");
-			Server server = APIServlet.createServer(4242, servlet);
+			APIServlet servlet = new APIServlet(this, this.serverPrefix, this.applicationPath + "/views");
+			Server server = APIServlet.createServer(this.serverPort, servlet);
 			try {
 				server.start();
 				server.join();

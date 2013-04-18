@@ -17,6 +17,10 @@ import java.util.Arrays;
 public class StringList {
 	public ArrayList<String> strings;
 
+	public StringList() {
+		this.strings = new ArrayList<String>();
+	}
+
 	public StringList(String[] strings) {
 		this.strings = new ArrayList<String>(Arrays.asList(strings));
 	}

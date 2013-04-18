@@ -33,6 +33,36 @@ public class Start extends Command {
 		return "Resume executing a Dog source file or application";
 	}
 
+	public static HashMap commandLineFlags(StringList args) {
+		return (HashMap)Start.parse(args)[0];
+	}
+
+	public static StringList commandLineFiles(StringList args) {
+		return (StringList)Start.parse(args)[1];
+	}
+
+	public static Object[] parse(StringList args) {
+		StringList remaining = new StringList();
+		HashMap options = new HashMap();
+		options.put("port", 4242);
+		options.put("prefix", "dog");
+
+		for(int i = 0; i < args.strings.size(); i++) {
+			String arg = args.strings.get(i);
+			if (arg.equals("-p")) {
+				i++;
+				options.put("port", Integer.parseInt(args.strings.get(i)));
+			} else if (arg.equals("-u")) {
+				i++;
+				options.put("prefix", args.strings.get(i));
+			} else {
+				remaining.push(arg);
+			}
+		}
+
+		return new Object[] {options, remaining};
+	}
+
 	public void run(StringList args) {
 		try {
 			Resolver resolver = new Resolver();
@@ -40,7 +70,10 @@ public class Start extends Command {
 			String applicationName = null;
 			String applicationPath = null;
 
-			for(String arg : args.strings) {
+			HashMap options = Start.commandLineFlags(args);
+			StringList remaining = Start.commandLineFiles(args);
+
+			for(String arg : remaining.strings) {
 				String originalArg = arg;
 
 				if(FilenameUtils.isExtension(arg, "dog") || FilenameUtils.isExtension(arg, "bark")) {
@@ -66,6 +99,9 @@ public class Start extends Command {
 			} catch(Exception e) {
 				throw new RuntimeException("Could not create runtime.");
 			}
+
+			runtime.serverPort = (Integer)options.get("port");
+			runtime.serverPrefix = (String)options.get("prefix");
 
 			if(this.restart) {
 				runtime.restart(startUpSymbol);
