@@ -25,7 +25,7 @@ public class Restart extends Command {
 	
 	public void run(StringList args) {
 		Compile compile = new Compile();
-		compile.run(args);
+		compile.run(Start.commandLineFiles(args));
 
 		Start start = new Start();
 		start.restart = true;
