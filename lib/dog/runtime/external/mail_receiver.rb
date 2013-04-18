@@ -5,13 +5,14 @@ require 'net/http'
 require 'httparty'
 require 'json'
 require 'mail'
+require 'pp'
 #require 'RMagick'
 
 def handle_message(message)
   events = ::Dog::MailedEvent.find()
   
-  subject = message.subject
-  body = message.body.to_s
+  subject = message.subject.to_s.encode('UTF-8')
+  body = message.body.to_s.encode('UTF-8')
   
   email = ::Dog::Value.new("dog.email", {})
   email["subject"] = ::Dog::Value.string_value(subject)
@@ -79,12 +80,15 @@ loop do
   # NoResponseError and ByResponseError happen often when imap'ing
   rescue Net::IMAP::NoResponseError => e
     # send to log file, db, or email
-    puts "The following error occured: #{e}" 
+    puts "The following error occurred 1: #{e}"
+    puts e.backtrace 
   rescue Net::IMAP::ByeResponseError => e
     # send to log file, db, or email
-    puts "The following error occured: #{e}"
+    puts "The following error occurred 2: #{e}"
+    puts e.backtrace 
   rescue => e
-    puts "The following error occured: #{e}"
+    puts "The following error occurred 3: #{e}"
+    puts e.backtrace 
     # send to log file, db, or email
   end
   
