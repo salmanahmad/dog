@@ -6,18 +6,48 @@ require 'httparty'
 require 'json'
 require 'mail'
 require 'pp'
-#require 'RMagick'
+require 'RMagick'
 
 def handle_message(message)
   events = ::Dog::MailedEvent.find()
   
   subject = message.subject.to_s.encode('UTF-8')
-  body = message.body.to_s.encode('UTF-8')
+
+  name = ""
   
+  if message.multipart? then
+    body = message.text_part.body.to_s.encode('UTF-8') rescue ""
+        
+    attachment = message.attachments.first
+    
+    dirname = File.dirname(::Dog::Runtime.bundle_filename)
+    
+    name = UUID.new.generate
+    extension = File.extname(attachment.filename)
+    name = name + extension
+    
+    FileUtils.mkpath(File.join(dirname, "views", "data"))
+    path = File.join(dirname, "views", "data", name)
+    
+    file = File.open(path, "w+") 
+    file.write(message.attachments.first.read)
+    file.close
+
+    if extension == ".jpg" || extension == ".jpeg" then
+      image = Magick::Image.read(path).first
+      image = image.auto_orient
+      image.write(path)
+    end
+
+  else
+    body = message.body.to_s.encode('UTF-8') rescue ""
+  end
+
   email = ::Dog::Value.new("dog.email", {})
   email["subject"] = ::Dog::Value.string_value(subject)
   email["body"] = ::Dog::Value.string_value(body)
-  
+  email["attachment"] = ::Dog::Value.string_value(name)
+
   for event in events do
     future = ::Dog::Future.find_one("value_id" => event["channel_id"])
     future = future.value
@@ -54,12 +84,12 @@ loop do
     
     # select inbox as our mailbox to process
     imap.select('Inbox')
-    
+
     # get all emails that are in inbox that have not been deleted
     imap.search(["NOT", "SEEN"]).each do |uid|
       # fetches the straight up source of the email for tmail to parse
       #source = imap.uid_fetch(uid, ['RFC822']).first.attr['RFC822']
-      
+
       message = imap.fetch(uid, "RFC822")[0].attr["RFC822"]
       message = Mail.new(message)
       handle_message(message)
